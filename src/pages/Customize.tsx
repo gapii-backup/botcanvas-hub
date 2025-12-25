@@ -25,11 +25,19 @@ export default function Customize() {
   const [botConfig, setBotConfig] = useState({
     name: 'Moj AI Asistent',
     greeting: 'Pozdravljeni! Kako vam lahko pomagam?',
+    homeTitle: 'Pozdravljeni!',
+    homeSubtitle: 'Kako vam lahko pomagam?',
     primaryColor: '#3B82F6',
     darkMode: true,
     position: 'right' as 'left' | 'right',
-    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
+    triggerStyle: 'floating' as 'floating' | 'edge',
+    edgeTriggerText: 'Klikni me',
+    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
     bookingUrl: '',
+    bookingEnabled: false,
+    supportEnabled: true,
+    showBubble: true,
+    showEmailField: true,
   });
 
   const [newQuestion, setNewQuestion] = useState('');
@@ -41,10 +49,14 @@ export default function Customize() {
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
+      title: botConfig.homeTitle || 'Pozdravljeni!',
+      subtitle: botConfig.homeSubtitle || 'Kako vam lahko pomagam?',
       position: botConfig.position,
       mode: botConfig.darkMode ? 'dark' : 'light',
       questions: encodeURIComponent(JSON.stringify(botConfig.quickQuestions)),
-      booking: botConfig.bookingUrl || ''
+      booking: botConfig.bookingUrl || '',
+      bubble: botConfig.showBubble ? 'true' : 'false',
+      trigger: botConfig.triggerStyle || 'floating'
     });
     return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
   }, [botConfig]);
@@ -52,15 +64,16 @@ export default function Customize() {
   // Load config from Supabase
   useEffect(() => {
     if (userBot) {
-      setBotConfig({
+      setBotConfig((prev) => ({
+        ...prev,
         name: userBot.bot_name || 'Moj AI Asistent',
         greeting: userBot.welcome_message || 'Pozdravljeni! Kako vam lahko pomagam?',
         primaryColor: userBot.primary_color || '#3B82F6',
         darkMode: userBot.dark_mode ?? true,
         position: (userBot.position as 'left' | 'right') || 'right',
-        quickQuestions: userBot.quick_questions || ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
+        quickQuestions: userBot.quick_questions || ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
         bookingUrl: userBot.booking_url || '',
-      });
+      }));
     }
   }, [userBot]);
 
@@ -108,7 +121,7 @@ export default function Customize() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex">
-        <div className="w-[420px] border-r border-border p-6">
+        <div className="w-[480px] border-r border-border p-6">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64 mb-8" />
           <div className="space-y-4">
@@ -127,7 +140,7 @@ export default function Customize() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left sidebar - Settings */}
-      <div className="w-[420px] border-r border-border p-6 overflow-y-auto">
+      <div className="w-[480px] border-r border-border p-6 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Prilagodite chatbota</h1>
           <p className="text-muted-foreground mt-1">
@@ -135,7 +148,7 @@ export default function Customize() {
           </p>
         </div>
 
-        <Accordion type="multiple" defaultValue={['basic', 'appearance']} className="space-y-4">
+        <Accordion type="multiple" defaultValue={['basic', 'appearance', 'questions', 'booking']} className="space-y-4">
           <AccordionItem value="basic" className="glass rounded-xl px-4 border-0">
             <AccordionTrigger className="text-foreground font-medium py-4">
               Osnovne informacije
@@ -156,6 +169,22 @@ export default function Customize() {
                   onChange={(e) => setBotConfig({ ...botConfig, greeting: e.target.value })}
                   placeholder="Sporočilo, ki ga uporabnik vidi ob odprtju"
                   rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Naslov domače strani</Label>
+                <Input
+                  value={botConfig.homeTitle}
+                  onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
+                  placeholder="Pozdravljeni!"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Podnaslov domače strani</Label>
+                <Input
+                  value={botConfig.homeSubtitle}
+                  onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
+                  placeholder="Kako vam lahko pomagam?"
                 />
               </div>
             </AccordionContent>
@@ -189,6 +218,13 @@ export default function Customize() {
                   onCheckedChange={(checked) => setBotConfig({ ...botConfig, darkMode: checked })}
                 />
               </div>
+              <div className="flex items-center justify-between">
+                <Label>Prikaži balon</Label>
+                <Switch
+                  checked={botConfig.showBubble}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, showBubble: checked })}
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Pozicija</Label>
                 <div className="flex gap-2">
@@ -207,6 +243,27 @@ export default function Customize() {
                     className="flex-1"
                   >
                     Desno
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Stil prožilca</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={botConfig.triggerStyle === 'floating' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'floating' })}
+                    className="flex-1"
+                  >
+                    Plavajoč
+                  </Button>
+                  <Button
+                    variant={botConfig.triggerStyle === 'edge' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'edge' })}
+                    className="flex-1"
+                  >
+                    Na robu
                   </Button>
                 </div>
               </div>
@@ -288,16 +345,12 @@ export default function Customize() {
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Phone frame with iframe */}
-        <div className="relative w-[375px] h-[700px] bg-background rounded-[40px] border-4 border-secondary shadow-2xl overflow-hidden animate-fade-in">
-          {/* Phone notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-secondary rounded-b-2xl z-10" />
-          
-          {/* Widget iframe */}
+        {/* Widget iframe without phone frame */}
+        <div className="relative w-[400px] h-[650px] animate-fade-in">
           <iframe
             key={previewUrl}
             src={previewUrl}
-            className="w-full h-full border-0 rounded-2xl"
+            className="w-full h-full border-0"
             title="Widget Preview"
           />
         </div>
