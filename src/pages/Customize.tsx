@@ -43,14 +43,14 @@ export default function Customize() {
   const [botConfig, setBotConfig] = useState<BotConfig>({
     name: 'Moj AI Asistent',
     greeting: 'Pozdravljeni! Kako vam lahko pomagam?',
-    homeTitle: 'Dobrodošli',
-    homeSubtitle: 'Tukaj smo za vas',
+    homeTitle: 'Pozdravljeni!',
+    homeSubtitle: 'Kako vam lahko pomagam?',
     primaryColor: '#3B82F6',
     darkMode: true,
     position: 'right',
     triggerStyle: 'floating',
-    edgeTriggerText: 'Pogovor',
-    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
+    edgeTriggerText: 'Klikni me',
+    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
     bookingEnabled: false,
     bookingUrl: '',
     supportEnabled: true,
@@ -67,18 +67,14 @@ export default function Customize() {
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
-      homeTitle: botConfig.homeTitle,
-      homeSubtitle: botConfig.homeSubtitle,
+      title: botConfig.homeTitle || 'Pozdravljeni!',
+      subtitle: botConfig.homeSubtitle || 'Kako vam lahko pomagam?',
       position: botConfig.position,
       mode: botConfig.darkMode ? 'dark' : 'light',
-      triggerStyle: botConfig.triggerStyle,
-      edgeTriggerText: botConfig.edgeTriggerText,
       questions: encodeURIComponent(JSON.stringify(botConfig.quickQuestions)),
-      bookingEnabled: botConfig.bookingEnabled ? 'true' : 'false',
       booking: botConfig.bookingUrl || '',
-      supportEnabled: botConfig.supportEnabled ? 'true' : 'false',
-      showBubble: botConfig.showBubble ? 'true' : 'false',
-      showEmailField: botConfig.showEmailField ? 'true' : 'false',
+      bubble: botConfig.showBubble ? 'true' : 'false',
+      trigger: botConfig.triggerStyle || 'floating',
     });
     return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
   }, [botConfig]);
@@ -150,7 +146,7 @@ export default function Customize() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex">
-        <div className="w-[500px] border-r border-border p-6">
+        <div className="w-[480px] border-r border-border p-6">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64 mb-8" />
           <div className="space-y-4">
@@ -169,7 +165,7 @@ export default function Customize() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left sidebar - Settings */}
-      <div className="w-[500px] border-r border-border p-6 overflow-y-auto">
+      <div className="w-[480px] border-r border-border p-6 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Prilagodite chatbota</h1>
           <p className="text-muted-foreground mt-1">
@@ -415,21 +411,18 @@ export default function Customize() {
       </div>
 
       {/* Right side - Widget Preview */}
-      <div className="flex-1 flex items-center justify-end pr-16 p-8 bg-muted/30 relative">
+      <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 relative">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Phone frame with iframe - smaller and without notch */}
-        <div className="relative w-[320px] h-[580px] bg-background rounded-[32px] border-4 border-secondary shadow-2xl overflow-hidden animate-fade-in">
-          {/* Widget iframe */}
-          <iframe
-            key={previewUrl}
-            src={previewUrl}
-            className="w-full h-full border-0"
-            title="Widget Preview"
-          />
-        </div>
+        {/* Widget iframe - no phone frame */}
+        <iframe
+          key={previewUrl}
+          src={previewUrl}
+          className="w-full h-full border-0"
+          title="Widget Preview"
+        />
       </div>
     </div>
   );
