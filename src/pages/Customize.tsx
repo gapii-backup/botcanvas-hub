@@ -35,18 +35,16 @@ export default function Customize() {
   const [newQuestion, setNewQuestion] = useState('');
 
   // Build iframe URL with query parameters
-  const widgetPreviewUrl = useMemo(() => {
+  const previewUrl = useMemo(() => {
     const params = new URLSearchParams({
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
       position: botConfig.position,
       mode: botConfig.darkMode ? 'dark' : 'light',
-      questions: botConfig.quickQuestions.join('|'),
+      questions: encodeURIComponent(JSON.stringify(botConfig.quickQuestions)),
+      booking: botConfig.bookingUrl || ''
     });
-    if (botConfig.bookingUrl) {
-      params.set('booking', botConfig.bookingUrl);
-    }
     return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
   }, [botConfig]);
 
@@ -289,12 +287,19 @@ export default function Customize() {
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Widget iframe */}
-        <iframe
-          src={widgetPreviewUrl}
-          className="w-[400px] h-[650px] border-0 rounded-2xl shadow-2xl animate-fade-in"
-          title="Widget Preview"
-        />
+        {/* Phone frame with iframe */}
+        <div className="relative w-[375px] h-[700px] bg-background rounded-[40px] border-4 border-secondary shadow-2xl overflow-hidden animate-fade-in">
+          {/* Phone notch */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-secondary rounded-b-2xl z-10" />
+          
+          {/* Widget iframe */}
+          <iframe
+            key={previewUrl}
+            src={previewUrl}
+            className="w-full h-full border-0"
+            title="Widget Preview"
+          />
+        </div>
       </div>
     </div>
   );
