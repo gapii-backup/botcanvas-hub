@@ -37,6 +37,7 @@ export default function Customize() {
   // Build iframe URL with query parameters
   const previewUrl = useMemo(() => {
     const params = new URLSearchParams({
+      preview: 'true',
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
@@ -296,7 +297,7 @@ export default function Customize() {
           <iframe
             key={previewUrl}
             src={previewUrl}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 rounded-2xl"
             title="Widget Preview"
           />
         </div>
