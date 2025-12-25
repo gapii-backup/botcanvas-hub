@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null; user: User | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -50,7 +50,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
     });
 
-    return { error };
+    if (error) {
+      return { error, user: null };
+    }
+
+    // Create user_bots row after successful registration
+    if (data.user) {
+      const { error: botError } = await (supabase as any)
+        .from('user_bots')
+        .insert({
+          user_id: data.user.id,
+          user_email: email,
+        });
+
+      if (botError) {
+        console.error('Error creating user_bots row:', botError);
+      }
+    }
+
+    return { error: null, user: data.user };
   };
 
   const signIn = async (email: string, password: string) => {

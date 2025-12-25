@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Check, Bot, Sparkles, Building2 } from 'lucide-react';
+import { Check, Bot, Sparkles, Building2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserBot } from '@/hooks/useUserBot';
+import { useToast } from '@/hooks/use-toast';
 
 const plans = [
   {
@@ -56,12 +58,27 @@ const plans = [
 
 export default function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { updateUserBot } = useUserBot();
+  const { toast } = useToast();
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = async (planId: string) => {
     setSelectedPlan(planId);
-    localStorage.setItem('selectedPlan', planId);
-    navigate('/customize');
+    setIsLoading(true);
+
+    try {
+      await updateUserBot({ plan: planId });
+      navigate('/customize');
+    } catch (error) {
+      toast({
+        title: 'Napaka',
+        description: 'Ni bilo mogoče shraniti paketa. Poskusite znova.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -137,8 +154,13 @@ export default function Pricing() {
                   variant={plan.popular ? 'glow' : 'outline'}
                   className="w-full"
                   size="lg"
+                  disabled={isLoading && selectedPlan === plan.id}
                 >
-                  Izberi
+                  {isLoading && selectedPlan === plan.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Izberi'
+                  )}
                 </Button>
               </div>
             );
