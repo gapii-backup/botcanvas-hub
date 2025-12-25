@@ -16,46 +16,20 @@ import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface BotConfig {
-  name: string;
-  greeting: string;
-  homeTitle: string;
-  homeSubtitle: string;
-  primaryColor: string;
-  darkMode: boolean;
-  position: 'left' | 'right';
-  triggerStyle: 'floating' | 'edge';
-  edgeTriggerText: string;
-  quickQuestions: string[];
-  bookingEnabled: boolean;
-  bookingUrl: string;
-  supportEnabled: boolean;
-  showBubble: boolean;
-  showEmailField: boolean;
-}
-
 export default function Customize() {
   const navigate = useNavigate();
   const { userBot, loading, updateUserBot } = useUserBot();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
-  const [botConfig, setBotConfig] = useState<BotConfig>({
+  const [botConfig, setBotConfig] = useState({
     name: 'Moj AI Asistent',
     greeting: 'Pozdravljeni! Kako vam lahko pomagam?',
-    homeTitle: 'Pozdravljeni!',
-    homeSubtitle: 'Kako vam lahko pomagam?',
     primaryColor: '#3B82F6',
     darkMode: true,
-    position: 'right',
-    triggerStyle: 'floating',
-    edgeTriggerText: 'Klikni me',
-    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
-    bookingEnabled: false,
+    position: 'right' as 'left' | 'right',
+    quickQuestions: ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
     bookingUrl: '',
-    supportEnabled: true,
-    showBubble: true,
-    showEmailField: true,
   });
 
   const [newQuestion, setNewQuestion] = useState('');
@@ -67,14 +41,10 @@ export default function Customize() {
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
-      title: botConfig.homeTitle || 'Pozdravljeni!',
-      subtitle: botConfig.homeSubtitle || 'Kako vam lahko pomagam?',
       position: botConfig.position,
       mode: botConfig.darkMode ? 'dark' : 'light',
       questions: encodeURIComponent(JSON.stringify(botConfig.quickQuestions)),
-      booking: botConfig.bookingUrl || '',
-      bubble: botConfig.showBubble ? 'true' : 'false',
-      trigger: botConfig.triggerStyle || 'floating',
+      booking: botConfig.bookingUrl || ''
     });
     return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
   }, [botConfig]);
@@ -85,19 +55,11 @@ export default function Customize() {
       setBotConfig({
         name: userBot.bot_name || 'Moj AI Asistent',
         greeting: userBot.welcome_message || 'Pozdravljeni! Kako vam lahko pomagam?',
-        homeTitle: (userBot as any).home_title || 'Dobrodošli',
-        homeSubtitle: (userBot as any).home_subtitle_line2 || 'Tukaj smo za vas',
         primaryColor: userBot.primary_color || '#3B82F6',
         darkMode: userBot.dark_mode ?? true,
         position: (userBot.position as 'left' | 'right') || 'right',
-        triggerStyle: (userBot as any).trigger_style || 'floating',
-        edgeTriggerText: (userBot as any).edge_trigger_text || 'Pogovor',
         quickQuestions: userBot.quick_questions || ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
-        bookingEnabled: (userBot as any).booking_enabled ?? false,
         bookingUrl: userBot.booking_url || '',
-        supportEnabled: (userBot as any).support_enabled ?? true,
-        showBubble: (userBot as any).show_bubble ?? true,
-        showEmailField: (userBot as any).show_email_field ?? true,
       });
     }
   }, [userBot]);
@@ -146,7 +108,7 @@ export default function Customize() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex">
-        <div className="w-[480px] border-r border-border p-6">
+        <div className="w-[420px] border-r border-border p-6">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64 mb-8" />
           <div className="space-y-4">
@@ -165,7 +127,7 @@ export default function Customize() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left sidebar - Settings */}
-      <div className="w-[480px] border-r border-border p-6 overflow-y-auto">
+      <div className="w-[420px] border-r border-border p-6 overflow-y-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Prilagodite chatbota</h1>
           <p className="text-muted-foreground mt-1">
@@ -174,7 +136,6 @@ export default function Customize() {
         </div>
 
         <Accordion type="multiple" defaultValue={['basic', 'appearance']} className="space-y-4">
-          {/* Osnovne informacije */}
           <AccordionItem value="basic" className="glass rounded-xl px-4 border-0">
             <AccordionTrigger className="text-foreground font-medium py-4">
               Osnovne informacije
@@ -197,26 +158,9 @@ export default function Customize() {
                   rows={3}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Naslov na domači strani</Label>
-                <Input
-                  value={botConfig.homeTitle}
-                  onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
-                  placeholder="Npr. Dobrodošli"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Podnaslov na domači strani</Label>
-                <Input
-                  value={botConfig.homeSubtitle}
-                  onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
-                  placeholder="Npr. Tukaj smo za vas"
-                />
-              </div>
             </AccordionContent>
           </AccordionItem>
 
-          {/* Videz */}
           <AccordionItem value="appearance" className="glass rounded-xl px-4 border-0">
             <AccordionTrigger className="text-foreground font-medium py-4">
               Videz
@@ -266,41 +210,9 @@ export default function Customize() {
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Stil gumba</Label>
-                <div className="flex gap-2">
-                  <Button
-                    variant={botConfig.triggerStyle === 'floating' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'floating' })}
-                    className="flex-1"
-                  >
-                    Plavajoči
-                  </Button>
-                  <Button
-                    variant={botConfig.triggerStyle === 'edge' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'edge' })}
-                    className="flex-1"
-                  >
-                    Robni
-                  </Button>
-                </div>
-              </div>
-              {botConfig.triggerStyle === 'edge' && (
-                <div className="space-y-2">
-                  <Label>Tekst na robnem gumbu</Label>
-                  <Input
-                    value={botConfig.edgeTriggerText}
-                    onChange={(e) => setBotConfig({ ...botConfig, edgeTriggerText: e.target.value })}
-                    placeholder="Npr. Pogovor"
-                  />
-                </div>
-              )}
             </AccordionContent>
           </AccordionItem>
 
-          {/* Hitra vprašanja */}
           <AccordionItem value="questions" className="glass rounded-xl px-4 border-0">
             <AccordionTrigger className="text-foreground font-medium py-4">
               Hitra vprašanja
@@ -335,57 +247,17 @@ export default function Customize() {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Kontakt & Booking */}
-          <AccordionItem value="contact" className="glass rounded-xl px-4 border-0">
+          <AccordionItem value="booking" className="glass rounded-xl px-4 border-0">
             <AccordionTrigger className="text-foreground font-medium py-4">
-              Kontakt & Rezervacije
+              Rezervacije (opcijsko)
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Omogoči rezervacije</Label>
-                <Switch
-                  checked={botConfig.bookingEnabled}
-                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, bookingEnabled: checked })}
-                />
-              </div>
-              {botConfig.bookingEnabled && (
-                <div className="space-y-2">
-                  <Label>URL za rezervacije</Label>
-                  <Input
-                    value={botConfig.bookingUrl}
-                    onChange={(e) => setBotConfig({ ...botConfig, bookingUrl: e.target.value })}
-                    placeholder="https://calendly.com/..."
-                  />
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <Label>Omogoči kontaktni obrazec</Label>
-                <Switch
-                  checked={botConfig.supportEnabled}
-                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, supportEnabled: checked })}
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Ostalo */}
-          <AccordionItem value="other" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-4">
-              Ostalo
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>Prikaži pozdravni oblak</Label>
-                <Switch
-                  checked={botConfig.showBubble}
-                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, showBubble: checked })}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Prikaži email polje</Label>
-                <Switch
-                  checked={botConfig.showEmailField}
-                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, showEmailField: checked })}
+            <AccordionContent className="pb-4">
+              <div className="space-y-2">
+                <Label>URL za rezervacije</Label>
+                <Input
+                  value={botConfig.bookingUrl}
+                  onChange={(e) => setBotConfig({ ...botConfig, bookingUrl: e.target.value })}
+                  placeholder="https://calendly.com/..."
                 />
               </div>
             </AccordionContent>
@@ -416,13 +288,19 @@ export default function Customize() {
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Widget iframe - no phone frame */}
-        <iframe
-          key={previewUrl}
-          src={previewUrl}
-          className="w-full h-full border-0"
-          title="Widget Preview"
-        />
+        {/* Phone frame with iframe */}
+        <div className="relative w-[375px] h-[700px] bg-background rounded-[40px] border-4 border-secondary shadow-2xl overflow-hidden animate-fade-in">
+          {/* Phone notch */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-secondary rounded-b-2xl z-10" />
+          
+          {/* Widget iframe */}
+          <iframe
+            key={previewUrl}
+            src={previewUrl}
+            className="w-full h-full border-0 rounded-2xl"
+            title="Widget Preview"
+          />
+        </div>
       </div>
     </div>
   );
