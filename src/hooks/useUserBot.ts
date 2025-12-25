@@ -71,6 +71,36 @@ export function useUserBot() {
   const updateUserBot = async (updates: Partial<Omit<UserBot, 'id' | 'created_at' | 'user_id' | 'user_email'>>) => {
     if (!user) throw new Error('User not authenticated');
 
+    // Check if user_bots row exists, create if not
+    let existingBot = userBot;
+    if (!existingBot) {
+      const { data: fetchedBot } = await (supabase as any)
+        .from('user_bots')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      existingBot = fetchedBot as UserBot | null;
+    }
+
+    if (!existingBot) {
+      // Create new row with updates
+      const { data, error } = await (supabase as any)
+        .from('user_bots')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          ...updates,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      setUserBot(data as UserBot);
+      return data as UserBot;
+    }
+
+    // Update existing row
     const { data, error } = await (supabase as any)
       .from('user_bots')
       .update(updates)
