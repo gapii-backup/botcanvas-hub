@@ -14,7 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      user_bots: {
+        Row: {
+          api_key: string | null
+          booking_url: string | null
+          bot_name: string | null
+          created_at: string
+          dark_mode: boolean
+          id: string
+          plan: string | null
+          position: string
+          primary_color: string | null
+          quick_questions: string[]
+          status: string
+          user_email: string
+          user_id: string
+          welcome_message: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          booking_url?: string | null
+          bot_name?: string | null
+          created_at?: string
+          dark_mode?: boolean
+          id?: string
+          plan?: string | null
+          position?: string
+          primary_color?: string | null
+          quick_questions?: string[]
+          status?: string
+          user_email: string
+          user_id: string
+          welcome_message?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          booking_url?: string | null
+          bot_name?: string | null
+          created_at?: string
+          dark_mode?: boolean
+          id?: string
+          plan?: string | null
+          position?: string
+          primary_color?: string | null
+          quick_questions?: string[]
+          status?: string
+          user_email?: string
+          user_id?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
