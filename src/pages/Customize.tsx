@@ -6,6 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, ArrowRight, Plus, X, Loader2 } from 'lucide-react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,21 +23,32 @@ export default function Customize() {
   const [isSaving, setIsSaving] = useState(false);
 
   const [botConfig, setBotConfig] = useState({
+    // Osnovne info
     name: 'Moj AI Asistent',
     greeting: 'Pozdravljeni! Kako vam lahko pomagam?',
     homeTitle: 'Pozdravljeni!',
     homeSubtitle: 'Kako vam lahko pomagam?',
+    
+    // Barve
     primaryColor: '#3B82F6',
     darkMode: true,
+    headerStyle: 'gradient' as 'gradient' | 'solid',
+    botIconBackground: '#3B82F6',
+    botIconColor: '#FFFFFF',
+    
+    // Pozicija
     position: 'right' as 'left' | 'right',
+    verticalOffset: 24,
     triggerStyle: 'floating' as 'floating' | 'edge',
     edgeTriggerText: 'Klikni me',
+    
+    // Funkcije
     quickQuestions: ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
-    bookingUrl: '',
-    bookingEnabled: false,
-    supportEnabled: true,
-    showBubble: true,
     showEmailField: true,
+    showBubble: true,
+    bookingEnabled: false,
+    bookingUrl: '',
+    supportEnabled: true,
   });
 
   const [newQuestion, setNewQuestion] = useState('');
@@ -43,14 +60,22 @@ export default function Customize() {
       color: botConfig.primaryColor,
       name: botConfig.name,
       message: botConfig.greeting,
-      title: botConfig.homeTitle || 'Pozdravljeni!',
-      subtitle: botConfig.homeSubtitle || 'Kako vam lahko pomagam?',
+      title: botConfig.homeTitle,
+      subtitle: botConfig.homeSubtitle,
       position: botConfig.position,
       mode: botConfig.darkMode ? 'dark' : 'light',
+      headerStyle: botConfig.headerStyle,
+      iconBg: botConfig.botIconBackground,
+      iconColor: botConfig.botIconColor,
+      offset: String(botConfig.verticalOffset),
+      trigger: botConfig.triggerStyle,
+      edgeText: botConfig.edgeTriggerText,
       questions: encodeURIComponent(JSON.stringify(botConfig.quickQuestions)),
-      booking: botConfig.bookingUrl || '',
-      bubble: botConfig.showBubble ? 'true' : 'false',
-      trigger: botConfig.triggerStyle || 'floating'
+      booking: botConfig.bookingUrl,
+      bookingEnabled: String(botConfig.bookingEnabled),
+      supportEnabled: String(botConfig.supportEnabled),
+      bubble: String(botConfig.showBubble),
+      emailField: String(botConfig.showEmailField),
     });
     return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
   }, [botConfig]);
@@ -115,12 +140,12 @@ export default function Customize() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex">
-        <div className="flex-1 border-r border-border p-6 max-w-[700px]">
+        <div className="flex-1 border-r border-border p-6">
           <Skeleton className="h-8 w-48 mb-2" />
           <Skeleton className="h-4 w-64 mb-8" />
-          <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-64 w-full" />
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
           </div>
         </div>
         <div className="w-[450px] flex items-center justify-center">
@@ -133,7 +158,7 @@ export default function Customize() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left sidebar - Settings */}
-      <div className="flex-1 border-r border-border p-6 overflow-y-auto max-w-[700px]">
+      <div className="flex-1 border-r border-border p-6 overflow-y-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">Prilagodite chatbota</h1>
           <p className="text-muted-foreground mt-1">
@@ -141,175 +166,291 @@ export default function Customize() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          {/* Column 1 - Basic info & Questions */}
-          <div className="space-y-4">
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-foreground font-medium mb-4">Osnovne informacije</h3>
-              <div className="space-y-3">
+        <Accordion type="multiple" defaultValue={['basic']} className="space-y-3">
+          {/* 1. Osnovne informacije */}
+          <AccordionItem value="basic" className="glass rounded-xl px-4 border-0">
+            <AccordionTrigger className="text-foreground font-medium py-3">
+              Osnovne informacije
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-sm">Ime bota</Label>
+                <Input
+                  value={botConfig.name}
+                  onChange={(e) => setBotConfig({ ...botConfig, name: e.target.value })}
+                  placeholder="Npr. Prodajni asistent"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Pozdravno sporočilo</Label>
+                <Textarea
+                  value={botConfig.greeting}
+                  onChange={(e) => setBotConfig({ ...botConfig, greeting: e.target.value })}
+                  placeholder="Sporočilo ob odprtju"
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-sm">Ime bota</Label>
+                  <Label className="text-sm">Naslov na domači strani</Label>
                   <Input
-                    value={botConfig.name}
-                    onChange={(e) => setBotConfig({ ...botConfig, name: e.target.value })}
-                    placeholder="Npr. Prodajni asistent"
+                    value={botConfig.homeTitle}
+                    onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
+                    placeholder="Pozdravljeni!"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-sm">Pozdravno sporočilo</Label>
-                  <Textarea
-                    value={botConfig.greeting}
-                    onChange={(e) => setBotConfig({ ...botConfig, greeting: e.target.value })}
-                    placeholder="Sporočilo ob odprtju"
-                    rows={2}
+                  <Label className="text-sm">Podnaslov na domači strani</Label>
+                  <Input
+                    value={botConfig.homeSubtitle}
+                    onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
+                    placeholder="Kako vam lahko pomagam?"
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-sm">Naslov</Label>
-                    <Input
-                      value={botConfig.homeTitle}
-                      onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
-                      placeholder="Pozdravljeni!"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-sm">Podnaslov</Label>
-                    <Input
-                      value={botConfig.homeSubtitle}
-                      onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
-                      placeholder="Kako pomagam?"
-                    />
-                  </div>
                 </div>
               </div>
-            </div>
+            </AccordionContent>
+          </AccordionItem>
 
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-foreground font-medium mb-3">Hitra vprašanja</h3>
-              <div className="space-y-2">
-                {botConfig.quickQuestions.map((q, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-secondary/50 rounded-lg p-2">
-                    <span className="flex-1 text-xs text-foreground truncate">{q}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-5 w-5"
-                      onClick={() => removeQuickQuestion(i)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+          {/* 2. Barve in tema */}
+          <AccordionItem value="colors" className="glass rounded-xl px-4 border-0">
+            <AccordionTrigger className="text-foreground font-medium py-3">
+              Barve in tema
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-sm">Glavna barva</Label>
                 <div className="flex gap-2">
-                  <Input
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
-                    placeholder="Novo vprašanje..."
-                    className="text-sm"
-                    onKeyPress={(e) => e.key === 'Enter' && addQuickQuestion()}
+                  <input
+                    type="color"
+                    value={botConfig.primaryColor}
+                    onChange={(e) => setBotConfig({ ...botConfig, primaryColor: e.target.value })}
+                    className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
                   />
-                  <Button variant="outline" size="icon" className="h-9 w-9" onClick={addQuickQuestion}>
-                    <Plus className="h-4 w-4" />
+                  <Input
+                    value={botConfig.primaryColor}
+                    onChange={(e) => setBotConfig({ ...botConfig, primaryColor: e.target.value })}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <Label className="text-sm">Temna tema</Label>
+                <Switch
+                  checked={botConfig.darkMode}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, darkMode: checked })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Stil headerja</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={botConfig.headerStyle === 'gradient' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, headerStyle: 'gradient' })}
+                    className="flex-1 h-8"
+                  >
+                    Gradient
+                  </Button>
+                  <Button
+                    variant={botConfig.headerStyle === 'solid' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, headerStyle: 'solid' })}
+                    className="flex-1 h-8"
+                  >
+                    Solid
                   </Button>
                 </div>
               </div>
-            </div>
-
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-foreground font-medium mb-3">Rezervacije</h3>
-              <div className="space-y-1">
-                <Label className="text-sm">URL za rezervacije</Label>
-                <Input
-                  value={botConfig.bookingUrl}
-                  onChange={(e) => setBotConfig({ ...botConfig, bookingUrl: e.target.value })}
-                  placeholder="https://calendly.com/..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Column 2 - Appearance */}
-          <div className="space-y-4">
-            <div className="glass rounded-xl p-4">
-              <h3 className="text-foreground font-medium mb-4">Videz</h3>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-sm">Glavna barva</Label>
+                  <Label className="text-sm">Barva ozadja ikone</Label>
                   <div className="flex gap-2">
                     <input
                       type="color"
-                      value={botConfig.primaryColor}
-                      onChange={(e) => setBotConfig({ ...botConfig, primaryColor: e.target.value })}
+                      value={botConfig.botIconBackground}
+                      onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
                       className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
                     />
                     <Input
-                      value={botConfig.primaryColor}
-                      onChange={(e) => setBotConfig({ ...botConfig, primaryColor: e.target.value })}
+                      value={botConfig.botIconBackground}
+                      onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
                       className="flex-1"
                     />
                   </div>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <Label className="text-sm">Temna tema</Label>
-                  <Switch
-                    checked={botConfig.darkMode}
-                    onCheckedChange={(checked) => setBotConfig({ ...botConfig, darkMode: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <Label className="text-sm">Prikaži balon</Label>
-                  <Switch
-                    checked={botConfig.showBubble}
-                    onCheckedChange={(checked) => setBotConfig({ ...botConfig, showBubble: checked })}
-                  />
-                </div>
                 <div className="space-y-1">
-                  <Label className="text-sm">Pozicija</Label>
+                  <Label className="text-sm">Barva ikone</Label>
                   <div className="flex gap-2">
-                    <Button
-                      variant={botConfig.position === 'left' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setBotConfig({ ...botConfig, position: 'left' })}
-                      className="flex-1 h-8"
-                    >
-                      Levo
-                    </Button>
-                    <Button
-                      variant={botConfig.position === 'right' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setBotConfig({ ...botConfig, position: 'right' })}
-                      className="flex-1 h-8"
-                    >
-                      Desno
-                    </Button>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-sm">Stil prožilca</Label>
-                  <div className="flex gap-2">
-                    <Button
-                      variant={botConfig.triggerStyle === 'floating' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'floating' })}
-                      className="flex-1 h-8"
-                    >
-                      Plavajoč
-                    </Button>
-                    <Button
-                      variant={botConfig.triggerStyle === 'edge' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'edge' })}
-                      className="flex-1 h-8"
-                    >
-                      Na robu
-                    </Button>
+                    <input
+                      type="color"
+                      value={botConfig.botIconColor}
+                      onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
+                      className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
+                    />
+                    <Input
+                      value={botConfig.botIconColor}
+                      onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
+                      className="flex-1"
+                    />
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* 3. Pozicija in gumb */}
+          <AccordionItem value="position" className="glass rounded-xl px-4 border-0">
+            <AccordionTrigger className="text-foreground font-medium py-3">
+              Pozicija in gumb
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-sm">Pozicija</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={botConfig.position === 'left' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, position: 'left' })}
+                    className="flex-1 h-8"
+                  >
+                    Levo
+                  </Button>
+                  <Button
+                    variant={botConfig.position === 'right' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, position: 'right' })}
+                    className="flex-1 h-8"
+                  >
+                    Desno
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Odmik od spodaj (px)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={botConfig.verticalOffset}
+                  onChange={(e) => setBotConfig({ ...botConfig, verticalOffset: Math.min(100, Math.max(0, parseInt(e.target.value) || 0)) })}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Stil gumba</Label>
+                <div className="flex gap-2">
+                  <Button
+                    variant={botConfig.triggerStyle === 'floating' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'floating' })}
+                    className="flex-1 h-8"
+                  >
+                    Plavajoči
+                  </Button>
+                  <Button
+                    variant={botConfig.triggerStyle === 'edge' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBotConfig({ ...botConfig, triggerStyle: 'edge' })}
+                    className="flex-1 h-8"
+                  >
+                    Robni
+                  </Button>
+                </div>
+              </div>
+              {botConfig.triggerStyle === 'edge' && (
+                <div className="space-y-1">
+                  <Label className="text-sm">Tekst na gumbu</Label>
+                  <Input
+                    value={botConfig.edgeTriggerText}
+                    onChange={(e) => setBotConfig({ ...botConfig, edgeTriggerText: e.target.value })}
+                    placeholder="Klikni me"
+                  />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* 4. Hitra vprašanja */}
+          <AccordionItem value="questions" className="glass rounded-xl px-4 border-0">
+            <AccordionTrigger className="text-foreground font-medium py-3">
+              Hitra vprašanja
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3">
+              <div className="space-y-2">
+                {botConfig.quickQuestions.map((q, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-secondary/50 rounded-lg p-2">
+                    <span className="flex-1 text-sm text-foreground truncate">{q}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => removeQuickQuestion(i)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value)}
+                  placeholder="Novo vprašanje..."
+                  onKeyPress={(e) => e.key === 'Enter' && addQuickQuestion()}
+                />
+                <Button variant="outline" size="icon" onClick={addQuickQuestion}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* 5. Funkcije */}
+          <AccordionItem value="features" className="glass rounded-xl px-4 border-0">
+            <AccordionTrigger className="text-foreground font-medium py-3">
+              Funkcije
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 space-y-3">
+              <div className="flex items-center justify-between py-1">
+                <Label className="text-sm">Prikaži welcome bubble</Label>
+                <Switch
+                  checked={botConfig.showBubble}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, showBubble: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <Label className="text-sm">Prikaži email polje</Label>
+                <Switch
+                  checked={botConfig.showEmailField}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, showEmailField: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <Label className="text-sm">Omogoči kontakt obrazec</Label>
+                <Switch
+                  checked={botConfig.supportEnabled}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, supportEnabled: checked })}
+                />
+              </div>
+              <div className="flex items-center justify-between py-1">
+                <Label className="text-sm">Omogoči rezervacije</Label>
+                <Switch
+                  checked={botConfig.bookingEnabled}
+                  onCheckedChange={(checked) => setBotConfig({ ...botConfig, bookingEnabled: checked })}
+                />
+              </div>
+              {botConfig.bookingEnabled && (
+                <div className="space-y-1">
+                  <Label className="text-sm">URL za rezervacije</Label>
+                  <Input
+                    value={botConfig.bookingUrl}
+                    onChange={(e) => setBotConfig({ ...botConfig, bookingUrl: e.target.value })}
+                    placeholder="https://calendly.com/..."
+                  />
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <div className="flex gap-3 mt-6 pt-4 border-t border-border">
           <Button variant="outline" onClick={() => navigate('/pricing')}>
