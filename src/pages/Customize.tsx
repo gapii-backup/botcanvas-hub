@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, ArrowRight, Plus, X, MessageSquare, Send, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, ArrowRight, Plus, X, Loader2 } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -34,6 +33,22 @@ export default function Customize() {
   });
 
   const [newQuestion, setNewQuestion] = useState('');
+
+  // Build iframe URL with query parameters
+  const widgetPreviewUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      color: botConfig.primaryColor,
+      name: botConfig.name,
+      message: botConfig.greeting,
+      position: botConfig.position,
+      mode: botConfig.darkMode ? 'dark' : 'light',
+      questions: botConfig.quickQuestions.join('|'),
+    });
+    if (botConfig.bookingUrl) {
+      params.set('booking', botConfig.bookingUrl);
+    }
+    return `https://cdn.botmotion.ai/widget-preview.html?${params.toString()}`;
+  }, [botConfig]);
 
   // Load config from Supabase
   useEffect(() => {
@@ -268,117 +283,18 @@ export default function Customize() {
         </div>
       </div>
 
-      {/* Right side - Preview */}
+      {/* Right side - Widget Preview */}
       <div className="flex-1 flex items-center justify-center p-8 bg-muted/30 relative">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
         </div>
 
-        {/* Phone mockup */}
-        <div className="relative w-[375px] h-[700px] bg-background rounded-[40px] border-4 border-secondary shadow-2xl overflow-hidden animate-fade-in">
-          {/* Phone notch */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-secondary rounded-b-2xl" />
-          
-          {/* Preview content */}
-          <div className="absolute inset-4 top-8 bg-card rounded-2xl overflow-hidden">
-            <div className="h-full flex flex-col">
-              {/* Simulated website header */}
-              <div className="h-12 bg-secondary/50 flex items-center px-4 gap-2">
-                <div className="w-3 h-3 rounded-full bg-destructive/50" />
-                <div className="w-3 h-3 rounded-full bg-warning/50" />
-                <div className="w-3 h-3 rounded-full bg-success/50" />
-                <div className="flex-1 bg-muted rounded-full h-6 ml-4" />
-              </div>
-
-              {/* Page content simulation */}
-              <div className="flex-1 p-4 space-y-4">
-                <div className="h-8 bg-muted rounded-lg w-2/3" />
-                <div className="h-4 bg-muted/60 rounded w-full" />
-                <div className="h-4 bg-muted/60 rounded w-4/5" />
-                <div className="h-32 bg-muted/40 rounded-xl mt-4" />
-                <div className="h-4 bg-muted/60 rounded w-full" />
-                <div className="h-4 bg-muted/60 rounded w-3/4" />
-              </div>
-
-              {/* Chat widget */}
-              <div
-                className={cn(
-                  'absolute bottom-4 w-80',
-                  botConfig.position === 'right' ? 'right-4' : 'left-4'
-                )}
-              >
-                {/* Chat window */}
-                <div
-                  className={cn(
-                    'rounded-2xl shadow-2xl overflow-hidden mb-4 animate-slide-up',
-                    botConfig.darkMode ? 'bg-card border border-border' : 'bg-background'
-                  )}
-                >
-                  {/* Header */}
-                  <div
-                    className="p-4 flex items-center gap-3"
-                    style={{ backgroundColor: botConfig.primaryColor }}
-                  >
-                    <div className="h-10 w-10 rounded-full bg-foreground/20 flex items-center justify-center">
-                      <MessageSquare className="h-5 w-5 text-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground text-sm">{botConfig.name}</p>
-                      <p className="text-xs text-foreground/70">Običajno odgovori v nekaj sekundah</p>
-                    </div>
-                  </div>
-
-                  {/* Messages */}
-                  <div className="p-4 space-y-3">
-                    <div className="flex gap-2">
-                      <div
-                        className="h-8 w-8 rounded-full flex-shrink-0 flex items-center justify-center"
-                        style={{ backgroundColor: botConfig.primaryColor }}
-                      >
-                        <MessageSquare className="h-4 w-4 text-foreground" />
-                      </div>
-                      <div className="bg-secondary rounded-2xl rounded-tl-sm px-4 py-2 max-w-[200px]">
-                        <p className="text-sm text-foreground">{botConfig.greeting}</p>
-                      </div>
-                    </div>
-
-                    {/* Quick questions */}
-                    {botConfig.quickQuestions.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {botConfig.quickQuestions.slice(0, 2).map((q, i) => (
-                          <button
-                            key={i}
-                            className="text-xs px-3 py-1.5 rounded-full border border-border hover:bg-secondary transition-colors text-foreground"
-                          >
-                            {q}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Input */}
-                  <div className="p-3 border-t border-border">
-                    <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
-                      <input
-                        type="text"
-                        placeholder="Vnesite sporočilo..."
-                        className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground"
-                        disabled
-                      />
-                      <button
-                        className="h-8 w-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: botConfig.primaryColor }}
-                      >
-                        <Send className="h-4 w-4 text-foreground" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Widget iframe */}
+        <iframe
+          src={widgetPreviewUrl}
+          className="w-[400px] h-[650px] border-0 rounded-2xl shadow-2xl animate-fade-in"
+          title="Widget Preview"
+        />
       </div>
     </div>
   );
