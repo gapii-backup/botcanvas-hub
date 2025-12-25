@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -13,24 +13,34 @@ import {
   Settings,
   AlertCircle,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useUserBot } from '@/hooks/useUserBot';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const { userBot, loading } = useUserBot();
 
-  useEffect(() => {
-    // Check if bot is configured
-    const botConfig = localStorage.getItem('botConfig');
-    setIsActive(!!botConfig);
-  }, []);
+  const isActive = userBot?.status === 'active';
+  const apiKey = userBot?.api_key;
 
-  const embedCode = `<script src="https://cdn.botmotion.ai/widget.js" data-key="bm_live_xxxxxxxxxxxxx"></script>`;
+  const embedCode = apiKey
+    ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
+    : `<script src="https://cdn.botmotion.ai/widget.js" data-key="YOUR_API_KEY"></script>`;
 
   const copyToClipboard = () => {
+    if (!apiKey) {
+      toast({
+        title: 'API ključ ni na voljo',
+        description: 'Vaš chatbot še ni aktiven.',
+        variant: 'destructive',
+      });
+      return;
+    }
     navigator.clipboard.writeText(embedCode);
     setCopied(true);
     toast({
@@ -45,6 +55,26 @@ export default function Dashboard() {
     { label: 'Aktivni uporabniki', value: '0', icon: Users, change: '+0%' },
     { label: 'Konverzijska stopnja', value: '0%', icon: TrendingUp, change: '+0%' },
   ];
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-8">
+          <div>
+            <Skeleton className="h-9 w-48 mb-2" />
+            <Skeleton className="h-5 w-80" />
+          </div>
+          <Skeleton className="h-32 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-36" />
+            <Skeleton className="h-36" />
+            <Skeleton className="h-36" />
+          </div>
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -130,13 +160,18 @@ export default function Dashboard() {
             <div>
               <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
               <p className="text-sm text-muted-foreground">
-                Dodajte to kodo pred zaključni &lt;/body&gt; tag
+                {apiKey
+                  ? 'Dodajte to kodo pred zaključni </body> tag'
+                  : 'API ključ bo na voljo po aktivaciji chatbota'}
               </p>
             </div>
           </div>
 
           <div className="relative">
-            <pre className="bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border">
+            <pre className={cn(
+              "bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border",
+              !apiKey && "opacity-50"
+            )}>
               <code>{embedCode}</code>
             </pre>
             <Button
@@ -144,6 +179,7 @@ export default function Dashboard() {
               size="sm"
               className="absolute top-3 right-3"
               onClick={copyToClipboard}
+              disabled={!apiKey}
             >
               {copied ? (
                 <>

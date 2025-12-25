@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { ArrowLeft, ArrowRight, Plus, X, MessageSquare, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, X, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Accordion,
@@ -13,9 +13,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useUserBot } from '@/hooks/useUserBot';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Customize() {
   const navigate = useNavigate();
+  const { userBot, loading, updateUserBot } = useUserBot();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
   const [botConfig, setBotConfig] = useState({
     name: 'Moj AI Asistent',
     greeting: 'Pozdravljeni! Kako vam lahko pomagam?',
@@ -27,6 +34,21 @@ export default function Customize() {
   });
 
   const [newQuestion, setNewQuestion] = useState('');
+
+  // Load config from Supabase
+  useEffect(() => {
+    if (userBot) {
+      setBotConfig({
+        name: userBot.bot_name || 'Moj AI Asistent',
+        greeting: userBot.welcome_message || 'Pozdravljeni! Kako vam lahko pomagam?',
+        primaryColor: userBot.primary_color || '#3B82F6',
+        darkMode: userBot.dark_mode ?? true,
+        position: (userBot.position as 'left' | 'right') || 'right',
+        quickQuestions: userBot.quick_questions || ['Kakšne so vaše cene?', 'Kako vas lahko kontaktiram?'],
+        bookingUrl: userBot.booking_url || '',
+      });
+    }
+  }, [userBot]);
 
   const addQuickQuestion = () => {
     if (newQuestion.trim()) {
@@ -45,10 +67,48 @@ export default function Customize() {
     });
   };
 
-  const handleContinue = () => {
-    localStorage.setItem('botConfig', JSON.stringify(botConfig));
-    navigate('/checkout');
+  const handleContinue = async () => {
+    setIsSaving(true);
+    try {
+      await updateUserBot({
+        bot_name: botConfig.name,
+        welcome_message: botConfig.greeting,
+        primary_color: botConfig.primaryColor,
+        dark_mode: botConfig.darkMode,
+        position: botConfig.position,
+        quick_questions: botConfig.quickQuestions,
+        booking_url: botConfig.bookingUrl || null,
+      });
+      navigate('/checkout');
+    } catch (error) {
+      toast({
+        title: 'Napaka',
+        description: 'Ni bilo mogoče shraniti nastavitev. Poskusite znova.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex">
+        <div className="w-[420px] border-r border-border p-6">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64 mb-8" />
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -195,9 +255,15 @@ export default function Customize() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Nazaj
           </Button>
-          <Button variant="glow" className="flex-1" onClick={handleContinue}>
-            Nadaljuj na plačilo
-            <ArrowRight className="h-4 w-4 ml-2" />
+          <Button variant="glow" className="flex-1" onClick={handleContinue} disabled={isSaving}>
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                Nadaljuj na plačilo
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </>
+            )}
           </Button>
         </div>
       </div>
