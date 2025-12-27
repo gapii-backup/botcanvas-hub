@@ -25,8 +25,8 @@ export default function Index() {
     } else if (widget.status === 'active') {
       navigate('/dashboard');
     } else {
-      // Pending or other status - go to customize
-      navigate('/customize/step-1');
+      // Plan is set but widget isn't fully activated/customization flow isn't finished yet
+      navigate('/pricing');
     }
   }, [user, widget, authLoading, widgetLoading, navigate]);
 
