@@ -45,7 +45,7 @@ const App = () => (
               }
             />
             <Route
-              path="/customize"
+              path="/customize/*"
               element={
                 <ProtectedRoute>
                   <Customize />
