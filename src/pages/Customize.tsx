@@ -6,12 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, ArrowRight, Plus, X, Loader2 } from 'lucide-react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -158,7 +152,7 @@ export default function Customize() {
   return (
     <div className="min-h-screen bg-background flex">
       {/* Left sidebar - Settings */}
-      <div className="flex-1 border-r border-border p-6 overflow-y-auto">
+      <div className="flex-1 border-r border-border p-6 flex flex-col">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">Prilagodite chatbota</h1>
           <p className="text-muted-foreground mt-1">
@@ -166,13 +160,15 @@ export default function Customize() {
           </p>
         </div>
 
-        <Accordion type="multiple" defaultValue={['basic']} className="space-y-3">
-          {/* 1. Osnovne informacije */}
-          <AccordionItem value="basic" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-3">
-              Osnovne informacije
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+        {/* Grid layout for all settings */}
+        <div className="flex-1 grid grid-cols-3 gap-6">
+          {/* Column 1: Osnovne informacije + Barve */}
+          <div className="space-y-6">
+            {/* Osnovne informacije */}
+            <div className="glass rounded-xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground border-b border-border pb-2">
+                Osnovne informacije
+              </h3>
               <div className="space-y-1">
                 <Label className="text-sm">Ime bota</Label>
                 <Input
@@ -190,33 +186,29 @@ export default function Customize() {
                   rows={2}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-sm">Naslov na domači strani</Label>
-                  <Input
-                    value={botConfig.homeTitle}
-                    onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
-                    placeholder="Pozdravljeni!"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-sm">Podnaslov na domači strani</Label>
-                  <Input
-                    value={botConfig.homeSubtitle}
-                    onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
-                    placeholder="Kako vam lahko pomagam?"
-                  />
-                </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Naslov na domači strani</Label>
+                <Input
+                  value={botConfig.homeTitle}
+                  onChange={(e) => setBotConfig({ ...botConfig, homeTitle: e.target.value })}
+                  placeholder="Pozdravljeni!"
+                />
               </div>
-            </AccordionContent>
-          </AccordionItem>
+              <div className="space-y-1">
+                <Label className="text-sm">Podnaslov na domači strani</Label>
+                <Input
+                  value={botConfig.homeSubtitle}
+                  onChange={(e) => setBotConfig({ ...botConfig, homeSubtitle: e.target.value })}
+                  placeholder="Kako vam lahko pomagam?"
+                />
+              </div>
+            </div>
 
-          {/* 2. Barve in tema */}
-          <AccordionItem value="colors" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-3">
-              Barve in tema
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+            {/* Barve in tema */}
+            <div className="glass rounded-xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground border-b border-border pb-2">
+                Barve in tema
+              </h3>
               <div className="space-y-1">
                 <Label className="text-sm">Glavna barva</Label>
                 <div className="flex gap-2">
@@ -261,49 +253,48 @@ export default function Customize() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label className="text-sm">Barva ozadja ikone</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={botConfig.botIconBackground}
-                      onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
-                      className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
-                    />
-                    <Input
-                      value={botConfig.botIconBackground}
-                      onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-sm">Barva ikone</Label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={botConfig.botIconColor}
-                      onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
-                      className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
-                    />
-                    <Input
-                      value={botConfig.botIconColor}
-                      onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
-                      className="flex-1"
-                    />
-                  </div>
+              <div className="space-y-1">
+                <Label className="text-sm">Barva ozadja ikone</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={botConfig.botIconBackground}
+                    onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
+                    className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
+                  />
+                  <Input
+                    value={botConfig.botIconBackground}
+                    onChange={(e) => setBotConfig({ ...botConfig, botIconBackground: e.target.value })}
+                    className="flex-1"
+                  />
                 </div>
               </div>
-            </AccordionContent>
-          </AccordionItem>
+              <div className="space-y-1">
+                <Label className="text-sm">Barva ikone</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={botConfig.botIconColor}
+                    onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
+                    className="h-9 w-12 rounded-lg cursor-pointer bg-transparent"
+                  />
+                  <Input
+                    value={botConfig.botIconColor}
+                    onChange={(e) => setBotConfig({ ...botConfig, botIconColor: e.target.value })}
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
-          {/* 3. Pozicija in gumb */}
-          <AccordionItem value="position" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-3">
-              Pozicija in gumb
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+          {/* Column 2: Pozicija + Hitra vprašanja */}
+          <div className="space-y-6">
+            {/* Pozicija in gumb */}
+            <div className="glass rounded-xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground border-b border-border pb-2">
+                Pozicija in gumb
+              </h3>
               <div className="space-y-1">
                 <Label className="text-sm">Pozicija</Label>
                 <div className="flex gap-2">
@@ -366,15 +357,13 @@ export default function Customize() {
                   />
                 </div>
               )}
-            </AccordionContent>
-          </AccordionItem>
+            </div>
 
-          {/* 4. Hitra vprašanja */}
-          <AccordionItem value="questions" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-3">
-              Hitra vprašanja
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+            {/* Hitra vprašanja */}
+            <div className="glass rounded-xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground border-b border-border pb-2">
+                Hitra vprašanja
+              </h3>
               <div className="space-y-2">
                 {botConfig.quickQuestions.map((q, i) => (
                   <div key={i} className="flex items-center gap-2 bg-secondary/50 rounded-lg p-2">
@@ -382,7 +371,7 @@ export default function Customize() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6"
+                      className="h-6 w-6 shrink-0"
                       onClick={() => removeQuickQuestion(i)}
                     >
                       <X className="h-4 w-4" />
@@ -401,15 +390,16 @@ export default function Customize() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            </AccordionContent>
-          </AccordionItem>
+            </div>
+          </div>
 
-          {/* 5. Funkcije */}
-          <AccordionItem value="features" className="glass rounded-xl px-4 border-0">
-            <AccordionTrigger className="text-foreground font-medium py-3">
-              Funkcije
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+          {/* Column 3: Funkcije + Preview */}
+          <div className="space-y-6">
+            {/* Funkcije */}
+            <div className="glass rounded-xl p-4 space-y-4">
+              <h3 className="font-semibold text-foreground border-b border-border pb-2">
+                Funkcije
+              </h3>
               <div className="flex items-center justify-between py-1">
                 <Label className="text-sm">Prikaži welcome bubble</Label>
                 <Switch
@@ -448,36 +438,35 @@ export default function Customize() {
                   />
                 </div>
               )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </div>
+          </div>
+        </div>
 
-        <div className="flex gap-3 mt-6 pt-4 border-t border-border">
-          <Button variant="outline" onClick={() => navigate('/pricing')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+        {/* Footer buttons */}
+        <div className="flex gap-3 pt-6 border-t border-border mt-6">
+          <Button variant="outline" onClick={() => navigate(-1)} className="gap-2">
+            <ArrowLeft className="w-4 h-4" />
             Nazaj
           </Button>
-          <Button variant="glow" className="flex-1" onClick={handleContinue} disabled={isSaving}>
+          <Button onClick={handleContinue} disabled={isSaving} className="flex-1 gap-2">
             {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Shranjujem...
+              </>
             ) : (
               <>
                 Nadaljuj na plačilo
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="w-4 h-4" />
               </>
             )}
           </Button>
         </div>
       </div>
 
-      {/* Right side - Widget Preview */}
-      <div className="w-[450px] flex items-center justify-center p-8 bg-muted/30 relative">
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl" />
-        </div>
-
-        {/* Widget iframe */}
-        <div className="relative w-[400px] h-[650px] animate-fade-in">
+      {/* Right side - Preview */}
+      <div className="w-[450px] bg-muted/30 flex items-center justify-center p-8">
+        <div className="w-[380px] h-[600px] rounded-2xl overflow-hidden shadow-2xl">
           <iframe
             key={previewUrl}
             src={previewUrl}
