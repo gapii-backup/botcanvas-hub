@@ -218,7 +218,7 @@ export default function Complete() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    onClick={() => navigate('/pricing')}
+                    onClick={() => navigate('/pricing?returnTo=complete')}
                   >
                     Zamenjaj paket
                   </Button>
