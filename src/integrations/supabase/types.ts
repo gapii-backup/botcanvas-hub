@@ -70,6 +70,7 @@ export type Database = {
       }
       widgets: {
         Row: {
+          addons: Json | null
           api_key: string | null
           billing_period: string
           booking_enabled: boolean
@@ -102,9 +103,11 @@ export type Database = {
           user_email: string
           user_id: string
           vertical_offset: number
+          website_url: string | null
           welcome_message: string | null
         }
         Insert: {
+          addons?: Json | null
           api_key?: string | null
           billing_period?: string
           booking_enabled?: boolean
@@ -137,9 +140,11 @@ export type Database = {
           user_email: string
           user_id: string
           vertical_offset?: number
+          website_url?: string | null
           welcome_message?: string | null
         }
         Update: {
+          addons?: Json | null
           api_key?: string | null
           billing_period?: string
           booking_enabled?: boolean
@@ -172,6 +177,7 @@ export type Database = {
           user_email?: string
           user_id?: string
           vertical_offset?: number
+          website_url?: string | null
           welcome_message?: string | null
         }
         Relationships: []

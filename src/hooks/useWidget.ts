@@ -48,6 +48,10 @@ export interface Widget {
   booking_enabled: boolean;
   booking_url: string | null;
   support_enabled: boolean;
+  
+  // Website & add-ons
+  website_url: string | null;
+  addons: string[] | null;
 }
 
 export function useWidget() {
