@@ -106,7 +106,7 @@ export default function Pricing() {
       if (returnTo === 'complete') {
         navigate('/customize/complete');
       } else {
-        navigate('/customize/step-0');
+        navigate('/customize/step-1');
       }
     } catch (error) {
       toast({

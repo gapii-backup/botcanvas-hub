@@ -26,7 +26,7 @@ export default function Index() {
       navigate('/dashboard');
     } else {
       // Pending or other status - go to customize
-      navigate('/customize/step-0');
+      navigate('/customize/step-1');
     }
   }, [user, widget, authLoading, widgetLoading, navigate]);
 

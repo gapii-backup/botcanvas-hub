@@ -33,7 +33,7 @@ export default function Login() {
       } else if (widget.status === 'active') {
         navigate('/dashboard');
       } else {
-        navigate('/customize/step-0');
+        navigate('/customize/step-1');
       }
     }
   }, [user, widget, widgetLoading, navigate]);
