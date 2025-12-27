@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Switch } from '@/components/ui/switch';
 
 // Define all add-ons with monthly prices in euros
 const ALL_ADDONS = {
@@ -103,9 +102,9 @@ export default function Complete() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
-  const [isYearly, setIsYearly] = useState(false);
 
   const userPlan = userBot?.plan || 'basic';
+  const isYearly = userBot?.billing_period === 'yearly';
   const availableAddons = getAvailableAddons(userPlan);
   const hasAddons = Object.keys(availableAddons).length > 0;
 
@@ -180,21 +179,14 @@ export default function Complete() {
                   </p>
                 </div>
 
-                {/* Billing toggle */}
+                {/* Billing info */}
                 <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-lg">
-                  <span className={`text-sm font-medium ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Mesečno
-                  </span>
-                  <Switch
-                    checked={isYearly}
-                    onCheckedChange={setIsYearly}
-                  />
-                  <span className={`text-sm font-medium ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    Letno
+                  <span className="text-sm font-medium text-foreground">
+                    {isYearly ? 'Letna naročnina' : 'Mesečna naročnina'}
                   </span>
                   {isYearly && (
-                    <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                      -20%
+                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                      -20% popust
                     </span>
                   )}
                 </div>

@@ -17,6 +17,7 @@ export interface UserBot {
   booking_url: string | null;
   status: string | null;
   api_key: string | null;
+  billing_period: 'monthly' | 'yearly';
 }
 
 export function useUserBot() {
