@@ -4,10 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { MessageCircle, ArrowLeft, AlignLeft, AlignRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, AlignLeft, AlignRight } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
+import { TriggerPreview } from '@/components/widget/WidgetPreview';
 
 export default function Step3() {
   const navigate = useNavigate();
@@ -15,52 +15,8 @@ export default function Step3() {
 
   return (
     <WizardLayout currentStep={3} totalSteps={3} preview={
-      <div className="relative w-full h-[400px]">
-        {/* Bubble preview */}
-        {config.showBubble && (
-          <div 
-            className={cn(
-              "absolute top-4",
-              config.position === 'right' ? 'right-16' : 'left-16'
-            )}
-          >
-            <div className={cn(
-              "px-4 py-2 rounded-2xl shadow-lg text-sm max-w-[200px]",
-              config.darkMode ? "bg-zinc-800 text-white" : "bg-white text-zinc-900"
-            )}>
-              {config.bubbleText}
-            </div>
-          </div>
-        )}
-
-        {/* Trigger button preview */}
-        <div 
-          className={cn(
-            "absolute",
-            config.position === 'right' ? 'right-0' : 'left-0'
-          )}
-          style={{ bottom: `${config.verticalOffset}px` }}
-        >
-          {config.triggerStyle === 'floating' ? (
-            <button
-              className="h-14 w-14 rounded-full flex items-center justify-center shadow-lg text-white transition-transform hover:scale-110"
-              style={{ backgroundColor: config.primaryColor }}
-            >
-              <MessageCircle className="h-6 w-6" />
-            </button>
-          ) : (
-            <button
-              className="px-4 py-3 rounded-l-lg shadow-lg text-white text-sm font-medium"
-              style={{ 
-                backgroundColor: config.primaryColor,
-                writingMode: 'vertical-rl',
-                textOrientation: 'mixed',
-              }}
-            >
-              {config.edgeTriggerText}
-            </button>
-          )}
-        </div>
+      <div className="flex flex-col items-center justify-end h-full pb-8">
+        <TriggerPreview config={config} />
       </div>
     }>
       <div className="space-y-8">
