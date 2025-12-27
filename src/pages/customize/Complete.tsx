@@ -15,10 +15,10 @@ const ALL_ADDONS = {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 12 },
-      { id: 'capacity_2000', label: '+2.000 pogovorov', monthlyPrice: 22 },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 52 },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', monthlyPrice: 99 },
+      { id: 'capacity_1000', label: '+1.000 pogovorov', yearlyLabel: '+12.000 pogovorov', monthlyPrice: 12 },
+      { id: 'capacity_2000', label: '+2.000 pogovorov', yearlyLabel: '+24.000 pogovorov', monthlyPrice: 22 },
+      { id: 'capacity_5000', label: '+5.000 pogovorov', yearlyLabel: '+60.000 pogovorov', monthlyPrice: 52 },
+      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+120.000 pogovorov', monthlyPrice: 99 },
     ],
   },
   languages: {
@@ -54,6 +54,12 @@ const ALL_ADDONS = {
   },
 };
 
+const PLAN_NAMES: Record<string, string> = {
+  basic: 'BASIC',
+  pro: 'PRO',
+  enterprise: 'ENTERPRISE',
+};
+
 // Calculate price based on billing period
 function formatPrice(monthlyPrice: number | null, isYearly: boolean): string {
   if (monthlyPrice === null) return 'po dogovoru';
@@ -66,8 +72,22 @@ function formatPrice(monthlyPrice: number | null, isYearly: boolean): string {
   return `€${monthlyPrice}/mesec`;
 }
 
+// Addon item type
+type AddonItem = {
+  id: string;
+  label: string;
+  yearlyLabel?: string;
+  monthlyPrice: number | null;
+};
+
+type AddonCategory = {
+  title: string;
+  icon: any;
+  items: AddonItem[];
+};
+
 // Get available add-ons based on plan
-function getAvailableAddons(plan: string | null) {
+function getAvailableAddons(plan: string | null): Record<string, AddonCategory> {
   const excluded: Record<string, string[]> = {
     basic: [], // Show all add-ons for basic
     pro: ['multilanguage', 'contacts', 'tickets'], // Exclude for PRO
@@ -77,14 +97,14 @@ function getAvailableAddons(plan: string | null) {
   const planKey = (plan || 'basic').toLowerCase();
   const excludedIds = excluded[planKey] || [];
 
-  const filtered: typeof ALL_ADDONS = {} as any;
+  const filtered: Record<string, AddonCategory> = {};
 
   Object.entries(ALL_ADDONS).forEach(([key, category]) => {
     const filteredItems = category.items.filter(item => !excludedIds.includes(item.id));
     if (filteredItems.length > 0) {
-      filtered[key as keyof typeof ALL_ADDONS] = {
+      filtered[key] = {
         ...category,
-        items: filteredItems,
+        items: filteredItems as AddonItem[],
       };
     }
   });
@@ -179,16 +199,29 @@ export default function Complete() {
                   </p>
                 </div>
 
-                {/* Billing info */}
-                <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-lg">
-                  <span className="text-sm font-medium text-foreground">
-                    {isYearly ? 'Letna naročnina' : 'Mesečna naročnina'}
-                  </span>
-                  {isYearly && (
-                    <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                      -20% popust
+                {/* Plan info */}
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">Paket:</span>
+                    <span className="text-sm font-bold text-foreground">
+                      {PLAN_NAMES[userPlan] || 'BASIC'}
                     </span>
-                  )}
+                    <span className="text-xs text-muted-foreground">
+                      ({isYearly ? 'letna naročnina' : 'mesečna naročnina'})
+                    </span>
+                    {isYearly && (
+                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                        -20%
+                      </span>
+                    )}
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate('/pricing')}
+                  >
+                    Zamenjaj paket
+                  </Button>
                 </div>
 
                 <div className="space-y-4">
@@ -200,24 +233,29 @@ export default function Complete() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
-                        {category.items.map((item) => (
-                          <div 
-                            key={item.id}
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                            onClick={() => toggleAddon(item.id)}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Checkbox 
-                                checked={selectedAddons.includes(item.id)}
-                                onCheckedChange={() => toggleAddon(item.id)}
-                              />
-                              <span className="text-sm">{item.label}</span>
+                        {category.items.map((item) => {
+                          const displayLabel = isYearly && 'yearlyLabel' in item && item.yearlyLabel 
+                            ? item.yearlyLabel 
+                            : item.label;
+                          return (
+                            <div 
+                              key={item.id}
+                              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                              onClick={() => toggleAddon(item.id)}
+                            >
+                              <div className="flex items-center gap-3">
+                                <Checkbox 
+                                  checked={selectedAddons.includes(item.id)}
+                                  onCheckedChange={() => toggleAddon(item.id)}
+                                />
+                                <span className="text-sm">{displayLabel}</span>
+                              </div>
+                              <span className="text-sm font-medium text-primary">
+                                {formatPrice(item.monthlyPrice, isYearly)}
+                              </span>
                             </div>
-                            <span className="text-sm font-medium text-primary">
-                              {formatPrice(item.monthlyPrice, isYearly)}
-                            </span>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </CardContent>
                     </Card>
                   ))}
