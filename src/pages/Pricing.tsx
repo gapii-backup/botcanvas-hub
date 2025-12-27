@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Bot, Sparkles, Building2, Loader2, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUserBot } from '@/hooks/useUserBot';
+import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -85,7 +85,7 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { updateUserBot } = useUserBot();
+  const { upsertWidget, widget } = useWidget();
   const { toast } = useToast();
   
   const returnTo = searchParams.get('returnTo');
@@ -95,16 +95,18 @@ export default function Pricing() {
     setIsLoading(true);
 
     try {
-      await updateUserBot({ 
+      // Update widget with selected plan
+      await upsertWidget({ 
         plan: planId,
         billing_period: isYearly ? 'yearly' : 'monthly',
+        status: 'pending', // Set status to pending after plan selection
       });
       
       // If returning from Complete page, go back there
       if (returnTo === 'complete') {
         navigate('/customize/complete');
       } else {
-        navigate('/customize');
+        navigate('/customize/step-0');
       }
     } catch (error) {
       toast({

@@ -200,8 +200,6 @@ export default function Complete() {
       
       // Save all widget data to widgets table
       await upsertWidget({
-        user_id: user.id,
-        user_email: user.email || '',
         api_key: generatedApiKey,
         
         // Plan & billing
@@ -225,7 +223,7 @@ export default function Complete() {
         
         // Icons
         bot_avatar: config.botAvatar || '',
-        bot_icon: JSON.stringify([config.botIcon || '']),
+        bot_icon: [config.botIcon || ''] as any, // JSONB field
         trigger_icon: config.triggerIcon || '',
         
         // Position

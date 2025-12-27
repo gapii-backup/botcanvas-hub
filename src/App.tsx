@@ -6,11 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardGuard } from "@/components/DashboardGuard";
+import { PricingGuard } from "@/components/guards/PricingGuard";
+import { CustomizeGuard } from "@/components/guards/CustomizeGuard";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
-
 import Customize from "./pages/Customize";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
@@ -33,7 +34,9 @@ const App = () => (
               path="/pricing"
               element={
                 <ProtectedRoute>
-                  <Pricing />
+                  <PricingGuard>
+                    <Pricing />
+                  </PricingGuard>
                 </ProtectedRoute>
               }
             />
@@ -41,7 +44,9 @@ const App = () => (
               path="/customize/*"
               element={
                 <ProtectedRoute>
-                  <Customize />
+                  <CustomizeGuard>
+                    <Customize />
+                  </CustomizeGuard>
                 </ProtectedRoute>
               }
             />
