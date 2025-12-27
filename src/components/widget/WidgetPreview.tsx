@@ -1,4 +1,4 @@
-import { Send, ArrowUp, ChevronRight, MessageCircle, X, Bot, Sparkles, Headphones, Zap, Brain, Heart, LucideIcon } from 'lucide-react';
+import { Send, ArrowUp, ChevronRight, MessageCircle, MessageSquare, X, Bot, Sparkles, Headphones, Zap, Brain, Heart, LucideIcon } from 'lucide-react';
 import { BotConfig } from '@/hooks/useWizardConfig';
 
 type WidgetPreviewProps = {
@@ -27,8 +27,8 @@ function hexToRgba(hex: string, alpha: number): string {
 
 // Icon component that renders based on icon name
 const IconComponents: Record<string, LucideIcon> = {
-  Robot: Bot,
   Bot: Bot,
+  MessageSquare: MessageSquare,
   MessageCircle: MessageCircle,
   Sparkles: Sparkles,
   Headphones: Headphones,
