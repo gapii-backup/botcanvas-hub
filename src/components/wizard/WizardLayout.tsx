@@ -10,9 +10,10 @@ type WizardLayoutProps = {
 };
 
 const steps = [
-  { number: 1, label: 'Chat' },
-  { number: 2, label: 'Izgled' },
-  { number: 3, label: 'Bubble' },
+  { number: 1, label: 'Povezava' },
+  { number: 2, label: 'Chat' },
+  { number: 3, label: 'Izgled' },
+  { number: 4, label: 'Bubble' },
 ];
 
 export function WizardLayout({ currentStep, totalSteps, children, preview }: WizardLayoutProps) {

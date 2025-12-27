@@ -21,8 +21,8 @@ export default function Step2() {
 
   return (
     <WizardLayout 
-      currentStep={2} 
-      totalSteps={3} 
+      currentStep={3} 
+      totalSteps={4} 
       preview={<WidgetPreview config={config} showChat={true} showHome={false} />}
     >
       <div className="space-y-8">
@@ -146,11 +146,11 @@ export default function Step2() {
 
         {/* Navigation */}
         <div className="pt-4 flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-1')} size="lg">
+          <Button variant="outline" onClick={() => navigate('/customize/step-2')} size="lg">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Nazaj
           </Button>
-          <Button onClick={() => navigate('/customize/step-3')} size="lg">
+          <Button onClick={() => navigate('/customize/step-4')} size="lg">
             Naprej
           </Button>
         </div>
