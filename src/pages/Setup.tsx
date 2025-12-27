@@ -3,19 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe, Sparkles, Palette, Link2, FileText, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
-
-const useCases = [
-  { value: 'general', label: 'Splošni AI asistent' },
-  { value: 'support', label: 'Podpora strankam' },
-  { value: 'sales', label: 'Prodajni asistent' },
-  { value: 'booking', label: 'Rezervacije in naročanje' },
-  { value: 'faq', label: 'FAQ bot' },
-];
 
 type FetchStep = {
   id: string;
@@ -26,7 +17,6 @@ type FetchStep = {
 
 export default function Setup() {
   const [websiteUrl, setWebsiteUrl] = useState('');
-  const [useCase, setUseCase] = useState('general');
   const [isFetching, setIsFetching] = useState(false);
   const [fetchSteps, setFetchSteps] = useState<FetchStep[]>([
     { id: 'logo', label: 'Pridobivanje logotipa', icon: Globe, status: 'pending' },
@@ -62,7 +52,7 @@ export default function Setup() {
     
     for (const stepId of steps) {
       updateStepStatus(stepId, 'loading');
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 600));
       updateStepStatus(stepId, 'done');
     }
 
@@ -79,8 +69,8 @@ export default function Setup() {
         description: 'Osnovne nastavitve so bile pridobljene.',
       });
       
-      // Navigate to customize page
-      setTimeout(() => navigate('/customize'), 500);
+      // Navigate to customize wizard
+      setTimeout(() => navigate('/customize/step-1'), 500);
     } catch (error) {
       toast({
         title: 'Napaka',
@@ -92,12 +82,7 @@ export default function Setup() {
     }
   };
 
-  const handleManualSetup = () => {
-    navigate('/customize');
-  };
-
   const allStepsDone = fetchSteps.every(step => step.status === 'done');
-  const anyStepLoading = fetchSteps.some(step => step.status === 'loading');
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -132,22 +117,6 @@ export default function Setup() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="use-case">Tip uporabe</Label>
-                <Select value={useCase} onValueChange={setUseCase} disabled={isFetching}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Izberite tip uporabe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {useCases.map(uc => (
-                      <SelectItem key={uc.value} value={uc.value}>
-                        {uc.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               <Button
                 onClick={simulateFetching}
                 disabled={isFetching || !websiteUrl.trim()}
@@ -166,25 +135,6 @@ export default function Setup() {
                     Ustvari mojega AI asistenta
                   </>
                 )}
-              </Button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">ali</span>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleManualSetup}
-                variant="outline"
-                className="w-full"
-                size="lg"
-                disabled={isFetching}
-              >
-                Nastavi ročno brez spletne strani
               </Button>
             </div>
           </div>
