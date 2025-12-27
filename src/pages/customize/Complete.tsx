@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer, AlertCircle } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
+import { useWidget } from '@/hooks/useWidget';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
@@ -133,7 +135,9 @@ type PreviewType = 'home' | 'chat' | 'trigger';
 export default function Complete() {
   const navigate = useNavigate();
   const { config, resetConfig } = useWizardConfig();
-  const { updateUserBot, userBot } = useUserBot();
+  const { userBot } = useUserBot();
+  const { upsertWidget } = useWidget();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
@@ -180,15 +184,64 @@ export default function Complete() {
   };
 
   const handleContinueToCheckout = async () => {
+    if (!user) {
+      toast({
+        title: 'Napaka',
+        description: 'Morate biti prijavljeni.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
-      await updateUserBot({
-        bot_name: config.name,
-        primary_color: config.primaryColor,
-        dark_mode: config.darkMode,
-        welcome_message: config.welcomeMessage,
-        quick_questions: config.quickQuestions,
-        position: config.position,
+      // Generate API key
+      const generatedApiKey = `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
+      
+      // Save all widget data to widgets table
+      await upsertWidget({
+        user_id: user.id,
+        user_email: user.email || '',
+        api_key: generatedApiKey,
+        
+        // Plan & billing
+        plan: userBot?.plan || 'basic',
+        billing_period: userBot?.billing_period || 'monthly',
+        status: 'pending_payment',
+        is_active: false,
+        
+        // Basic info
+        bot_name: config.name || '',
+        welcome_message: config.welcomeMessage || '',
+        home_title: config.homeTitle || '',
+        home_subtitle_line2: config.homeSubtitle || '',
+        
+        // Colors
+        primary_color: config.primaryColor || '#6366f1',
+        mode: config.darkMode ? 'dark' : 'light',
+        header_style: config.headerStyle || 'solid',
+        bot_icon_background: config.iconBgColor || '',
+        bot_icon_color: config.iconColor || '',
+        
+        // Icons
+        bot_avatar: config.botAvatar || '',
+        bot_icon: JSON.stringify([config.botIcon || '']),
+        trigger_icon: config.triggerIcon || '',
+        
+        // Position
+        position: config.position || 'right',
+        vertical_offset: config.verticalOffset || 20,
+        trigger_style: config.triggerStyle || 'floating',
+        edge_trigger_text: config.edgeTriggerText || '',
+        
+        // Features
+        quick_questions: config.quickQuestions || [],
+        show_email_field: config.showEmailField ?? true,
+        show_bubble: config.showBubble ?? true,
+        bubble_text: config.bubbleText || '',
+        booking_enabled: false,
+        booking_url: '',
+        support_enabled: false,
       });
       
       toast({
@@ -198,8 +251,9 @@ export default function Complete() {
       
       resetConfig();
       setShowPaymentDialog(false);
-      navigate('/checkout');
+      navigate(`/checkout?key=${generatedApiKey}`);
     } catch (error) {
+      console.error('Error saving widget:', error);
       toast({
         title: 'Napaka',
         description: 'Ni bilo mogoče shraniti nastavitev.',

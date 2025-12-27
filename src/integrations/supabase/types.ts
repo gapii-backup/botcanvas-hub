@@ -68,6 +68,114 @@ export type Database = {
         }
         Relationships: []
       }
+      widgets: {
+        Row: {
+          api_key: string | null
+          billing_period: string
+          booking_enabled: boolean
+          booking_url: string | null
+          bot_avatar: string | null
+          bot_icon: Json | null
+          bot_icon_background: string | null
+          bot_icon_color: string | null
+          bot_name: string | null
+          bubble_text: string | null
+          created_at: string
+          edge_trigger_text: string | null
+          header_style: string
+          home_subtitle_line2: string | null
+          home_title: string | null
+          id: string
+          is_active: boolean
+          mode: string
+          plan: string | null
+          position: string
+          primary_color: string | null
+          quick_questions: Json | null
+          show_bubble: boolean
+          show_email_field: boolean
+          status: string
+          support_enabled: boolean
+          trigger_icon: string | null
+          trigger_style: string
+          updated_at: string
+          user_email: string
+          user_id: string
+          vertical_offset: number
+          welcome_message: string | null
+        }
+        Insert: {
+          api_key?: string | null
+          billing_period?: string
+          booking_enabled?: boolean
+          booking_url?: string | null
+          bot_avatar?: string | null
+          bot_icon?: Json | null
+          bot_icon_background?: string | null
+          bot_icon_color?: string | null
+          bot_name?: string | null
+          bubble_text?: string | null
+          created_at?: string
+          edge_trigger_text?: string | null
+          header_style?: string
+          home_subtitle_line2?: string | null
+          home_title?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          plan?: string | null
+          position?: string
+          primary_color?: string | null
+          quick_questions?: Json | null
+          show_bubble?: boolean
+          show_email_field?: boolean
+          status?: string
+          support_enabled?: boolean
+          trigger_icon?: string | null
+          trigger_style?: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+          vertical_offset?: number
+          welcome_message?: string | null
+        }
+        Update: {
+          api_key?: string | null
+          billing_period?: string
+          booking_enabled?: boolean
+          booking_url?: string | null
+          bot_avatar?: string | null
+          bot_icon?: Json | null
+          bot_icon_background?: string | null
+          bot_icon_color?: string | null
+          bot_name?: string | null
+          bubble_text?: string | null
+          created_at?: string
+          edge_trigger_text?: string | null
+          header_style?: string
+          home_subtitle_line2?: string | null
+          home_title?: string | null
+          id?: string
+          is_active?: boolean
+          mode?: string
+          plan?: string | null
+          position?: string
+          primary_color?: string | null
+          quick_questions?: Json | null
+          show_bubble?: boolean
+          show_email_field?: boolean
+          status?: string
+          support_enabled?: boolean
+          trigger_icon?: string | null
+          trigger_style?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+          vertical_offset?: number
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
