@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Palette, MessageSquare, Layout, ArrowLeft, Bot, CreditCard } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Check, Palette, MessageSquare, Layout, ArrowLeft, CreditCard } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
+import { WidgetPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
 
 export default function Complete() {
@@ -163,69 +163,13 @@ export default function Complete() {
           <div 
             className="rounded-2xl border border-border overflow-hidden lg:sticky lg:top-8"
             style={{
-              backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)`,
-              backgroundSize: '16px 16px',
-              backgroundColor: 'hsl(var(--muted) / 0.3)',
+              backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
+              backgroundSize: '12px 12px',
+              backgroundColor: 'hsl(var(--muted) / 0.4)',
             }}
           >
             <div className="p-8 flex items-center justify-center min-h-[500px]">
-              <div className="w-full max-w-[320px]">
-                {/* Widget preview */}
-                <div 
-                  className="rounded-t-2xl p-4 flex items-center gap-3"
-                  style={{ 
-                    background: config.headerStyle === 'gradient'
-                      ? `linear-gradient(135deg, ${config.primaryColor}, ${config.primaryColor}cc)` 
-                      : config.primaryColor
-                  }}
-                >
-                  <div 
-                    className="h-10 w-10 rounded-full flex items-center justify-center text-white"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-                  >
-                    <Bot className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{config.name}</h3>
-                    <p className="text-xs text-white/70">Online</p>
-                  </div>
-                </div>
-                <div className={cn(
-                  "rounded-b-2xl p-6",
-                  config.darkMode ? "bg-zinc-900" : "bg-white"
-                )}>
-                  <div className="text-center mb-6">
-                    <h4 className={cn(
-                      "text-lg font-semibold",
-                      config.darkMode ? "text-white" : "text-zinc-900"
-                    )}>
-                      {config.homeTitle}
-                    </h4>
-                    <p className={cn(
-                      "text-sm mt-1",
-                      config.darkMode ? "text-zinc-400" : "text-zinc-500"
-                    )}>
-                      {config.homeSubtitle}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    {config.quickQuestions.slice(0, 3).map((q, i) => (
-                      <button
-                        key={i}
-                        className={cn(
-                          "w-full text-left text-sm px-3 py-2 rounded-lg border transition-colors",
-                          config.darkMode 
-                            ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800" 
-                            : "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
-                        )}
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <WidgetPreview config={config} showChat={true} showHome={false} />
             </div>
           </div>
         </div>

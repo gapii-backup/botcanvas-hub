@@ -74,14 +74,14 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
             {children}
           </div>
 
-          {/* Preview panel */}
+          {/* Preview panel with dotted pattern */}
           <div className="lg:sticky lg:top-8">
             <div 
-              className="rounded-2xl border border-border overflow-hidden"
+              className="rounded-2xl border border-border overflow-hidden relative"
               style={{
-                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.15) 1px, transparent 1px)`,
-                backgroundSize: '16px 16px',
-                backgroundColor: 'hsl(var(--muted) / 0.3)',
+                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
+                backgroundSize: '12px 12px',
+                backgroundColor: 'hsl(var(--muted) / 0.4)',
               }}
             >
               <div className="p-8 min-h-[500px] flex items-center justify-center">
