@@ -162,16 +162,12 @@ export default function Step3() {
         {config.triggerStyle === 'edge' && (
           <div className="space-y-2 animate-fade-in">
             <Label htmlFor="edge-text">Tekst na gumbu</Label>
-            <div className="flex gap-1">
-              <Input
-                id="edge-text"
-                value={config.edgeTriggerText}
-                onChange={(e) => setConfig({ edgeTriggerText: e.target.value })}
-                placeholder="Klikni me"
-                className="flex-1"
-              />
-              <EmojiPicker onEmojiSelect={(emoji) => setConfig({ edgeTriggerText: config.edgeTriggerText + emoji })} />
-            </div>
+            <Input
+              id="edge-text"
+              value={config.edgeTriggerText}
+              onChange={(e) => setConfig({ edgeTriggerText: e.target.value })}
+              placeholder="Klikni me"
+            />
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,9 +7,11 @@ import { Globe, Sparkles, ArrowRight } from 'lucide-react';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
+import { useWizardConfig } from '@/hooks/useWizardConfig';
 
 export default function Step0() {
-  const [websiteUrl, setWebsiteUrl] = useState('');
+  const { config, setConfig } = useWizardConfig();
+  const [websiteUrl, setWebsiteUrl] = useState(config.websiteUrl || '');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { updateUserBot } = useUserBot();
@@ -39,8 +41,12 @@ export default function Step0() {
       return;
     }
 
+    const fullUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
+    
+    // Save to wizard config
+    setConfig({ websiteUrl: websiteUrl });
+
     try {
-      const fullUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
       await updateUserBot({ 
         booking_url: fullUrl,
         bot_name: `Asistent za ${new URL(fullUrl).hostname}`,
