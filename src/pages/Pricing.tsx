@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Check, Bot, Sparkles, Building2, Loader2 } from 'lucide-react';
+import { Check, Bot, Sparkles, Building2, Loader2, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ const plans = [
     name: 'BASIC',
     monthlyPrice: 49.99,
     yearlyPrice: 479.99,
+    setupFee: 80,
     description: 'Za manjša podjetja',
     icon: Bot,
     features: [
@@ -31,6 +32,7 @@ const plans = [
     name: 'PRO',
     monthlyPrice: 119.99,
     yearlyPrice: 1149.99,
+    setupFee: 140,
     description: 'Za rastoča podjetja',
     icon: Sparkles,
     highlight: 'Vse iz Basic paketa, plus:',
@@ -49,6 +51,7 @@ const plans = [
     name: 'ENTERPRISE',
     monthlyPrice: 299.99,
     yearlyPrice: 2879.99,
+    setupFee: 320,
     description: 'Za velika podjetja',
     icon: Building2,
     highlight: 'Vse iz Pro paketa, plus:',
@@ -60,6 +63,20 @@ const plans = [
     ],
     popular: false,
   },
+];
+
+const comparisonFeatures = [
+  { name: 'Pogovori mesečno', basic: '2.000', pro: '5.000', enterprise: '10.000' },
+  { name: 'Jeziki', basic: '1', pro: 'Več jezikov', enterprise: 'Več jezikov' },
+  { name: 'RAG sistem (spletna stran + dokumenti)', basic: true, pro: true, enterprise: true },
+  { name: 'Widget za spletno stran', basic: true, pro: true, enterprise: true },
+  { name: 'Statistika pogovorov', basic: 'Osnovna', pro: 'Napredna', enterprise: 'Napredna' },
+  { name: 'Zgodovina pogovorov', basic: '30 dni', pro: '60 dni', enterprise: '180 dni' },
+  { name: 'Zbiranje kontaktov (lead generation)', basic: false, pro: true, enterprise: true },
+  { name: 'Support ticket kreiranje', basic: false, pro: true, enterprise: true },
+  { name: 'Rezervacija sestankov', basic: false, pro: false, enterprise: true },
+  { name: 'AI priporočila izdelkov', basic: false, pro: false, enterprise: true },
+  { name: 'Setup fee (enkratno)', basic: '€80', pro: '€140', enterprise: '€320' },
 ];
 
 export default function Pricing() {
@@ -189,6 +206,10 @@ export default function Pricing() {
                 </ul>
 
                 <div className="space-y-3">
+                  <div className="text-center py-2 px-3 rounded-lg bg-secondary/50 border border-border">
+                    <span className="text-xs text-muted-foreground">Setup fee (enkratno): </span>
+                    <span className="text-sm font-semibold text-foreground">€{plan.setupFee}</span>
+                  </div>
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}
                     variant={plan.popular ? 'glow' : 'outline'}
@@ -207,7 +228,62 @@ export default function Pricing() {
             );
           })}
         </div>
+
+        {/* Comparison Table */}
+        <div className="mt-20 max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-foreground text-center mb-8">
+            Primerjava paketov
+          </h2>
+          <div className="glass rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left p-4 text-sm font-semibold text-foreground">Funkcija</th>
+                    <th className="text-center p-4 text-sm font-semibold text-foreground">BASIC</th>
+                    <th className="text-center p-4 text-sm font-semibold text-primary">PRO</th>
+                    <th className="text-center p-4 text-sm font-semibold text-foreground">ENTERPRISE</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparisonFeatures.map((feature, index) => (
+                    <tr key={index} className={cn("border-b border-border/50", index % 2 === 0 && "bg-secondary/20")}>
+                      <td className="p-4 text-sm text-foreground">{feature.name}</td>
+                      <td className="p-4 text-center">
+                        {renderFeatureValue(feature.basic)}
+                      </td>
+                      <td className="p-4 text-center bg-primary/5">
+                        {renderFeatureValue(feature.pro)}
+                      </td>
+                      <td className="p-4 text-center">
+                        {renderFeatureValue(feature.enterprise)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
+}
+
+function renderFeatureValue(value: boolean | string) {
+  if (value === true) {
+    return (
+      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary/20">
+        <Check className="h-4 w-4 text-primary" />
+      </div>
+    );
+  }
+  if (value === false) {
+    return (
+      <div className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-muted">
+        <Minus className="h-4 w-4 text-muted-foreground" />
+      </div>
+    );
+  }
+  return <span className="text-sm text-foreground">{value}</span>;
 }
