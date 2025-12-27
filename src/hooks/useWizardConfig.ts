@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export type BotConfig = {
+  // Step 0 - Website URL
+  websiteUrl: string;
+  
   // Step 1 - Osnovni izgled
   name: string;
   primaryColor: string;
@@ -75,6 +78,8 @@ export const TRIGGER_ICONS = [
 ];
 
 const defaultConfig: BotConfig = {
+  websiteUrl: '',
+  
   name: 'Moj AI Asistent',
   primaryColor: '#3B82F6',
   darkMode: true,
