@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer, AlertCircle } from 'lucide-react';
-import { useWizardConfig } from '@/hooks/useWizardConfig';
+import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +19,25 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+
+// Helper function to get bot icon SVG paths from icon name
+const getBotIconPaths = (iconName: string): string[] => {
+  const icon = BOT_ICONS.find(i => i.name === iconName);
+  return icon?.paths || ['M12 8V4H8', 'M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z', 'M9 16h0', 'M15 16h0'];
+};
+
+// Helper function to get trigger icon SVG path from icon name
+const getTriggerIconPath = (iconName: string): string => {
+  const paths: Record<string, string> = {
+    'MessageCircle': 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z',
+    'MessageSquare': 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    'Bot': 'M12 8V4H8',
+    'Sparkles': 'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',
+    'Headphones': 'M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3',
+    'Zap': 'M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z',
+  };
+  return paths[iconName] || paths['MessageCircle'];
+};
 
 // Define all add-ons with monthly prices in euros
 const ALL_ADDONS = {
@@ -221,10 +240,10 @@ export default function Complete() {
         bot_icon_background: config.iconBgColor || '',
         bot_icon_color: config.iconColor || '',
         
-        // Icons
+        // Icons - save SVG paths instead of icon names
         bot_avatar: config.botAvatar || '',
-        bot_icon: [config.botIcon || ''] as any, // JSONB field
-        trigger_icon: config.triggerIcon || '',
+        bot_icon: getBotIconPaths(config.botIcon || 'Bot') as any, // JSONB field with SVG paths
+        trigger_icon: getTriggerIconPath(config.triggerIcon || 'MessageCircle'),
         
         // Position
         position: config.position || 'right',
@@ -241,7 +260,8 @@ export default function Complete() {
         booking_url: '',
         support_enabled: false,
         
-        // Add-ons
+        // Website & Add-ons
+        website_url: config.websiteUrl || '',
         addons: selectedAddons,
       });
       
