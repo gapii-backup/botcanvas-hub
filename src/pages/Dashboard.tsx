@@ -13,20 +13,19 @@ import {
   Settings,
   AlertCircle,
   CheckCircle2,
-  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUserBot } from '@/hooks/useUserBot';
+import { useWidget } from '@/hooks/useWidget';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
-  const { userBot, loading } = useUserBot();
+  const { widget, loading } = useWidget();
 
-  const isActive = userBot?.status === 'active';
-  const apiKey = userBot?.api_key;
+  const isActive = widget?.status === 'active' && widget?.is_active;
+  const apiKey = widget?.api_key;
 
   const embedCode = apiKey
     ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
