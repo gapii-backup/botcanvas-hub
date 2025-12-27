@@ -7,6 +7,7 @@ import { Sun, Moon, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
+import { ImageUpload } from '@/components/ImageUpload';
 
 export default function Step1() {
   const navigate = useNavigate();
@@ -117,17 +118,11 @@ export default function Step1() {
         {/* Profile picture */}
         <div className="space-y-2">
           <Label>Profilna slika</Label>
-          <div className="flex gap-3">
-            <Input
-              placeholder="URL slike ali pustite prazno"
-              value={config.botAvatar}
-              onChange={(e) => setConfig({ botAvatar: e.target.value })}
-              className="flex-1"
-            />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Vnesite URL slike ali pustite prazno za privzeto ikono
-          </p>
+          <ImageUpload
+            value={config.botAvatar}
+            onChange={(url) => setConfig({ botAvatar: url })}
+            placeholder="URL slike"
+          />
         </div>
 
         {/* Navigation */}
