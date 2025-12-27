@@ -1,13 +1,22 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer, AlertCircle } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 // Define all add-ons with monthly prices in euros
 const ALL_ADDONS = {
@@ -58,6 +67,13 @@ const PLAN_NAMES: Record<string, string> = {
   basic: 'BASIC',
   pro: 'PRO',
   enterprise: 'ENTERPRISE',
+};
+
+// Plan pricing data
+const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; setupFee: number }> = {
+  basic: { monthlyPrice: 49.99, yearlyPrice: 479.99, setupFee: 80 },
+  pro: { monthlyPrice: 119.99, yearlyPrice: 1149.99, setupFee: 140 },
+  enterprise: { monthlyPrice: 299.99, yearlyPrice: 2879.99, setupFee: 320 },
 };
 
 // Calculate price based on billing period
@@ -122,11 +138,34 @@ export default function Complete() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const userPlan = userBot?.plan || 'basic';
   const isYearly = userBot?.billing_period === 'yearly';
   const availableAddons = getAvailableAddons(userPlan);
   const hasAddons = Object.keys(availableAddons).length > 0;
+  
+  // Get pricing for current plan
+  const planPricing = PLAN_PRICING[userPlan] || PLAN_PRICING.basic;
+  const setupFee = planPricing.setupFee;
+  const subscriptionPrice = isYearly ? planPricing.yearlyPrice : planPricing.monthlyPrice;
+  
+  // Calculate add-ons total
+  const getAddonPrice = (addonId: string): number => {
+    for (const category of Object.values(ALL_ADDONS)) {
+      const addon = category.items.find(item => item.id === addonId);
+      if (addon && addon.monthlyPrice) {
+        if (isYearly) {
+          return Math.round(addon.monthlyPrice * 12 * 0.8);
+        }
+        return addon.monthlyPrice;
+      }
+    }
+    return 0;
+  };
+  
+  const addonsTotal = selectedAddons.reduce((sum, addonId) => sum + getAddonPrice(addonId), 0);
+  const totalSubscription = subscriptionPrice + addonsTotal;
 
   const toggleAddon = (addonId: string) => {
     setSelectedAddons(prev => 
@@ -134,6 +173,10 @@ export default function Complete() {
         ? prev.filter(id => id !== addonId)
         : [...prev, addonId]
     );
+  };
+
+  const handleOpenPaymentDialog = () => {
+    setShowPaymentDialog(true);
   };
 
   const handleContinueToCheckout = async () => {
@@ -154,6 +197,7 @@ export default function Complete() {
       });
       
       resetConfig();
+      setShowPaymentDialog(false);
       navigate('/checkout');
     } catch (error) {
       toast({
@@ -343,18 +387,127 @@ export default function Complete() {
               Nazaj
             </Button>
             <Button 
-              onClick={handleContinueToCheckout} 
+              onClick={handleOpenPaymentDialog} 
               size="lg" 
               variant="glow" 
-              disabled={isSaving}
               className="text-lg px-8 py-6 h-auto"
             >
               <CreditCard className="h-5 w-5 mr-2" />
-              {isSaving ? 'Shranjujem...' : 'Nadaljuj na plačilo'}
+              Nadaljuj na plačilo
             </Button>
           </div>
         </div>
       </div>
+
+      {/* Payment Summary Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Povzetek plačila</DialogTitle>
+            <DialogDescription>
+              Preglejte stroške pred nadaljevanjem na plačilo.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Info box */}
+            <div className="flex gap-3 p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium text-foreground mb-1">Kako poteka plačilo?</p>
+                <p className="text-muted-foreground">
+                  Najprej boste plačali enkratni <strong>setup fee</strong> za pripravo vašega AI asistenta. 
+                  Ko bo bot pripravljen, se bo za aktivacijo potrebna še {isYearly ? 'letna' : 'mesečna'} naročnina.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 1: Setup Fee */}
+            <div>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">1. ENKRATNO PLAČILO (ZDAJ)</h4>
+              <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <span className="font-medium">Setup fee</span>
+                  <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
+                </div>
+                <span className="text-lg font-bold text-primary">€{setupFee}</span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Step 2: Subscription */}
+            <div>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">
+                2. {isYearly ? 'LETNA' : 'MESEČNA'} NAROČNINA (PO AKTIVACIJI)
+              </h4>
+              <div className="space-y-2">
+                {/* Plan price */}
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
+                  </div>
+                  <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')}</span>
+                </div>
+
+                {/* Selected add-ons */}
+                {selectedAddons.length > 0 && (
+                  <>
+                    {selectedAddons.map(addonId => {
+                      const price = getAddonPrice(addonId);
+                      let addonLabel = '';
+                      for (const category of Object.values(ALL_ADDONS)) {
+                        const addon = category.items.find(item => item.id === addonId);
+                        if (addon) {
+                          addonLabel = addon.label;
+                          break;
+                        }
+                      }
+                      if (price === 0) return null;
+                      return (
+                        <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                          <span className="text-sm">{addonLabel}</span>
+                          <span className="text-sm font-medium">€{price}</span>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+
+                {/* Total subscription */}
+                <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20 mt-3">
+                  <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
+                  <span className="text-lg font-bold text-primary">
+                    €{totalSubscription.toFixed(2).replace('.', ',')}
+                    <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
+                  </span>
+                </div>
+
+                {isYearly && (
+                  <p className="text-xs text-center text-muted-foreground mt-2">
+                    Prihranite 20% z letno naročnino!
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
+              Prekliči
+            </Button>
+            <Button 
+              onClick={handleContinueToCheckout} 
+              variant="glow" 
+              disabled={isSaving}
+              className="w-full sm:w-auto"
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
