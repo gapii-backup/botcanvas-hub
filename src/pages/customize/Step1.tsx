@@ -117,11 +117,14 @@ export default function Step1() {
 
         {/* Profile picture */}
         <div className="space-y-2">
-          <Label>Profilna slika</Label>
+          <Label>Profilna slika ali ikona</Label>
           <ImageUpload
             value={config.botAvatar}
             onChange={(url) => setConfig({ botAvatar: url })}
             placeholder="URL slike"
+            selectedIcon={config.botIcon}
+            onIconChange={(icon) => setConfig({ botIcon: icon })}
+            primaryColor={config.primaryColor}
           />
         </div>
 

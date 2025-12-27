@@ -1,20 +1,45 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, X, Image as ImageIcon, Link } from 'lucide-react';
+import { Upload, X, Link, Bot, MessageCircle, Sparkles, Headphones, Zap, Brain, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { BOT_ICONS } from '@/hooks/useWizardConfig';
 
 type ImageUploadProps = {
   value: string;
   onChange: (url: string) => void;
   placeholder?: string;
+  selectedIcon?: string;
+  onIconChange?: (iconName: string) => void;
+  primaryColor?: string;
 };
 
-export function ImageUpload({ value, onChange, placeholder = "URL slike" }: ImageUploadProps) {
+// Map icon names to Lucide components
+const IconComponents: Record<string, React.FC<{ className?: string; style?: React.CSSProperties }>> = {
+  Robot: Bot,
+  Bot: Bot,
+  MessageCircle: MessageCircle,
+  Sparkles: Sparkles,
+  Headphones: Headphones,
+  Zap: Zap,
+  Brain: Brain,
+  Heart: Heart,
+};
+
+export function ImageUpload({ 
+  value, 
+  onChange, 
+  placeholder = "URL slike",
+  selectedIcon = 'Robot',
+  onIconChange,
+  primaryColor = '#3B82F6'
+}: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -71,6 +96,7 @@ export function ImageUpload({ value, onChange, placeholder = "URL slike" }: Imag
         .getPublicUrl(fileName);
 
       onChange(publicUrl);
+      setShowIconPicker(false);
       
       toast({
         title: 'Uspešno!',
@@ -96,15 +122,24 @@ export function ImageUpload({ value, onChange, placeholder = "URL slike" }: Imag
     setShowUrlInput(false);
   };
 
+  const handleSelectIcon = (iconName: string) => {
+    onIconChange?.(iconName);
+    onChange(''); // Clear any uploaded image
+    setShowIconPicker(false);
+  };
+
+  const SelectedIconComponent = IconComponents[selectedIcon] || Bot;
+
   return (
     <div className="space-y-3">
-      {/* Preview */}
-      {value && (
-        <div className="relative inline-block">
-          <div 
-            className="w-16 h-16 rounded-xl overflow-hidden border-2 border-border"
-            style={{ backgroundColor: 'hsl(var(--muted))' }}
-          >
+      {/* Current selection preview */}
+      <div className="flex items-center gap-3">
+        {/* Avatar/Icon preview */}
+        <div 
+          className="w-14 h-14 rounded-xl overflow-hidden border-2 border-border flex items-center justify-center"
+          style={{ backgroundColor: value ? 'hsl(var(--muted))' : primaryColor }}
+        >
+          {value ? (
             <img 
               src={value} 
               alt="Avatar preview" 
@@ -113,44 +148,71 @@ export function ImageUpload({ value, onChange, placeholder = "URL slike" }: Imag
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
-          </div>
-          <button
-            onClick={handleRemove}
-            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90 transition-colors"
-          >
-            <X className="w-3 h-3" />
-          </button>
+          ) : (
+            <SelectedIconComponent className="w-7 h-7 text-white" />
+          )}
         </div>
-      )}
 
-      {/* Upload buttons */}
-      {!value && !showUrlInput && (
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="flex-1"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {isUploading ? 'Nalagam...' : 'Naloži sliko'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowUrlInput(true)}
-          >
-            <Link className="h-4 w-4" />
-          </Button>
+        {/* Action buttons */}
+        <div className="flex flex-col gap-1.5">
+          {value ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleRemove}
+              className="text-destructive hover:text-destructive h-8"
+            >
+              <X className="h-4 w-4 mr-1" />
+              Odstrani
+            </Button>
+          ) : (
+            <span className="text-sm text-muted-foreground">
+              {BOT_ICONS.find(i => i.name === selectedIcon)?.name || 'Robot'} ikona
+            </span>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Upload/Icon options */}
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="flex-1"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          {isUploading ? 'Nalagam...' : 'Naloži sliko'}
+        </Button>
+        <Button
+          type="button"
+          variant={showIconPicker ? "default" : "outline"}
+          size="sm"
+          onClick={() => setShowIconPicker(!showIconPicker)}
+          className="flex-1"
+        >
+          <Bot className="h-4 w-4 mr-2" />
+          Izberi ikono
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setShowUrlInput(!showUrlInput)}
+        >
+          <Link className="h-4 w-4" />
+        </Button>
+      </div>
 
       {/* URL input */}
-      {!value && showUrlInput && (
-        <div className="flex gap-2">
+      {showUrlInput && (
+        <div className="flex gap-2 animate-fade-in">
           <Input
             placeholder={placeholder}
+            value={value}
             onChange={(e) => onChange(e.target.value)}
             className="flex-1"
           />
@@ -165,6 +227,35 @@ export function ImageUpload({ value, onChange, placeholder = "URL slike" }: Imag
         </div>
       )}
 
+      {/* Icon picker */}
+      {showIconPicker && (
+        <div className="grid grid-cols-4 gap-2 p-3 rounded-lg border border-border bg-muted/30 animate-fade-in">
+          {Object.keys(IconComponents).map((iconName) => {
+            const IconComp = IconComponents[iconName];
+            const isSelected = selectedIcon === iconName && !value;
+            return (
+              <button
+                key={iconName}
+                type="button"
+                onClick={() => handleSelectIcon(iconName)}
+                className={cn(
+                  "w-12 h-12 rounded-lg flex items-center justify-center transition-all hover:scale-105",
+                  isSelected 
+                    ? "ring-2 ring-primary ring-offset-2 ring-offset-background" 
+                    : "hover:bg-muted"
+                )}
+                style={{ backgroundColor: isSelected ? primaryColor : undefined }}
+              >
+                <IconComp 
+                  className="w-6 h-6" 
+                  style={{ color: isSelected ? 'white' : 'hsl(var(--foreground))' }}
+                />
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -173,13 +264,6 @@ export function ImageUpload({ value, onChange, placeholder = "URL slike" }: Imag
         onChange={handleFileSelect}
         className="hidden"
       />
-
-      {/* Help text */}
-      {!value && !showUrlInput && (
-        <p className="text-xs text-muted-foreground">
-          Naloži sliko ali vnesi URL. Največja velikost: 2MB.
-        </p>
-      )}
     </div>
   );
 }
