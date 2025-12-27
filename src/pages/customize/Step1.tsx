@@ -3,10 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Sun, Moon, RotateCcw, Upload, Bot } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Sun, Moon, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
+import { WidgetPreview } from '@/components/widget/WidgetPreview';
 
 export default function Step1() {
   const navigate = useNavigate();
@@ -21,51 +21,11 @@ export default function Step1() {
   };
 
   return (
-    <WizardLayout currentStep={1} totalSteps={3} preview={
-      <div className="w-full max-w-[320px]">
-        {/* Widget header preview */}
-        <div 
-          className={cn(
-            "rounded-t-2xl p-4 flex items-center gap-3",
-            config.headerStyle === 'gradient' 
-              ? "bg-gradient-to-r from-primary to-primary/80" 
-              : ""
-          )}
-          style={{ 
-            backgroundColor: config.headerStyle === 'solid' ? config.primaryColor : undefined,
-            background: config.headerStyle === 'gradient' 
-              ? `linear-gradient(135deg, ${config.primaryColor}, ${config.primaryColor}cc)` 
-              : undefined 
-          }}
-        >
-          <div 
-            className="h-10 w-10 rounded-full flex items-center justify-center text-white"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            {config.botAvatar ? (
-              <img src={config.botAvatar} alt="Bot" className="h-10 w-10 rounded-full object-cover" />
-            ) : (
-              <Bot className="h-5 w-5" />
-            )}
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">{config.name || 'AI Asistent'}</h3>
-            <p className="text-xs text-white/70">Online</p>
-          </div>
-        </div>
-        <div className={cn(
-          "rounded-b-2xl p-6 h-64",
-          config.darkMode ? "bg-zinc-900" : "bg-white"
-        )}>
-          <p className={cn(
-            "text-sm text-center mt-8",
-            config.darkMode ? "text-zinc-400" : "text-zinc-500"
-          )}>
-            Predogled sporočil...
-          </p>
-        </div>
-      </div>
-    }>
+    <WizardLayout 
+      currentStep={1} 
+      totalSteps={3} 
+      preview={<WidgetPreview config={config} showChat={true} showHome={false} />}
+    >
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Osnovni izgled</h2>

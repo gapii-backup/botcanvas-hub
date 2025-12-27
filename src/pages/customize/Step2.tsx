@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, X, Bot, ArrowLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, X, ArrowLeft } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
+import { WidgetPreview } from '@/components/widget/WidgetPreview';
 
 export default function Step2() {
   const navigate = useNavigate();
@@ -27,73 +27,11 @@ export default function Step2() {
   };
 
   return (
-    <WizardLayout currentStep={2} totalSteps={3} preview={
-      <div className="w-full max-w-[320px]">
-        {/* Widget preview */}
-        <div 
-          className="rounded-t-2xl p-4 flex items-center gap-3"
-          style={{ 
-            background: `linear-gradient(135deg, ${config.primaryColor}, ${config.primaryColor}cc)` 
-          }}
-        >
-          <div 
-            className="h-10 w-10 rounded-full flex items-center justify-center text-white"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            <Bot className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-white">{config.name}</h3>
-            <p className="text-xs text-white/70">Online</p>
-          </div>
-        </div>
-        <div className={cn(
-          "rounded-b-2xl p-6",
-          config.darkMode ? "bg-zinc-900" : "bg-white"
-        )}>
-          <div className="text-center mb-6">
-            <h4 className={cn(
-              "text-lg font-semibold",
-              config.darkMode ? "text-white" : "text-zinc-900"
-            )}>
-              {config.homeTitle}
-            </h4>
-            <p className={cn(
-              "text-sm mt-1",
-              config.darkMode ? "text-zinc-400" : "text-zinc-500"
-            )}>
-              {config.homeSubtitle}
-            </p>
-          </div>
-
-          {/* Quick questions preview */}
-          <div className="space-y-2">
-            {config.quickQuestions.slice(0, 2).map((q, i) => (
-              <button
-                key={i}
-                className={cn(
-                  "w-full text-left text-sm px-3 py-2 rounded-lg border transition-colors",
-                  config.darkMode 
-                    ? "border-zinc-700 text-zinc-300 hover:bg-zinc-800" 
-                    : "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
-                )}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-
-          {config.showEmailField && (
-            <div className={cn(
-              "mt-4 text-xs text-center",
-              config.darkMode ? "text-zinc-500" : "text-zinc-400"
-            )}>
-              📧 Email polje prikazano
-            </div>
-          )}
-        </div>
-      </div>
-    }>
+    <WizardLayout 
+      currentStep={2} 
+      totalSteps={3} 
+      preview={<WidgetPreview config={config} showChat={false} showHome={true} />}
+    >
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Chat nastavitve</h2>
