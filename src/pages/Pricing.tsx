@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Bot, Sparkles, Building2, Loader2, X, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -84,8 +84,11 @@ export default function Pricing() {
   const [isLoading, setIsLoading] = useState(false);
   const [isYearly, setIsYearly] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { updateUserBot } = useUserBot();
   const { toast } = useToast();
+  
+  const returnTo = searchParams.get('returnTo');
 
   const handleSelectPlan = async (planId: string) => {
     setSelectedPlan(planId);
@@ -96,7 +99,13 @@ export default function Pricing() {
         plan: planId,
         billing_period: isYearly ? 'yearly' : 'monthly',
       });
-      navigate('/customize');
+      
+      // If returning from Complete page, go back there
+      if (returnTo === 'complete') {
+        navigate('/customize/complete');
+      } else {
+        navigate('/customize');
+      }
     } catch (error) {
       toast({
         title: 'Napaka',
