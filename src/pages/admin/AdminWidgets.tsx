@@ -31,14 +31,16 @@ export default function AdminWidgets() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filteredWidgets = widgets.filter((widget) => {
+    const searchLower = search.toLowerCase();
     const matchesSearch =
-      widget.user_email.toLowerCase().includes(search.toLowerCase()) ||
-      (widget.bot_name?.toLowerCase().includes(search.toLowerCase()) ?? false);
+      (widget.user_email?.toLowerCase() || '').includes(searchLower) ||
+      (widget.bot_name?.toLowerCase() || '').includes(searchLower);
 
+    const widgetStatus = widget.status || 'pending';
     const matchesStatus =
       statusFilter === 'all' ||
       (statusFilter === 'active' && widget.is_active) ||
-      (statusFilter === 'pending' && (widget.status === 'pending' || widget.status === 'pending_payment'));
+      (statusFilter === 'pending' && (widgetStatus === 'pending' || widgetStatus === 'pending_payment'));
 
     return matchesSearch && matchesStatus;
   });
@@ -112,44 +114,47 @@ export default function AdminWidgets() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredWidgets.map((widget) => (
-                  <TableRow key={widget.id}>
-                    <TableCell className="font-medium">{widget.user_email}</TableCell>
-                    <TableCell>{widget.bot_name || '-'}</TableCell>
-                    <TableCell>
-                      <span className="capitalize">{widget.plan || '-'}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          widget.status === 'active'
-                            ? 'bg-green-500/20 text-green-500'
-                            : widget.status === 'pending_payment'
-                            ? 'bg-orange-500/20 text-orange-500'
-                            : 'bg-yellow-500/20 text-yellow-500'
-                        }`}
-                      >
-                        {widget.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={widget.is_active}
-                        onCheckedChange={() => handleToggleActive(widget.id, widget.is_active)}
-                      />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(new Date(widget.created_at), 'dd. MMM yyyy', { locale: sl })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/admin/widgets/${widget.id}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filteredWidgets.map((widget) => {
+                  const status = widget.status || 'pending';
+                  return (
+                    <TableRow key={widget.id}>
+                      <TableCell className="font-medium">{widget.user_email || 'N/A'}</TableCell>
+                      <TableCell>{widget.bot_name || 'Brez imena'}</TableCell>
+                      <TableCell>
+                        <span className="capitalize">{widget.plan || 'Ni izbran'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            status === 'active'
+                              ? 'bg-green-500/20 text-green-500'
+                              : status === 'pending_payment'
+                              ? 'bg-orange-500/20 text-orange-500'
+                              : 'bg-yellow-500/20 text-yellow-500'
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={widget.is_active}
+                          onCheckedChange={() => handleToggleActive(widget.id, widget.is_active)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {format(new Date(widget.created_at), 'dd. MMM yyyy', { locale: sl })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link to={`/admin/widgets/${widget.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
