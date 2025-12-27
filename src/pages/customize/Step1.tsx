@@ -13,6 +13,8 @@ export default function Step1() {
   const navigate = useNavigate();
   const { config, setConfig, defaultConfig } = useWizardConfig();
   const [newQuestion, setNewQuestion] = useState('');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   const addQuestion = () => {
     const trimmed = newQuestion.trim().slice(0, 35);
@@ -26,6 +28,21 @@ export default function Step1() {
     if (config.quickQuestions.length > 1) {
       setConfig({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
     }
+  };
+
+  const startEditing = (index: number) => {
+    setEditingIndex(index);
+    setEditValue(config.quickQuestions[index]);
+  };
+
+  const saveEdit = () => {
+    if (editingIndex !== null && editValue.trim()) {
+      const updated = [...config.quickQuestions];
+      updated[editingIndex] = editValue.trim().slice(0, 35);
+      setConfig({ quickQuestions: updated });
+    }
+    setEditingIndex(null);
+    setEditValue('');
   };
 
   const handleColorChange = (color: string) => {
@@ -50,23 +67,31 @@ export default function Step1() {
 
         {/* Home title */}
         <div className="space-y-2">
-          <Label htmlFor="home-title">Naslov na domači strani</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="home-title">Naslov na domači strani</Label>
+            <span className="text-xs text-muted-foreground">{config.homeTitle.length}/21</span>
+          </div>
           <Input
             id="home-title"
             value={config.homeTitle}
-            onChange={(e) => setConfig({ homeTitle: e.target.value })}
+            onChange={(e) => setConfig({ homeTitle: e.target.value.slice(0, 21) })}
             placeholder="Pozdravljeni!"
+            maxLength={21}
           />
         </div>
 
         {/* Home subtitle */}
         <div className="space-y-2">
-          <Label htmlFor="home-subtitle">Podnaslov</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="home-subtitle">Podnaslov</Label>
+            <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/21</span>
+          </div>
           <Input
             id="home-subtitle"
             value={config.homeSubtitle}
-            onChange={(e) => setConfig({ homeSubtitle: e.target.value })}
+            onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 21) })}
             placeholder="Kako vam lahko pomagam?"
+            maxLength={21}
           />
         </div>
 
@@ -125,7 +150,28 @@ export default function Step1() {
           <div className="space-y-2">
             {config.quickQuestions.map((q, index) => (
               <div key={index} className="flex items-center gap-2">
-                <Input value={q} readOnly className="flex-1 bg-muted" />
+                {editingIndex === index ? (
+                  <div className="flex-1 relative">
+                    <Input 
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value.slice(0, 35))}
+                      onBlur={saveEdit}
+                      onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                      autoFocus
+                      maxLength={35}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                      {editValue.length}/35
+                    </span>
+                  </div>
+                ) : (
+                  <Input 
+                    value={q} 
+                    readOnly 
+                    className="flex-1 bg-muted cursor-pointer hover:bg-muted/80 transition-colors" 
+                    onClick={() => startEditing(index)}
+                  />
+                )}
                 <Button
                   type="button"
                   variant="ghost"

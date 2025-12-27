@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload, X, Link, Bot, MessageCircle, Sparkles, Headphones, Zap, Brain, Heart } from 'lucide-react';
+import { Upload, X, Link, Bot, MessageCircle, MessageSquare, Sparkles, Headphones, Zap, Brain, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,8 +20,8 @@ type ImageUploadProps = {
 
 // Map icon names to Lucide components
 const IconComponents: Record<string, React.FC<{ className?: string; style?: React.CSSProperties }>> = {
-  Robot: Bot,
   Bot: Bot,
+  MessageSquare: MessageSquare,
   MessageCircle: MessageCircle,
   Sparkles: Sparkles,
   Headphones: Headphones,
@@ -34,7 +34,7 @@ export function ImageUpload({
   value, 
   onChange, 
   placeholder = "URL slike",
-  selectedIcon = 'Robot',
+  selectedIcon = 'Bot',
   onIconChange,
   primaryColor = '#3B82F6',
   iconColor = '#FFFFFF'
