@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Pricing from "./pages/Pricing";
+import Setup from "./pages/Setup";
 import Customize from "./pages/Customize";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
@@ -32,6 +33,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Pricing />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/setup"
+              element={
+                <ProtectedRoute>
+                  <Setup />
                 </ProtectedRoute>
               }
             />
