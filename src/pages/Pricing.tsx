@@ -93,7 +93,7 @@ export default function Pricing() {
 
     try {
       await updateUserBot({ plan: planId });
-      navigate('/setup');
+      navigate('/customize');
     } catch (error) {
       toast({
         title: 'Napaka',
