@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardGuard } from "@/components/DashboardGuard";
 import { PricingGuard } from "@/components/guards/PricingGuard";
 import { CustomizeGuard } from "@/components/guards/CustomizeGuard";
+import { AdminGuard } from "@/components/guards/AdminGuard";
 import Index from "./pages/Index";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -16,6 +17,10 @@ import Customize from "./pages/Customize";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminWidgets from "./pages/admin/AdminWidgets";
+import AdminWidgetEdit from "./pages/admin/AdminWidgetEdit";
+import AdminPayments from "./pages/admin/AdminPayments";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +81,39 @@ const App = () => (
                     <Dashboard />
                   </DashboardGuard>
                 </ProtectedRoute>
+              }
+            />
+            {/* Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <AdminDashboard />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/widgets"
+              element={
+                <AdminGuard>
+                  <AdminWidgets />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/widgets/:id"
+              element={
+                <AdminGuard>
+                  <AdminWidgetEdit />
+                </AdminGuard>
+              }
+            />
+            <Route
+              path="/admin/payments"
+              element={
+                <AdminGuard>
+                  <AdminPayments />
+                </AdminGuard>
               }
             />
             <Route path="*" element={<NotFound />} />

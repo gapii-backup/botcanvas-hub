@@ -84,10 +84,12 @@ export type Database = {
           created_at: string
           edge_trigger_text: string | null
           header_style: string
+          health_check_url: string | null
           home_subtitle_line2: string | null
           home_title: string | null
           id: string
           is_active: boolean
+          lead_webhook_url: string | null
           mode: string
           plan: string | null
           position: string
@@ -97,12 +99,15 @@ export type Database = {
           show_email_field: boolean
           status: string
           support_enabled: boolean
+          support_webhook_url: string | null
+          table_name: string | null
           trigger_icon: string | null
           trigger_style: string
           updated_at: string
           user_email: string
           user_id: string
           vertical_offset: number
+          webhook_url: string | null
           website_url: string | null
           welcome_message: string | null
         }
@@ -121,10 +126,12 @@ export type Database = {
           created_at?: string
           edge_trigger_text?: string | null
           header_style?: string
+          health_check_url?: string | null
           home_subtitle_line2?: string | null
           home_title?: string | null
           id?: string
           is_active?: boolean
+          lead_webhook_url?: string | null
           mode?: string
           plan?: string | null
           position?: string
@@ -134,12 +141,15 @@ export type Database = {
           show_email_field?: boolean
           status?: string
           support_enabled?: boolean
+          support_webhook_url?: string | null
+          table_name?: string | null
           trigger_icon?: string | null
           trigger_style?: string
           updated_at?: string
           user_email: string
           user_id: string
           vertical_offset?: number
+          webhook_url?: string | null
           website_url?: string | null
           welcome_message?: string | null
         }
@@ -158,10 +168,12 @@ export type Database = {
           created_at?: string
           edge_trigger_text?: string | null
           header_style?: string
+          health_check_url?: string | null
           home_subtitle_line2?: string | null
           home_title?: string | null
           id?: string
           is_active?: boolean
+          lead_webhook_url?: string | null
           mode?: string
           plan?: string | null
           position?: string
@@ -171,12 +183,15 @@ export type Database = {
           show_email_field?: boolean
           status?: string
           support_enabled?: boolean
+          support_webhook_url?: string | null
+          table_name?: string | null
           trigger_icon?: string | null
           trigger_style?: string
           updated_at?: string
           user_email?: string
           user_id?: string
           vertical_offset?: number
+          webhook_url?: string | null
           website_url?: string | null
           welcome_message?: string | null
         }
