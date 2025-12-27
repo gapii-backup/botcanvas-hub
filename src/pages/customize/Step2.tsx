@@ -2,8 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Sun, Moon, RotateCcw, ArrowLeft } from 'lucide-react';
+import { Sun, Moon, ArrowLeft } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
@@ -11,15 +10,7 @@ import { ImageUpload } from '@/components/ImageUpload';
 
 export default function Step2() {
   const navigate = useNavigate();
-  const { config, setConfig, defaultConfig } = useWizardConfig();
-
-  const handleColorChange = (color: string) => {
-    setConfig({ primaryColor: color });
-  };
-
-  const resetColor = () => {
-    setConfig({ primaryColor: defaultConfig.primaryColor });
-  };
+  const { config, setConfig } = useWizardConfig();
 
   return (
     <WizardLayout 
@@ -69,50 +60,6 @@ export default function Step2() {
               Temna
             </Button>
           </div>
-        </div>
-
-        {/* Primary color */}
-        <div className="space-y-3">
-          <Label>Glavna barva</Label>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <input
-                type="color"
-                value={config.primaryColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="h-10 w-10 rounded-lg cursor-pointer border-0"
-              />
-            </div>
-            <Input
-              value={config.primaryColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="flex-1 font-mono text-sm"
-              placeholder="#3B82F6"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={resetColor}
-              title="Ponastavi barvo"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Header style */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label>Uporabi gradient za glavo</Label>
-            <p className="text-xs text-muted-foreground">
-              Namesto enobarvne glave
-            </p>
-          </div>
-          <Switch
-            checked={config.headerStyle === 'gradient'}
-            onCheckedChange={(checked) => setConfig({ headerStyle: checked ? 'gradient' : 'solid' })}
-          />
         </div>
 
         {/* Profile picture */}
