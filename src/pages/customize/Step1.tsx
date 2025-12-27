@@ -3,27 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
 
 export default function Step1() {
   const navigate = useNavigate();
-  const { config, setConfig } = useWizardConfig();
+  const { config, setConfig, defaultConfig } = useWizardConfig();
   const [newQuestion, setNewQuestion] = useState('');
 
   const addQuestion = () => {
-    if (newQuestion.trim()) {
+    if (newQuestion.trim() && config.quickQuestions.length < 4) {
       setConfig({ quickQuestions: [...config.quickQuestions, newQuestion.trim()] });
       setNewQuestion('');
     }
   };
 
   const removeQuestion = (index: number) => {
-    setConfig({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
+    if (config.quickQuestions.length > 1) {
+      setConfig({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
+    }
+  };
+
+  const handleColorChange = (color: string) => {
+    setConfig({ primaryColor: color });
+  };
+
+  const resetColor = () => {
+    setConfig({ primaryColor: defaultConfig.primaryColor });
   };
 
   return (
@@ -60,21 +69,58 @@ export default function Step1() {
           />
         </div>
 
-        {/* Welcome message */}
-        <div className="space-y-2">
-          <Label htmlFor="welcome-message">Pozdravno sporočilo</Label>
-          <Textarea
-            id="welcome-message"
-            value={config.welcomeMessage}
-            onChange={(e) => setConfig({ welcomeMessage: e.target.value })}
-            placeholder="Pozdravljeni! Kako vam lahko pomagam?"
-            rows={3}
+        {/* Primary color */}
+        <div className="space-y-3">
+          <Label>Glavna barva</Label>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <input
+                type="color"
+                value={config.primaryColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+                className="h-10 w-10 rounded-lg cursor-pointer border-0"
+              />
+            </div>
+            <Input
+              value={config.primaryColor}
+              onChange={(e) => handleColorChange(e.target.value)}
+              className="flex-1 font-mono text-sm"
+              placeholder="#3B82F6"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={resetColor}
+              title="Ponastavi barvo"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Header style */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label>Uporabi gradient za glavo</Label>
+            <p className="text-xs text-muted-foreground">
+              Namesto enobarvne glave
+            </p>
+          </div>
+          <Switch
+            checked={config.headerStyle === 'gradient'}
+            onCheckedChange={(checked) => setConfig({ headerStyle: checked ? 'gradient' : 'solid' })}
           />
         </div>
 
         {/* Quick questions */}
         <div className="space-y-3">
-          <Label>Hitra vprašanja</Label>
+          <div className="flex items-center justify-between">
+            <Label>Hitra vprašanja</Label>
+            <span className="text-xs text-muted-foreground">
+              {config.quickQuestions.length}/4
+            </span>
+          </div>
           <div className="space-y-2">
             {config.quickQuestions.map((q, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -84,24 +130,27 @@ export default function Step1() {
                   variant="ghost"
                   size="icon"
                   onClick={() => removeQuestion(index)}
-                  className="text-destructive hover:text-destructive"
+                  disabled={config.quickQuestions.length <= 1}
+                  className="text-destructive hover:text-destructive disabled:opacity-50"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             ))}
           </div>
-          <div className="flex gap-2">
-            <Input
-              value={newQuestion}
-              onChange={(e) => setNewQuestion(e.target.value)}
-              placeholder="Novo vprašanje..."
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
-            />
-            <Button type="button" variant="outline" size="icon" onClick={addQuestion}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+          {config.quickQuestions.length < 4 && (
+            <div className="flex gap-2">
+              <Input
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                placeholder="Novo vprašanje..."
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
+              />
+              <Button type="button" variant="outline" size="icon" onClick={addQuestion}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Show email field */}
