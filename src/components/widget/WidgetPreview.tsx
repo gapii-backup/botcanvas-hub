@@ -1,4 +1,4 @@
-import { Bot, Send, ArrowUp, ChevronRight, MessageCircle, X } from 'lucide-react';
+import { Send, ArrowUp, ChevronRight, MessageCircle, X, Bot, Sparkles, Headphones, Zap, Brain, Heart, LucideIcon } from 'lucide-react';
 import { BotConfig } from '@/hooks/useWizardConfig';
 
 type WidgetPreviewProps = {
@@ -23,6 +23,39 @@ function hexToRgba(hex: string, alpha: number): string {
   const G = (num >> 8) & 255;
   const B = num & 255;
   return `rgba(${R}, ${G}, ${B}, ${alpha})`;
+}
+
+// Icon component that renders based on icon name
+const IconComponents: Record<string, LucideIcon> = {
+  Robot: Bot,
+  Bot: Bot,
+  MessageCircle: MessageCircle,
+  Sparkles: Sparkles,
+  Headphones: Headphones,
+  Zap: Zap,
+  Brain: Brain,
+  Heart: Heart,
+};
+
+function BotIconOrAvatar({ 
+  config, 
+  size = 32, 
+}: { 
+  config: BotConfig; 
+  size?: number;
+}) {
+  if (config.botAvatar) {
+    return (
+      <img 
+        src={config.botAvatar} 
+        alt="Bot avatar"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    );
+  }
+  
+  const IconComponent = IconComponents[config.botIcon] || Bot;
+  return <IconComponent size={size} color="white" />;
 }
 
 export function WidgetPreview({ config, showChat = true, showHome = false }: WidgetPreviewProps) {
@@ -112,15 +145,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 overflow: 'hidden'
               }}
             >
-              {config.botAvatar ? (
-                <img 
-                  src={config.botAvatar} 
-                  alt="Bot avatar"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '16px' }}
-                />
-              ) : (
-                <Bot size={32} color="white" />
-              )}
+              <BotIconOrAvatar config={config} size={32} />
             </div>
 
             {/* Title */}
@@ -305,7 +330,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
               </svg>
             </div>
 
-            {/* Avatar */}
+            {/* Header Avatar */}
             <div 
               style={{ 
                 width: '36px', 
@@ -320,15 +345,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 boxShadow: `0 2px 8px ${hexToRgba(config.primaryColor, 0.3)}`
               }}
             >
-              {config.botAvatar ? (
-                <img 
-                  src={config.botAvatar} 
-                  alt="Bot avatar"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <Bot size={20} color="white" />
-              )}
+              <BotIconOrAvatar config={config} size={20} />
             </div>
 
             {/* Header Info */}
@@ -392,10 +409,11 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '22px',
-                    boxShadow: `0 2px 6px ${hexToRgba(config.primaryColor, 0.3)}`
+                    boxShadow: `0 2px 6px ${hexToRgba(config.primaryColor, 0.3)}`,
+                    overflow: 'hidden'
                   }}
                 >
-                  <Bot size={16} color="white" />
+                  <BotIconOrAvatar config={config} size={16} />
                 </div>
                 <div style={{ maxWidth: '80%' }}>
                   <div 
