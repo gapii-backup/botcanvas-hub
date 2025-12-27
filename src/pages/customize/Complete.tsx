@@ -240,6 +240,9 @@ export default function Complete() {
         booking_enabled: false,
         booking_url: '',
         support_enabled: false,
+        
+        // Add-ons
+        addons: selectedAddons,
       });
       
       toast({

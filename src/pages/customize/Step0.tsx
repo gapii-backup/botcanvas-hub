@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Globe, Sparkles, ArrowRight } from 'lucide-react';
 import { useUserBot } from '@/hooks/useUserBot';
+import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
@@ -13,8 +14,10 @@ export default function Step0() {
   const { config, setConfig } = useWizardConfig();
   const [websiteUrl, setWebsiteUrl] = useState(config.websiteUrl || '');
   const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   const { updateUserBot } = useUserBot();
+  const { updateWidget } = useWidget();
   const { toast } = useToast();
 
   const validateUrl = (url: string): boolean => {
@@ -46,13 +49,22 @@ export default function Step0() {
     // Save to wizard config
     setConfig({ websiteUrl: websiteUrl });
 
+    setIsSaving(true);
     try {
+      // Save website_url to widgets table
+      await updateWidget({ 
+        website_url: fullUrl,
+      });
+      
+      // Also update user_bots for backwards compatibility
       await updateUserBot({ 
         booking_url: fullUrl,
         bot_name: `Asistent za ${new URL(fullUrl).hostname}`,
       });
     } catch (err) {
       console.log('Could not save URL, continuing anyway');
+    } finally {
+      setIsSaving(false);
     }
     
     navigate('/customize/step-2');
@@ -97,8 +109,9 @@ export default function Step0() {
           className="w-full"
           size="lg"
           variant="glow"
+          disabled={isSaving}
         >
-          Naprej
+          {isSaving ? 'Shranjujem...' : 'Naprej'}
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
