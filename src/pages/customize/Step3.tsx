@@ -8,6 +8,7 @@ import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessageSquare, Bot, Sp
 import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { TriggerPreview } from '@/components/widget/WidgetPreview';
+import { EmojiPicker } from '@/components/EmojiPicker';
 import { cn } from '@/lib/utils';
 
 const TriggerIconComponents: Record<string, LucideIcon> = {
@@ -53,12 +54,16 @@ export default function Step3() {
         {config.showBubble && (
           <div className="space-y-2 animate-fade-in">
             <Label htmlFor="bubble-text">Besedilo mehurčka</Label>
-            <Input
-              id="bubble-text"
-              value={config.bubbleText}
-              onChange={(e) => setConfig({ bubbleText: e.target.value })}
-              placeholder="👋 Pozdravljeni!"
-            />
+            <div className="flex gap-1">
+              <Input
+                id="bubble-text"
+                value={config.bubbleText}
+                onChange={(e) => setConfig({ bubbleText: e.target.value })}
+                placeholder="👋 Pozdravljeni!"
+                className="flex-1"
+              />
+              <EmojiPicker onEmojiSelect={(emoji) => setConfig({ bubbleText: config.bubbleText + emoji })} />
+            </div>
           </div>
         )}
 
@@ -147,12 +152,16 @@ export default function Step3() {
         {config.triggerStyle === 'edge' && (
           <div className="space-y-2 animate-fade-in">
             <Label htmlFor="edge-text">Tekst na gumbu</Label>
-            <Input
-              id="edge-text"
-              value={config.edgeTriggerText}
-              onChange={(e) => setConfig({ edgeTriggerText: e.target.value })}
-              placeholder="Klikni me"
-            />
+            <div className="flex gap-1">
+              <Input
+                id="edge-text"
+                value={config.edgeTriggerText}
+                onChange={(e) => setConfig({ edgeTriggerText: e.target.value })}
+                placeholder="Klikni me"
+                className="flex-1"
+              />
+              <EmojiPicker onEmojiSelect={(emoji) => setConfig({ edgeTriggerText: config.edgeTriggerText + emoji })} />
+            </div>
           </div>
         )}
 
