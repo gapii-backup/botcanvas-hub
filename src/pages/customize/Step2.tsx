@@ -7,6 +7,7 @@ import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
 import { ImageUpload } from '@/components/ImageUpload';
+import { EmojiPicker } from '@/components/EmojiPicker';
 
 export default function Step2() {
   const navigate = useNavigate();
@@ -34,12 +35,16 @@ export default function Step2() {
         {/* Agent name */}
         <div className="space-y-2">
           <Label htmlFor="agent-name">Ime agenta</Label>
-          <Input
-            id="agent-name"
-            value={config.name}
-            onChange={(e) => setConfig({ name: e.target.value })}
-            placeholder="Moj AI Asistent"
-          />
+          <div className="flex gap-1">
+            <Input
+              id="agent-name"
+              value={config.name}
+              onChange={(e) => setConfig({ name: e.target.value })}
+              placeholder="Moj AI Asistent"
+              className="flex-1"
+            />
+            <EmojiPicker onEmojiSelect={(emoji) => setConfig({ name: config.name + emoji })} />
+          </div>
         </div>
 
         {/* Appearance - Light/Dark */}

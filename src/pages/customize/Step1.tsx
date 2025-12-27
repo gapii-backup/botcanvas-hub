@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Plus, X, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
+import { EmojiPicker } from '@/components/EmojiPicker';
 
 export default function Step1() {
   const navigate = useNavigate();
@@ -71,13 +72,17 @@ export default function Step1() {
             <Label htmlFor="home-title">Naslov na domači strani</Label>
             <span className="text-xs text-muted-foreground">{config.homeTitle.length}/21</span>
           </div>
-          <Input
-            id="home-title"
-            value={config.homeTitle}
-            onChange={(e) => setConfig({ homeTitle: e.target.value.slice(0, 21) })}
-            placeholder="Pozdravljeni!"
-            maxLength={21}
-          />
+          <div className="flex gap-1">
+            <Input
+              id="home-title"
+              value={config.homeTitle}
+              onChange={(e) => setConfig({ homeTitle: e.target.value.slice(0, 21) })}
+              placeholder="Pozdravljeni!"
+              maxLength={21}
+              className="flex-1"
+            />
+            <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeTitle: (config.homeTitle + emoji).slice(0, 21) })} />
+          </div>
         </div>
 
         {/* Home subtitle */}
@@ -86,13 +91,17 @@ export default function Step1() {
             <Label htmlFor="home-subtitle">Podnaslov</Label>
             <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/21</span>
           </div>
-          <Input
-            id="home-subtitle"
-            value={config.homeSubtitle}
-            onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 21) })}
-            placeholder="Kako vam lahko pomagam?"
-            maxLength={21}
-          />
+          <div className="flex gap-1">
+            <Input
+              id="home-subtitle"
+              value={config.homeSubtitle}
+              onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 21) })}
+              placeholder="Kako vam lahko pomagam?"
+              maxLength={21}
+              className="flex-1"
+            />
+            <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 21) })} />
+          </div>
         </div>
 
         {/* Primary color */}
@@ -172,6 +181,15 @@ export default function Step1() {
                     onClick={() => startEditing(index)}
                   />
                 )}
+                <EmojiPicker onEmojiSelect={(emoji) => {
+                  if (editingIndex === index) {
+                    setEditValue((editValue + emoji).slice(0, 35));
+                  } else {
+                    const updated = [...config.quickQuestions];
+                    updated[index] = (updated[index] + emoji).slice(0, 35);
+                    setConfig({ quickQuestions: updated });
+                  }
+                }} />
                 <Button
                   type="button"
                   variant="ghost"
@@ -199,6 +217,7 @@ export default function Step1() {
                   {newQuestion.length}/35
                 </span>
               </div>
+              <EmojiPicker onEmojiSelect={(emoji) => setNewQuestion((newQuestion + emoji).slice(0, 35))} />
               <Button type="button" variant="outline" size="icon" onClick={addQuestion}>
                 <Plus className="h-4 w-4" />
               </Button>
