@@ -180,9 +180,9 @@ export default function AdminWidgetEdit() {
                     <SelectValue placeholder="Izberi plan" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="starter">Starter</SelectItem>
-                    <SelectItem value="growth">Growth</SelectItem>
-                    <SelectItem value="scale">Scale</SelectItem>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="pro">Pro</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -443,6 +443,129 @@ export default function AdminWidgetEdit() {
                 checked={widget.show_bubble}
                 onCheckedChange={(v) => updateField('show_bubble', v)}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bot Avatar */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Bot Avatar</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-4">
+              {widget.bot_avatar && (
+                <img 
+                  src={widget.bot_avatar} 
+                  alt="Bot avatar" 
+                  className="w-16 h-16 rounded-full object-cover border border-border"
+                />
+              )}
+              <div className="flex-1 space-y-2">
+                <Label>Bot Avatar URL</Label>
+                <Input
+                  value={widget.bot_avatar || ''}
+                  onChange={(e) => updateField('bot_avatar', e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Questions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Questions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Quick Questions (JSON array)</Label>
+              <Textarea
+                value={JSON.stringify(widget.quick_questions || [], null, 2)}
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(e.target.value);
+                    updateField('quick_questions', parsed);
+                  } catch {
+                    // Invalid JSON, don't update
+                  }
+                }}
+                rows={6}
+                placeholder='["Vprašanje 1", "Vprašanje 2"]'
+                className="font-mono text-sm"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Addons */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Addons</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Addons (JSON array)</Label>
+              <Textarea
+                value={JSON.stringify(widget.addons || [], null, 2)}
+                onChange={(e) => {
+                  try {
+                    const parsed = JSON.parse(e.target.value);
+                    updateField('addons', parsed);
+                  } catch {
+                    // Invalid JSON, don't update
+                  }
+                }}
+                rows={4}
+                placeholder='["addon1", "addon2"]'
+                className="font-mono text-sm"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Footer */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Footer</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Footer Prefix</Label>
+                <Input
+                  value={widget.footer_prefix || ''}
+                  onChange={(e) => updateField('footer_prefix', e.target.value)}
+                  placeholder="Powered by"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Footer Link Text</Label>
+                <Input
+                  value={widget.footer_link_text || ''}
+                  onChange={(e) => updateField('footer_link_text', e.target.value)}
+                  placeholder="Our Company"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Footer Link URL</Label>
+                <Input
+                  value={widget.footer_link_url || ''}
+                  onChange={(e) => updateField('footer_link_url', e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Footer Suffix</Label>
+                <Input
+                  value={widget.footer_suffix || ''}
+                  onChange={(e) => updateField('footer_suffix', e.target.value)}
+                  placeholder=""
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -58,6 +58,12 @@ export interface AdminWidget {
   support_webhook_url: string | null;
   health_check_url: string | null;
   table_name: string | null;
+  
+  // Footer
+  footer_prefix: string | null;
+  footer_link_text: string | null;
+  footer_link_url: string | null;
+  footer_suffix: string | null;
 }
 
 export function useAdminWidgets() {
