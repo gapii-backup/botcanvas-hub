@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sun, Moon, ArrowLeft } from 'lucide-react';
+import { Sun, Moon, ArrowLeft, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
@@ -10,7 +10,14 @@ import { ImageUpload } from '@/components/ImageUpload';
 
 export default function Step2() {
   const navigate = useNavigate();
-  const { config, setConfig } = useWizardConfig();
+  const { config, setConfig, defaultConfig } = useWizardConfig();
+
+  const resetIconColors = () => {
+    setConfig({ 
+      iconBgColor: config.primaryColor, 
+      iconColor: '#FFFFFF' 
+    });
+  };
 
   return (
     <WizardLayout 
@@ -71,9 +78,71 @@ export default function Step2() {
             placeholder="URL slike"
             selectedIcon={config.botIcon}
             onIconChange={(icon) => setConfig({ botIcon: icon })}
-            primaryColor={config.primaryColor}
+            primaryColor={config.iconBgColor}
+            iconColor={config.iconColor}
           />
         </div>
+
+        {/* Icon colors - only show when no avatar uploaded */}
+        {!config.botAvatar && (
+          <div className="space-y-4 p-4 rounded-lg border border-border bg-muted/30 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <Label>Barve ikone</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={resetIconColors}
+                className="h-8 text-xs"
+              >
+                <RotateCcw className="h-3 w-3 mr-1" />
+                Ponastavi
+              </Button>
+            </div>
+            
+            {/* Icon background color */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Ozadje ikone</Label>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={config.iconBgColor}
+                    onChange={(e) => setConfig({ iconBgColor: e.target.value })}
+                    className="h-10 w-10 rounded-lg cursor-pointer border-0"
+                  />
+                </div>
+                <Input
+                  value={config.iconBgColor}
+                  onChange={(e) => setConfig({ iconBgColor: e.target.value })}
+                  className="flex-1 font-mono text-sm"
+                  placeholder="#3B82F6"
+                />
+              </div>
+            </div>
+
+            {/* Icon color */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Barva ikone</Label>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={config.iconColor}
+                    onChange={(e) => setConfig({ iconColor: e.target.value })}
+                    className="h-10 w-10 rounded-lg cursor-pointer border-0"
+                  />
+                </div>
+                <Input
+                  value={config.iconColor}
+                  onChange={(e) => setConfig({ iconColor: e.target.value })}
+                  className="flex-1 font-mono text-sm"
+                  placeholder="#FFFFFF"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Navigation */}
         <div className="pt-4 flex justify-between">

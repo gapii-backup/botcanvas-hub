@@ -4,10 +4,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { ArrowLeft, AlignLeft, AlignRight } from 'lucide-react';
-import { useWizardConfig } from '@/hooks/useWizardConfig';
+import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessagesSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
+import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { TriggerPreview } from '@/components/widget/WidgetPreview';
+import { cn } from '@/lib/utils';
+
+const TriggerIconComponents: Record<string, LucideIcon> = {
+  MessageCircle,
+  MessagesSquare,
+  Bot,
+  Sparkles,
+  Headphones,
+  Zap,
+};
 
 export default function Step3() {
   const navigate = useNavigate();
@@ -97,12 +107,41 @@ export default function Step3() {
               variant={config.triggerStyle === 'edge' ? "default" : "outline"}
               size="sm"
               onClick={() => setConfig({ triggerStyle: 'edge' })}
-              className="flex-1"
+              className="flex-1 whitespace-nowrap"
             >
               Robni
             </Button>
           </div>
         </div>
+
+        {/* Trigger icon - only for floating style */}
+        {config.triggerStyle === 'floating' && (
+          <div className="space-y-3 animate-fade-in">
+            <Label>Ikona gumba</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {TRIGGER_ICONS.map(({ name, label }) => {
+                const IconComp = TriggerIconComponents[name];
+                const isSelected = config.triggerIcon === name;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => setConfig({ triggerIcon: name })}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-lg border transition-all hover:scale-105",
+                      isSelected 
+                        ? "border-primary bg-primary/10 ring-2 ring-primary ring-offset-2 ring-offset-background" 
+                        : "border-border hover:border-primary/50 hover:bg-muted"
+                    )}
+                  >
+                    <IconComp className="w-6 h-6" style={{ color: isSelected ? config.primaryColor : 'hsl(var(--foreground))' }} />
+                    <span className="text-xs text-muted-foreground">{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Edge trigger text */}
         {config.triggerStyle === 'edge' && (

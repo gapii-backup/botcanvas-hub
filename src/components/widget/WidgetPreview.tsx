@@ -55,7 +55,7 @@ function BotIconOrAvatar({
   }
   
   const IconComponent = IconComponents[config.botIcon] || Bot;
-  return <IconComponent size={size} color="white" />;
+  return <IconComponent size={size} color={config.iconColor || 'white'} />;
 }
 
 export function WidgetPreview({ config, showChat = true, showHome = false }: WidgetPreviewProps) {
@@ -136,12 +136,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 width: '64px', 
                 height: '64px', 
                 borderRadius: '16px',
-                background: config.primaryColor,
+                background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
                 margin: '16px auto 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 8px 24px ${hexToRgba(config.primaryColor, 0.4)}`,
+                boxShadow: `0 8px 24px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.4)}`,
                 overflow: 'hidden'
               }}
             >
@@ -337,12 +337,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 height: '36px', 
                 minWidth: '36px',
                 borderRadius: '10px',
-                background: config.primaryColor,
+                background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
-                boxShadow: `0 2px 8px ${hexToRgba(config.primaryColor, 0.3)}`
+                boxShadow: `0 2px 8px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.3)}`
               }}
             >
               <BotIconOrAvatar config={config} size={20} />
@@ -404,12 +404,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                     height: '28px', 
                     minWidth: '28px',
                     borderRadius: '50%',
-                    background: config.primaryColor,
+                    background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '22px',
-                    boxShadow: `0 2px 6px ${hexToRgba(config.primaryColor, 0.3)}`,
+                    boxShadow: `0 2px 6px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.3)}`,
                     overflow: 'hidden'
                   }}
                 >
@@ -563,7 +563,10 @@ export function TriggerPreview({ config }: { config: BotConfig }) {
             cursor: 'pointer'
           }}
         >
-          <MessageCircle size={28} color="white" />
+          {(() => {
+            const TriggerIcon = IconComponents[config.triggerIcon] || MessageCircle;
+            return <TriggerIcon size={28} color="white" />;
+          })()}
           {/* Notification dot */}
           <div 
             style={{ 
