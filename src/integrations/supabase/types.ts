@@ -17,6 +17,7 @@ export type Database = {
       user_bots: {
         Row: {
           api_key: string | null
+          billing_period: string
           booking_url: string | null
           bot_name: string | null
           created_at: string
@@ -33,6 +34,7 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
+          billing_period?: string
           booking_url?: string | null
           bot_name?: string | null
           created_at?: string
@@ -49,6 +51,7 @@ export type Database = {
         }
         Update: {
           api_key?: string | null
+          billing_period?: string
           booking_url?: string | null
           bot_name?: string | null
           created_at?: string

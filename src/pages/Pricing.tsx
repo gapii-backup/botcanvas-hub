@@ -92,7 +92,10 @@ export default function Pricing() {
     setIsLoading(true);
 
     try {
-      await updateUserBot({ plan: planId });
+      await updateUserBot({ 
+        plan: planId,
+        billing_period: isYearly ? 'yearly' : 'monthly',
+      });
       navigate('/customize');
     } catch (error) {
       toast({
