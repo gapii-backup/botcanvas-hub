@@ -8,6 +8,8 @@ export type BotConfig = {
   headerStyle: 'gradient' | 'solid';
   botAvatar: string;
   botIcon: string; // SVG path for icon when no avatar
+  iconBgColor: string; // Background color for icon
+  iconColor: string; // Icon color
   
   // Step 2 - Chat
   homeTitle: string;
@@ -23,6 +25,7 @@ export type BotConfig = {
   triggerStyle: 'floating' | 'edge';
   edgeTriggerText: string;
   verticalOffset: number;
+  triggerIcon: string; // Icon for floating trigger
 };
 
 // Available bot icons - Lucide paths (24x24 viewBox)
@@ -61,6 +64,16 @@ export const BOT_ICONS = [
   },
 ];
 
+// Trigger icons for floating button
+export const TRIGGER_ICONS = [
+  { name: 'MessageCircle', label: 'Sporočilo' },
+  { name: 'MessagesSquare', label: 'Klepet' },
+  { name: 'Bot', label: 'Robot' },
+  { name: 'Sparkles', label: 'Iskrice' },
+  { name: 'Headphones', label: 'Podpora' },
+  { name: 'Zap', label: 'Blisk' },
+];
+
 const defaultConfig: BotConfig = {
   name: 'Moj AI Asistent',
   primaryColor: '#3B82F6',
@@ -68,11 +81,13 @@ const defaultConfig: BotConfig = {
   headerStyle: 'gradient',
   botAvatar: '',
   botIcon: 'Robot', // Default icon name
+  iconBgColor: '#3B82F6',
+  iconColor: '#FFFFFF',
   
   homeTitle: 'Pozdravljeni!',
   homeSubtitle: 'Kako vam lahko pomagam?',
   welcomeMessage: 'Pozdravljeni! Kako vam lahko pomagam?',
-  quickQuestions: ['Kakšne so vaše cene?', 'Kako vas kontaktiram?'],
+  quickQuestions: ['Kaj ponujate?'],
   showEmailField: true,
   
   showBubble: true,
@@ -81,6 +96,7 @@ const defaultConfig: BotConfig = {
   triggerStyle: 'floating',
   edgeTriggerText: 'Klikni me',
   verticalOffset: 24,
+  triggerIcon: 'MessageCircle',
 };
 
 const STORAGE_KEY = 'botmotion-wizard-config';

@@ -15,8 +15,9 @@ export default function Step1() {
   const [newQuestion, setNewQuestion] = useState('');
 
   const addQuestion = () => {
-    if (newQuestion.trim() && config.quickQuestions.length < 4) {
-      setConfig({ quickQuestions: [...config.quickQuestions, newQuestion.trim()] });
+    const trimmed = newQuestion.trim().slice(0, 35);
+    if (trimmed && config.quickQuestions.length < 4) {
+      setConfig({ quickQuestions: [...config.quickQuestions, trimmed] });
       setNewQuestion('');
     }
   };
@@ -140,12 +141,18 @@ export default function Step1() {
           </div>
           {config.quickQuestions.length < 4 && (
             <div className="flex gap-2">
-              <Input
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                placeholder="Novo vprašanje..."
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
-              />
+              <div className="flex-1 relative">
+                <Input
+                  value={newQuestion}
+                  onChange={(e) => setNewQuestion(e.target.value.slice(0, 35))}
+                  placeholder="Novo vprašanje..."
+                  maxLength={35}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                  {newQuestion.length}/35
+                </span>
+              </div>
               <Button type="button" variant="outline" size="icon" onClick={addQuestion}>
                 <Plus className="h-4 w-4" />
               </Button>

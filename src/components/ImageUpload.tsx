@@ -15,6 +15,7 @@ type ImageUploadProps = {
   selectedIcon?: string;
   onIconChange?: (iconName: string) => void;
   primaryColor?: string;
+  iconColor?: string;
 };
 
 // Map icon names to Lucide components
@@ -35,7 +36,8 @@ export function ImageUpload({
   placeholder = "URL slike",
   selectedIcon = 'Robot',
   onIconChange,
-  primaryColor = '#3B82F6'
+  primaryColor = '#3B82F6',
+  iconColor = '#FFFFFF'
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -149,7 +151,7 @@ export function ImageUpload({
               }}
             />
           ) : (
-            <SelectedIconComponent className="w-7 h-7 text-white" />
+            <SelectedIconComponent className="w-7 h-7" style={{ color: iconColor }} />
           )}
         </div>
 
