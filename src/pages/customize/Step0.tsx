@@ -10,22 +10,45 @@ import { WizardLayout } from '@/components/wizard/WizardLayout';
 
 export default function Step0() {
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { updateUserBot } = useUserBot();
   const { toast } = useToast();
 
-  const handleNext = async () => {
-    if (websiteUrl.trim()) {
-      try {
-        const fullUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
-        await updateUserBot({ 
-          booking_url: fullUrl,
-          bot_name: `Asistent za ${new URL(fullUrl).hostname}`,
-        });
-      } catch (error) {
-        console.log('Could not save URL, continuing anyway');
-      }
+  const validateUrl = (url: string): boolean => {
+    if (!url.trim()) {
+      setError('Prosim vnesite URL spletne strani.');
+      return false;
     }
+    
+    // Simple domain validation
+    const urlPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\/.*)?$/;
+    const cleanUrl = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    
+    if (!urlPattern.test(cleanUrl)) {
+      setError('Prosim vnesite veljaven URL (npr. vasa-stran.si).');
+      return false;
+    }
+    
+    setError('');
+    return true;
+  };
+
+  const handleNext = async () => {
+    if (!validateUrl(websiteUrl)) {
+      return;
+    }
+
+    try {
+      const fullUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
+      await updateUserBot({ 
+        booking_url: fullUrl,
+        bot_name: `Asistent za ${new URL(fullUrl).hostname}`,
+      });
+    } catch (err) {
+      console.log('Could not save URL, continuing anyway');
+    }
+    
     navigate('/customize/step-2');
   };
 
@@ -36,7 +59,7 @@ export default function Step0() {
           Začnimo s povezavo
         </h2>
         <p className="text-muted-foreground">
-          Delite povezavo do vaše spletne strani (neobvezno).
+          Vnesite povezavo do vaše spletne strani.
         </p>
       </div>
 
@@ -51,10 +74,16 @@ export default function Step0() {
               id="website-url"
               placeholder="vasa-stran.si"
               value={websiteUrl}
-              onChange={(e) => setWebsiteUrl(e.target.value)}
-              className="rounded-l-none"
+              onChange={(e) => {
+                setWebsiteUrl(e.target.value);
+                if (error) setError('');
+              }}
+              className={`rounded-l-none ${error ? 'border-destructive' : ''}`}
             />
           </div>
+          {error && (
+            <p className="text-sm text-destructive animate-fade-in">{error}</p>
+          )}
         </div>
 
         <Button
