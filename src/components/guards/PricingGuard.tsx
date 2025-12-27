@@ -17,15 +17,16 @@ export function PricingGuard({ children }: PricingGuardProps) {
     );
   }
 
-  // If user already has a plan, redirect appropriately
-  if (widget?.plan) {
-    if (widget.status === 'active') {
-      return <Navigate to="/dashboard" replace />;
-    }
-    // Has plan but not active - go to customize
-    return <Navigate to="/customize/step-0" replace />;
+  // If widget is already active, redirect to dashboard
+  if (widget?.status === 'active') {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // No plan yet - allow access to pricing
+  // If payment is pending, continue the flow on the Complete step
+  if (widget?.status === 'pending_payment') {
+    return <Navigate to="/customize/complete" replace />;
+  }
+
+  // Otherwise, always allow access to pricing
   return <>{children}</>;
 }

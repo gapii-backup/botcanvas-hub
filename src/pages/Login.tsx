@@ -26,15 +26,16 @@ export default function Login() {
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
     if (user && !widgetLoading) {
-      if (!widget?.plan) {
-        navigate('/pricing');
-      } else if (widget.status === 'pending_payment') {
-        navigate('/customize/complete');
-      } else if (widget.status === 'active') {
-        navigate('/dashboard');
-      } else {
-        navigate('/customize/step-1');
-      }
+        if (!widget?.plan) {
+          navigate('/pricing');
+        } else if (widget.status === 'pending_payment') {
+          navigate('/customize/complete');
+        } else if (widget.status === 'active') {
+          navigate('/dashboard');
+        } else {
+          // Plan is set but widget isn't fully activated/customization flow isn't finished yet
+          navigate('/pricing');
+        }
     }
   }, [user, widget, widgetLoading, navigate]);
 
