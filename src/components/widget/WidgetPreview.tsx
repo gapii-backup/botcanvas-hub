@@ -427,7 +427,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                       color: textColor
                     }}
                   >
-                    {config.welcomeMessage || 'Pozdravljeni! Kako vam lahko pomagam?'}
+                    Zdravo! Kako vam lahko pomagam?
                   </div>
                   <div style={{ fontSize: '11px', color: textMuted, marginTop: '4px' }}>
                     14:32
@@ -449,7 +449,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                       color: 'white'
                     }}
                   >
-                    Zdravo! Zanima me več.
+                    Kaj ponujate?
                   </div>
                   <div style={{ fontSize: '11px', color: textMuted, marginTop: '4px' }}>
                     14:32
