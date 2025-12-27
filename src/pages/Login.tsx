@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWidget } from '@/hooks/useWidget';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Bot, MessageSquare } from 'lucide-react';
+import { Loader2, Bot, MessageSquare, X } from 'lucide-react';
 import { z } from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 const loginSchema = z.object({
   email: z.string().email('Neveljaven email naslov'),
@@ -18,10 +26,39 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const { signIn, user } = useAuth();
   const { widget, loading: widgetLoading } = useWidget();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim()) {
+      toast({
+        title: 'Napaka',
+        description: 'Vnesite email naslov.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsResetting(true);
+    await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: 'https://app.botmotion.ai/reset-password',
+    });
+    setIsResetting(false);
+    setResetSent(true);
+  };
+
+  const closeForgotPasswordModal = () => {
+    setShowForgotPassword(false);
+    setResetEmail('');
+    setResetSent(false);
+  };
 
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
@@ -158,12 +195,84 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-sm text-muted-foreground">
-            Nimate računa?{' '}
-            <Link to="/register" className="text-primary hover:underline font-medium">
-              Registrirajte se
-            </Link>
-          </p>
+          <div className="text-center space-y-2">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-primary hover:underline font-medium"
+            >
+              Pozabljeno geslo?
+            </button>
+            <p className="text-sm text-muted-foreground">
+              Nimate računa?{' '}
+              <Link to="/register" className="text-primary hover:underline font-medium">
+                Registrirajte se
+              </Link>
+            </p>
+          </div>
+
+          {/* Forgot Password Modal */}
+          <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Ponastavitev gesla</DialogTitle>
+                <DialogDescription>
+                  Vnesite svoj email naslov in poslali vam bomo povezavo za ponastavitev gesla.
+                </DialogDescription>
+              </DialogHeader>
+              {!resetSent ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="resetEmail">Email</Label>
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="ime@podjetje.si"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={closeForgotPasswordModal}
+                      className="flex-1"
+                    >
+                      Zapri
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="glow"
+                      disabled={isResetting}
+                      className="flex-1"
+                    >
+                      {isResetting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Pošlji povezavo'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Če email obstaja v našem sistemu, smo poslali povezavo za ponastavitev gesla.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeForgotPasswordModal}
+                    className="w-full"
+                  >
+                    Zapri
+                  </Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>

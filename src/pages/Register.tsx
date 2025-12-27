@@ -12,12 +12,17 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Ime mora imeti vsaj 2 znaka'),
   email: z.string().email('Neveljaven email naslov'),
   password: z.string().min(6, 'Geslo mora imeti vsaj 6 znakov'),
+  confirmPassword: z.string().min(6, 'Geslo mora imeti vsaj 6 znakov'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Gesli se ne ujemata',
+  path: ['confirmPassword'],
 });
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -30,7 +35,7 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const validation = registerSchema.safeParse({ name, email, password });
+    const validation = registerSchema.safeParse({ name, email, password, confirmPassword });
     if (!validation.success) {
       toast({
         title: 'Napaka pri validaciji',
@@ -117,6 +122,18 @@ export default function Register() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Potrdi geslo</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </div>
