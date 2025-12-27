@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessagesSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
+import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessageSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
 import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { TriggerPreview } from '@/components/widget/WidgetPreview';
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 
 const TriggerIconComponents: Record<string, LucideIcon> = {
   MessageCircle,
-  MessagesSquare,
+  MessageSquare,
   Bot,
   Sparkles,
   Headphones,
@@ -24,7 +24,7 @@ export default function Step3() {
   const { config, setConfig } = useWizardConfig();
 
   return (
-    <WizardLayout currentStep={3} totalSteps={3} preview={
+    <WizardLayout currentStep={4} totalSteps={4} preview={
       <div className="flex flex-col items-center justify-end h-full pb-8">
         <TriggerPreview config={config} />
       </div>
@@ -173,7 +173,7 @@ export default function Step3() {
 
         {/* Navigation */}
         <div className="pt-4 flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-2')} size="lg">
+          <Button variant="outline" onClick={() => navigate('/customize/step-3')} size="lg">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Nazaj
           </Button>
