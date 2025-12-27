@@ -28,10 +28,6 @@ export type BotConfig = {
 // Available bot icons - Lucide paths (24x24 viewBox)
 export const BOT_ICONS = [
   { 
-    name: 'Robot', 
-    paths: ['M12 8V4H8', 'M4.93 10.93 2.5 13.36', 'M19.07 10.93l2.43 2.43', 'M12 2a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2 2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z', 'M6 16a6 6 0 0 1 12 0c0 2.22-.72 4.27-1.94 5.93a6.41 6.41 0 0 1-8.12 0C6.72 20.27 6 18.22 6 16Z', 'M9 17h.01', 'M15 17h.01']
-  },
-  { 
     name: 'Bot', 
     paths: ['M12 8V4H8', 'rect x="4" y="8" width="16" height="12" rx="2"', 'M9 16h0', 'M15 16h0']
   },
@@ -58,6 +54,10 @@ export const BOT_ICONS = [
   { 
     name: 'Heart', 
     paths: ['M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z']
+  },
+  { 
+    name: 'MessagesSquare', 
+    paths: ['M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2z', 'M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1']
   },
 ];
 
