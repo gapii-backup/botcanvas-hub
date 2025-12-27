@@ -180,7 +180,7 @@ export default function Step3() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Odmik od spodaj</Label>
-              <p className="text-xs text-muted-foreground">Priporočeno 28px</p>
+              <p className="text-xs text-muted-foreground">Priporočeno 24px</p>
             </div>
             <span className="text-sm text-muted-foreground">{config.verticalOffset}px</span>
           </div>

@@ -502,8 +502,15 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
 
 // Trigger button preview
 export function TriggerPreview({ config }: { config: BotConfig }) {
+  const isRight = config.position === 'right';
+  
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: isRight ? 'flex-end' : 'flex-start', 
+      gap: '12px' 
+    }}>
       {/* Welcome Bubble */}
       {config.showBubble && (
         <div 
