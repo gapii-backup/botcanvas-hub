@@ -54,17 +54,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error, user: null };
     }
 
-    // Create user_bots row after successful registration
+    // Create widgets row after successful registration
     if (data.user) {
-      const { error: botError } = await (supabase as any)
-        .from('user_bots')
+      const { error: widgetError } = await supabase
+        .from('widgets')
         .insert({
           user_id: data.user.id,
           user_email: email,
         });
 
-      if (botError) {
-        console.error('Error creating user_bots row:', botError);
+      if (widgetError) {
+        console.error('Error creating widgets row:', widgetError);
       }
     }
 

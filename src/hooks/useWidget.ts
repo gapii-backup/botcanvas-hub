@@ -144,41 +144,19 @@ export function useWidget() {
     return data as Widget;
   };
 
-  const upsertWidget = async (widgetData: {
-    user_id: string;
-    user_email: string;
-    api_key: string;
-    plan: string;
-    billing_period: string;
-    status: string;
-    is_active: boolean;
-    bot_name: string;
-    welcome_message: string;
-    home_title: string;
-    home_subtitle_line2: string;
-    primary_color: string;
-    mode: string;
-    header_style: string;
-    bot_icon_background: string;
-    bot_icon_color: string;
-    bot_avatar: string;
-    bot_icon: string;
-    trigger_icon: string;
-    position: string;
-    vertical_offset: number;
-    trigger_style: string;
-    edge_trigger_text: string;
-    quick_questions: string[];
-    show_email_field: boolean;
-    show_bubble: boolean;
-    bubble_text: string;
-    booking_enabled: boolean;
-    booking_url: string;
-    support_enabled: boolean;
-  }) => {
+  const upsertWidget = async (widgetData: Partial<Omit<Widget, 'id' | 'created_at' | 'updated_at'>>) => {
+    if (!user) throw new Error('User not authenticated');
+
+    // Always include user_id and user_email for upsert
+    const dataWithUser = {
+      user_id: user.id,
+      user_email: user.email || '',
+      ...widgetData,
+    };
+
     const { data, error } = await supabase
       .from('widgets')
-      .upsert(widgetData, { onConflict: 'user_id' })
+      .upsert(dataWithUser, { onConflict: 'user_id' })
       .select()
       .single();
 

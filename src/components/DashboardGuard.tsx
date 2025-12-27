@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useUserBot } from '@/hooks/useUserBot';
+import { useWidget } from '@/hooks/useWidget';
 import { Loader2 } from 'lucide-react';
 
 interface DashboardGuardProps {
@@ -7,7 +7,7 @@ interface DashboardGuardProps {
 }
 
 export function DashboardGuard({ children }: DashboardGuardProps) {
-  const { userBot, loading } = useUserBot();
+  const { widget, loading } = useWidget();
 
   if (loading) {
     return (
@@ -17,13 +17,26 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     );
   }
 
-  // Check if wizard is complete - status should be 'active' or bot_name should be set
-  const isWizardComplete = userBot?.status === 'active' || (userBot?.bot_name && userBot?.welcome_message);
-
-  if (!isWizardComplete) {
-    // Redirect to customize if wizard not complete
-    return <Navigate to="/customize" replace />;
+  // No widget exists - redirect to pricing
+  if (!widget) {
+    return <Navigate to="/pricing" replace />;
   }
 
-  return <>{children}</>;
+  // No plan selected - redirect to pricing
+  if (!widget.plan) {
+    return <Navigate to="/pricing" replace />;
+  }
+
+  // Has plan but pending payment - redirect to complete
+  if (widget.status === 'pending_payment') {
+    return <Navigate to="/customize/complete" replace />;
+  }
+
+  // Widget is active or pending - allow access
+  if (widget.status === 'active' || widget.status === 'pending') {
+    return <>{children}</>;
+  }
+
+  // Default - redirect to pricing
+  return <Navigate to="/pricing" replace />;
 }

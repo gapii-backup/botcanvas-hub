@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWidget } from '@/hooks/useWidget';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,11 +19,31 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, user } = useAuth();
+  const { widget, loading: widgetLoading } = useWidget();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Redirect based on widget status when user is already logged in
+  useEffect(() => {
+    if (user && !widgetLoading) {
+      if (!widget?.plan) {
+        navigate('/pricing');
+      } else if (widget.status === 'pending_payment') {
+        navigate('/customize/complete');
+      } else if (widget.status === 'active') {
+        navigate('/dashboard');
+      } else {
+        navigate('/customize/step-0');
+      }
+    }
+  }, [user, widget, widgetLoading, navigate]);
+
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,10 +75,9 @@ export default function Login() {
 
     toast({
       title: 'Prijava uspešna!',
-      description: 'Dobrodošli nazaj.',
+      description: 'Preusmerjanje...',
     });
-    navigate('/dashboard');
-    setIsLoading(false);
+    // Navigation will be handled by useEffect based on widget status
   };
 
   return (
