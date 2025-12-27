@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, Plus, MessageCircle, Globe, Calendar, Users, Bot, Headphones, Link2, History } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useToast } from '@/hooks/use-toast';
@@ -80,6 +80,8 @@ function getAvailableAddons(plan: string | null) {
   return filtered;
 }
 
+type PreviewType = 'home' | 'chat' | 'trigger';
+
 export default function Complete() {
   const navigate = useNavigate();
   const { config, resetConfig } = useWizardConfig();
@@ -87,6 +89,7 @@ export default function Complete() {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [activePreview, setActivePreview] = useState<PreviewType>('home');
 
   const userPlan = userBot?.plan || 'basic';
   const availableAddons = getAvailableAddons(userPlan);
@@ -130,6 +133,12 @@ export default function Complete() {
     }
   };
 
+  const previewTabs = [
+    { id: 'home' as const, label: 'Domača stran', icon: Home },
+    { id: 'chat' as const, label: 'Pogovor', icon: MessagesSquare },
+    { id: 'trigger' as const, label: 'Gumb', icon: MousePointer },
+  ];
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Header */}
@@ -145,126 +154,139 @@ export default function Complete() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Predogled vašega AI asistenta</h1>
-          <p className="text-muted-foreground">Tako bo izgledal vaš chatbot na spletni strani.</p>
-        </div>
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* Left side - Add-ons */}
+          <div className="space-y-6">
+            {hasAddons && (
+              <>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Dodatne možnosti</h2>
+                  <p className="text-muted-foreground">
+                    Izboljšajte svojega AI asistenta z dodatnimi funkcijami.
+                  </p>
+                </div>
 
-        {/* Three previews */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {/* Home screen preview */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-center text-muted-foreground">Domača stran</h3>
-            <div 
-              className="rounded-2xl border border-border overflow-hidden"
-              style={{
-                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
-                backgroundSize: '12px 12px',
-                backgroundColor: 'hsl(var(--muted) / 0.4)',
-              }}
-            >
-              <div className="p-4 flex items-center justify-center min-h-[450px]">
-                <WidgetPreview config={config} showChat={false} showHome={true} />
-              </div>
-            </div>
-          </div>
+                <div className="space-y-4">
+                  {Object.entries(availableAddons).map(([key, category]) => (
+                    <Card key={key} className="border-border">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                          {category.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        {category.items.map((item) => (
+                          <div 
+                            key={item.id}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => toggleAddon(item.id)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Checkbox 
+                                checked={selectedAddons.includes(item.id)}
+                                onCheckedChange={() => toggleAddon(item.id)}
+                              />
+                              <span className="text-sm">{item.label}</span>
+                            </div>
+                            <span className="text-sm font-medium text-primary">{item.price}</span>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
 
-          {/* Chat preview */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-center text-muted-foreground">Pogovor</h3>
-            <div 
-              className="rounded-2xl border border-border overflow-hidden"
-              style={{
-                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
-                backgroundSize: '12px 12px',
-                backgroundColor: 'hsl(var(--muted) / 0.4)',
-              }}
-            >
-              <div className="p-4 flex items-center justify-center min-h-[450px]">
-                <WidgetPreview config={config} showChat={true} showHome={false} />
-              </div>
-            </div>
-          </div>
+                {selectedAddons.length > 0 && (
+                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-sm text-center">
+                      <span className="font-medium">Izbrani dodatki:</span>{' '}
+                      {selectedAddons.length} dodatkov bo dodanih vašemu paketu
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
 
-          {/* Trigger preview */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-center text-muted-foreground">Gumb za odprtje</h3>
-            <div 
-              className="rounded-2xl border border-border overflow-hidden"
-              style={{
-                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
-                backgroundSize: '12px 12px',
-                backgroundColor: 'hsl(var(--muted) / 0.4)',
-              }}
-            >
-              <div className="p-4 flex items-center justify-center min-h-[450px]">
-                <TriggerPreview config={config} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Add-ons section - only show for Basic plan or if there are available addons */}
-        {hasAddons && (
-          <div className="mb-12">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-foreground mb-2">Dodatne možnosti</h2>
-              <p className="text-muted-foreground">
-                Izboljšajte svojega AI asistenta z dodatnimi funkcijami.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(availableAddons).map(([key, category]) => (
-                <Card key={key} className="border-border">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                      {category.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {category.items.map((item) => (
-                      <div 
-                        key={item.id}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => toggleAddon(item.id)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Checkbox 
-                            checked={selectedAddons.includes(item.id)}
-                            onCheckedChange={() => toggleAddon(item.id)}
-                          />
-                          <span className="text-sm">{item.label}</span>
-                        </div>
-                        <span className="text-sm font-medium text-primary">{item.price}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {selectedAddons.length > 0 && (
-              <div className="mt-4 p-4 bg-primary/10 rounded-lg border border-primary/20">
-                <p className="text-sm text-center">
-                  <span className="font-medium">Izbrani dodatki:</span>{' '}
-                  {selectedAddons.length} dodatkov bo dodanih vašemu paketu
-                </p>
+            {!hasAddons && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center py-12">
+                  <Check className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Vse je pripravljeno!</h2>
+                  <p className="text-muted-foreground">
+                    Vaš paket že vključuje vse funkcije.
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        )}
 
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-3')} size="lg">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Nazaj
-          </Button>
-          <Button onClick={handleContinueToCheckout} size="lg" variant="glow" disabled={isSaving}>
-            <CreditCard className="h-4 w-4 mr-2" />
-            {isSaving ? 'Shranjujem...' : 'Nadaljuj na plačilo'}
-          </Button>
+          {/* Right side - Preview */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Predogled vašega AI asistenta</h2>
+              <p className="text-muted-foreground">Tako bo izgledal vaš chatbot na spletni strani.</p>
+            </div>
+
+            {/* Preview tabs */}
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              {previewTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActivePreview(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+                    activePreview === tab.id
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Preview container */}
+            <div 
+              className="rounded-2xl border border-border overflow-hidden"
+              style={{
+                backgroundImage: `radial-gradient(circle, hsl(var(--muted-foreground) / 0.2) 1px, transparent 1px)`,
+                backgroundSize: '12px 12px',
+                backgroundColor: 'hsl(var(--muted) / 0.4)',
+              }}
+            >
+              <div className="p-6 flex items-center justify-center min-h-[500px]">
+                {activePreview === 'home' && (
+                  <WidgetPreview config={config} showChat={false} showHome={true} />
+                )}
+                {activePreview === 'chat' && (
+                  <WidgetPreview config={config} showChat={true} showHome={false} />
+                )}
+                {activePreview === 'trigger' && (
+                  <TriggerPreview config={config} />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation - Full width sticky bottom */}
+        <div className="mt-8 pt-6 border-t border-border">
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <Button variant="outline" onClick={() => navigate('/customize/step-3')} size="lg">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Nazaj
+            </Button>
+            <Button 
+              onClick={handleContinueToCheckout} 
+              size="lg" 
+              variant="glow" 
+              disabled={isSaving}
+              className="text-lg px-8 py-6 h-auto"
+            >
+              <CreditCard className="h-5 w-5 mr-2" />
+              {isSaving ? 'Shranjujem...' : 'Nadaljuj na plačilo'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
