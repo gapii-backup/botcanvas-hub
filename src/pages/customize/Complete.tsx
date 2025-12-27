@@ -59,9 +59,9 @@ function formatPrice(monthlyPrice: number | null, isYearly: boolean): string {
   if (monthlyPrice === null) return 'po dogovoru';
   
   if (isYearly) {
-    // 20% discount for yearly, show monthly equivalent
-    const discountedMonthly = Math.round(monthlyPrice * 0.8);
-    return `€${discountedMonthly}/mesec`;
+    // 20% discount for yearly, show yearly total price
+    const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8);
+    return `€${yearlyPrice}/leto`;
   }
   return `€${monthlyPrice}/mesec`;
 }
