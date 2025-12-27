@@ -1,130 +1,120 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Sun, Moon, RotateCcw } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
-import { ImageUpload } from '@/components/ImageUpload';
 
 export default function Step1() {
   const navigate = useNavigate();
-  const { config, setConfig, defaultConfig } = useWizardConfig();
+  const { config, setConfig } = useWizardConfig();
+  const [newQuestion, setNewQuestion] = useState('');
 
-  const handleColorChange = (color: string) => {
-    setConfig({ primaryColor: color });
+  const addQuestion = () => {
+    if (newQuestion.trim()) {
+      setConfig({ quickQuestions: [...config.quickQuestions, newQuestion.trim()] });
+      setNewQuestion('');
+    }
   };
 
-  const resetColor = () => {
-    setConfig({ primaryColor: defaultConfig.primaryColor });
+  const removeQuestion = (index: number) => {
+    setConfig({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
   };
 
   return (
     <WizardLayout 
       currentStep={1} 
       totalSteps={3} 
-      preview={<WidgetPreview config={config} showChat={true} showHome={false} />}
+      preview={<WidgetPreview config={config} showChat={false} showHome={true} />}
     >
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Osnovni izgled</h2>
-          <p className="text-muted-foreground">Prilagodite videz vašega chatbota.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Chat nastavitve</h2>
+          <p className="text-muted-foreground">Prilagodite sporočila in hitra vprašanja.</p>
         </div>
 
-        {/* Agent name */}
+        {/* Home title */}
         <div className="space-y-2">
-          <Label htmlFor="agent-name">Ime agenta</Label>
+          <Label htmlFor="home-title">Naslov na domači strani</Label>
           <Input
-            id="agent-name"
-            value={config.name}
-            onChange={(e) => setConfig({ name: e.target.value })}
-            placeholder="Moj AI Asistent"
+            id="home-title"
+            value={config.homeTitle}
+            onChange={(e) => setConfig({ homeTitle: e.target.value })}
+            placeholder="Pozdravljeni!"
           />
         </div>
 
-        {/* Appearance - Light/Dark */}
+        {/* Home subtitle */}
+        <div className="space-y-2">
+          <Label htmlFor="home-subtitle">Podnaslov</Label>
+          <Input
+            id="home-subtitle"
+            value={config.homeSubtitle}
+            onChange={(e) => setConfig({ homeSubtitle: e.target.value })}
+            placeholder="Kako vam lahko pomagam?"
+          />
+        </div>
+
+        {/* Welcome message */}
+        <div className="space-y-2">
+          <Label htmlFor="welcome-message">Pozdravno sporočilo</Label>
+          <Textarea
+            id="welcome-message"
+            value={config.welcomeMessage}
+            onChange={(e) => setConfig({ welcomeMessage: e.target.value })}
+            placeholder="Pozdravljeni! Kako vam lahko pomagam?"
+            rows={3}
+          />
+        </div>
+
+        {/* Quick questions */}
         <div className="space-y-3">
-          <Label>Videz</Label>
+          <Label>Hitra vprašanja</Label>
+          <div className="space-y-2">
+            {config.quickQuestions.map((q, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Input value={q} readOnly className="flex-1 bg-muted" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeQuestion(index)}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
           <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={!config.darkMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setConfig({ darkMode: false })}
-              className="flex-1"
-            >
-              <Sun className="h-4 w-4 mr-2" />
-              Svetla
-            </Button>
-            <Button
-              type="button"
-              variant={config.darkMode ? "default" : "outline"}
-              size="sm"
-              onClick={() => setConfig({ darkMode: true })}
-              className="flex-1"
-            >
-              <Moon className="h-4 w-4 mr-2" />
-              Temna
-            </Button>
-          </div>
-        </div>
-
-        {/* Primary color */}
-        <div className="space-y-3">
-          <Label>Glavna barva</Label>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <input
-                type="color"
-                value={config.primaryColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="h-10 w-10 rounded-lg cursor-pointer border-0"
-              />
-            </div>
             <Input
-              value={config.primaryColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="flex-1 font-mono text-sm"
-              placeholder="#3B82F6"
+              value={newQuestion}
+              onChange={(e) => setNewQuestion(e.target.value)}
+              placeholder="Novo vprašanje..."
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addQuestion())}
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={resetColor}
-              title="Ponastavi barvo"
-            >
-              <RotateCcw className="h-4 w-4" />
+            <Button type="button" variant="outline" size="icon" onClick={addQuestion}>
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* Header style */}
+        {/* Show email field */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label>Uporabi gradient za glavo</Label>
+            <Label>Prikaži email polje</Label>
             <p className="text-xs text-muted-foreground">
-              Namesto enobarvne glave
+              Zbirajte email naslove od obiskovalcev
             </p>
           </div>
           <Switch
-            checked={config.headerStyle === 'gradient'}
-            onCheckedChange={(checked) => setConfig({ headerStyle: checked ? 'gradient' : 'solid' })}
-          />
-        </div>
-
-        {/* Profile picture */}
-        <div className="space-y-2">
-          <Label>Profilna slika ali ikona</Label>
-          <ImageUpload
-            value={config.botAvatar}
-            onChange={(url) => setConfig({ botAvatar: url })}
-            placeholder="URL slike"
-            selectedIcon={config.botIcon}
-            onIconChange={(icon) => setConfig({ botIcon: icon })}
-            primaryColor={config.primaryColor}
+            checked={config.showEmailField}
+            onCheckedChange={(checked) => setConfig({ showEmailField: checked })}
           />
         </div>
 
