@@ -83,6 +83,10 @@ export type Database = {
           bubble_text: string | null
           created_at: string
           edge_trigger_text: string | null
+          footer_link_text: string | null
+          footer_link_url: string | null
+          footer_prefix: string | null
+          footer_suffix: string | null
           header_style: string
           health_check_url: string | null
           home_subtitle_line2: string | null
@@ -125,6 +129,10 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           edge_trigger_text?: string | null
+          footer_link_text?: string | null
+          footer_link_url?: string | null
+          footer_prefix?: string | null
+          footer_suffix?: string | null
           header_style?: string
           health_check_url?: string | null
           home_subtitle_line2?: string | null
@@ -167,6 +175,10 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           edge_trigger_text?: string | null
+          footer_link_text?: string | null
+          footer_link_url?: string | null
+          footer_prefix?: string | null
+          footer_suffix?: string | null
           header_style?: string
           health_check_url?: string | null
           home_subtitle_line2?: string | null
