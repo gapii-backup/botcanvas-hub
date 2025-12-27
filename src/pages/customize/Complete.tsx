@@ -8,51 +8,64 @@ import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 
-// Define all add-ons
+// Define all add-ons with monthly prices in euros
 const ALL_ADDONS = {
   capacity: {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_1000', label: '+1.000 pogovorov', price: '€12/mesec' },
-      { id: 'capacity_2000', label: '+2.000 pogovorov', price: '€22/mesec' },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', price: '€52/mesec' },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', price: '€99/mesec' },
+      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 12 },
+      { id: 'capacity_2000', label: '+2.000 pogovorov', monthlyPrice: 22 },
+      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 52 },
+      { id: 'capacity_10000', label: '+10.000 pogovorov', monthlyPrice: 99 },
     ],
   },
   languages: {
     title: '🌍 JEZIKI',
     icon: Globe,
     items: [
-      { id: 'multilanguage', label: 'Multilanguage upgrade', price: '€30/mesec' },
+      { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30 },
     ],
   },
   sales: {
     title: '💼 SALES & LEAD GENERATION',
     icon: Users,
     items: [
-      { id: 'booking', label: 'Rezervacija sestankov', price: '€35/mesec' },
-      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', price: '€15/mesec' },
-      { id: 'product_ai', label: 'Product recommendations (AI)', price: '€50/mesec' },
+      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35 },
+      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 15 },
+      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 50 },
     ],
   },
   support: {
     title: '🎧 SUPPORT & CUSTOMER SERVICE',
     icon: Headphones,
     items: [
-      { id: 'tickets', label: 'Support ticket kreiranje', price: '€35/mesec' },
+      { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35 },
     ],
   },
   integrations: {
     title: '🔗 CRM & INTEGRACIJE',
     icon: Link2,
     items: [
-      { id: 'crm', label: 'CRM integracija', price: 'po dogovoru' },
-      { id: 'history', label: 'Extended history (+90 dni)', price: '€20/mesec' },
+      { id: 'crm', label: 'CRM integracija', monthlyPrice: null }, // po dogovoru
+      { id: 'history', label: 'Extended history (+90 dni)', monthlyPrice: 10 },
     ],
   },
 };
+
+// Calculate price based on billing period
+function formatPrice(monthlyPrice: number | null, isYearly: boolean): string {
+  if (monthlyPrice === null) return 'po dogovoru';
+  
+  if (isYearly) {
+    // 20% discount for yearly, show monthly equivalent
+    const discountedMonthly = Math.round(monthlyPrice * 0.8);
+    return `€${discountedMonthly}/mesec`;
+  }
+  return `€${monthlyPrice}/mesec`;
+}
 
 // Get available add-ons based on plan
 function getAvailableAddons(plan: string | null) {
@@ -90,6 +103,7 @@ export default function Complete() {
   const [isSaving, setIsSaving] = useState(false);
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
+  const [isYearly, setIsYearly] = useState(false);
 
   const userPlan = userBot?.plan || 'basic';
   const availableAddons = getAvailableAddons(userPlan);
@@ -166,6 +180,25 @@ export default function Complete() {
                   </p>
                 </div>
 
+                {/* Billing toggle */}
+                <div className="flex items-center justify-center gap-3 p-4 bg-muted/50 rounded-lg">
+                  <span className={`text-sm font-medium ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Mesečno
+                  </span>
+                  <Switch
+                    checked={isYearly}
+                    onCheckedChange={setIsYearly}
+                  />
+                  <span className={`text-sm font-medium ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Letno
+                  </span>
+                  {isYearly && (
+                    <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                      -20%
+                    </span>
+                  )}
+                </div>
+
                 <div className="space-y-4">
                   {Object.entries(availableAddons).map(([key, category]) => (
                     <Card key={key} className="border-border">
@@ -188,7 +221,9 @@ export default function Complete() {
                               />
                               <span className="text-sm">{item.label}</span>
                             </div>
-                            <span className="text-sm font-medium text-primary">{item.price}</span>
+                            <span className="text-sm font-medium text-primary">
+                              {formatPrice(item.monthlyPrice, isYearly)}
+                            </span>
                           </div>
                         ))}
                       </CardContent>
@@ -201,6 +236,7 @@ export default function Complete() {
                     <p className="text-sm text-center">
                       <span className="font-medium">Izbrani dodatki:</span>{' '}
                       {selectedAddons.length} dodatkov bo dodanih vašemu paketu
+                      {isYearly && ' (letna naročnina z 20% popustom)'}
                     </p>
                   </div>
                 )}
