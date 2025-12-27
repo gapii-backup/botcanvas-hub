@@ -26,7 +26,17 @@ export default function Step3() {
 
   return (
     <WizardLayout currentStep={4} totalSteps={4} preview={
-      <div className="flex flex-col items-center justify-end h-full pb-8">
+      <div 
+        className="relative w-full h-full"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          alignItems: config.position === 'right' ? 'flex-end' : 'flex-start',
+          padding: '20px',
+          paddingBottom: `${config.verticalOffset + 20}px`,
+        }}
+      >
         <TriggerPreview config={config} />
       </div>
     }>
@@ -168,7 +178,10 @@ export default function Step3() {
         {/* Vertical offset */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>Odmik od spodaj</Label>
+            <div className="space-y-0.5">
+              <Label>Odmik od spodaj</Label>
+              <p className="text-xs text-muted-foreground">Priporočeno 28px</p>
+            </div>
             <span className="text-sm text-muted-foreground">{config.verticalOffset}px</span>
           </div>
           <Slider
