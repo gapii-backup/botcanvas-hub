@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Loader2,
   CalendarIcon,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
@@ -22,6 +24,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardConversations() {
   const { widget, loading } = useWidget();
@@ -37,6 +40,8 @@ export default function DashboardConversations() {
   const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days' | 'custom'>('all');
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const { toast } = useToast();
 
   // Scroll to bottom when messages load
   useEffect(() => {
@@ -103,6 +108,143 @@ export default function DashboardConversations() {
     ? `${filteredConversations.length}+` 
     : `${filteredConversations.length}`;
 
+  const getDateRangeLabel = () => {
+    if (dateFilter === 'all') return 'Vsi pogovori';
+    if (dateFilter === '7days') return 'Zadnjih 7 dni';
+    if (dateFilter === '30days') return 'Zadnjih 30 dni';
+    if (dateFilter === 'custom' && customDateRange) {
+      const from = customDateRange.from ? format(customDateRange.from, 'dd. MM. yyyy', { locale: sl }) : '';
+      const to = customDateRange.to ? format(customDateRange.to, 'dd. MM. yyyy', { locale: sl }) : '';
+      return `${from} - ${to}`;
+    }
+    return 'Neznano obdobje';
+  };
+
+  const exportToCSV = (messages: Array<{ session_id: string; date: string; type: string; content: string }>) => {
+    const headers = ['Session ID', 'Datum', 'Pošiljatelj', 'Sporočilo'];
+    const csvContent = [
+      headers.join(','),
+      ...messages.map(m => [
+        `"${m.session_id}"`,
+        `"${m.date}"`,
+        `"${m.type}"`,
+        `"${m.content.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+      ].join(','))
+    ].join('\n');
+    
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `pogovori_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToPDF = (messages: Array<{ session_id: string; date: string; type: string; content: string }>) => {
+    const grouped: Record<string, Array<{ session_id: string; date: string; type: string; content: string }>> = {};
+    messages.forEach(m => {
+      if (!grouped[m.session_id]) grouped[m.session_id] = [];
+      grouped[m.session_id].push(m);
+    });
+    
+    let html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Pogovori - BotMotion</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px; }
+          h2 { color: #374151; margin-top: 30px; }
+          .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
+          .user { background: #dbeafe; margin-left: 20%; }
+          .bot { background: #f3f4f6; margin-right: 20%; }
+          .meta { font-size: 12px; color: #6b7280; margin-top: 5px; }
+          .period { color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <h1>Pogovori - BotMotion</h1>
+        <p class="period">Obdobje: ${getDateRangeLabel()}</p>
+        <p class="period">Število pogovorov: ${Object.keys(grouped).length}</p>
+    `;
+    
+    Object.entries(grouped).forEach(([, msgs], index) => {
+      html += `<h2>Pogovor #${index + 1}</h2>`;
+      msgs.forEach(m => {
+        const msgClass = m.type === 'Uporabnik' ? 'user' : 'bot';
+        html += `
+          <div class="message ${msgClass}">
+            <strong>${m.type}:</strong> ${m.content}
+            <div class="meta">${m.date}</div>
+          </div>
+        `;
+      });
+    });
+    
+    html += '</body></html>';
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const handleExport = async (formatType: 'csv' | 'pdf') => {
+    setExporting(true);
+    
+    try {
+      const allMessages: Array<{ session_id: string; date: string; type: string; content: string }> = [];
+      
+      for (const conv of filteredConversations) {
+        const msgs = await fetchMessages(conv.session_id);
+        msgs.forEach(msg => {
+          let content = '';
+          let type = '';
+          
+          if (typeof msg.message === 'object' && msg.message !== null) {
+            content = (msg.message as any).content || (msg.message as any).text || '';
+            type = (msg.message as any).type === 'human' ? 'Uporabnik' : 'Bot';
+          } else {
+            content = String(msg.message || '');
+            type = 'Neznano';
+          }
+          
+          allMessages.push({
+            session_id: conv.session_id,
+            date: new Date(msg.created_at).toLocaleString('sl-SI'),
+            type,
+            content
+          });
+        });
+      }
+      
+      if (formatType === 'csv') {
+        exportToCSV(allMessages);
+      } else {
+        exportToPDF(allMessages);
+      }
+      
+      toast({
+        title: 'Izvoz uspešen',
+        description: `Pogovori so bili izvoženi v ${formatType.toUpperCase()} format.`
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: 'Napaka pri izvozu',
+        description: 'Prišlo je do napake pri izvozu pogovorov.',
+        variant: 'destructive'
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
@@ -131,71 +273,95 @@ export default function DashboardConversations() {
           )}
         </div>
 
-        {/* Filter gumbi */}
-        <div className="flex flex-wrap gap-2 items-center">
-          {[
-            { key: 'all', label: 'Vsi pogovori' },
-            { key: '7days', label: 'Zadnjih 7 dni' },
-            { key: '30days', label: 'Zadnjih 30 dni' },
-          ].map((filter) => (
-            <Button 
-              key={filter.key}
-              variant={dateFilter === filter.key ? 'default' : 'outline'} 
-              size="sm"
-              className="transition-all"
-              onClick={() => {
-                setDateFilter(filter.key as any);
-                setCustomDateRange(undefined);
-              }}
-            >
-              {filter.label}
-            </Button>
-          ))}
-          
-          {/* Custom Date Range Picker */}
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant={dateFilter === 'custom' ? 'default' : 'outline'}
+        {/* Filter gumbi in izvoz */}
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-2 items-center">
+            {[
+              { key: 'all', label: 'Vsi pogovori' },
+              { key: '7days', label: 'Zadnjih 7 dni' },
+              { key: '30days', label: 'Zadnjih 30 dni' },
+            ].map((filter) => (
+              <Button 
+                key={filter.key}
+                variant={dateFilter === filter.key ? 'default' : 'outline'} 
                 size="sm"
-                className={cn(
-                  "transition-all min-w-[200px] justify-start text-left font-normal",
-                  !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
-                )}
-                onClick={() => setDateFilter('custom')}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {customDateRange?.from ? (
-                  customDateRange.to ? (
-                    <>
-                      {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
-                    </>
-                  ) : (
-                    format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
-                  )
-                ) : (
-                  "Izberi obdobje"
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={customDateRange?.from}
-                selected={customDateRange}
-                onSelect={(range) => {
-                  setCustomDateRange(range);
-                  if (range?.from && range?.to) {
-                    setCalendarOpen(false);
-                  }
+                className="transition-all"
+                onClick={() => {
+                  setDateFilter(filter.key as any);
+                  setCustomDateRange(undefined);
                 }}
-                numberOfMonths={2}
-                locale={sl}
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
+              >
+                {filter.label}
+              </Button>
+            ))}
+            
+            {/* Custom Date Range Picker */}
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    "transition-all min-w-[200px] justify-start text-left font-normal",
+                    !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
+                  )}
+                  onClick={() => setDateFilter('custom')}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {customDateRange?.from ? (
+                    customDateRange.to ? (
+                      <>
+                        {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
+                      </>
+                    ) : (
+                      format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
+                    )
+                  ) : (
+                    "Izberi obdobje"
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={customDateRange?.from}
+                  selected={customDateRange}
+                  onSelect={(range) => {
+                    setCustomDateRange(range);
+                    if (range?.from && range?.to) {
+                      setCalendarOpen(false);
+                    }
+                  }}
+                  numberOfMonths={2}
+                  locale={sl}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Gumbi za izvoz */}
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleExport('csv')}
+              disabled={exporting || filteredConversations.length === 0}
+            >
+              {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              CSV
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleExport('pdf')}
+              disabled={exporting || filteredConversations.length === 0}
+            >
+              {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+              PDF
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
