@@ -95,6 +95,51 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          chat_history: string | null
+          created_at: string
+          email: string
+          id: number
+          message: string
+          name: string
+          phone: string | null
+          session_id: string
+          status: string
+          table_name: string
+          ticket_id: string
+          updated_at: string
+        }
+        Insert: {
+          chat_history?: string | null
+          created_at?: string
+          email: string
+          id?: number
+          message: string
+          name: string
+          phone?: string | null
+          session_id: string
+          status?: string
+          table_name: string
+          ticket_id: string
+          updated_at?: string
+        }
+        Update: {
+          chat_history?: string | null
+          created_at?: string
+          email?: string
+          id?: number
+          message?: string
+          name?: string
+          phone?: string | null
+          session_id?: string
+          status?: string
+          table_name?: string
+          ticket_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_bots: {
         Row: {
           api_key: string | null
