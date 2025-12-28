@@ -338,10 +338,8 @@ export default function Dashboard() {
               onClick={() => handleSubscribe('monthly')}
               disabled={subscribing !== null}
             >
-              {subscribing === 'monthly' ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
-              Mesečna naročnina (€{currentPlanPrices.monthly}/mesec)
+              {subscribing === 'monthly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Mesečna naročnina
             </Button>
             <Button 
               size="lg" 
@@ -350,10 +348,9 @@ export default function Dashboard() {
               onClick={() => handleSubscribe('yearly')}
               disabled={subscribing !== null}
             >
-              {subscribing === 'yearly' ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : null}
-              Letna naročnina -20% (€{currentPlanPrices.yearly}/leto)
+              {subscribing === 'yearly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Letna naročnina
+              <span className="ml-2 bg-success/20 text-success px-2 py-0.5 rounded text-sm font-semibold">-20%</span>
             </Button>
           </div>
         </DialogContent>
