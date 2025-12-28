@@ -10,8 +10,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { format, subDays } from 'date-fns';
+import { format, subDays, startOfMonth } from 'date-fns';
 import { sl } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
 import {
   CalendarIcon,
   MessageSquare,
@@ -79,14 +80,68 @@ export default function DashboardAnalytics() {
   const { widget, loading } = useWidget();
   const tableName = widget?.table_name;
 
-  // Date filter state
-  const [startDate, setStartDate] = useState<Date | undefined>(subDays(new Date(), 30));
-  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
+  // Date filter state - same as DashboardConversations
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | '7days' | '30days' | 'month' | 'custom'>('30days');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  // Calculate start/end dates based on filter
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    
+    if (dateFilter === 'all') {
+      return { startDate: undefined, endDate: undefined };
+    }
+    if (dateFilter === 'today') {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return { startDate: today, endDate: now };
+    }
+    if (dateFilter === '7days') {
+      return { startDate: subDays(now, 7), endDate: now };
+    }
+    if (dateFilter === '30days') {
+      return { startDate: subDays(now, 30), endDate: now };
+    }
+    if (dateFilter === 'month') {
+      return { startDate: startOfMonth(now), endDate: now };
+    }
+    if (dateFilter === 'custom' && customDateRange) {
+      return { startDate: customDateRange.from, endDate: customDateRange.to };
+    }
+    return { startDate: subDays(now, 30), endDate: now };
+  }, [dateFilter, customDateRange]);
 
   const { rawData, categories, topTopics, loading: topicsLoading } = useConversationTopics(
     tableName,
-    { startDate, endDate }
+    { startDate: startDate ?? null, endDate: endDate ?? null }
   );
+
+  // Get date range label for display
+  const getDateRangeLabel = () => {
+    if (dateFilter === 'all') return 'Vse';
+    if (dateFilter === 'today') return format(new Date(), 'd. MMMM yyyy', { locale: sl });
+    if (dateFilter === '7days') {
+      const from = format(subDays(new Date(), 7), 'd. MMM yyyy', { locale: sl });
+      const to = format(new Date(), 'd. MMM yyyy', { locale: sl });
+      return `${from} - ${to}`;
+    }
+    if (dateFilter === '30days') {
+      const from = format(subDays(new Date(), 30), 'd. MMM yyyy', { locale: sl });
+      const to = format(new Date(), 'd. MMM yyyy', { locale: sl });
+      return `${from} - ${to}`;
+    }
+    if (dateFilter === 'month') {
+      const from = format(startOfMonth(new Date()), 'd. MMM yyyy', { locale: sl });
+      const to = format(new Date(), 'd. MMM yyyy', { locale: sl });
+      return `${from} - ${to}`;
+    }
+    if (dateFilter === 'custom' && customDateRange?.from) {
+      const from = format(customDateRange.from, 'd. MMM yyyy', { locale: sl });
+      const to = customDateRange.to ? format(customDateRange.to, 'd. MMM yyyy', { locale: sl }) : '';
+      return to ? `${from} - ${to}` : from;
+    }
+    return 'Neznano obdobje';
+  };
 
   // Pie chart state
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -227,66 +282,80 @@ export default function DashboardAnalytics() {
   return (
     <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
       <div className="space-y-6 animate-slide-up">
-        {/* Date Range Picker */}
-        <div className="glass rounded-2xl p-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="text-sm text-muted-foreground">Obdobje:</span>
-            <Popover>
+        {/* Date Range Picker - same as DashboardConversations */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {[
+              { key: 'all', label: 'Vse' },
+              { key: 'today', label: 'Danes' },
+              { key: '7days', label: 'Zadnjih 7 dni' },
+              { key: '30days', label: 'Zadnjih 30 dni' },
+              { key: 'month', label: 'Ta mesec' },
+            ].map((filter) => (
+              <Button 
+                key={filter.key}
+                variant={dateFilter === filter.key ? 'default' : 'outline'} 
+                size="sm"
+                className="transition-all"
+                onClick={() => {
+                  setDateFilter(filter.key as any);
+                  setCustomDateRange(undefined);
+                }}
+              >
+                {filter.label}
+              </Button>
+            ))}
+            
+            {/* Custom Date Range Picker */}
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
+                <Button
+                  variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    "transition-all min-w-[200px] justify-start text-left font-normal",
+                    !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
+                  )}
+                  onClick={() => setDateFilter('custom')}
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, 'd. MMM yyyy', { locale: sl }) : 'Od'}
+                  {customDateRange?.from ? (
+                    customDateRange.to ? (
+                      <>
+                        {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
+                      </>
+                    ) : (
+                      format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
+                    )
+                  ) : (
+                    "Po meri"
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
                   initialFocus
+                  mode="range"
+                  defaultMonth={customDateRange?.from}
+                  selected={customDateRange}
+                  onSelect={(range) => {
+                    setCustomDateRange(range);
+                    if (range?.from && range?.to) {
+                      setCalendarOpen(false);
+                    }
+                  }}
+                  numberOfMonths={2}
+                  locale={sl}
                   className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
-            <span className="text-muted-foreground">—</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[160px] justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, 'd. MMM yyyy', { locale: sl }) : 'Do'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setStartDate(subDays(new Date(), 30));
-                setEndDate(new Date());
-              }}
-            >
-              Zadnjih 30 dni
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setStartDate(subDays(new Date(), 7));
-                setEndDate(new Date());
-              }}
-            >
-              Zadnjih 7 dni
-            </Button>
           </div>
+          
+          {/* Period display */}
+          <p className="text-sm text-muted-foreground">
+            Obdobje: {getDateRangeLabel()}
+          </p>
         </div>
 
         {/* Stats Cards */}
