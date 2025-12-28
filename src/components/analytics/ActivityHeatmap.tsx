@@ -56,6 +56,9 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
     return labels;
   }, []);
 
+  // Check if data is empty or all zeros
+  const hasData = data.length > 0 && maxValue > 0;
+
   if (data.length === 0) {
     return (
       <div className="h-48 flex items-center justify-center text-muted-foreground">
@@ -63,6 +66,9 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
       </div>
     );
   }
+
+  // Debug log
+  console.log('ActivityHeatmap render - data:', data, 'maxValue:', maxValue, 'hasData:', hasData);
 
   return (
     <TooltipProvider>

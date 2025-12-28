@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { differenceInDays, eachDayOfInterval, format } from 'date-fns';
 
 export interface TopicRecord {
   id: string;
@@ -127,23 +128,33 @@ export function useConversationTopics(
           console.error('Trend RPC error:', trendError);
         }
 
-        // Convert RPC result to TrendDataPoint array
-        // RPC returns last 7 days, we need to fill in missing days
-        const trendMap = new Map<string, number>();
+        // Determine date range for trend data
         const now = new Date();
+        const effectiveEndDate = endDate || now;
+        const effectiveStartDate = startDate || new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         
-        // Initialize last 14 days with 0
-        for (let i = 13; i >= 0; i--) {
-          const date = new Date(now);
-          date.setDate(date.getDate() - i);
-          const dayKey = date.toISOString().split('T')[0];
+        // Generate all days in the range
+        const trendMap = new Map<string, number>();
+        const daysInRange = eachDayOfInterval({ 
+          start: effectiveStartDate, 
+          end: effectiveEndDate 
+        });
+        
+        // Initialize all days with 0
+        daysInRange.forEach(date => {
+          const dayKey = format(date, 'yyyy-MM-dd');
           trendMap.set(dayKey, 0);
-        }
+        });
 
         // Fill in actual counts from RPC
         if (trendRpcData) {
           (trendRpcData as Array<{ day: string; count: number }>).forEach(item => {
-            const dayKey = typeof item.day === 'string' ? item.day : new Date(item.day).toISOString().split('T')[0];
+            // Handle both string and Date types
+            const dayKey = typeof item.day === 'string' 
+              ? item.day.split('T')[0] 
+              : format(new Date(item.day), 'yyyy-MM-dd');
+            
+            // Only include if within our range
             if (trendMap.has(dayKey)) {
               trendMap.set(dayKey, Number(item.count));
             }
@@ -164,22 +175,32 @@ export function useConversationTopics(
           console.error('Heatmap RPC error:', heatmapError);
         }
 
+        // Debug log
+        console.log('Heatmap RPC data:', heatmapRpcData);
+
         // Convert RPC result to 7x24 matrix
         // Index 0 = Sunday, 1 = Monday, ..., 6 = Saturday
         const heatmap: number[][] = Array(7).fill(null).map(() => Array(24).fill(0));
 
-        if (heatmapRpcData) {
+        if (heatmapRpcData && Array.isArray(heatmapRpcData)) {
           (heatmapRpcData as Array<{ day_of_week: number; hour: number; count: number }>).forEach(item => {
-            const dow = item.day_of_week;
-            const hour = item.hour;
+            const dow = Number(item.day_of_week);
+            const hour = Number(item.hour);
+            const count = Number(item.count);
+            
             if (dow >= 0 && dow < 7 && hour >= 0 && hour < 24) {
-              heatmap[dow][hour] = Number(item.count);
+              heatmap[dow][hour] = count;
             }
           });
         }
 
+        // Debug log
+        console.log('Processed heatmap matrix:', heatmap);
+        console.log('Max value in heatmap:', Math.max(...heatmap.flat()));
+
         setHeatmapData(heatmap);
       } catch (err) {
+        console.error('useConversationTopics error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
       } finally {
         setLoading(false);
