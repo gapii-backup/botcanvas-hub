@@ -34,7 +34,7 @@ const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics' },
-  { label: 'Leads', icon: Users, href: '/dashboard/leads', requiresAddon: 'contacts' },
+  { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresAddon: 'contacts' },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Računi', icon: CreditCard, href: '/dashboard/billing' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },

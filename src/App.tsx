@@ -27,7 +27,7 @@ import AdminPayments from "./pages/admin/AdminPayments";
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import DashboardConversations from "./pages/dashboard/DashboardConversations";
 import DashboardAnalytics from "./pages/dashboard/DashboardAnalytics";
-import DashboardLeads from "./pages/dashboard/DashboardLeads";
+import DashboardContacts from "./pages/dashboard/DashboardContacts";
 import DashboardSettings from "./pages/dashboard/DashboardSettings";
 import DashboardBilling from "./pages/dashboard/DashboardBilling";
 import DashboardHelp from "./pages/dashboard/DashboardHelp";
@@ -106,11 +106,11 @@ const App = () => (
               }
             />
             <Route
-              path="/dashboard/leads"
+              path="/dashboard/contacts"
               element={
                 <ProtectedRoute>
                   <DashboardGuard>
-                    <DashboardLeads />
+                    <DashboardContacts />
                   </DashboardGuard>
                 </ProtectedRoute>
               }
