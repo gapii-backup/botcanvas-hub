@@ -11,7 +11,11 @@ export interface Conversation {
 export interface Message {
   id: number;
   session_id: string;
-  message: string;
+  message: {
+    role?: string;
+    content?: string;
+    text?: string;
+  } | string;
   created_at: string;
 }
 

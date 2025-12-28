@@ -226,8 +226,13 @@ export default function Dashboard() {
 
   const handleSelectConversation = async (sessionId: string) => {
     setSelectedConversation(sessionId);
-    const msgs = await fetchMessages(sessionId);
-    setMessages(msgs);
+    try {
+      const msgs = await fetchMessages(sessionId);
+      setMessages(msgs || []);
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      setMessages([]);
+    }
   };
 
   const filteredConversations = conversations.filter(conv => {
@@ -472,14 +477,36 @@ export default function Dashboard() {
             {selectedConversation ? (
               messages.length > 0 ? (
                 <div className="space-y-4">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-foreground text-sm whitespace-pre-wrap">{msg.message}</p>
-                      <span className="text-xs text-muted-foreground mt-2 block">
-                        {new Date(msg.created_at).toLocaleString('sl-SI')}
-                      </span>
-                    </div>
-                  ))}
+                  {messages.map((msg) => {
+                    // Parse message - lahko je JSONB objekt ali string
+                    let messageContent = '';
+                    let isUser = false;
+                    
+                    if (typeof msg.message === 'object' && msg.message !== null) {
+                      messageContent = msg.message.content || msg.message.text || JSON.stringify(msg.message);
+                      isUser = msg.message.role === 'user';
+                    } else {
+                      messageContent = String(msg.message);
+                      isUser = messageContent.toLowerCase().startsWith('user:') || messageContent.toLowerCase().startsWith('uporabnik:');
+                    }
+                    
+                    return (
+                      <div
+                        key={msg.id}
+                        className={cn(
+                          "max-w-[80%] p-3 rounded-lg",
+                          isUser
+                            ? "bg-primary/20 ml-auto"
+                            : "bg-muted"
+                        )}
+                      >
+                        <p className="text-sm whitespace-pre-wrap">{messageContent}</p>
+                        <span className="text-xs text-muted-foreground mt-1 block">
+                          {new Date(msg.created_at).toLocaleString('sl-SI')}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
