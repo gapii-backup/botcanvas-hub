@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useWidget } from '@/hooks/useWidget';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversations, type Message } from '@/hooks/useConversations';
 import { cn } from '@/lib/utils';
-import { format, startOfMonth, startOfDay } from 'date-fns';
+import { format, startOfMonth, startOfDay, subDays } from 'date-fns';
 import { sl } from 'date-fns/locale';
+import type { DateRange } from 'react-day-picker';
 import {
   Lock,
   Users,
@@ -19,7 +22,10 @@ import {
   MessageSquare,
   Loader2,
   Mail,
+  CalendarIcon,
 } from 'lucide-react';
+
+type DateFilter = 'all' | '7days' | '30days' | 'custom';
 
 export default function DashboardContacts() {
   const navigate = useNavigate();
@@ -34,6 +40,8 @@ export default function DashboardContacts() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages load
@@ -43,14 +51,34 @@ export default function DashboardContacts() {
     }
   }, [messages]);
 
-  // Filter leads by search
+  // Filter leads by search and date
   const filteredLeads = useMemo(() => {
-    if (!searchQuery) return leads;
-    const query = searchQuery.toLowerCase();
-    return leads.filter(lead => 
-      lead.email?.toLowerCase().includes(query)
-    );
-  }, [leads, searchQuery]);
+    let result = leads;
+    
+    // Date filter
+    if (dateFilter === '7days') {
+      const sevenDaysAgo = subDays(new Date(), 7);
+      result = result.filter(lead => new Date(lead.created_at) >= sevenDaysAgo);
+    } else if (dateFilter === '30days') {
+      const thirtyDaysAgo = subDays(new Date(), 30);
+      result = result.filter(lead => new Date(lead.created_at) >= thirtyDaysAgo);
+    } else if (dateFilter === 'custom' && customDateRange?.from) {
+      const from = startOfDay(customDateRange.from);
+      const to = customDateRange.to ? startOfDay(new Date(customDateRange.to.getTime() + 86400000)) : new Date();
+      result = result.filter(lead => {
+        const date = new Date(lead.created_at);
+        return date >= from && date <= to;
+      });
+    }
+    
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(lead => lead.email?.toLowerCase().includes(query));
+    }
+    
+    return result;
+  }, [leads, searchQuery, dateFilter, customDateRange]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -189,6 +217,72 @@ export default function DashboardContacts() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Date Filter Buttons */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant={dateFilter === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setDateFilter('all');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Vsi kontakti
+          </Button>
+          <Button
+            variant={dateFilter === '7days' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setDateFilter('7days');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Zadnjih 7 dni
+          </Button>
+          <Button
+            variant={dateFilter === '30days' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => {
+              setDateFilter('30days');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Zadnjih 30 dni
+          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                size="sm"
+                className="gap-2"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {dateFilter === 'custom' && customDateRange?.from
+                  ? customDateRange.to
+                    ? `${format(customDateRange.from, 'd. MMM', { locale: sl })} - ${format(customDateRange.to, 'd. MMM', { locale: sl })}`
+                    : format(customDateRange.from, 'd. MMM yyyy', { locale: sl })
+                  : 'Izberi obdobje'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarComponent
+                initialFocus
+                mode="range"
+                defaultMonth={customDateRange?.from}
+                selected={customDateRange}
+                onSelect={(range) => {
+                  setCustomDateRange(range);
+                  if (range?.from) {
+                    setDateFilter('custom');
+                  }
+                }}
+                numberOfMonths={2}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Main Content - Two Panel Layout */}
