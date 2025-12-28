@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useBlocker } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,16 +19,6 @@ import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview
 import { ImageUpload } from '@/components/ImageUpload';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { cn } from '@/lib/utils';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 type PreviewType = 'home' | 'chat' | 'trigger';
 
@@ -62,7 +51,6 @@ const getTriggerIconPath = (iconName: string): string => {
 };
 
 export default function DashboardSettings() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { widget, loading, upsertWidget } = useWidget();
   const { config, setConfig, defaultConfig, resetConfig } = useWizardConfig();
@@ -74,7 +62,6 @@ export default function DashboardSettings() {
   const [editValue, setEditValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
   const subscriptionStatus = widget?.subscription_status || 'none';
   const apiKey = widget?.api_key;
@@ -99,18 +86,6 @@ export default function DashboardSettings() {
     setHasUnsavedChanges(true);
   }, [setConfig]);
 
-  // Block navigation with unsaved changes
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
-  );
-
-  // Show dialog when navigation is blocked
-  useEffect(() => {
-    if (blocker.state === 'blocked') {
-      setShowLeaveDialog(true);
-    }
-  }, [blocker.state]);
 
   // Warn on page leave (browser close/refresh)
   useEffect(() => {
@@ -860,32 +835,6 @@ export default function DashboardSettings() {
         {PreviewPanel}
       </div>
 
-      {/* Leave confirmation dialog */}
-      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Neshranjene spremembe</AlertDialogTitle>
-            <AlertDialogDescription>
-              Imate neshranjene spremembe. Ali ste prepričani, da želite zapustiti stran? Vse spremembe bodo izgubljene.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => {
-              setShowLeaveDialog(false);
-              blocker.reset?.();
-            }}>
-              Ostani na strani
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              setHasUnsavedChanges(false);
-              setShowLeaveDialog(false);
-              blocker.proceed?.();
-            }}>
-              Zapusti brez shranjevanja
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </DashboardLayout>
   );
 }
