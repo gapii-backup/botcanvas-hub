@@ -6,6 +6,8 @@ export interface Conversation {
   message_count: number;
   first_message_at: string;
   last_message_at: string;
+  first_question: string;
+  first_answer: string;
 }
 
 export interface Message {

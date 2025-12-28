@@ -310,7 +310,9 @@ export type Database = {
       get_conversations: {
         Args: { p_limit?: number; p_offset?: number; p_table_name: string }
         Returns: {
+          first_answer: string
           first_message_at: string
+          first_question: string
           last_message_at: string
           message_count: number
           session_id: string
