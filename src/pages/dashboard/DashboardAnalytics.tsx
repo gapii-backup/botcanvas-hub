@@ -91,6 +91,8 @@ export default function DashboardAnalytics() {
     { startDate: startDate ?? null, endDate: endDate ?? null }
   );
 
+  console.log('Heatmap data for render:', heatmapData);
+
   // Get date range label for display
   const getDateRangeLabel = () => {
     if (dateFilter === 'all') return 'Vse';

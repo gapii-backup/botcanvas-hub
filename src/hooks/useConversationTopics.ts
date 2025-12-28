@@ -155,7 +155,7 @@ export function useConversationTopics(
         const { data: heatmapRaw, error: heatmapError } = await supabase
           .rpc('get_activity_heatmap', { p_table_name: tableName });
 
-        console.log('Heatmap RPC raw data:', heatmapRaw);
+        console.log('Heatmap raw data:', heatmapRaw);
 
         if (heatmapError) {
           console.error('Heatmap RPC error:', heatmapError);
@@ -165,22 +165,19 @@ export function useConversationTopics(
         const matrix: number[][] = Array(7).fill(null).map(() => Array(24).fill(0));
 
         if (heatmapRaw && Array.isArray(heatmapRaw)) {
-          heatmapRaw.forEach((item: { day_of_week: number; hour: number; count: number }) => {
-            const dow = Number(item.day_of_week);
-            const hour = Number(item.hour);
-            const count = Number(item.count);
-            
-            console.log(`Heatmap item: dow=${dow}, hour=${hour}, count=${count}`);
-            
+          heatmapRaw.forEach((item: any) => {
+            const dow = Number(item.day_of_week ?? item.dayOfWeek ?? item.dow);
+            const hour = Number(item.hour ?? item.hour_of_day ?? item.hour_of_day);
+            const count = Number(item.count ?? item.message_count ?? item.messageCount);
+
             if (dow >= 0 && dow < 7 && hour >= 0 && hour < 24) {
               matrix[dow][hour] = count;
             }
           });
         }
 
-        console.log('Processed heatmap matrix:', matrix);
-        console.log('Heatmap max value:', Math.max(...matrix.flat()));
-        
+        console.log('Heatmap matrix:', matrix);
+
         setHeatmapData(matrix);
 
       } catch (err) {
