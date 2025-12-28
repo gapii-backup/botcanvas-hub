@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUnsavedChanges } from '@/contexts/UnsavedChangesContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,6 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   LayoutDashboard,
   MessageSquare,
@@ -24,6 +35,8 @@ import {
   Menu,
   X,
   TicketCheck,
+  Save,
+  Undo2,
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
@@ -52,6 +65,17 @@ export function DashboardSidebar({
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const { 
+    hasUnsavedChanges, 
+    setHasUnsavedChanges,
+    pendingNavigation, 
+    setPendingNavigation,
+    onSave,
+    onDiscard
+  } = useUnsavedChanges();
 
   const filteredNavItems = navItems.filter(item => {
     if (item.requiresAddon === 'contacts') {
@@ -68,8 +92,50 @@ export function DashboardSidebar({
   };
 
   const handleNavClick = (href: string) => {
+    // Check for unsaved changes before navigating
+    if (hasUnsavedChanges && location.pathname !== href) {
+      setPendingNavigation(href);
+      setShowUnsavedDialog(true);
+      return;
+    }
     navigate(href);
     setMobileMenuOpen(false);
+  };
+
+  const handleSaveAndContinue = async () => {
+    if (onSave) {
+      setIsSaving(true);
+      try {
+        await onSave();
+        setHasUnsavedChanges(false);
+        if (pendingNavigation) {
+          navigate(pendingNavigation);
+          setPendingNavigation(null);
+        }
+      } finally {
+        setIsSaving(false);
+      }
+    }
+    setShowUnsavedDialog(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleDiscardAndContinue = () => {
+    if (onDiscard) {
+      onDiscard();
+    }
+    setHasUnsavedChanges(false);
+    if (pendingNavigation) {
+      navigate(pendingNavigation);
+      setPendingNavigation(null);
+    }
+    setShowUnsavedDialog(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleStayHere = () => {
+    setPendingNavigation(null);
+    setShowUnsavedDialog(false);
   };
 
   const isActive = (href: string) => {
@@ -226,6 +292,34 @@ export function DashboardSidebar({
           {children}
         </div>
       </main>
+
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Neshranjene spremembe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Imate neshranjene spremembe. Kaj želite narediti?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={handleStayHere}>
+              Ostani tukaj
+            </AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={handleDiscardAndContinue}
+            >
+              <Undo2 className="h-4 w-4 mr-2" />
+              Prekliči spremembe
+            </Button>
+            <AlertDialogAction onClick={handleSaveAndContinue} disabled={isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? 'Shranjujem...' : 'Shrani'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

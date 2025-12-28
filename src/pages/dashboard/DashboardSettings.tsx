@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { useUnsavedChanges } from '@/contexts/UnsavedChangesContext';
 import { 
   Bot, Copy, Check, Lock, Home, MessagesSquare, MousePointer,
   Plus, X, RotateCcw, Sun, Moon, AlignLeft, AlignRight,
@@ -64,6 +65,12 @@ export default function DashboardSettings() {
   const { toast } = useToast();
   const { widget, loading, upsertWidget } = useWidget();
   const { config, setConfig, defaultConfig, resetConfig } = useWizardConfig();
+  const { 
+    setHasUnsavedChanges: setGlobalUnsavedChanges, 
+    setOnSave, 
+    setOnDiscard 
+  } = useUnsavedChanges();
+  
   const [copied, setCopied] = useState(false);
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
   const [activeTab, setActiveTab] = useState('home');
@@ -83,6 +90,70 @@ export default function DashboardSettings() {
       initialConfigRef.current = { ...config };
     }
   }, [loading, config]);
+
+  // Sync local unsaved changes with global context
+  useEffect(() => {
+    setGlobalUnsavedChanges(hasUnsavedChanges);
+  }, [hasUnsavedChanges, setGlobalUnsavedChanges]);
+
+  // Register save and discard handlers for sidebar navigation
+  useEffect(() => {
+    setOnSave(async () => {
+      await handleSaveForNavigation();
+    });
+    setOnDiscard(() => {
+      handleCancelForNavigation();
+    });
+    
+    // Cleanup on unmount
+    return () => {
+      setOnSave(null);
+      setOnDiscard(null);
+      setGlobalUnsavedChanges(false);
+    };
+  }, [config, setOnSave, setOnDiscard, setGlobalUnsavedChanges]);
+
+  // Save function for navigation (doesn't show toast - sidebar will navigate)
+  const handleSaveForNavigation = async () => {
+    setIsSaving(true);
+    try {
+      await upsertWidget({
+        bot_name: config.name || '',
+        welcome_message: config.welcomeMessage || '',
+        home_title: config.homeTitle || '',
+        home_subtitle_line2: config.homeSubtitle || '',
+        primary_color: config.primaryColor || '#6366f1',
+        mode: config.darkMode ? 'dark' : 'light',
+        header_style: config.headerStyle || 'solid',
+        bot_icon_background: config.iconBgColor || '',
+        bot_icon_color: config.iconColor || '',
+        bot_avatar: config.botAvatar || '',
+        bot_icon: getBotIconPaths(config.botIcon || 'Bot') as any,
+        trigger_icon: getTriggerIconPath(config.triggerIcon || 'MessageCircle'),
+        position: config.position || 'right',
+        vertical_offset: config.verticalOffset || 20,
+        trigger_style: config.triggerStyle || 'floating',
+        edge_trigger_text: config.edgeTriggerText || '',
+        quick_questions: config.quickQuestions || [],
+        show_email_field: config.showEmailField ?? true,
+        show_bubble: config.showBubble ?? true,
+        bubble_text: config.bubbleText || '',
+        website_url: config.websiteUrl || '',
+      });
+      initialConfigRef.current = { ...config };
+      setHasUnsavedChanges(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Cancel function for navigation
+  const handleCancelForNavigation = () => {
+    if (initialConfigRef.current) {
+      setConfig(initialConfigRef.current);
+    }
+    setHasUnsavedChanges(false);
+  };
 
   const subscriptionStatus = widget?.subscription_status || 'none';
   const apiKey = widget?.api_key;
