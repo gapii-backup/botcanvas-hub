@@ -30,7 +30,7 @@ export default function DashboardConversations() {
   const { widget, loading } = useWidget();
   const tableName = widget?.table_name;
   const { stats } = useDashboardStats(tableName);
-  const { conversations, loading: convsLoading, loadingMore, hasMore, loadMore, fetchMessages } = useConversations(tableName);
+  const { conversations, loading: convsLoading, loadingMore, hasMore, loadMore, fetchMessages, fetchAllConversations } = useConversations(tableName);
   
   const conversationsListRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -198,9 +198,42 @@ export default function DashboardConversations() {
     setExporting(true);
     
     try {
-      const allMessages: Array<{ session_id: string; date: string; type: string; content: string }> = [];
+      // Določi date filter glede na izbrano obdobje
+      let exportDateFilter: { from?: Date; to?: Date; days?: number } | undefined;
       
-      for (const conv of filteredConversations) {
+      if (dateFilter === '7days') {
+        exportDateFilter = { days: 7 };
+      } else if (dateFilter === '30days') {
+        exportDateFilter = { days: 30 };
+      } else if (dateFilter === 'custom' && customDateRange) {
+        exportDateFilter = {
+          from: customDateRange.from,
+          to: customDateRange.to
+        };
+      }
+      
+      toast({
+        title: 'Pripravljam izvoz...',
+        description: 'Nalagam vse pogovore za izbrano obdobje.'
+      });
+      
+      // Fetch VSE pogovore za izbrano obdobje
+      const allConversations = await fetchAllConversations(exportDateFilter);
+      
+      if (allConversations.length === 0) {
+        toast({
+          title: 'Ni pogovorov',
+          description: 'Za izbrano obdobje ni pogovorov za izvoz.',
+          variant: 'destructive'
+        });
+        setExporting(false);
+        return;
+      }
+      
+      const allMessages: Array<{ session_id: string; date: string; type: string; content: string }> = [];
+      let processed = 0;
+      
+      for (const conv of allConversations) {
         const msgs = await fetchMessages(conv.session_id);
         msgs.forEach(msg => {
           let content = '';
@@ -221,6 +254,11 @@ export default function DashboardConversations() {
             content
           });
         });
+        
+        processed++;
+        if (processed % 10 === 0) {
+          console.log(`Processed ${processed}/${allConversations.length} conversations`);
+        }
       }
       
       if (formatType === 'csv') {
@@ -231,7 +269,7 @@ export default function DashboardConversations() {
       
       toast({
         title: 'Izvoz uspešen',
-        description: `Pogovori so bili izvoženi v ${formatType.toUpperCase()} format.`
+        description: `Izvoženih ${allConversations.length} pogovorov v ${formatType.toUpperCase()} format.`
       });
     } catch (error) {
       console.error('Export error:', error);
@@ -255,6 +293,16 @@ export default function DashboardConversations() {
 
   return (
     <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
+      {/* Export loading overlay */}
+      {exporting && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card border rounded-xl p-6 flex flex-col items-center gap-4 shadow-lg">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="text-foreground font-medium">Izvažam pogovore...</span>
+            <span className="text-sm text-muted-foreground">To lahko traja nekaj trenutkov</span>
+          </div>
+        </div>
+      )}
       <div className="space-y-6 animate-slide-up">
         {/* Usage Progress */}
         <div className="bg-muted rounded-xl p-4">
