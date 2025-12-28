@@ -54,13 +54,45 @@ export default function AdminWidgetEdit() {
     loadWidget();
   }, [id]);
 
+  // Track original is_active state to detect changes
+  const [originalIsActive, setOriginalIsActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (widget) {
+      setOriginalIsActive(widget.is_active);
+    }
+  }, [widget?.id]);
+
   const handleSave = async () => {
     if (!widget || !id) return;
     
     setSaving(true);
     try {
       await updateWidgetById(id, widget);
-      toast.success('Widget shranjen');
+      
+      // Check if is_active was changed to TRUE
+      if (widget.is_active && !originalIsActive) {
+        // Call the webhook to notify about bot activation
+        try {
+          await fetch('https://hub.botmotion.ai/webhook/bot-activated', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_email: widget.user_email,
+              bot_name: widget.bot_name,
+              api_key: widget.api_key
+            })
+          });
+          toast.success('Bot aktiviran in email poslan uporabniku');
+        } catch (webhookError) {
+          console.error('Webhook error:', webhookError);
+          toast.success('Widget shranjen, a webhook ni bil uspešen');
+        }
+        // Update original state after successful activation
+        setOriginalIsActive(true);
+      } else {
+        toast.success('Widget shranjen');
+      }
     } catch (error) {
       toast.error('Napaka pri shranjevanju');
     } finally {
