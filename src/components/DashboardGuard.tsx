@@ -32,8 +32,8 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     return <Navigate to="/customize/complete" replace />;
   }
 
-  // Widget is active or pending - allow access
-  if (widget.status === 'active' || widget.status === 'pending') {
+  // Widget is active, pending, or setup_paid - allow access
+  if (widget.status === 'active' || widget.status === 'pending' || widget.status === 'setup_paid') {
     return <>{children}</>;
   }
 
