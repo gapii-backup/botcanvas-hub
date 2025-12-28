@@ -48,17 +48,25 @@ export function useSupportTickets(tableName: string | null | undefined) {
   }, [tableName]);
 
   const updateTicketStatus = async (ticketId: string, status: 'open' | 'closed') => {
-    const { error } = await supabase
+    console.log('Updating ticket:', ticketId, 'to status:', status);
+    
+    const { data, error } = await supabase
       .from('support_tickets')
       .update({ status, updated_at: new Date().toISOString() })
-      .eq('ticket_id', ticketId);
+      .eq('ticket_id', ticketId)
+      .select();
     
-    if (!error) {
-      setTickets(prev => prev.map(t => 
-        t.ticket_id === ticketId ? { ...t, status } : t
-      ));
+    console.log('Update result:', { data, error });
+    
+    if (error) {
+      console.error('Update error:', error);
+      return false;
     }
-    return !error;
+    
+    setTickets(prev => prev.map(t => 
+      t.ticket_id === ticketId ? { ...t, status } : t
+    ));
+    return true;
   };
 
   return { tickets, loading, updateTicketStatus };
