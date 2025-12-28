@@ -298,6 +298,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_activity_heatmap: {
+        Args: { p_table_name: string }
+        Returns: {
+          count: number
+          day_of_week: number
+          hour: number
+        }[]
+      }
       get_conversation_messages: {
         Args: { p_session_id: string; p_table_name: string }
         Returns: {
