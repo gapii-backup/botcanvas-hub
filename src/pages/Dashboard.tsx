@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 import {
   Bot,
   Copy,
@@ -18,10 +19,15 @@ import {
   Rocket,
   Lock,
   Loader2,
+  Calendar,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useLeads } from '@/hooks/useLeads';
+import { useConversationTopics } from '@/hooks/useConversationTopics';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -30,6 +36,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  CartesianGrid,
+} from 'recharts';
 
 const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = {
   basic: {
@@ -46,17 +74,24 @@ const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = 
   }
 };
 
-const planPrices: Record<string, { monthly: number; yearly: number }> = {
-  basic: { monthly: 29, yearly: 278 },
-  pro: { monthly: 59, yearly: 566 },
-  enterprise: { monthly: 149, yearly: 1430 }
-};
-
 const planNames: Record<string, string> = {
   basic: 'Basic',
   pro: 'Pro',
   enterprise: 'Enterprise'
 };
+
+const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--success))', 'hsl(var(--warning))', 'hsl(var(--destructive))', 'hsl(var(--muted-foreground))'];
+
+// Mock data for line chart (last 7 days)
+const mockMessageData = [
+  { day: 'Pon', messages: 12 },
+  { day: 'Tor', messages: 19 },
+  { day: 'Sre', messages: 15 },
+  { day: 'Čet', messages: 25 },
+  { day: 'Pet', messages: 22 },
+  { day: 'Sob', messages: 8 },
+  { day: 'Ned', messages: 5 },
+];
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -68,10 +103,16 @@ export default function Dashboard() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
+  const tableName = widget?.table_name;
+  const { stats, loading: statsLoading } = useDashboardStats(tableName);
+  const { leads, loading: leadsLoading } = useLeads(tableName);
+  const { categories, topTopics, loading: topicsLoading } = useConversationTopics(tableName);
+
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
   const plan = widget?.plan || 'basic';
   const apiKey = widget?.api_key;
+  const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
   
   // Handle subscription success/cancelled from URL
   useEffect(() => {
@@ -179,145 +220,35 @@ export default function Dashboard() {
     }
   };
 
-  // Get banner config based on status
-  const getBannerConfig = () => {
-    if (!isActive) {
-      return {
-        icon: Clock,
-        iconBg: 'bg-primary/20',
-        iconColor: 'text-primary',
-        borderColor: 'border-primary/50',
-        title: '⏳ Vaš chatbot se pripravlja.',
-        subtitle: 'Obvestili vas bomo po e-pošti ko bo pripravljen.'
-      };
-    }
-    if (subscriptionStatus === 'none') {
-      return {
-        icon: Rocket,
-        iconBg: 'bg-success/20',
-        iconColor: 'text-success',
-        borderColor: 'border-success/50',
-        title: '🎉 Vaš chatbot je pripravljen!',
-        subtitle: 'Aktivirajte naročnino za uporabo.'
-      };
-    }
-    if (subscriptionStatus === 'active') {
-      return {
-        icon: CheckCircle2,
-        iconBg: 'bg-success/20',
-        iconColor: 'text-success',
-        borderColor: 'border-success/50',
-        title: '✅ Vaš chatbot je aktiven.',
-        subtitle: 'Vaš chatbot uspešno deluje.'
-      };
-    }
-    if (subscriptionStatus === 'failed') {
-      return {
-        icon: AlertCircle,
-        iconBg: 'bg-destructive/20',
-        iconColor: 'text-destructive',
-        borderColor: 'border-destructive/50',
-        title: '⚠️ Plačilo neuspešno.',
-        subtitle: 'Prosimo posodobite plačilno metodo.'
-      };
-    }
-    if (subscriptionStatus === 'cancelled') {
-      return {
-        icon: AlertCircle,
-        iconBg: 'bg-warning/20',
-        iconColor: 'text-warning',
-        borderColor: 'border-warning/50',
-        title: 'Naročnina preklicana.',
-        subtitle: 'Za nadaljevanje uporabe obnovite naročnino.'
-      };
-    }
-    return null;
-  };
+  const usagePercentage = stats.monthlyLimit > 0 
+    ? Math.round((stats.monthlyCount / stats.monthlyLimit) * 100) 
+    : 0;
 
-  // Get embed section config based on status
-  const getEmbedSectionConfig = () => {
-    if (!isActive) {
-      return {
-        icon: Clock,
-        iconBg: 'bg-primary/20',
-        iconColor: 'text-primary',
-        message: '⏳ Vaš chatbot se pripravlja...',
-        showButton: false,
-        showCode: false
-      };
-    }
-    if (subscriptionStatus === 'none') {
-      return {
-        icon: Lock,
-        iconBg: 'bg-warning/20',
-        iconColor: 'text-warning',
-        message: 'Za prikaz embed kode aktivirajte naročnino',
-        showButton: true,
-        showCode: false
-      };
-    }
-    if (subscriptionStatus === 'failed') {
-      return {
-        icon: AlertCircle,
-        iconBg: 'bg-destructive/20',
-        iconColor: 'text-destructive',
-        message: '⚠️ Plačilo neuspešno. Prosimo posodobite plačilno metodo.',
-        showButton: true,
-        showCode: false
-      };
-    }
-    if (subscriptionStatus === 'cancelled') {
-      return {
-        icon: AlertCircle,
-        iconBg: 'bg-warning/20',
-        iconColor: 'text-warning',
-        message: 'Naročnina preklicana. Za nadaljevanje uporabe obnovite naročnino.',
-        showButton: true,
-        showCode: false
-      };
-    }
-    if (subscriptionStatus === 'active') {
-      return {
-        showCode: true
-      };
-    }
-    return { showCode: false, showButton: false };
-  };
-
-  const stats = [
-    { label: 'Sporočila danes', value: '0', icon: MessageSquare, change: '+0%' },
-    { label: 'Aktivni uporabniki', value: '0', icon: Users, change: '+0%' },
-    { label: 'Konverzijska stopnja', value: '0%', icon: TrendingUp, change: '+0%' },
-  ];
+  const currentPlanName = planNames[plan] || 'Basic';
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="space-y-8">
+      <DashboardSidebar hasContactsAddon={false}>
+        <div className="p-6 lg:p-8 space-y-8">
           <div>
             <Skeleton className="h-9 w-48 mb-2" />
             <Skeleton className="h-5 w-80" />
           </div>
-          <Skeleton className="h-32 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-36" />
-            <Skeleton className="h-36" />
-            <Skeleton className="h-36" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
           </div>
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-64 w-full" />
         </div>
-      </DashboardLayout>
+      </DashboardSidebar>
     );
   }
 
-  const currentPlanPrices = planPrices[plan] || planPrices.basic;
-  const currentPlanName = planNames[plan] || 'Basic';
-  const bannerConfig = getBannerConfig();
-  const embedConfig = getEmbedSectionConfig();
-
   return (
-    <DashboardLayout>
-      {/* Subscription Modal - Only show if is_active === true AND subscription_status === 'none' */}
+    <DashboardSidebar hasContactsAddon={hasContactsAddon}>
+      {/* Subscription Modal */}
       <Dialog open={showSubscriptionModal && isActive && subscriptionStatus === 'none'} onOpenChange={setShowSubscriptionModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -356,7 +287,7 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-8">
+      <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="animate-fade-in">
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
@@ -365,7 +296,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Subscription Activation Section - Show when is_active === true AND subscription_status === 'none' */}
+        {/* Subscription Activation Section */}
         {isActive && subscriptionStatus === 'none' && (
           <div className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20 rounded-xl p-6 animate-slide-up">
             <div className="flex items-center gap-3 mb-4">
@@ -402,69 +333,243 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Status Banner */}
-        {bannerConfig && (
-          <div className={cn(
-            "glass rounded-2xl p-4 animate-slide-up flex items-center gap-4",
-            bannerConfig.borderColor
-          )}>
-            <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", bannerConfig.iconBg)}>
-              <bannerConfig.icon className={cn("h-5 w-5", bannerConfig.iconColor)} />
+        {/* Stats Grid - 4 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="glass rounded-2xl p-6 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <MessageSquare className="h-5 w-5 text-primary" />
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-foreground font-medium">{bannerConfig.title}</p>
-              <p className="text-muted-foreground text-sm">{bannerConfig.subtitle}</p>
+            <p className="text-3xl font-bold text-foreground">{stats.messagesToday}</p>
+            <p className="text-sm text-muted-foreground mt-1">Sporočila danes</p>
+          </div>
+
+          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-success" />
+              </div>
             </div>
-            {/* Show "Uredi chatbota" button only if is_active === true */}
-            {isActive && (
-              <Button variant="outline" onClick={() => navigate('/customize')}>
-                <Settings className="h-4 w-4 mr-2" />
-                Uredi chatbota
-              </Button>
+            <p className="text-3xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
+            <p className="text-sm text-muted-foreground mt-1">Pogovori ta mesec</p>
+          </div>
+
+          {hasContactsAddon && (
+            <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-warning" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-foreground">{stats.leadsCount}</p>
+              <p className="text-sm text-muted-foreground mt-1">Leads</p>
+            </div>
+          )}
+
+          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: hasContactsAddon ? '300ms' : '200ms' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-lg bg-destructive/20 flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-destructive" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground">{stats.conversionRate}%</p>
+            <p className="text-sm text-muted-foreground mt-1">Konverzijska stopnja</p>
+          </div>
+        </div>
+
+        {/* Conversations Section */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Pogovori</h2>
+          
+          {/* Line Chart */}
+          <div className="h-64 mb-6">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mockMessageData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
+                <YAxis stroke="hsl(var(--muted-foreground))" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="messages" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--primary))' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Usage Progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Poraba:</span>
+              <span className="text-foreground font-medium">
+                {stats.monthlyCount} / {stats.monthlyLimit} pogovorov
+              </span>
+            </div>
+            <Progress value={usagePercentage} className="h-2" />
+            {usagePercentage > 80 && (
+              <div className="flex items-center gap-2 text-warning text-sm mt-2">
+                <AlertCircle className="h-4 w-4" />
+                <span>Približujete se mesečni omejitvi pogovorov</span>
+              </div>
             )}
           </div>
-        )}
+        </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div
-                key={stat.label}
-                className="glass rounded-2xl p-6 animate-slide-up"
-                style={{ animationDelay: `${(index + 1) * 100}ms` }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded-full">
-                    {stat.change}
-                  </span>
+        {/* Analytics Section */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Analiza</h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Pie/Bar Chart */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-4">Kategorije pogovorov</h3>
+              {categories.length > 0 ? (
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={categories}
+                        dataKey="count"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={80}
+                        label={({ category }) => category}
+                      >
+                        {categories.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-                <p className="text-3xl font-bold text-foreground">{stat.value}</p>
-                <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              ) : (
+                <div className="h-48 flex items-center justify-center text-muted-foreground">
+                  Ni podatkov o kategorijah
+                </div>
+              )}
+            </div>
+
+            {/* Top Topics */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-4">Top 5 tem</h3>
+              {topTopics.length > 0 ? (
+                <div className="space-y-3">
+                  {topTopics.map((topic, index) => (
+                    <div key={topic.topic} className="flex items-center justify-between">
+                      <span className="text-sm text-foreground">{index + 1}. {topic.topic}</span>
+                      <span className="text-sm text-muted-foreground">{topic.count}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-muted-foreground">
+                  Ni podatkov o temah
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Leads Section */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Leads</h2>
+          
+          {hasContactsAddon ? (
+            leads.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Session ID</TableHead>
+                      <TableHead>Datum</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {leads.slice(0, 10).map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell className="font-medium">{lead.email || '-'}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {lead.session_id.slice(0, 8)}...
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {new Date(lead.created_at).toLocaleDateString('sl-SI')}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            );
-          })}
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Še ni zbranih kontaktov
+              </div>
+            )
+          ) : (
+            <div className="text-center py-8">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
+                <Lock className="h-5 w-5" />
+                <span>🔒 Odklenite zbiranje kontaktov z nadgradnjo paketa</span>
+              </div>
+              <Button onClick={() => navigate('/pricing')}>
+                Nadgradi
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Bot Settings Section */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Nastavitve bota</h2>
+            <Button variant="outline" onClick={() => navigate('/customize')}>
+              <Settings className="h-4 w-4 mr-2" />
+              Uredi videz chatbota
+            </Button>
+          </div>
+          
+          {/* Widget Preview */}
+          <div className="bg-muted/50 rounded-lg p-4 h-64 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <Bot className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>Predogled widgeta</p>
+            </div>
+          </div>
         </div>
 
         {/* Embed Code Section */}
-        {embedConfig.showCode ? (
-          <div className="glass rounded-2xl p-6 animate-slide-up delay-400">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-                <Bot className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
-                <p className="text-sm text-muted-foreground">
-                  Dodajte to kodo pred zaključni &lt;/body&gt; tag
-                </p>
-              </div>
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
+              <Bot className="h-5 w-5 text-primary-foreground" />
             </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
+              <p className="text-sm text-muted-foreground">
+                Dodajte to kodo pred zaključni &lt;/body&gt; tag
+              </p>
+            </div>
+          </div>
 
+          {subscriptionStatus === 'active' ? (
             <div className="relative">
               <pre className="bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border">
                 <code>{embedCode}</code>
@@ -488,31 +593,14 @@ export default function Dashboard() {
                 )}
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="glass rounded-2xl p-6 animate-slide-up delay-400 border-warning/30">
-            <div className="flex items-center gap-3">
-              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", embedConfig.iconBg)}>
-                {embedConfig.icon && <embedConfig.icon className={cn("h-5 w-5", embedConfig.iconColor)} />}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
-                <p className="text-sm text-muted-foreground">
-                  {embedConfig.message}
-                </p>
-              </div>
+          ) : (
+            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/20 rounded-lg">
+              <Lock className="h-5 w-5 text-warning" />
+              <span className="text-warning">Za prikaz embed kode aktivirajte naročnino</span>
             </div>
-            {embedConfig.showButton && (
-              <Button 
-                className="mt-4"
-                onClick={() => setShowSubscriptionModal(true)}
-              >
-                Aktiviraj naročnino
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </DashboardLayout>
+    </DashboardSidebar>
   );
 }

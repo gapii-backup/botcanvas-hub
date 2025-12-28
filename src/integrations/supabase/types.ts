@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversation_topics: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          session_id: string
+          table_name: string
+          topic: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          session_id: string
+          table_name: string
+          topic?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+          table_name?: string
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          session_id: string
+          table_name: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          session_id: string
+          table_name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          session_id?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
+      message_limits: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_count: number
+          monthly_limit: number
+          reset_at: string
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_count?: number
+          monthly_limit?: number
+          reset_at?: string
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_count?: number
+          monthly_limit?: number
+          reset_at?: string
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_bots: {
         Row: {
           api_key: string | null
