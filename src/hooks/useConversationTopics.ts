@@ -40,6 +40,8 @@ export function useConversationTopics(
   const [topTopics, setTopTopics] = useState<TopTopic[]>([]);
   const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
   const [heatmapData, setHeatmapData] = useState<HeatmapData>([]);
+  const [sessionsCount, setSessionsCount] = useState<number>(0);
+  const [humanMessagesCount, setHumanMessagesCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -196,6 +198,44 @@ export function useConversationTopics(
 
         setHeatmapData(matrix);
 
+        // === 4. Fetch sessions count with date range ===
+        const dateStartStr = startDate 
+          ? startDate.toISOString().replace('T', ' ').replace('Z', '') 
+          : null;
+        
+        const dateEndStr = endDate 
+          ? (() => {
+              const endOfDay = new Date(endDate);
+              endOfDay.setHours(23, 59, 59, 999);
+              return endOfDay.toISOString().replace('T', ' ').replace('Z', '');
+            })()
+          : null;
+
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .rpc('get_sessions_count', { 
+            p_table_name: tableName,
+            p_start_date: dateStartStr,
+            p_end_date: dateEndStr
+          });
+
+        if (sessionsError) {
+          console.error('Sessions count error:', sessionsError);
+        }
+        setSessionsCount(sessionsData || 0);
+
+        // === 5. Fetch human messages count with date range ===
+        const { data: humanMsgData, error: humanMsgError } = await supabase
+          .rpc('get_human_messages_count_range', { 
+            p_table_name: tableName,
+            p_start_date: dateStartStr,
+            p_end_date: dateEndStr
+          });
+
+        if (humanMsgError) {
+          console.error('Human messages count error:', humanMsgError);
+        }
+        setHumanMessagesCount(humanMsgData || 0);
+
       } catch (err) {
         console.error('useConversationTopics error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -212,7 +252,9 @@ export function useConversationTopics(
     categories, 
     topTopics, 
     trendData, 
-    heatmapData, 
+    heatmapData,
+    sessionsCount,
+    humanMessagesCount, 
     loading, 
     error 
   };

@@ -343,6 +343,14 @@ export type Database = {
         Args: { p_table_name: string }
         Returns: number
       }
+      get_human_messages_count_range: {
+        Args: {
+          p_end_date?: string
+          p_start_date?: string
+          p_table_name: string
+        }
+        Returns: number
+      }
       get_messages_by_day:
         | {
             Args: { p_table_name: string }
@@ -359,6 +367,14 @@ export type Database = {
             }[]
           }
       get_messages_today: { Args: { p_table_name: string }; Returns: number }
+      get_sessions_count: {
+        Args: {
+          p_end_date?: string
+          p_start_date?: string
+          p_table_name: string
+        }
+        Returns: number
+      }
       get_sessions_this_month: {
         Args: { p_table_name: string }
         Returns: number
