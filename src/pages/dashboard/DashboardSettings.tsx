@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,13 +12,23 @@ import {
   MessageCircle, MessageSquare, Sparkles, Headphones, Zap, LucideIcon, Save, Loader2, Undo2
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
-import { useWizardConfig, TRIGGER_ICONS, BOT_ICONS } from '@/hooks/useWizardConfig';
+import { useWizardConfig, TRIGGER_ICONS, BOT_ICONS, BotConfig } from '@/hooks/useWizardConfig';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { ImageUpload } from '@/components/ImageUpload';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type PreviewType = 'home' | 'chat' | 'trigger';
 
@@ -62,6 +72,17 @@ export default function DashboardSettings() {
   const [editValue, setEditValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingTab, setPendingTab] = useState<string | null>(null);
+  
+  // Store initial config when component mounts
+  const initialConfigRef = useRef<BotConfig | null>(null);
+  
+  useEffect(() => {
+    if (!loading && initialConfigRef.current === null) {
+      initialConfigRef.current = { ...config };
+    }
+  }, [loading, config]);
 
   const subscriptionStatus = widget?.subscription_status || 'none';
   const apiKey = widget?.api_key;
@@ -86,7 +107,38 @@ export default function DashboardSettings() {
     setHasUnsavedChanges(true);
   }, [setConfig]);
 
+  // Handle tab change with unsaved changes check
+  const handleTabChange = (newTab: string) => {
+    if (hasUnsavedChanges) {
+      setPendingTab(newTab);
+      setShowUnsavedDialog(true);
+    } else {
+      setActiveTab(newTab);
+    }
+  };
 
+  // Save and continue to new tab
+  const handleSaveAndContinue = async () => {
+    await handleSave();
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+    setShowUnsavedDialog(false);
+  };
+
+  // Discard changes and continue to new tab
+  const handleDiscardAndContinue = () => {
+    if (initialConfigRef.current) {
+      setConfig(initialConfigRef.current);
+    }
+    setHasUnsavedChanges(false);
+    if (pendingTab) {
+      setActiveTab(pendingTab);
+      setPendingTab(null);
+    }
+    setShowUnsavedDialog(false);
+  };
   // Warn on page leave (browser close/refresh)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -147,6 +199,8 @@ export default function DashboardSettings() {
         website_url: config.websiteUrl || '',
       });
 
+      // Update initial config reference after successful save
+      initialConfigRef.current = { ...config };
       setHasUnsavedChanges(false);
       toast({
         title: 'Shranjeno!',
@@ -164,13 +218,15 @@ export default function DashboardSettings() {
     }
   };
 
-  // Cancel/reset changes
+  // Cancel/reset changes - restore to initial state
   const handleCancel = () => {
-    resetConfig();
+    if (initialConfigRef.current) {
+      setConfig(initialConfigRef.current);
+    }
     setHasUnsavedChanges(false);
     toast({
       title: 'Preklicano',
-      description: 'Nastavitve so bile ponastavljene.',
+      description: 'Nastavitve so bile ponastavljene na začetno stanje.',
     });
   };
 
@@ -236,7 +292,7 @@ export default function DashboardSettings() {
     <div className="space-y-6">
       {/* Bot Settings Tabs */}
       <div className="glass rounded-2xl p-6 animate-slide-up">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="home" className="flex items-center gap-2">
               <Home className="h-4 w-4" />
@@ -835,6 +891,36 @@ export default function DashboardSettings() {
         {PreviewPanel}
       </div>
 
+      {/* Unsaved changes dialog */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Neshranjene spremembe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Imate neshranjene spremembe. Kaj želite narediti?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => {
+              setPendingTab(null);
+              setShowUnsavedDialog(false);
+            }}>
+              Ostani tukaj
+            </AlertDialogCancel>
+            <Button
+              variant="outline"
+              onClick={handleDiscardAndContinue}
+            >
+              <Undo2 className="h-4 w-4 mr-2" />
+              Prekliči spremembe
+            </Button>
+            <AlertDialogAction onClick={handleSaveAndContinue} disabled={isSaving}>
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? 'Shranjujem...' : 'Shrani'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
