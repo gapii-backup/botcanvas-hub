@@ -275,7 +275,7 @@ export default function Complete() {
           api_key: apiKey,
           plan: userPlan,
           user_email: user.email,
-          success_url: 'https://app.botmotion.ai/dashboard?payment=success',
+          success_url: 'https://app.botmotion.ai/payment-success',
           cancel_url: 'https://app.botmotion.ai/customize/complete?payment=cancelled'
         })
       });
