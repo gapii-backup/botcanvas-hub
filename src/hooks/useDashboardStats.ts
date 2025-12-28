@@ -8,6 +8,7 @@ export interface DashboardStats {
   conversionRate: number;
   monthlyCount: number;
   monthlyLimit: number;
+  humanMessagesCount: number;
 }
 
 export interface MessagesByDay {
@@ -23,6 +24,7 @@ export function useDashboardStats(tableName: string | null | undefined) {
     conversionRate: 0,
     monthlyCount: 0,
     monthlyLimit: 1000,
+    humanMessagesCount: 0,
   });
   const [messagesByDay, setMessagesByDay] = useState<MessagesByDay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +81,13 @@ export function useDashboardStats(tableName: string | null | undefined) {
         if (leadsError) console.error('Leads error:', leadsError);
         console.log('Leads count:', leadsCount);
 
+        // Get human messages count for this table
+        const { data: humanMessagesData, error: humanError } = await supabase
+          .rpc('get_human_messages_count', { p_table_name: tableName });
+        
+        if (humanError) console.error('Human messages error:', humanError);
+        console.log('Human messages count:', humanMessagesData);
+
         const totalLeads = leadsCount || 0;
         const totalSessions = sessionsData || 0;
         const conversionRate = totalSessions > 0 
@@ -90,8 +99,9 @@ export function useDashboardStats(tableName: string | null | undefined) {
           conversationsThisMonth: totalSessions,
           leadsCount: totalLeads,
           conversionRate,
-          monthlyCount: totalSessions,
+          monthlyCount: humanMessagesData || 0,
           monthlyLimit: limitsData?.monthly_limit || 1000,
+          humanMessagesCount: humanMessagesData || 0,
         });
 
         // Format messages by day for chart

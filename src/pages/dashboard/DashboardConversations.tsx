@@ -39,7 +39,7 @@ export default function DashboardConversations() {
   }, [messages]);
 
   const usagePercentage = stats.monthlyLimit > 0 
-    ? Math.round((stats.monthlyCount / stats.monthlyLimit) * 100) 
+    ? Math.round((stats.humanMessagesCount / stats.monthlyLimit) * 100) 
     : 0;
 
   const handleSelectConversation = async (sessionId: string) => {
@@ -160,7 +160,7 @@ export default function DashboardConversations() {
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-muted-foreground">Poraba sporočil</span>
             <span className="text-sm font-semibold text-foreground">
-              {stats.monthlyCount} / {stats.monthlyLimit} sporočil
+              {stats.humanMessagesCount} / {stats.monthlyLimit} sporočil
             </span>
           </div>
           <Progress value={usagePercentage} className="h-2" />
@@ -275,19 +275,11 @@ export default function DashboardConversations() {
                       let messageContent = '';
                       let isUser = false;
                       
-                      // Debug - log the full message structure
-                      console.log('Full message object:', JSON.stringify(msg.message));
                       
                       if (typeof msg.message === 'object' && msg.message !== null) {
-                        // Preveri različne možne strukture
                         messageContent = msg.message.content || msg.message.text || JSON.stringify(msg.message);
-                        // Preveri role - lahko je 'user', 'human', 'customer', 'sender' itd.
-                        isUser = msg.message.role === 'user' || 
-                                 msg.message.role === 'human' || 
-                                 msg.message.role === 'customer' ||
-                                 (msg.message as any).sender === 'user' ||
-                                 (msg.message as any).type === 'user' ||
-                                 (msg.message as any).from === 'user';
+                        // type === 'human' za uporabnika, 'ai' ali 'assistant' za bota
+                        isUser = (msg.message as any).type === 'human';
                       } else {
                         messageContent = String(msg.message || '');
                       }
