@@ -36,6 +36,7 @@ import {
 } from 'recharts';
 import { ActivityHeatmap } from '@/components/analytics/ActivityHeatmap';
 import { HorizontalBarChart } from '@/components/analytics/HorizontalBarChart';
+import { PieChart3D } from '@/components/analytics/PieChart3D';
 
 const CHART_COLORS = [
   'hsl(var(--primary))',
@@ -446,7 +447,7 @@ export default function DashboardAnalytics() {
                 <FolderOpen className="h-5 w-5 text-primary" />
                 Kategorije pogovorov
               </h3>
-              <HorizontalBarChart 
+              <PieChart3D 
                 categories={categories}
                 selectedCategory={selectedCategory}
                 onCategoryClick={handleCategoryClick}
