@@ -8,6 +8,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   MessageSquare,
   AlertCircle,
   Loader2,
@@ -389,27 +395,29 @@ export default function DashboardConversations() {
             </Popover>
           </div>
 
-          {/* Gumbi za izvoz */}
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleExport('csv')}
-              disabled={exporting || filteredConversations.length === 0}
-            >
-              {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-              CSV
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => handleExport('pdf')}
-              disabled={exporting || filteredConversations.length === 0}
-            >
-              {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-              PDF
-            </Button>
-          </div>
+          {/* Gumb za izvoz z dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="default" 
+                size="sm"
+                disabled={exporting || filteredConversations.length === 0}
+              >
+                {exporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+                Prenesi pogovore
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('csv')}>
+                <Download className="w-4 h-4 mr-2" />
+                CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                <FileText className="w-4 h-4 mr-2" />
+                PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
