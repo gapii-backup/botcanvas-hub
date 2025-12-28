@@ -103,11 +103,20 @@ export default function Dashboard() {
   const { categories, topTopics, loading: topicsLoading } = useConversationTopics(tableName);
   const { conversations, loading: convsLoading, loadingMore, hasMore, loadMore, fetchMessages } = useConversations(tableName);
   const conversationsListRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | 'custom'>('all');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+
+  // Scroll to bottom when messages load
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
@@ -229,12 +238,15 @@ export default function Dashboard() {
 
   const handleSelectConversation = async (sessionId: string) => {
     setSelectedConversation(sessionId);
+    setMessagesLoading(true);
     try {
       const msgs = await fetchMessages(sessionId);
       setMessages(msgs || []);
     } catch (error) {
       console.error('Error loading messages:', error);
       setMessages([]);
+    } finally {
+      setMessagesLoading(false);
     }
   };
 
@@ -588,15 +600,16 @@ export default function Dashboard() {
           
           <div className="flex-1 overflow-y-auto p-4">
             {selectedConversation ? (
-              messages.length > 0 ? (
+              messagesLoading ? (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : messages.length > 0 ? (
                 <div className="space-y-4">
                   {messages.map((msg, index) => {
                     // Parse message - lahko je JSONB objekt ali string
                     let messageContent = '';
                     let isUser = false;
-                    
-                    // Debug - odstrani po testiranju
-                    console.log('Message:', msg.message);
                     
                     if (typeof msg.message === 'object' && msg.message !== null) {
                       // Preveri različne možne strukture
@@ -645,10 +658,12 @@ export default function Dashboard() {
                       </div>
                     );
                   })}
+                  {/* Scroll anchor */}
+                  <div ref={messagesEndRef} />
                 </div>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  Ni sporočil v tem pogovoru
                 </div>
               )
             ) : (
