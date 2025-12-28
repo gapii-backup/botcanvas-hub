@@ -57,7 +57,7 @@ export function useConversationTopics(
 
         let query = supabase
           .from('conversation_topics')
-          .select('id, category, topic, created_at, session_id')
+          .select('id, category, specific, created_at, session_id')
           .eq('table_name', tableName);
 
         if (startDate) {
@@ -75,7 +75,7 @@ export function useConversationTopics(
           data: Array<{
             id: string;
             category: string;
-            topic: string | null;
+            specific: string | null;
             created_at: string;
             session_id: string;
           }> | null; 
@@ -84,11 +84,10 @@ export function useConversationTopics(
 
         if (fetchError) throw fetchError;
 
-        // Map topic to specific for compatibility
         const records: TopicRecord[] = (data || []).map(item => ({
           id: item.id,
           category: item.category,
-          specific: item.topic,
+          specific: item.specific,
           created_at: item.created_at,
           session_id: item.session_id
         }));
