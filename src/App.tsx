@@ -28,6 +28,7 @@ import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import DashboardConversations from "./pages/dashboard/DashboardConversations";
 import DashboardAnalytics from "./pages/dashboard/DashboardAnalytics";
 import DashboardContacts from "./pages/dashboard/DashboardContacts";
+import DashboardSupport from "./pages/dashboard/DashboardSupport";
 import DashboardSettings from "./pages/dashboard/DashboardSettings";
 import DashboardBilling from "./pages/dashboard/DashboardBilling";
 import DashboardHelp from "./pages/dashboard/DashboardHelp";
@@ -121,6 +122,16 @@ const App = () => (
                 <ProtectedRoute>
                   <DashboardGuard>
                     <DashboardSettings />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/support"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardSupport />
                   </DashboardGuard>
                 </ProtectedRoute>
               }

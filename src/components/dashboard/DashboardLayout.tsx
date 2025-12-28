@@ -12,9 +12,10 @@ export function DashboardLayout({ title, subtitle, children }: DashboardLayoutPr
   const location = useLocation();
   const { widget } = useWidget();
   const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
+  const hasTicketsAddon = Array.isArray(widget?.addons) && widget.addons.includes('tickets');
 
   return (
-    <DashboardSidebar hasContactsAddon={hasContactsAddon}>
+    <DashboardSidebar hasContactsAddon={hasContactsAddon} hasTicketsAddon={hasTicketsAddon}>
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="animate-fade-in">

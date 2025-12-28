@@ -23,10 +23,12 @@ import {
   User,
   Menu,
   X,
+  TicketCheck,
 } from 'lucide-react';
 
 interface DashboardSidebarProps {
   hasContactsAddon?: boolean;
+  hasTicketsAddon?: boolean;
   children: React.ReactNode;
 }
 
@@ -35,13 +37,15 @@ const navItems = [
   { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics' },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresAddon: 'contacts' },
+  { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresAddon: 'tickets' },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Računi', icon: CreditCard, href: '/dashboard/billing' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
 
 export function DashboardSidebar({ 
-  hasContactsAddon = false, 
+  hasContactsAddon = false,
+  hasTicketsAddon = false,
   children,
 }: DashboardSidebarProps) {
   const { user, signOut } = useAuth();
@@ -52,6 +56,9 @@ export function DashboardSidebar({
   const filteredNavItems = navItems.filter(item => {
     if (item.requiresAddon === 'contacts') {
       return hasContactsAddon;
+    }
+    if (item.requiresAddon === 'tickets') {
+      return hasTicketsAddon;
     }
     return true;
   });
