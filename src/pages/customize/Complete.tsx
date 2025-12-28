@@ -280,13 +280,13 @@ export default function Complete() {
         })
       });
 
-      const { sessionId } = await response.json();
+      const data = await response.json();
       
       // Redirect to Stripe Checkout
-      const stripe = await stripePromise;
-      if (stripe && sessionId) {
-        // Use window.location for redirect since newer Stripe.js uses different API
-        window.location.href = `https://checkout.stripe.com/c/pay/${sessionId}`;
+      if (data.url) {
+        window.location.href = data.url;
+      } else if (data.sessionId) {
+        window.location.href = `https://checkout.stripe.com/c/pay/${data.sessionId}`;
       }
     } catch (error) {
       console.error('Error:', error);
