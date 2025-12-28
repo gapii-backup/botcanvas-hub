@@ -246,6 +246,17 @@ export default function DashboardAnalytics() {
   const generatePDF = useCallback(async () => {
     setIsGeneratingPdf(true);
     
+    // Helper to replace Slovenian characters with ASCII equivalents for PDF
+    const sanitizeForPdf = (text: string): string => {
+      return text
+        .replace(/č/g, 'c')
+        .replace(/Č/g, 'C')
+        .replace(/š/g, 's')
+        .replace(/Š/g, 'S')
+        .replace(/ž/g, 'z')
+        .replace(/Ž/g, 'Z');
+    };
+    
     try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
@@ -265,7 +276,7 @@ export default function DashboardAnalytics() {
         }
         doc.setFontSize(14);
         doc.setTextColor(...primaryColor);
-        doc.text(title, margin, yPos);
+        doc.text(sanitizeForPdf(title), margin, yPos);
         yPos += 10;
         doc.setTextColor(...textColor);
       };
@@ -284,9 +295,9 @@ export default function DashboardAnalytics() {
       // Date range and generation date
       doc.setFontSize(10);
       doc.setTextColor(...mutedColor);
-      doc.text(`Obdobje: ${getDateRangeLabel()}`, margin, yPos);
+      doc.text(sanitizeForPdf(`Obdobje: ${getDateRangeLabel()}`), margin, yPos);
       yPos += 6;
-      doc.text(`Generirano: ${format(new Date(), 'd. MMMM yyyy, HH:mm', { locale: sl })}`, margin, yPos);
+      doc.text(sanitizeForPdf(`Generirano: ${format(new Date(), 'd. MMMM yyyy, HH:mm', { locale: sl })}`), margin, yPos);
       yPos += 15;
 
       // Separator line
@@ -304,7 +315,7 @@ export default function DashboardAnalytics() {
       const statsData = [
         ['Skupaj pogovorov', sessionsCount.toString()],
         ['Stevilo sporocil', humanMessagesCount.toString()],
-        ['Najpogostejsa tema', stats.mostFrequentTopic],
+        ['Najpogostejsa tema', sanitizeForPdf(stats.mostFrequentTopic)],
       ];
 
       autoTable(doc, {
@@ -328,7 +339,7 @@ export default function DashboardAnalytics() {
       
       if (formattedTrendData.length > 0) {
         const trendTableData = formattedTrendData.map(item => [
-          item.label,
+          sanitizeForPdf(item.label),
           item.count.toString()
         ]);
 
@@ -360,7 +371,7 @@ export default function DashboardAnalytics() {
       if (categories.length > 0) {
         const totalCategories = categories.reduce((sum, c) => sum + c.count, 0);
         const categoryTableData = categories.map(cat => [
-          cat.category,
+          sanitizeForPdf(cat.category),
           cat.count.toString(),
           totalCategories > 0 ? `${((cat.count / totalCategories) * 100).toFixed(1)}%` : '0%'
         ]);
@@ -388,7 +399,7 @@ export default function DashboardAnalytics() {
       if (topTopics.length > 0) {
         const topTopicsData = topTopics.slice(0, 5).map((topic, index) => [
           (index + 1).toString(),
-          topic.topic,
+          sanitizeForPdf(topic.topic),
           `${topic.count}x`
         ]);
 
@@ -447,8 +458,8 @@ export default function DashboardAnalytics() {
           .sort((a, b) => b.count - a.count)
           .slice(0, 50) // Limit to 50 topics for PDF
           .map(item => [
-            item.category,
-            item.specific,
+            sanitizeForPdf(item.category),
+            sanitizeForPdf(item.specific),
             item.count.toString(),
             totalForPercent > 0 ? `${((item.count / totalForPercent) * 100).toFixed(1)}%` : '0%'
           ]);
@@ -717,11 +728,18 @@ export default function DashboardAnalytics() {
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
+                            // Slovenian plural: 1 = sporočilo, 2 = sporočili, 3-4 = sporočila, 0 or 5+ = sporočil
+                            const getMessageLabel = (count: number) => {
+                              if (count === 1) return 'sporočilo';
+                              if (count === 2) return 'sporočili';
+                              if (count === 3 || count === 4) return 'sporočila';
+                              return 'sporočil';
+                            };
                             return (
                               <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
                                 <p className="font-medium text-foreground">{data.label}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {data.count} {data.count === 1 ? 'sporočilo' : data.count < 5 ? 'sporočila' : 'sporočil'}
+                                  {data.count} {getMessageLabel(data.count)}
                                 </p>
                               </div>
                             );
