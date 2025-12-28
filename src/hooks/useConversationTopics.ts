@@ -151,9 +151,25 @@ export function useConversationTopics(
           setTrendData([]);
         }
 
-        // === 3. Fetch heatmap data via RPC ===
+        // === 3. Fetch heatmap data via RPC with date range ===
+        const heatmapStartDate = startDate 
+          ? startDate.toISOString().replace('T', ' ').replace('Z', '') 
+          : null;
+        
+        const heatmapEndDate = endDate 
+          ? (() => {
+              const endOfDay = new Date(endDate);
+              endOfDay.setHours(23, 59, 59, 999);
+              return endOfDay.toISOString().replace('T', ' ').replace('Z', '');
+            })()
+          : null;
+
         const { data: heatmapRaw, error: heatmapError } = await supabase
-          .rpc('get_activity_heatmap', { p_table_name: tableName });
+          .rpc('get_activity_heatmap', { 
+            p_table_name: tableName,
+            p_start_date: heatmapStartDate,
+            p_end_date: heatmapEndDate
+          });
 
         console.log('Heatmap raw data:', heatmapRaw);
 
