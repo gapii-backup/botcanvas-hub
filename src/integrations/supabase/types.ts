@@ -316,6 +316,10 @@ export type Database = {
           session_id: string
         }[]
       }
+      get_human_messages_count: {
+        Args: { p_table_name: string }
+        Returns: number
+      }
       get_messages_by_day: {
         Args: { p_table_name: string }
         Returns: {
