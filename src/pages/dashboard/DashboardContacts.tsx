@@ -63,7 +63,7 @@ export default function DashboardContacts() {
     }
   }, [messages]);
 
-  // Get unique leads (one per email, most recent)
+  // Get unique leads (one per email, most recent) - for statistics and export
   const uniqueLeads = useMemo(() => {
     return Object.values(
       leads.reduce((acc, lead) => {
@@ -76,7 +76,36 @@ export default function DashboardContacts() {
     ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [leads]);
 
-  // Filter leads by search and date
+  // Filter ALL leads by search and date - for display list
+  const displayLeads = useMemo(() => {
+    let result = leads;
+    
+    // Date filter
+    if (dateFilter === '7days') {
+      const sevenDaysAgo = subDays(new Date(), 7);
+      result = result.filter(lead => new Date(lead.created_at) >= sevenDaysAgo);
+    } else if (dateFilter === '30days') {
+      const thirtyDaysAgo = subDays(new Date(), 30);
+      result = result.filter(lead => new Date(lead.created_at) >= thirtyDaysAgo);
+    } else if (dateFilter === 'custom' && customDateRange?.from) {
+      const from = startOfDay(customDateRange.from);
+      const to = customDateRange.to ? startOfDay(new Date(customDateRange.to.getTime() + 86400000)) : new Date();
+      result = result.filter(lead => {
+        const date = new Date(lead.created_at);
+        return date >= from && date <= to;
+      });
+    }
+    
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(lead => lead.email?.toLowerCase().includes(query));
+    }
+    
+    return result;
+  }, [leads, searchQuery, dateFilter, customDateRange]);
+
+  // Filter UNIQUE leads - for export
   const filteredLeads = useMemo(() => {
     let result = uniqueLeads;
     
@@ -443,7 +472,7 @@ export default function DashboardContacts() {
 
               {/* Contacts List */}
               <div className="flex-1 overflow-y-auto">
-                {filteredLeads.length === 0 ? (
+                {displayLeads.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full p-6 text-center">
                     <Mail className="h-12 w-12 text-muted-foreground/50 mb-4" />
                     <p className="text-muted-foreground">
@@ -455,7 +484,7 @@ export default function DashboardContacts() {
                   </div>
                 ) : (
                   <div className="divide-y divide-border">
-                    {filteredLeads.map((lead) => (
+                    {displayLeads.map((lead) => (
                       <button
                         key={lead.id}
                         onClick={() => handleSelectLead(lead.session_id)}
