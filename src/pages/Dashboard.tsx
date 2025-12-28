@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -16,9 +16,11 @@ import {
   CheckCircle2,
   Rocket,
   Lock,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
+import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -28,17 +30,70 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
+const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = {
+  basic: {
+    monthly: 'price_1SjJKK6cfwnnZsVXWEAaqZYr',
+    yearly: 'price_1SjJLk6cfwnnZsVX1FhA81fq'
+  },
+  pro: {
+    monthly: 'price_1SjJKk6cfwnnZsVXYShVZi6o',
+    yearly: 'price_1SjJMB6cfwnnZsVXhImgf35D'
+  },
+  enterprise: {
+    monthly: 'price_1SjJL86cfwnnZsVXkJ2gbn2z',
+    yearly: 'price_1SjJMi6cfwnnZsVXCcGoMNVY'
+  }
+};
+
+const planPrices: Record<string, { monthly: number; yearly: number }> = {
+  basic: { monthly: 29, yearly: 278 },
+  pro: { monthly: 59, yearly: 566 },
+  enterprise: { monthly: 149, yearly: 1430 }
+};
+
+const planNames: Record<string, string> = {
+  basic: 'Basic',
+  pro: 'Pro',
+  enterprise: 'Enterprise'
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
-  const { widget, loading } = useWidget();
+  const { widget, loading, fetchWidget } = useWidget();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
   const isActive = widget?.status === 'active' && widget?.is_active;
   const isSetupPaid = widget?.status === 'setup_paid';
   const apiKey = widget?.api_key;
   const subscriptionStatus = widget?.subscription_status || 'none';
+  const plan = widget?.plan || 'basic';
+  
+  // Handle subscription success/cancelled from URL
+  useEffect(() => {
+    const subscriptionResult = searchParams.get('subscription');
+    if (subscriptionResult === 'success') {
+      toast({
+        title: 'Naročnina aktivirana!',
+        description: 'Vaša naročnina je bila uspešno aktivirana.',
+      });
+      // Refresh widget data to get updated subscription_status
+      fetchWidget();
+      // Clear the URL parameter
+      setSearchParams({});
+    } else if (subscriptionResult === 'cancelled') {
+      toast({
+        title: 'Naročnina preklicana',
+        description: 'Niste dokončali plačila naročnine.',
+        variant: 'destructive',
+      });
+      setSearchParams({});
+    }
+  }, [searchParams]);
   
   // Show subscription modal when is_active is true but subscription_status is 'none'
   useEffect(() => {
@@ -69,9 +124,59 @@ export default function Dashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubscriptionClick = (period: 'monthly' | 'yearly') => {
-    // Navigate to checkout with subscription type
-    navigate(`/checkout?type=subscription&period=${period}`);
+  const handleSubscribe = async (billingPeriod: 'monthly' | 'yearly') => {
+    if (!widget?.plan || !user?.email) {
+      toast({
+        title: 'Napaka',
+        description: 'Manjkajo podatki za naročnino.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const priceId = subscriptionPrices[widget.plan]?.[billingPeriod];
+    if (!priceId) {
+      toast({
+        title: 'Napaka',
+        description: 'Neveljavni naročniški paket.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSubscribing(billingPeriod);
+    
+    try {
+      const response = await fetch('https://hub.botmotion.ai/webhook/create-subscription-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price_id: priceId,
+          api_key: widget.api_key,
+          plan: widget.plan,
+          billing_period: billingPeriod,
+          user_email: user.email,
+          success_url: 'https://app.botmotion.ai/dashboard?subscription=success',
+          cancel_url: 'https://app.botmotion.ai/dashboard?subscription=cancelled'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+      toast({
+        title: 'Napaka',
+        description: 'Napaka pri ustvarjanju naročnine. Prosimo, poskusite znova.',
+        variant: 'destructive',
+      });
+      setSubscribing(null);
+    }
   };
 
   const stats = [
@@ -100,6 +205,9 @@ export default function Dashboard() {
     );
   }
 
+  const currentPlanPrices = planPrices[plan] || planPrices.basic;
+  const currentPlanName = planNames[plan] || 'Basic';
+
   return (
     <DashboardLayout>
       {/* Subscription Modal */}
@@ -110,27 +218,35 @@ export default function Dashboard() {
               <div className="h-12 w-12 rounded-xl bg-success/20 flex items-center justify-center">
                 <Rocket className="h-6 w-6 text-success" />
               </div>
-              <DialogTitle className="text-xl">Vaš chatbot je pripravljen!</DialogTitle>
+              <DialogTitle className="text-xl">🎉 Vaš chatbot je pripravljen!</DialogTitle>
             </div>
             <DialogDescription className="text-base pt-2">
-              Za aktivacijo izberite naročniški paket
+              Za aktivacijo izberite naročniški paket za <span className="font-semibold text-foreground">{currentPlanName}</span> paket
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 mt-4">
             <Button 
               size="lg" 
               className="w-full"
-              onClick={() => handleSubscriptionClick('monthly')}
+              onClick={() => handleSubscribe('monthly')}
+              disabled={subscribing !== null}
             >
-              Mesečna naročnina
+              {subscribing === 'monthly' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
+              Mesečna naročnina (€{currentPlanPrices.monthly}/mesec)
             </Button>
             <Button 
               size="lg" 
               variant="outline"
               className="w-full border-success text-success hover:bg-success/10"
-              onClick={() => handleSubscriptionClick('yearly')}
+              onClick={() => handleSubscribe('yearly')}
+              disabled={subscribing !== null}
             >
-              Letna naročnina (-20%)
+              {subscribing === 'yearly' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
+              Letna naročnina -20% (€{currentPlanPrices.yearly}/leto)
             </Button>
           </div>
         </DialogContent>
