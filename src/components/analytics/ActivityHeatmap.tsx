@@ -37,15 +37,17 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
     return { maxValue: max, reorderedData: reordered };
   }, [data]);
 
-  const getColor = (value: number) => {
-    if (value === 0) return 'bg-muted/30';
-    if (maxValue === 0) return 'bg-muted/30';
-    
-    const intensity = value / maxValue;
-    if (intensity < 0.25) return 'bg-primary/20';
-    if (intensity < 0.5) return 'bg-primary/40';
-    if (intensity < 0.75) return 'bg-primary/60';
-    return 'bg-primary/90';
+  const getCellStyle = (value: number) => {
+    if (maxValue === 0 || value <= 0) {
+      // "white/light" for 0
+      return { backgroundColor: 'hsl(var(--muted) / 0.25)' };
+    }
+
+    const ratio = value / maxValue;
+    const alpha = 0.2 + ratio * 0.8; // 0.2..1.0
+
+    // Theme-safe "blue" via primary token
+    return { backgroundColor: `hsl(var(--primary) / ${alpha})` };
   };
 
   const hourLabels = useMemo(() => {
@@ -95,18 +97,15 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                   <Tooltip key={`${dayIndex}-${hourIndex}`}>
                     <TooltipTrigger asChild>
                       <div
+                        style={getCellStyle(value)}
                         className={cn(
-                          "flex-1 h-5 rounded-sm transition-colors cursor-default",
-                          getColor(value)
+                          "flex-1 h-5 rounded-sm transition-colors cursor-default"
                         )}
                       />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="font-medium">
-                        {fullName} {hourIndex.toString().padStart(2, '0')}:00
-                      </p>
-                      <p className="text-muted-foreground">
-                        {value} {value === 1 ? 'pogovor' : value < 5 ? 'pogovori' : 'pogovorov'}
+                        {fullName} {hourIndex.toString().padStart(2, '0')}:00 - {value} sporočil
                       </p>
                     </TooltipContent>
                   </Tooltip>
