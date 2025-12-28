@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
+  CheckCircle,
   Rocket,
   Lock,
   Loader2,
@@ -92,10 +93,12 @@ export default function Dashboard() {
     }
   }, [searchParams]);
   
-  // Show subscription modal ONLY when is_active === true AND subscription_status === 'none'
+  // Show subscription modal ONLY on first visit when is_active === true AND subscription_status === 'none'
   useEffect(() => {
-    if (isActive && subscriptionStatus === 'none') {
+    const modalShown = localStorage.getItem('subscription_modal_shown');
+    if (isActive && subscriptionStatus === 'none' && !modalShown) {
       setShowSubscriptionModal(true);
+      localStorage.setItem('subscription_modal_shown', 'true');
     }
   }, [isActive, subscriptionStatus]);
 
@@ -364,6 +367,43 @@ export default function Dashboard() {
             Upravljajte in spremljajte vašega AI chatbota
           </p>
         </div>
+
+        {/* Subscription Activation Section - Show when is_active === true AND subscription_status === 'none' */}
+        {isActive && subscriptionStatus === 'none' && (
+          <div className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20 rounded-xl p-6 animate-slide-up">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-success" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Vaš chatbot je pripravljen!</h3>
+                <p className="text-muted-foreground">Za aktivacijo izberite naročniški paket</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-4 mt-6">
+              <Button 
+                className="flex-1"
+                size="lg"
+                onClick={() => handleSubscribe('monthly')}
+                disabled={subscribing !== null}
+              >
+                {subscribing === 'monthly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Mesečna naročnina
+              </Button>
+              <Button 
+                className="flex-1 bg-gradient-to-r from-success to-emerald-600 hover:from-success/90 hover:to-emerald-700 text-primary-foreground"
+                size="lg"
+                onClick={() => handleSubscribe('yearly')}
+                disabled={subscribing !== null}
+              >
+                {subscribing === 'yearly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <span className="font-bold">Letna naročnina</span>
+                <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-sm">-20%</span>
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Status Banner */}
         {bannerConfig && (
