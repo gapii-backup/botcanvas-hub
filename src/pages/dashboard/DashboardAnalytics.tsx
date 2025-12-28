@@ -277,13 +277,13 @@ export default function DashboardAnalytics() {
             </div>
           </div>
           <div className="glass rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-warning/10">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-warning/10 shrink-0">
                 <TrendingUp className="h-6 w-6 text-warning" />
               </div>
-              <div>
+              <div className="min-w-0 flex-1">
                 <p className="text-sm text-muted-foreground">Najpogostejša tema</p>
-                <p className="text-lg font-bold text-foreground truncate max-w-[200px]">
+                <p className="text-lg font-bold text-foreground break-words">
                   {stats.mostFrequentTopic}
                 </p>
               </div>
@@ -291,80 +291,76 @@ export default function DashboardAnalytics() {
           </div>
         </div>
 
-        {/* Date Range Picker */}
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-2 items-center">
+        {/* Date Range Picker - pill style like DashboardConversations */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-muted/30 rounded-full p-1 gap-1">
             {[
-              { key: 'all', label: 'Vse' },
-              { key: 'today', label: 'Danes' },
+              { key: 'all', label: 'Vsi pogovori' },
               { key: '7days', label: 'Zadnjih 7 dni' },
               { key: '30days', label: 'Zadnjih 30 dni' },
-              { key: 'month', label: 'Ta mesec' },
             ].map((filter) => (
-              <Button 
+              <button 
                 key={filter.key}
-                variant={dateFilter === filter.key ? 'default' : 'outline'} 
-                size="sm"
-                className="transition-all"
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
+                  dateFilter === filter.key 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
                 onClick={() => {
-                  setDateFilter(filter.key as any);
+                  setDateFilter(filter.key as typeof dateFilter);
                   setCustomDateRange(undefined);
                 }}
               >
                 {filter.label}
-              </Button>
+              </button>
             ))}
-            
-            {/* Custom Date Range Picker */}
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={dateFilter === 'custom' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn(
-                    "transition-all min-w-[200px] justify-start text-left font-normal",
-                    !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
-                  )}
-                  onClick={() => setDateFilter('custom')}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {customDateRange?.from ? (
-                    customDateRange.to ? (
-                      <>
-                        {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
-                      </>
-                    ) : (
-                      format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
-                    )
-                  ) : (
-                    "Po meri"
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={customDateRange?.from}
-                  selected={customDateRange}
-                  onSelect={(range) => {
-                    setCustomDateRange(range);
-                    if (range?.from && range?.to) {
-                      setCalendarOpen(false);
-                    }
-                  }}
-                  numberOfMonths={2}
-                  locale={sl}
-                  className="pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
           </div>
           
-          {/* Period display */}
-          <p className="text-sm text-muted-foreground">
-            Obdobje: {getDateRangeLabel()}
-          </p>
+          {/* Custom Date Range Picker */}
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border",
+                  dateFilter === 'custom' 
+                    ? "bg-primary text-primary-foreground border-primary shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-border/50"
+                )}
+                onClick={() => setDateFilter('custom')}
+              >
+                <CalendarIcon className="h-4 w-4" />
+                {customDateRange?.from ? (
+                  customDateRange.to ? (
+                    <>
+                      {format(customDateRange.from, "d. MMM", { locale: sl })} - {format(customDateRange.to, "d. MMM", { locale: sl })}
+                    </>
+                  ) : (
+                    format(customDateRange.from, "d. MMM yyyy", { locale: sl })
+                  )
+                ) : (
+                  "Izberi obdobje"
+                )}
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={customDateRange?.from}
+                selected={customDateRange}
+                onSelect={(range) => {
+                  setCustomDateRange(range);
+                  if (range?.from && range?.to) {
+                    setCalendarOpen(false);
+                  }
+                }}
+                numberOfMonths={2}
+                locale={sl}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Main Charts Grid - 2 columns */}
@@ -516,17 +512,17 @@ export default function DashboardAnalytics() {
                       {topTopics.map((topic, index) => (
                         <div 
                           key={topic.topic}
-                          className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                          className="flex items-start justify-between p-3 rounded-lg bg-muted/30 gap-3"
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center">
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center shrink-0 mt-0.5">
                               {index + 1}
                             </span>
-                            <span className="text-sm font-medium text-foreground truncate max-w-[200px]">
+                            <span className="text-sm font-medium text-foreground break-words">
                               {topic.topic}
                             </span>
                           </div>
-                          <span className="text-sm text-muted-foreground">{topic.count}x</span>
+                          <span className="text-sm text-muted-foreground shrink-0">{topic.count}x</span>
                         </div>
                       ))}
                     </div>
