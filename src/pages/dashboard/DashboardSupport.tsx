@@ -113,7 +113,7 @@ export default function DashboardSupport() {
   const formatChatHistory = (chatHistory: string | null) => {
     if (!chatHistory) return null;
     
-    const lines = chatHistory.split('\n');
+    const lines = chatHistory.split('\n').filter(line => line.trim());
     return lines.map((line, index) => {
       const isUser = line.startsWith('👤') || line.toLowerCase().includes('user:');
       const isBot = line.startsWith('🤖') || line.toLowerCase().includes('bot:');
@@ -122,8 +122,8 @@ export default function DashboardSupport() {
         <div
           key={index}
           className={cn(
-            'p-3 rounded-lg mb-2',
-            isUser ? 'bg-primary/10 ml-4' : isBot ? 'bg-muted mr-4' : 'bg-muted/50'
+            'px-3 py-2 rounded-lg',
+            isUser ? 'bg-primary/10' : isBot ? 'bg-muted' : 'bg-muted/50'
           )}
         >
           <p className="text-sm whitespace-pre-wrap">{line}</p>
