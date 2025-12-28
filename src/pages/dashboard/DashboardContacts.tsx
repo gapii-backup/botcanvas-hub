@@ -63,9 +63,22 @@ export default function DashboardContacts() {
     }
   }, [messages]);
 
+  // Get unique leads (one per email, most recent)
+  const uniqueLeads = useMemo(() => {
+    return Object.values(
+      leads.reduce((acc, lead) => {
+        const email = lead.email || '';
+        if (!acc[email] || new Date(lead.created_at) > new Date(acc[email].created_at)) {
+          acc[email] = lead;
+        }
+        return acc;
+      }, {} as Record<string, typeof leads[0]>)
+    ).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [leads]);
+
   // Filter leads by search and date
   const filteredLeads = useMemo(() => {
-    let result = leads;
+    let result = uniqueLeads;
     
     // Date filter
     if (dateFilter === '7days') {
@@ -90,24 +103,24 @@ export default function DashboardContacts() {
     }
     
     return result;
-  }, [leads, searchQuery, dateFilter, customDateRange]);
+  }, [uniqueLeads, searchQuery, dateFilter, customDateRange]);
 
-  // Statistics
+  // Statistics - count unique emails
   const stats = useMemo(() => {
-    const total = leads.length;
+    const total = uniqueLeads.length;
     const today = startOfDay(new Date());
     const thisMonth = startOfMonth(new Date());
     
-    const todayCount = leads.filter(lead => 
-      new Date(lead.created_at) >= today
-    ).length;
+    // For today: unique emails from leads created today
+    const todayLeads = leads.filter(lead => new Date(lead.created_at) >= today);
+    const uniqueToday = [...new Set(todayLeads.map(lead => lead.email))].length;
     
-    const monthCount = leads.filter(lead => 
-      new Date(lead.created_at) >= thisMonth
-    ).length;
+    // For this month: unique emails from leads created this month
+    const monthLeads = leads.filter(lead => new Date(lead.created_at) >= thisMonth);
+    const uniqueThisMonth = [...new Set(monthLeads.map(lead => lead.email))].length;
 
-    return { total, todayCount, monthCount };
-  }, [leads]);
+    return { total, todayCount: uniqueToday, monthCount: uniqueThisMonth };
+  }, [leads, uniqueLeads]);
 
   // Handle lead selection
   const handleSelectLead = async (sessionId: string) => {
@@ -177,11 +190,10 @@ export default function DashboardContacts() {
     setExporting(true);
     try {
       const BOM = '\uFEFF';
-      const headers = ['Email', 'Datum', 'Session ID'];
+      const headers = ['Email', 'Datum'];
       const rows = filteredLeads.map(lead => [
         lead.email || '',
-        new Date(lead.created_at).toLocaleString('sl-SI'),
-        lead.session_id
+        new Date(lead.created_at).toLocaleString('sl-SI')
       ]);
       
       const csvContent = BOM + [
