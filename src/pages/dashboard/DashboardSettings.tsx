@@ -84,9 +84,44 @@ export default function DashboardSettings() {
   
   // Store initial config when component mounts
   const initialConfigRef = useRef<BotConfig | null>(null);
+  const hasInitializedFromDb = useRef(false);
   
+  // Load config from database when widget is loaded
   useEffect(() => {
-    if (!loading && initialConfigRef.current === null) {
+    if (!loading && widget && !hasInitializedFromDb.current) {
+      hasInitializedFromDb.current = true;
+      
+      // Map widget data to config
+      const dbConfig: Partial<BotConfig> = {
+        name: widget.bot_name || defaultConfig.name,
+        welcomeMessage: widget.welcome_message || defaultConfig.welcomeMessage,
+        homeTitle: widget.home_title || defaultConfig.homeTitle,
+        homeSubtitle: widget.home_subtitle_line2 || defaultConfig.homeSubtitle,
+        primaryColor: widget.primary_color || defaultConfig.primaryColor,
+        darkMode: widget.mode === 'dark',
+        headerStyle: (widget.header_style as 'gradient' | 'solid') || defaultConfig.headerStyle,
+        iconBgColor: widget.bot_icon_background || defaultConfig.iconBgColor,
+        iconColor: widget.bot_icon_color || defaultConfig.iconColor,
+        botAvatar: widget.bot_avatar || defaultConfig.botAvatar,
+        position: (widget.position as 'left' | 'right') || defaultConfig.position,
+        verticalOffset: widget.vertical_offset || defaultConfig.verticalOffset,
+        triggerStyle: (widget.trigger_style as 'floating' | 'edge') || defaultConfig.triggerStyle,
+        edgeTriggerText: widget.edge_trigger_text || defaultConfig.edgeTriggerText,
+        quickQuestions: (widget.quick_questions as string[]) || defaultConfig.quickQuestions,
+        showEmailField: widget.show_email_field ?? defaultConfig.showEmailField,
+        showBubble: widget.show_bubble ?? defaultConfig.showBubble,
+        bubbleText: widget.bubble_text || defaultConfig.bubbleText,
+        websiteUrl: widget.website_url || defaultConfig.websiteUrl,
+      };
+      
+      setConfig(dbConfig);
+      initialConfigRef.current = { ...config, ...dbConfig };
+    }
+  }, [loading, widget, setConfig, defaultConfig, config]);
+
+  // Update initial config ref after first db load
+  useEffect(() => {
+    if (!loading && hasInitializedFromDb.current && initialConfigRef.current === null) {
       initialConfigRef.current = { ...config };
     }
   }, [loading, config]);
