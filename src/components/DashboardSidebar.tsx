@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -28,20 +27,26 @@ import {
 interface DashboardSidebarProps {
   hasContactsAddon?: boolean;
   children: React.ReactNode;
+  activeSection: string;
+  setActiveSection: (section: string) => void;
 }
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', section: 'dashboard' },
-  { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations', section: 'conversations' },
-  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', section: 'analytics' },
-  { label: 'Leads', icon: Users, href: '/dashboard/leads', section: 'leads', requiresAddon: 'contacts' },
-  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings', section: 'settings' },
-  { label: 'Računi', icon: CreditCard, href: '/dashboard/billing', section: 'billing' },
-  { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help', section: 'help' },
+  { label: 'Dashboard', icon: LayoutDashboard, section: 'dashboard' },
+  { label: 'Pogovori', icon: MessageSquare, section: 'conversations' },
+  { label: 'Analiza', icon: BarChart3, section: 'analytics' },
+  { label: 'Leads', icon: Users, section: 'leads', requiresAddon: 'contacts' },
+  { label: 'Nastavitve', icon: Settings, section: 'settings' },
+  { label: 'Računi', icon: CreditCard, section: 'billing' },
+  { label: 'Pomoč', icon: HelpCircle, section: 'help' },
 ];
 
-export function DashboardSidebar({ hasContactsAddon = false, children }: DashboardSidebarProps) {
-  const location = useLocation();
+export function DashboardSidebar({ 
+  hasContactsAddon = false, 
+  children,
+  activeSection,
+  setActiveSection
+}: DashboardSidebarProps) {
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -56,12 +61,17 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
     await signOut();
   };
 
+  const handleNavClick = (section: string) => {
+    setActiveSection(section);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex w-full bg-background">
       {/* Mobile Header */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:hidden z-50">
         <div className="flex items-center gap-2">
-          <img src="/lovable-uploads/3dd2b3cb-a846-4bb1-9f29-68be3e38c5bc.png" alt="BotMotion" className="h-8" />
+          <span className="text-lg font-bold text-foreground">BotMotion.ai</span>
         </div>
         <div className="flex items-center gap-2">
           <DropdownMenu>
@@ -78,11 +88,11 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
                 {user?.email}
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Nastavitve
               </DropdownMenuItem>
@@ -112,16 +122,14 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
         <nav className="p-4 space-y-1">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href || 
-              (item.href === '/dashboard' && location.pathname === '/dashboard');
+            const isActive = activeSection === item.section;
             
             return (
-              <NavLink
-                key={item.href}
-                to={item.href}
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                key={item.section}
+                onClick={() => handleNavClick(item.section)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -129,7 +137,7 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
               >
                 <Icon className="h-5 w-5" />
                 {item.label}
-              </NavLink>
+              </button>
             );
           })}
         </nav>
@@ -139,22 +147,21 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-border">
-          <img src="/lovable-uploads/3dd2b3cb-a846-4bb1-9f29-68be3e38c5bc.png" alt="BotMotion" className="h-8" />
+          <span className="text-lg font-bold text-foreground">BotMotion.ai</span>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href || 
-              (item.href === '/dashboard' && location.pathname === '/dashboard');
+            const isActive = activeSection === item.section;
             
             return (
-              <NavLink
-                key={item.href}
-                to={item.href}
+              <button
+                key={item.section}
+                onClick={() => handleNavClick(item.section)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
                   isActive
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -162,7 +169,7 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
               >
                 <Icon className="h-5 w-5" />
                 {item.label}
-              </NavLink>
+              </button>
             );
           })}
         </nav>
@@ -182,11 +189,11 @@ export function DashboardSidebar({ hasContactsAddon = false, children }: Dashboa
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Nastavitve
               </DropdownMenuItem>
