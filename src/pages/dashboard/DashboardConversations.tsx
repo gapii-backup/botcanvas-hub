@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   MessageSquare,
   AlertCircle,
   Loader2,
-  Calendar,
-  X,
+  CalendarIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
@@ -15,6 +19,9 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useConversations, type Message } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { format } from 'date-fns';
+import { sl } from 'date-fns/locale';
+import { DateRange } from 'react-day-picker';
 
 export default function DashboardConversations() {
   const { widget, loading } = useWidget();
@@ -27,9 +34,9 @@ export default function DashboardConversations() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | 'custom'>('all');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFilter, setDateFilter] = useState<'all' | '7days' | '30days' | 'custom'>('all');
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>();
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Scroll to bottom when messages load
   useEffect(() => {
@@ -64,24 +71,28 @@ export default function DashboardConversations() {
   };
 
   const filteredConversations = conversations.filter(conv => {
-    if (dateRange === 'all') return true;
+    if (dateFilter === 'all') return true;
     
     const convDate = new Date(conv.last_message_at);
     const now = new Date();
     
-    if (dateRange === '7days') {
+    if (dateFilter === '7days') {
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       return convDate >= weekAgo;
     }
     
-    if (dateRange === '30days') {
+    if (dateFilter === '30days') {
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       return convDate >= monthAgo;
     }
     
-    if (dateRange === 'custom') {
-      if (dateFrom && convDate < new Date(dateFrom)) return false;
-      if (dateTo && convDate > new Date(dateTo + 'T23:59:59')) return false;
+    if (dateFilter === 'custom' && customDateRange) {
+      if (customDateRange.from && convDate < customDateRange.from) return false;
+      if (customDateRange.to) {
+        const endOfDay = new Date(customDateRange.to);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (convDate > endOfDay) return false;
+      }
     }
     
     return true;
@@ -103,59 +114,7 @@ export default function DashboardConversations() {
   return (
     <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
       <div className="space-y-6 animate-slide-up">
-        {/* Filter gumbi */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { key: 'all', label: 'Vsi pogovori' },
-            { key: '7days', label: 'Zadnjih 7 dni' },
-            { key: '30days', label: 'Zadnjih 30 dni' },
-            { key: 'custom', label: 'Po meri' }
-          ].map((filter) => (
-            <Button 
-              key={filter.key}
-              variant={dateRange === filter.key ? 'default' : 'outline'} 
-              size="sm"
-              className="transition-all"
-              onClick={() => setDateRange(filter.key as any)}
-            >
-              {filter.label}
-            </Button>
-          ))}
-        </div>
-        
-        {/* Custom date range picker */}
-        {dateRange === 'custom' && (
-          <div className="flex gap-2 items-center bg-muted p-3 rounded-lg">
-            <Calendar className="w-5 h-5 text-muted-foreground" />
-            <Input 
-              type="date" 
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-36 bg-background"
-              placeholder="Od"
-            />
-            <span className="text-muted-foreground">→</span>
-            <Input 
-              type="date" 
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-36 bg-background"
-              placeholder="Do"
-            />
-            {(dateFrom || dateTo) && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => { setDateFrom(''); setDateTo(''); }}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            )}
-          </div>
-        )}
-
-        {/* Usage Progress - moved above conversation list */}
+        {/* Usage Progress */}
         <div className="bg-muted rounded-xl p-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-muted-foreground">Poraba sporočil</span>
@@ -172,9 +131,76 @@ export default function DashboardConversations() {
           )}
         </div>
 
+        {/* Filter gumbi */}
+        <div className="flex flex-wrap gap-2 items-center">
+          {[
+            { key: 'all', label: 'Vsi pogovori' },
+            { key: '7days', label: 'Zadnjih 7 dni' },
+            { key: '30days', label: 'Zadnjih 30 dni' },
+          ].map((filter) => (
+            <Button 
+              key={filter.key}
+              variant={dateFilter === filter.key ? 'default' : 'outline'} 
+              size="sm"
+              className="transition-all"
+              onClick={() => {
+                setDateFilter(filter.key as any);
+                setCustomDateRange(undefined);
+              }}
+            >
+              {filter.label}
+            </Button>
+          ))}
+          
+          {/* Custom Date Range Picker */}
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                size="sm"
+                className={cn(
+                  "transition-all min-w-[200px] justify-start text-left font-normal",
+                  !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
+                )}
+                onClick={() => setDateFilter('custom')}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {customDateRange?.from ? (
+                  customDateRange.to ? (
+                    <>
+                      {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
+                    </>
+                  ) : (
+                    format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
+                  )
+                ) : (
+                  "Izberi obdobje"
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={customDateRange?.from}
+                selected={customDateRange}
+                onSelect={(range) => {
+                  setCustomDateRange(range);
+                  if (range?.from && range?.to) {
+                    setCalendarOpen(false);
+                  }
+                }}
+                numberOfMonths={2}
+                locale={sl}
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Levi panel - seznam pogovorov */}
-          <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 420px)' }}>
+          <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 480px)' }}>
             <div className="p-4 border-b border-border">
               <h3 className="font-medium text-foreground">Pogovori ({displayCount})</h3>
             </div>
@@ -202,30 +228,25 @@ export default function DashboardConversations() {
                           : "hover:bg-muted/50"
                       )}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                          selectedConversation === conv.session_id ? "bg-primary/20" : "bg-muted"
-                        )}>
-                          <MessageSquare className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-start mb-1">
-                            <span className="font-medium text-sm truncate text-foreground">
-                              Pogovor #{conv.session_id.split('_').pop()?.slice(0, 8)}
-                            </span>
-                            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                              {new Date(conv.last_message_at).toLocaleDateString('sl-SI')}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs text-muted-foreground">
-                              {conv.message_count} sporočil
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(conv.last_message_at).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
+                      <div className="space-y-2">
+                        {/* First question - bold */}
+                        <p className="font-medium text-sm text-foreground line-clamp-2">
+                          {conv.first_question || `Pogovor #${conv.session_id.split('_').pop()?.slice(0, 8)}`}
+                        </p>
+                        
+                        {/* First answer - normal */}
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {conv.first_answer || 'Ni odgovora'}
+                        </p>
+                        
+                        {/* Meta info */}
+                        <div className="flex justify-between items-center pt-1">
+                          <span className="text-xs text-muted-foreground">
+                            {conv.message_count} sporočil
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(conv.last_message_at).toLocaleDateString('sl-SI')}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -255,7 +276,7 @@ export default function DashboardConversations() {
           </div>
 
           {/* Desni panel - sporočila */}
-          <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 420px)' }}>
+          <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 480px)' }}>
             <div className="p-4 border-b border-border">
               <h3 className="font-medium text-foreground truncate">
                 {selectedConversation ? `Pogovor #${selectedConversation.split('_').pop()?.slice(0, 8)}` : 'Izberite pogovor'}
@@ -271,14 +292,11 @@ export default function DashboardConversations() {
                 ) : messages.length > 0 ? (
                   <div className="space-y-4">
                     {messages.map((msg, index) => {
-                      // Parse message - lahko je JSONB objekt ali string
                       let messageContent = '';
                       let isUser = false;
                       
-                      
                       if (typeof msg.message === 'object' && msg.message !== null) {
                         messageContent = msg.message.content || msg.message.text || JSON.stringify(msg.message);
-                        // type === 'human' za uporabnika, 'ai' ali 'assistant' za bota
                         isUser = (msg.message as any).type === 'human';
                       } else {
                         messageContent = String(msg.message || '');
