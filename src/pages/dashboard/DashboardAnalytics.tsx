@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useWidget } from '@/hooks/useWidget';
 import { useConversationTopics } from '@/hooks/useConversationTopics';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +24,8 @@ import {
   ArrowUpDown,
   X,
   Clock,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -37,6 +39,9 @@ import {
 import { ActivityHeatmap } from '@/components/analytics/ActivityHeatmap';
 import { HorizontalBarChart } from '@/components/analytics/HorizontalBarChart';
 import { PieChart3D } from '@/components/analytics/PieChart3D';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'sonner';
 
 const CHART_COLORS = [
   'hsl(var(--primary))',
@@ -126,6 +131,9 @@ export default function DashboardAnalytics() {
 
   // Modal state
   const [showAllModal, setShowAllModal] = useState(false);
+
+  // PDF generation state
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   // Table state
   const [searchQuery, setSearchQuery] = useState('');
@@ -234,6 +242,276 @@ export default function DashboardAnalytics() {
     }));
   }, [trendData]);
 
+  // PDF Generation function
+  const generatePDF = useCallback(async () => {
+    setIsGeneratingPdf(true);
+    
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 20;
+      let yPos = 20;
+
+      // Colors
+      const primaryColor: [number, number, number] = [59, 130, 246]; // Blue
+      const textColor: [number, number, number] = [30, 41, 59];
+      const mutedColor: [number, number, number] = [100, 116, 139];
+
+      // Helper function to add section title
+      const addSectionTitle = (title: string) => {
+        if (yPos > 260) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(14);
+        doc.setTextColor(...primaryColor);
+        doc.text(title, margin, yPos);
+        yPos += 10;
+        doc.setTextColor(...textColor);
+      };
+
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(...primaryColor);
+      doc.text('BotMotion.ai', margin, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(16);
+      doc.setTextColor(...textColor);
+      doc.text('Analiza pogovorov', margin, yPos);
+      yPos += 15;
+
+      // Date range and generation date
+      doc.setFontSize(10);
+      doc.setTextColor(...mutedColor);
+      doc.text(`Obdobje: ${getDateRangeLabel()}`, margin, yPos);
+      yPos += 6;
+      doc.text(`Generirano: ${format(new Date(), 'd. MMMM yyyy, HH:mm', { locale: sl })}`, margin, yPos);
+      yPos += 15;
+
+      // Separator line
+      doc.setDrawColor(...primaryColor);
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 15;
+
+      // SECTION 1: Statistics
+      addSectionTitle('Statistike');
+      
+      doc.setFontSize(11);
+      doc.setTextColor(...textColor);
+      
+      const statsData = [
+        ['Skupaj pogovorov', sessionsCount.toString()],
+        ['Stevilo sporocil', humanMessagesCount.toString()],
+        ['Najpogostejsa tema', stats.mostFrequentTopic],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Metrika', 'Vrednost']],
+        body: statsData,
+        margin: { left: margin, right: margin },
+        headStyles: { 
+          fillColor: primaryColor,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        styles: { fontSize: 10 },
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      // SECTION 2: Trends
+      addSectionTitle('Trendi sporocil');
+      
+      if (formattedTrendData.length > 0) {
+        const trendTableData = formattedTrendData.map(item => [
+          item.label,
+          item.count.toString()
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Dan', 'Stevilo sporocil']],
+          body: trendTableData,
+          margin: { left: margin, right: margin },
+          headStyles: { 
+            fillColor: primaryColor,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          styles: { fontSize: 9 },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      } else {
+        doc.setFontSize(10);
+        doc.setTextColor(...mutedColor);
+        doc.text('Ni podatkov za prikaz trendov', margin, yPos);
+        yPos += 15;
+      }
+
+      // SECTION 3: Categories
+      addSectionTitle('Kategorije pogovorov');
+      
+      if (categories.length > 0) {
+        const totalCategories = categories.reduce((sum, c) => sum + c.count, 0);
+        const categoryTableData = categories.map(cat => [
+          cat.category,
+          cat.count.toString(),
+          totalCategories > 0 ? `${((cat.count / totalCategories) * 100).toFixed(1)}%` : '0%'
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Kategorija', 'Stevilo', 'Procent']],
+          body: categoryTableData,
+          margin: { left: margin, right: margin },
+          headStyles: { 
+            fillColor: primaryColor,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          styles: { fontSize: 10 },
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+
+      // SECTION 4: Top 5 Topics
+      addSectionTitle('Top 5 tem');
+      
+      if (topTopics.length > 0) {
+        const topTopicsData = topTopics.slice(0, 5).map((topic, index) => [
+          (index + 1).toString(),
+          topic.topic,
+          `${topic.count}x`
+        ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['#', 'Tema', 'Stevilo']],
+          body: topTopicsData,
+          margin: { left: margin, right: margin },
+          headStyles: { 
+            fillColor: primaryColor,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          styles: { fontSize: 10 },
+          columnStyles: {
+            0: { cellWidth: 15 },
+            2: { cellWidth: 25 }
+          }
+        });
+        
+        yPos = (doc as any).lastAutoTable.finalY + 15;
+      }
+
+      // SECTION 5: Activity by hours (summary)
+      addSectionTitle('Aktivnost po urah');
+      
+      // Find peak activity
+      let maxActivity = 0;
+      let peakDay = '';
+      let peakHour = 0;
+      const dayNames = ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Cetrtek', 'Petek', 'Sobota'];
+      
+      heatmapData.forEach((dayData, dayIndex) => {
+        dayData.forEach((count, hourIndex) => {
+          if (count > maxActivity) {
+            maxActivity = count;
+            peakDay = dayNames[dayIndex];
+            peakHour = hourIndex;
+          }
+        });
+      });
+
+      if (maxActivity > 0) {
+        doc.setFontSize(10);
+        doc.setTextColor(...textColor);
+        doc.text(`Najvecja aktivnost: ${peakDay} ob ${peakHour}:00 (${maxActivity} sporocil)`, margin, yPos);
+        yPos += 15;
+      }
+
+      // SECTION 6: All Topics
+      if (groupedBySpecific.length > 0) {
+        addSectionTitle('Vse teme');
+        
+        const allTopicsData = groupedBySpecific
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 50) // Limit to 50 topics for PDF
+          .map(item => [
+            item.category,
+            item.specific,
+            item.count.toString(),
+            totalForPercent > 0 ? `${((item.count / totalForPercent) * 100).toFixed(1)}%` : '0%'
+          ]);
+
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Kategorija', 'Tema', 'Stevilo', '%']],
+          body: allTopicsData,
+          margin: { left: margin, right: margin },
+          headStyles: { 
+            fillColor: primaryColor,
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          },
+          alternateRowStyles: { fillColor: [248, 250, 252] },
+          styles: { fontSize: 9 },
+          columnStyles: {
+            0: { cellWidth: 35 },
+            3: { cellWidth: 20 }
+          }
+        });
+      }
+
+      // Footer on all pages
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(...mutedColor);
+        doc.text(
+          `Stran ${i} od ${pageCount} | BotMotion.ai`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' }
+        );
+      }
+
+      // Save PDF
+      const fileName = `BotMotion-Analiza-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      doc.save(fileName);
+      
+      toast.success('PDF uspesno generiran!', {
+        description: fileName
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Napaka pri generiranju PDF-ja');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  }, [
+    categories, 
+    topTopics, 
+    formattedTrendData, 
+    heatmapData, 
+    groupedBySpecific, 
+    sessionsCount, 
+    humanMessagesCount, 
+    stats, 
+    totalForPercent,
+    getDateRangeLabel
+  ]);
+
   if (loading || topicsLoading) {
     return (
       <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
@@ -292,7 +570,8 @@ export default function DashboardAnalytics() {
         </div>
 
         {/* Date Range Picker - exact style like reference */}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-4">
           {/* First button - pill shape */}
           <button 
             className={cn(
@@ -384,6 +663,26 @@ export default function DashboardAnalytics() {
               />
             </PopoverContent>
           </Popover>
+          </div>
+          
+          {/* PDF Download Button */}
+          <Button
+            onClick={generatePDF}
+            disabled={isGeneratingPdf}
+            className="gap-2"
+          >
+            {isGeneratingPdf ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generiram...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Prenesi analizo
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Main Charts Grid - 2 columns */}
