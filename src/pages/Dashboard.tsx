@@ -427,62 +427,78 @@ export default function Dashboard() {
         <p className="text-sm text-muted-foreground">Preglejte vse pogovore z vašim chatbotom</p>
       </div>
 
-      {/* Filter po datumu */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex gap-2">
+      {/* Filter gumbi */}
+      <div className="flex flex-wrap gap-2">
+        {[
+          { key: 'all', label: 'Vsi pogovori' },
+          { key: '7days', label: 'Zadnjih 7 dni' },
+          { key: '30days', label: 'Zadnjih 30 dni' },
+          { key: 'custom', label: 'Po meri' }
+        ].map((filter) => (
           <Button 
-            variant={dateRange === 'all' ? 'default' : 'outline'} 
+            key={filter.key}
+            variant={dateRange === filter.key ? 'default' : 'outline'} 
             size="sm"
-            onClick={() => setDateRange('all')}
+            className="transition-all"
+            onClick={() => setDateRange(filter.key as any)}
           >
-            Vsi pogovori
+            {filter.label}
           </Button>
-          <Button 
-            variant={dateRange === '7days' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setDateRange('7days')}
-          >
-            Zadnjih 7 dni
-          </Button>
-          <Button 
-            variant={dateRange === '30days' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setDateRange('30days')}
-          >
-            Zadnjih 30 dni
-          </Button>
-          <Button 
-            variant={dateRange === 'custom' ? 'default' : 'outline'} 
-            size="sm"
-            onClick={() => setDateRange('custom')}
-          >
-            Po meri
-          </Button>
+        ))}
+      </div>
+      
+      {/* Custom date range picker */}
+      {dateRange === 'custom' && (
+        <div className="flex gap-2 items-center bg-muted p-3 rounded-lg">
+          <Calendar className="w-5 h-5 text-muted-foreground" />
+          <Input 
+            type="date" 
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-36 bg-background"
+            placeholder="Od"
+          />
+          <span className="text-muted-foreground">→</span>
+          <Input 
+            type="date" 
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-36 bg-background"
+            placeholder="Do"
+          />
+          {(dateFrom || dateTo) && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => { setDateFrom(''); setDateTo(''); }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
-        
-        {dateRange === 'custom' && (
-          <div className="flex gap-2 items-center">
-            <span className="text-sm text-muted-foreground">Od:</span>
-            <Input 
-              type="date" 
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-40"
-            />
-            <span className="text-sm text-muted-foreground">Do:</span>
-            <Input 
-              type="date" 
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-40"
-            />
+      )}
+
+      {/* Usage Progress - moved above conversation list */}
+      <div className="bg-muted rounded-xl p-4">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium text-muted-foreground">Poraba sporočil</span>
+          <span className="text-sm font-semibold text-foreground">
+            {stats.monthlyCount} / {stats.monthlyLimit} sporočil
+          </span>
+        </div>
+        <Progress value={usagePercentage} className="h-2" />
+        {usagePercentage > 80 && (
+          <div className="flex items-center gap-2 text-warning text-xs mt-2">
+            <AlertCircle className="h-4 w-4" />
+            <span>Približujete se mesečni omejitvi</span>
           </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Levi panel - seznam pogovorov */}
-        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
+        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 360px)' }}>
           <div className="p-4 border-b border-border">
             <h3 className="font-medium text-foreground">Pogovori ({filteredConversations.length})</h3>
           </div>
@@ -563,10 +579,10 @@ export default function Dashboard() {
         </div>
 
         {/* Desni panel - sporočila */}
-        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
+        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 360px)' }}>
           <div className="p-4 border-b border-border">
             <h3 className="font-medium text-foreground truncate">
-              {selectedConversation ? `Pogovor: ${selectedConversation.slice(0, 30)}...` : 'Izberite pogovor'}
+              {selectedConversation ? `Pogovor #${selectedConversation.split('_').pop()?.slice(0, 8)}` : 'Izberite pogovor'}
             </h3>
           </div>
           
@@ -574,24 +590,30 @@ export default function Dashboard() {
             {selectedConversation ? (
               messages.length > 0 ? (
                 <div className="space-y-4">
-                  {messages.map((msg) => {
+                  {messages.map((msg, index) => {
                     // Parse message - lahko je JSONB objekt ali string
                     let messageContent = '';
                     let isUser = false;
                     
+                    // Debug - odstrani po testiranju
+                    console.log('Message:', msg.message);
+                    
                     if (typeof msg.message === 'object' && msg.message !== null) {
+                      // Preveri različne možne strukture
                       messageContent = msg.message.content || msg.message.text || JSON.stringify(msg.message);
-                      isUser = msg.message.role === 'user';
+                      // Preveri role - lahko je 'user', 'human', 'customer' itd.
+                      isUser = msg.message.role === 'user' || msg.message.role === 'human' || msg.message.role === 'customer';
                     } else {
-                      messageContent = String(msg.message);
-                      isUser = messageContent.toLowerCase().startsWith('user:');
+                      messageContent = String(msg.message || '');
                     }
+                    
+                    if (!messageContent.trim()) return null;
                     
                     return (
                       <div
-                        key={msg.id}
+                        key={msg.id || index}
                         className={cn(
-                          "flex",
+                          "flex w-full",
                           isUser ? "justify-end" : "justify-start"
                         )}
                       >
@@ -599,16 +621,16 @@ export default function Dashboard() {
                           className={cn(
                             "max-w-[75%] p-4 rounded-2xl shadow-sm",
                             isUser
-                              ? "bg-primary text-primary-foreground rounded-br-md"
-                              : "bg-card border border-border rounded-bl-md"
+                              ? "bg-primary text-primary-foreground rounded-br-sm"
+                              : "bg-card border border-border rounded-bl-sm"
                           )}
                         >
                           <div 
-                            className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                            className="text-sm leading-relaxed"
                             dangerouslySetInnerHTML={{ 
                               __html: messageContent
                                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                .replace(/^\* /gm, '• ')
                                 .replace(/^- /gm, '• ')
                                 .replace(/\n/g, '<br/>') 
                             }}
@@ -638,25 +660,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Usage Progress */}
-      <div className="glass rounded-2xl p-6">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Poraba:</span>
-            <span className="text-foreground font-medium">
-              {stats.monthlyCount} / {stats.monthlyLimit} pogovorov
-            </span>
-          </div>
-          <Progress value={usagePercentage} className="h-2" />
-          {usagePercentage > 80 && (
-            <div className="flex items-center gap-2 text-warning text-sm mt-2">
-              <AlertCircle className="h-4 w-4" />
-              <span>Približujete se mesečni omejitvi pogovorov</span>
-            </div>
-          )}
         </div>
       </div>
     </div>
