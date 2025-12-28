@@ -64,6 +64,9 @@ export interface AdminWidget {
   footer_link_text: string | null;
   footer_link_url: string | null;
   footer_suffix: string | null;
+  
+  // Subscription
+  subscription_status: string;
 }
 
 export function useAdminWidgets() {

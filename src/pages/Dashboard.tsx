@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -14,20 +14,38 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
+  Rocket,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const { widget, loading } = useWidget();
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const isActive = widget?.status === 'active' && widget?.is_active;
   const isSetupPaid = widget?.status === 'setup_paid';
   const apiKey = widget?.api_key;
+  const subscriptionStatus = widget?.subscription_status || 'none';
+  
+  // Show subscription modal when is_active is true but subscription_status is 'none'
+  useEffect(() => {
+    if (widget?.is_active && subscriptionStatus === 'none') {
+      setShowSubscriptionModal(true);
+    }
+  }, [widget?.is_active, subscriptionStatus]);
 
   const embedCode = apiKey
     ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
@@ -49,6 +67,11 @@ export default function Dashboard() {
       description: 'Embed koda je bila kopirana v odložišče.',
     });
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSubscriptionClick = (period: 'monthly' | 'yearly') => {
+    // Navigate to checkout with subscription type
+    navigate(`/checkout?type=subscription&period=${period}`);
   };
 
   const stats = [
@@ -79,6 +102,40 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
+      {/* Subscription Modal */}
+      <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-12 w-12 rounded-xl bg-success/20 flex items-center justify-center">
+                <Rocket className="h-6 w-6 text-success" />
+              </div>
+              <DialogTitle className="text-xl">Vaš chatbot je pripravljen!</DialogTitle>
+            </div>
+            <DialogDescription className="text-base pt-2">
+              Za aktivacijo izberite naročniški paket
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button 
+              size="lg" 
+              className="w-full"
+              onClick={() => handleSubscriptionClick('monthly')}
+            >
+              Mesečna naročnina
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="w-full border-success text-success hover:bg-success/10"
+              onClick={() => handleSubscriptionClick('yearly')}
+            >
+              Letna naročnina (-20%)
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="space-y-8">
         {/* Header */}
         <div className="animate-fade-in">
@@ -167,50 +224,72 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Embed Code Section */}
-        <div className="glass rounded-2xl p-6 animate-slide-up delay-400">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-              <Bot className="h-5 w-5 text-primary-foreground" />
+        {/* Embed Code Section - Only show if subscription is active */}
+        {subscriptionStatus === 'active' ? (
+          <div className="glass rounded-2xl p-6 animate-slide-up delay-400">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
+                <Bot className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
+                <p className="text-sm text-muted-foreground">
+                  {apiKey
+                    ? 'Dodajte to kodo pred zaključni </body> tag'
+                    : 'API ključ bo na voljo po aktivaciji chatbota'}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
-              <p className="text-sm text-muted-foreground">
-                {apiKey
-                  ? 'Dodajte to kodo pred zaključni </body> tag'
-                  : 'API ključ bo na voljo po aktivaciji chatbota'}
-              </p>
+
+            <div className="relative">
+              <pre className={cn(
+                "bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border",
+                !apiKey && "opacity-50"
+              )}>
+                <code>{embedCode}</code>
+              </pre>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="absolute top-3 right-3"
+                onClick={copyToClipboard}
+                disabled={!apiKey}
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Kopirano
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Kopiraj
+                  </>
+                )}
+              </Button>
             </div>
           </div>
-
-          <div className="relative">
-            <pre className={cn(
-              "bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border",
-              !apiKey && "opacity-50"
-            )}>
-              <code>{embedCode}</code>
-            </pre>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute top-3 right-3"
-              onClick={copyToClipboard}
-              disabled={!apiKey}
+        ) : (
+          <div className="glass rounded-2xl p-6 animate-slide-up delay-400 border-warning/30">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                <Lock className="h-5 w-5 text-warning" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
+                <p className="text-sm text-muted-foreground">
+                  Embed koda bo na voljo po aktivaciji naročnine
+                </p>
+              </div>
+            </div>
+            <Button 
+              className="mt-4"
+              onClick={() => setShowSubscriptionModal(true)}
             >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Kopirano
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Kopiraj
-                </>
-              )}
+              Aktiviraj naročnino
             </Button>
           </div>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );

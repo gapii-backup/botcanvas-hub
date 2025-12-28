@@ -102,6 +102,7 @@ export type Database = {
           show_bubble: boolean
           show_email_field: boolean
           status: string
+          subscription_status: string
           support_enabled: boolean
           support_webhook_url: string | null
           table_name: string | null
@@ -148,6 +149,7 @@ export type Database = {
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
+          subscription_status?: string
           support_enabled?: boolean
           support_webhook_url?: string | null
           table_name?: string | null
@@ -194,6 +196,7 @@ export type Database = {
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
+          subscription_status?: string
           support_enabled?: boolean
           support_webhook_url?: string | null
           table_name?: string | null
