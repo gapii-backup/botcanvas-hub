@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,16 +9,26 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Bot, Copy, Check, Lock, Home, MessagesSquare, MousePointer,
   Plus, X, RotateCcw, Sun, Moon, AlignLeft, AlignRight,
-  MessageCircle, MessageSquare, Sparkles, Headphones, Zap, LucideIcon
+  MessageCircle, MessageSquare, Sparkles, Headphones, Zap, LucideIcon, Save, Loader2
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
-import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
+import { useWizardConfig, TRIGGER_ICONS, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { ImageUpload } from '@/components/ImageUpload';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type PreviewType = 'home' | 'chat' | 'trigger';
 
@@ -31,15 +41,38 @@ const TriggerIconComponents: Record<string, LucideIcon> = {
   Zap,
 };
 
+// Helper function to get bot icon SVG paths from icon name
+const getBotIconPaths = (iconName: string): string[] => {
+  const icon = BOT_ICONS.find(i => i.name === iconName);
+  return icon?.paths || ['M12 8V4H8', 'M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z', 'M9 16h0', 'M15 16h0'];
+};
+
+// Helper function to get trigger icon SVG path from icon name
+const getTriggerIconPath = (iconName: string): string => {
+  const paths: Record<string, string> = {
+    'MessageCircle': 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z',
+    'MessageSquare': 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    'Bot': 'M12 8V4H8',
+    'Sparkles': 'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',
+    'Headphones': 'M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3',
+    'Zap': 'M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z',
+  };
+  return paths[iconName] || paths['MessageCircle'];
+};
+
 export default function DashboardSettings() {
   const { toast } = useToast();
-  const { widget, loading } = useWidget();
+  const { widget, loading, upsertWidget } = useWidget();
   const { config, setConfig, defaultConfig } = useWizardConfig();
   const [copied, setCopied] = useState(false);
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
   const [newQuestion, setNewQuestion] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   const subscriptionStatus = widget?.subscription_status || 'none';
   const apiKey = widget?.api_key;
@@ -47,6 +80,26 @@ export default function DashboardSettings() {
   const embedCode = apiKey
     ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
     : `<script src="https://cdn.botmotion.ai/widget.js" data-key="YOUR_API_KEY"></script>`;
+
+  // Track changes
+  const handleConfigChange = useCallback((updates: Parameters<typeof setConfig>[0]) => {
+    setConfig(updates);
+    setHasUnsavedChanges(true);
+  }, [setConfig]);
+
+  // Warn on page leave
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const copyToClipboard = () => {
     if (!apiKey) {
@@ -66,18 +119,63 @@ export default function DashboardSettings() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Save settings to database
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await upsertWidget({
+        bot_name: config.name || '',
+        welcome_message: config.welcomeMessage || '',
+        home_title: config.homeTitle || '',
+        home_subtitle_line2: config.homeSubtitle || '',
+        primary_color: config.primaryColor || '#6366f1',
+        mode: config.darkMode ? 'dark' : 'light',
+        header_style: config.headerStyle || 'solid',
+        bot_icon_background: config.iconBgColor || '',
+        bot_icon_color: config.iconColor || '',
+        bot_avatar: config.botAvatar || '',
+        bot_icon: getBotIconPaths(config.botIcon || 'Bot') as any,
+        trigger_icon: getTriggerIconPath(config.triggerIcon || 'MessageCircle'),
+        position: config.position || 'right',
+        vertical_offset: config.verticalOffset || 20,
+        trigger_style: config.triggerStyle || 'floating',
+        edge_trigger_text: config.edgeTriggerText || '',
+        quick_questions: config.quickQuestions || [],
+        show_email_field: config.showEmailField ?? true,
+        show_bubble: config.showBubble ?? true,
+        bubble_text: config.bubbleText || '',
+        website_url: config.websiteUrl || '',
+      });
+
+      setHasUnsavedChanges(false);
+      toast({
+        title: 'Shranjeno!',
+        description: 'Nastavitve so bile uspešno shranjene.',
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: 'Napaka',
+        description: 'Prišlo je do napake pri shranjevanju.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Quick questions handlers
   const addQuestion = () => {
     const trimmed = newQuestion.trim().slice(0, 35);
     if (trimmed && config.quickQuestions.length < 4) {
-      setConfig({ quickQuestions: [...config.quickQuestions, trimmed] });
+      handleConfigChange({ quickQuestions: [...config.quickQuestions, trimmed] });
       setNewQuestion('');
     }
   };
 
   const removeQuestion = (index: number) => {
     if (config.quickQuestions.length > 1) {
-      setConfig({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
+      handleConfigChange({ quickQuestions: config.quickQuestions.filter((_, i) => i !== index) });
     }
   };
 
@@ -90,18 +188,18 @@ export default function DashboardSettings() {
     if (editingIndex !== null && editValue.trim()) {
       const updated = [...config.quickQuestions];
       updated[editingIndex] = editValue.trim().slice(0, 35);
-      setConfig({ quickQuestions: updated });
+      handleConfigChange({ quickQuestions: updated });
     }
     setEditingIndex(null);
     setEditValue('');
   };
 
   const resetColor = () => {
-    setConfig({ primaryColor: defaultConfig.primaryColor });
+    handleConfigChange({ primaryColor: defaultConfig.primaryColor });
   };
 
   const resetIconColors = () => {
-    setConfig({ 
+    handleConfigChange({ 
       iconBgColor: config.primaryColor, 
       iconColor: '#FFFFFF' 
     });
@@ -147,12 +245,12 @@ export default function DashboardSettings() {
                     <Input
                       id="home-title"
                       value={config.homeTitle}
-                      onChange={(e) => setConfig({ homeTitle: e.target.value.slice(0, 21) })}
+                      onChange={(e) => handleConfigChange({ homeTitle: e.target.value.slice(0, 21) })}
                       placeholder="Pozdravljeni!"
                       maxLength={21}
                       className="flex-1"
                     />
-                    <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeTitle: (config.homeTitle + emoji).slice(0, 21) })} />
+                    <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeTitle: (config.homeTitle + emoji).slice(0, 21) })} />
                   </div>
                 </div>
 
@@ -166,12 +264,12 @@ export default function DashboardSettings() {
                     <Input
                       id="home-subtitle"
                       value={config.homeSubtitle}
-                      onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 21) })}
+                      onChange={(e) => handleConfigChange({ homeSubtitle: e.target.value.slice(0, 21) })}
                       placeholder="Kako vam lahko pomagam?"
                       maxLength={21}
                       className="flex-1"
                     />
-                    <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 21) })} />
+                    <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 21) })} />
                   </div>
                 </div>
 
@@ -183,13 +281,13 @@ export default function DashboardSettings() {
                       <input
                         type="color"
                         value={config.primaryColor}
-                        onChange={(e) => setConfig({ primaryColor: e.target.value })}
+                        onChange={(e) => handleConfigChange({ primaryColor: e.target.value })}
                         className="h-10 w-10 rounded-lg cursor-pointer border-0"
                       />
                     </div>
                     <Input
                       value={config.primaryColor}
-                      onChange={(e) => setConfig({ primaryColor: e.target.value })}
+                      onChange={(e) => handleConfigChange({ primaryColor: e.target.value })}
                       className="flex-1 font-mono text-sm"
                       placeholder="#3B82F6"
                     />
@@ -213,7 +311,7 @@ export default function DashboardSettings() {
                   </div>
                   <Switch
                     checked={config.headerStyle === 'gradient'}
-                    onCheckedChange={(checked) => setConfig({ headerStyle: checked ? 'gradient' : 'solid' })}
+                    onCheckedChange={(checked) => handleConfigChange({ headerStyle: checked ? 'gradient' : 'solid' })}
                   />
                 </div>
 
@@ -254,7 +352,7 @@ export default function DashboardSettings() {
                           } else {
                             const updated = [...config.quickQuestions];
                             updated[index] = (updated[index] + emoji).slice(0, 35);
-                            setConfig({ quickQuestions: updated });
+                            handleConfigChange({ quickQuestions: updated });
                           }
                         }} />
                         <Button
@@ -300,7 +398,7 @@ export default function DashboardSettings() {
                   </div>
                   <Switch
                     checked={config.showEmailField}
-                    onCheckedChange={(checked) => setConfig({ showEmailField: checked })}
+                    onCheckedChange={(checked) => handleConfigChange({ showEmailField: checked })}
                   />
                 </div>
               </TabsContent>
@@ -314,11 +412,11 @@ export default function DashboardSettings() {
                     <Input
                       id="agent-name"
                       value={config.name}
-                      onChange={(e) => setConfig({ name: e.target.value })}
+                      onChange={(e) => handleConfigChange({ name: e.target.value })}
                       placeholder="Moj AI Asistent"
                       className="flex-1"
                     />
-                    <EmojiPicker onEmojiSelect={(emoji) => setConfig({ name: config.name + emoji })} />
+                    <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ name: config.name + emoji })} />
                   </div>
                 </div>
 
@@ -330,7 +428,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={!config.darkMode ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ darkMode: false })}
+                      onClick={() => handleConfigChange({ darkMode: false })}
                       className="flex-1"
                     >
                       <Sun className="h-4 w-4 mr-2" />
@@ -340,7 +438,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={config.darkMode ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ darkMode: true })}
+                      onClick={() => handleConfigChange({ darkMode: true })}
                       className="flex-1"
                     >
                       <Moon className="h-4 w-4 mr-2" />
@@ -354,10 +452,10 @@ export default function DashboardSettings() {
                   <Label>Profilna slika ali ikona</Label>
                   <ImageUpload
                     value={config.botAvatar}
-                    onChange={(url) => setConfig({ botAvatar: url })}
+                    onChange={(url) => { handleConfigChange({ botAvatar: url }); }}
                     placeholder="URL slike"
                     selectedIcon={config.botIcon}
-                    onIconChange={(icon) => setConfig({ botIcon: icon })}
+                    onIconChange={(icon) => { handleConfigChange({ botIcon: icon }); }}
                     primaryColor={config.iconBgColor}
                     iconColor={config.iconColor}
                   />
@@ -388,13 +486,13 @@ export default function DashboardSettings() {
                           <input
                             type="color"
                             value={config.iconBgColor}
-                            onChange={(e) => setConfig({ iconBgColor: e.target.value })}
+                            onChange={(e) => handleConfigChange({ iconBgColor: e.target.value })}
                             className="h-10 w-10 rounded-lg cursor-pointer border-0"
                           />
                         </div>
                         <Input
                           value={config.iconBgColor}
-                          onChange={(e) => setConfig({ iconBgColor: e.target.value })}
+                          onChange={(e) => handleConfigChange({ iconBgColor: e.target.value })}
                           className="flex-1 font-mono text-sm"
                           placeholder="#3B82F6"
                         />
@@ -409,13 +507,13 @@ export default function DashboardSettings() {
                           <input
                             type="color"
                             value={config.iconColor}
-                            onChange={(e) => setConfig({ iconColor: e.target.value })}
+                            onChange={(e) => handleConfigChange({ iconColor: e.target.value })}
                             className="h-10 w-10 rounded-lg cursor-pointer border-0"
                           />
                         </div>
                         <Input
                           value={config.iconColor}
-                          onChange={(e) => setConfig({ iconColor: e.target.value })}
+                          onChange={(e) => handleConfigChange({ iconColor: e.target.value })}
                           className="flex-1 font-mono text-sm"
                           placeholder="#FFFFFF"
                         />
@@ -435,7 +533,7 @@ export default function DashboardSettings() {
                   </div>
                   <Switch
                     checked={config.showBubble}
-                    onCheckedChange={(checked) => setConfig({ showBubble: checked })}
+                    onCheckedChange={(checked) => handleConfigChange({ showBubble: checked })}
                   />
                 </div>
 
@@ -447,11 +545,11 @@ export default function DashboardSettings() {
                       <Input
                         id="bubble-text"
                         value={config.bubbleText}
-                        onChange={(e) => setConfig({ bubbleText: e.target.value })}
+                        onChange={(e) => handleConfigChange({ bubbleText: e.target.value })}
                         placeholder="👋 Pozdravljeni!"
                         className="flex-1"
                       />
-                      <EmojiPicker onEmojiSelect={(emoji) => setConfig({ bubbleText: config.bubbleText + emoji })} />
+                      <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ bubbleText: config.bubbleText + emoji })} />
                     </div>
                   </div>
                 )}
@@ -464,7 +562,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={config.position === 'left' ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ position: 'left' })}
+                      onClick={() => handleConfigChange({ position: 'left' })}
                       className="flex-1"
                     >
                       <AlignLeft className="h-4 w-4 mr-2" />
@@ -474,7 +572,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={config.position === 'right' ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ position: 'right' })}
+                      onClick={() => handleConfigChange({ position: 'right' })}
                       className="flex-1"
                     >
                       <AlignRight className="h-4 w-4 mr-2" />
@@ -491,7 +589,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={config.triggerStyle === 'floating' ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ triggerStyle: 'floating' })}
+                      onClick={() => handleConfigChange({ triggerStyle: 'floating' })}
                       className="flex-1"
                     >
                       Plavajoči
@@ -500,7 +598,7 @@ export default function DashboardSettings() {
                       type="button"
                       variant={config.triggerStyle === 'edge' ? "default" : "outline"}
                       size="sm"
-                      onClick={() => setConfig({ triggerStyle: 'edge' })}
+                      onClick={() => handleConfigChange({ triggerStyle: 'edge' })}
                       className="flex-1 whitespace-nowrap"
                     >
                       Robni
@@ -520,7 +618,7 @@ export default function DashboardSettings() {
                           <button
                             key={name}
                             type="button"
-                            onClick={() => setConfig({ triggerIcon: name })}
+                            onClick={() => handleConfigChange({ triggerIcon: name })}
                             className={cn(
                               "flex flex-col items-center gap-2 p-3 rounded-lg border transition-all hover:scale-105",
                               isSelected 
@@ -544,7 +642,7 @@ export default function DashboardSettings() {
                     <Input
                       id="edge-text"
                       value={config.edgeTriggerText}
-                      onChange={(e) => setConfig({ edgeTriggerText: e.target.value })}
+                      onChange={(e) => handleConfigChange({ edgeTriggerText: e.target.value })}
                       placeholder="Klikni me"
                     />
                   </div>
@@ -561,7 +659,7 @@ export default function DashboardSettings() {
                   </div>
                   <Slider
                     value={[config.verticalOffset]}
-                    onValueChange={([value]) => setConfig({ verticalOffset: value })}
+                    onValueChange={([value]) => handleConfigChange({ verticalOffset: value })}
                     min={0}
                     max={100}
                     step={4}
@@ -569,6 +667,33 @@ export default function DashboardSettings() {
                 </div>
               </TabsContent>
             </Tabs>
+
+            {/* Save Button */}
+            <div className="mt-6 pt-6 border-t border-border">
+              <Button 
+                onClick={handleSave} 
+                disabled={isSaving || !hasUnsavedChanges}
+                className="w-full"
+                size="lg"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Shranjujem...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    {hasUnsavedChanges ? 'Shrani nastavitve' : 'Shranjeno'}
+                  </>
+                )}
+              </Button>
+              {hasUnsavedChanges && (
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  Imate neshranjene spremembe
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Embed Code Section */}
@@ -666,6 +791,32 @@ export default function DashboardSettings() {
           </div>
         </div>
       </div>
+
+      {/* Leave confirmation dialog */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Neshranjene spremembe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Imate neshranjene spremembe. Ali ste prepričani, da želite zapustiti stran? Vse spremembe bodo izgubljene.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowLeaveDialog(false)}>
+              Ostani na strani
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setHasUnsavedChanges(false);
+              setShowLeaveDialog(false);
+              if (pendingNavigation) {
+                window.location.href = pendingNavigation;
+              }
+            }}>
+              Zapusti brez shranjevanja
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
