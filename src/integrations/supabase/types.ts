@@ -298,6 +298,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_conversation_messages: {
+        Args: { p_session_id: string; p_table_name: string }
+        Returns: {
+          created_at: string
+          id: number
+          message: string
+          session_id: string
+        }[]
+      }
+      get_conversations: {
+        Args: { p_limit?: number; p_table_name: string }
+        Returns: {
+          first_message_at: string
+          last_message_at: string
+          message_count: number
+          session_id: string
+        }[]
+      }
       get_messages_by_day: {
         Args: { p_table_name: string }
         Returns: {
