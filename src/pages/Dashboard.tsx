@@ -67,11 +67,10 @@ export default function Dashboard() {
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
-  const isActive = widget?.status === 'active' && widget?.is_active;
-  const isSetupPaid = widget?.status === 'setup_paid';
-  const apiKey = widget?.api_key;
+  const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
   const plan = widget?.plan || 'basic';
+  const apiKey = widget?.api_key;
   
   // Handle subscription success/cancelled from URL
   useEffect(() => {
@@ -81,9 +80,7 @@ export default function Dashboard() {
         title: 'Naročnina aktivirana!',
         description: 'Vaša naročnina je bila uspešno aktivirana.',
       });
-      // Refresh widget data to get updated subscription_status
       fetchWidget();
-      // Clear the URL parameter
       setSearchParams({});
     } else if (subscriptionResult === 'cancelled') {
       toast({
@@ -95,12 +92,12 @@ export default function Dashboard() {
     }
   }, [searchParams]);
   
-  // Show subscription modal when is_active is true but subscription_status is 'none'
+  // Show subscription modal ONLY when is_active === true AND subscription_status === 'none'
   useEffect(() => {
-    if (widget?.is_active && subscriptionStatus === 'none') {
+    if (isActive && subscriptionStatus === 'none') {
       setShowSubscriptionModal(true);
     }
-  }, [widget?.is_active, subscriptionStatus]);
+  }, [isActive, subscriptionStatus]);
 
   const embedCode = apiKey
     ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
@@ -179,6 +176,111 @@ export default function Dashboard() {
     }
   };
 
+  // Get banner config based on status
+  const getBannerConfig = () => {
+    if (!isActive) {
+      return {
+        icon: Clock,
+        iconBg: 'bg-primary/20',
+        iconColor: 'text-primary',
+        borderColor: 'border-primary/50',
+        title: '⏳ Vaš chatbot se pripravlja.',
+        subtitle: 'Obvestili vas bomo po e-pošti ko bo pripravljen.'
+      };
+    }
+    if (subscriptionStatus === 'none') {
+      return {
+        icon: Rocket,
+        iconBg: 'bg-success/20',
+        iconColor: 'text-success',
+        borderColor: 'border-success/50',
+        title: '🎉 Vaš chatbot je pripravljen!',
+        subtitle: 'Aktivirajte naročnino za uporabo.'
+      };
+    }
+    if (subscriptionStatus === 'active') {
+      return {
+        icon: CheckCircle2,
+        iconBg: 'bg-success/20',
+        iconColor: 'text-success',
+        borderColor: 'border-success/50',
+        title: '✅ Vaš chatbot je aktiven.',
+        subtitle: 'Vaš chatbot uspešno deluje.'
+      };
+    }
+    if (subscriptionStatus === 'failed') {
+      return {
+        icon: AlertCircle,
+        iconBg: 'bg-destructive/20',
+        iconColor: 'text-destructive',
+        borderColor: 'border-destructive/50',
+        title: '⚠️ Plačilo neuspešno.',
+        subtitle: 'Prosimo posodobite plačilno metodo.'
+      };
+    }
+    if (subscriptionStatus === 'cancelled') {
+      return {
+        icon: AlertCircle,
+        iconBg: 'bg-warning/20',
+        iconColor: 'text-warning',
+        borderColor: 'border-warning/50',
+        title: 'Naročnina preklicana.',
+        subtitle: 'Za nadaljevanje uporabe obnovite naročnino.'
+      };
+    }
+    return null;
+  };
+
+  // Get embed section config based on status
+  const getEmbedSectionConfig = () => {
+    if (!isActive) {
+      return {
+        icon: Clock,
+        iconBg: 'bg-primary/20',
+        iconColor: 'text-primary',
+        message: '⏳ Vaš chatbot se pripravlja...',
+        showButton: false,
+        showCode: false
+      };
+    }
+    if (subscriptionStatus === 'none') {
+      return {
+        icon: Lock,
+        iconBg: 'bg-warning/20',
+        iconColor: 'text-warning',
+        message: 'Za prikaz embed kode aktivirajte naročnino',
+        showButton: true,
+        showCode: false
+      };
+    }
+    if (subscriptionStatus === 'failed') {
+      return {
+        icon: AlertCircle,
+        iconBg: 'bg-destructive/20',
+        iconColor: 'text-destructive',
+        message: '⚠️ Plačilo neuspešno. Prosimo posodobite plačilno metodo.',
+        showButton: true,
+        showCode: false
+      };
+    }
+    if (subscriptionStatus === 'cancelled') {
+      return {
+        icon: AlertCircle,
+        iconBg: 'bg-warning/20',
+        iconColor: 'text-warning',
+        message: 'Naročnina preklicana. Za nadaljevanje uporabe obnovite naročnino.',
+        showButton: true,
+        showCode: false
+      };
+    }
+    if (subscriptionStatus === 'active') {
+      return {
+        showCode: true
+      };
+    }
+    return { showCode: false, showButton: false };
+  };
+
   const stats = [
     { label: 'Sporočila danes', value: '0', icon: MessageSquare, change: '+0%' },
     { label: 'Aktivni uporabniki', value: '0', icon: Users, change: '+0%' },
@@ -207,11 +309,13 @@ export default function Dashboard() {
 
   const currentPlanPrices = planPrices[plan] || planPrices.basic;
   const currentPlanName = planNames[plan] || 'Basic';
+  const bannerConfig = getBannerConfig();
+  const embedConfig = getEmbedSectionConfig();
 
   return (
     <DashboardLayout>
-      {/* Subscription Modal */}
-      <Dialog open={showSubscriptionModal} onOpenChange={setShowSubscriptionModal}>
+      {/* Subscription Modal - Only show if is_active === true AND subscription_status === 'none' */}
+      <Dialog open={showSubscriptionModal && isActive && subscriptionStatus === 'none'} onOpenChange={setShowSubscriptionModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
@@ -261,59 +365,28 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Setup Paid Banner */}
-        {isSetupPaid && (
-          <div className="glass rounded-2xl p-4 border-primary/50 animate-slide-up flex items-center gap-4">
-            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-primary" />
+        {/* Status Banner */}
+        {bannerConfig && (
+          <div className={cn(
+            "glass rounded-2xl p-4 animate-slide-up flex items-center gap-4",
+            bannerConfig.borderColor
+          )}>
+            <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", bannerConfig.iconBg)}>
+              <bannerConfig.icon className={cn("h-5 w-5", bannerConfig.iconColor)} />
             </div>
-            <div>
-              <p className="text-foreground font-medium">Vaš chatbot se pripravlja</p>
-              <p className="text-muted-foreground text-sm">
-                Obvestili vas bomo po e-pošti ko bo pripravljen.
-              </p>
+            <div className="flex-1">
+              <p className="text-foreground font-medium">{bannerConfig.title}</p>
+              <p className="text-muted-foreground text-sm">{bannerConfig.subtitle}</p>
             </div>
+            {/* Show "Uredi chatbota" button only if is_active === true */}
+            {isActive && (
+              <Button variant="outline" onClick={() => navigate('/customize')}>
+                <Settings className="h-4 w-4 mr-2" />
+                Uredi chatbota
+              </Button>
+            )}
           </div>
         )}
-
-        {/* Status Card */}
-        <div
-          className={cn(
-            'glass rounded-2xl p-6 animate-slide-up',
-            isActive ? 'border-success/50' : 'border-warning/50'
-          )}
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
-              <div
-                className={cn(
-                  'h-14 w-14 rounded-xl flex items-center justify-center',
-                  isActive ? 'bg-success/20' : 'bg-warning/20'
-                )}
-              >
-                {isActive ? (
-                  <CheckCircle2 className="h-7 w-7 text-success" />
-                ) : (
-                  <AlertCircle className="h-7 w-7 text-warning" />
-                )}
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">
-                  {isActive ? 'Chatbot je aktiven' : 'Chatbot čaka na aktivacijo'}
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  {isActive
-                    ? 'Vaš chatbot uspešno deluje na vaši spletni strani.'
-                    : 'Dodajte embed kodo na vašo spletno stran za aktivacijo.'}
-                </p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => navigate('/customize')}>
-              <Settings className="h-4 w-4 mr-2" />
-              Uredi chatbota
-            </Button>
-          </div>
-        </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -340,8 +413,8 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* Embed Code Section - Only show if subscription is active */}
-        {subscriptionStatus === 'active' ? (
+        {/* Embed Code Section */}
+        {embedConfig.showCode ? (
           <div className="glass rounded-2xl p-6 animate-slide-up delay-400">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
@@ -350,18 +423,13 @@ export default function Dashboard() {
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
                 <p className="text-sm text-muted-foreground">
-                  {apiKey
-                    ? 'Dodajte to kodo pred zaključni </body> tag'
-                    : 'API ključ bo na voljo po aktivaciji chatbota'}
+                  Dodajte to kodo pred zaključni &lt;/body&gt; tag
                 </p>
               </div>
             </div>
 
             <div className="relative">
-              <pre className={cn(
-                "bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border",
-                !apiKey && "opacity-50"
-              )}>
+              <pre className="bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border">
                 <code>{embedCode}</code>
               </pre>
               <Button
@@ -369,7 +437,6 @@ export default function Dashboard() {
                 size="sm"
                 className="absolute top-3 right-3"
                 onClick={copyToClipboard}
-                disabled={!apiKey}
               >
                 {copied ? (
                   <>
@@ -388,22 +455,24 @@ export default function Dashboard() {
         ) : (
           <div className="glass rounded-2xl p-6 animate-slide-up delay-400 border-warning/30">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
-                <Lock className="h-5 w-5 text-warning" />
+              <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", embedConfig.iconBg)}>
+                {embedConfig.icon && <embedConfig.icon className={cn("h-5 w-5", embedConfig.iconColor)} />}
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
                 <p className="text-sm text-muted-foreground">
-                  Embed koda bo na voljo po aktivaciji naročnine
+                  {embedConfig.message}
                 </p>
               </div>
             </div>
-            <Button 
-              className="mt-4"
-              onClick={() => setShowSubscriptionModal(true)}
-            >
-              Aktiviraj naročnino
-            </Button>
+            {embedConfig.showButton && (
+              <Button 
+                className="mt-4"
+                onClick={() => setShowSubscriptionModal(true)}
+              >
+                Aktiviraj naročnino
+              </Button>
+            )}
           </div>
         )}
       </div>
