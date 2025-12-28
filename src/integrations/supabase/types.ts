@@ -308,7 +308,7 @@ export type Database = {
         }[]
       }
       get_conversations: {
-        Args: { p_limit?: number; p_table_name: string }
+        Args: { p_limit?: number; p_offset?: number; p_table_name: string }
         Returns: {
           first_message_at: string
           last_message_at: string

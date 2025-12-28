@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Conversation {
@@ -22,30 +22,64 @@ export interface Message {
 export function useConversations(tableName: string | null | undefined) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const LIMIT = 50;
 
-  useEffect(() => {
+  const fetchConversations = useCallback(async (reset = false) => {
     if (!tableName) {
       setLoading(false);
       return;
     }
 
-    const fetchConversations = async () => {
-      try {
+    try {
+      if (reset) {
         setLoading(true);
-        const { data, error } = await supabase
-          .rpc('get_conversations', { p_table_name: tableName, p_limit: 50 });
-        
-        if (error) throw error;
-        setConversations(data || []);
-      } catch (err) {
-        console.error('Error fetching conversations:', err);
-      } finally {
-        setLoading(false);
+        setOffset(0);
+      } else {
+        setLoadingMore(true);
       }
-    };
 
-    fetchConversations();
+      const currentOffset = reset ? 0 : offset;
+      
+      const { data, error } = await supabase
+        .rpc('get_conversations', { 
+          p_table_name: tableName, 
+          p_limit: LIMIT,
+          p_offset: currentOffset
+        });
+      
+      if (error) throw error;
+      
+      const newData = data || [];
+      
+      if (reset) {
+        setConversations(newData);
+      } else {
+        setConversations(prev => [...prev, ...newData]);
+      }
+      
+      setHasMore(newData.length === LIMIT);
+      setOffset(currentOffset + newData.length);
+      
+    } catch (err) {
+      console.error('Error fetching conversations:', err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [tableName, offset]);
+
+  useEffect(() => {
+    fetchConversations(true);
   }, [tableName]);
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchConversations(false);
+    }
+  };
 
   const fetchMessages = async (sessionId: string): Promise<Message[]> => {
     if (!tableName) return [];
@@ -63,5 +97,5 @@ export function useConversations(tableName: string | null | undefined) {
     return data || [];
   };
 
-  return { conversations, loading, fetchMessages };
+  return { conversations, loading, loadingMore, hasMore, loadMore, fetchMessages };
 }
