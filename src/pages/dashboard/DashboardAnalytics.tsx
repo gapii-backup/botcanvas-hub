@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useWidget } from '@/hooks/useWidget';
-import { useConversationTopics, TopicRecord } from '@/hooks/useConversationTopics';
+import { useConversationTopics } from '@/hooks/useConversationTopics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -23,16 +23,19 @@ import {
   ChevronRight,
   ArrowUpDown,
   X,
+  Clock,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Legend,
-  Sector,
 } from 'recharts';
+import { ActivityHeatmap } from '@/components/analytics/ActivityHeatmap';
+import { HorizontalBarChart } from '@/components/analytics/HorizontalBarChart';
 
 const CHART_COLORS = [
   'hsl(var(--primary))',
@@ -44,34 +47,6 @@ const CHART_COLORS = [
   'hsl(280, 70%, 50%)',
   'hsl(340, 70%, 50%)',
 ];
-
-const renderActiveShape = (props: any) => {
-  const {
-    cx, cy, innerRadius, outerRadius, startAngle, endAngle,
-    fill, payload, percent,
-  } = props;
-
-  return (
-    <g>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius + 10}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-        style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}
-      />
-      <text x={cx} y={cy - 10} textAnchor="middle" fill="hsl(var(--foreground))" className="text-sm font-medium">
-        {payload.category}
-      </text>
-      <text x={cx} y={cy + 15} textAnchor="middle" fill="hsl(var(--muted-foreground))" className="text-xs">
-        {`${(percent * 100).toFixed(1)}%`}
-      </text>
-    </g>
-  );
-};
 
 type SortField = 'category' | 'specific' | 'count';
 type SortDirection = 'asc' | 'desc';
@@ -111,7 +86,7 @@ export default function DashboardAnalytics() {
     return { startDate: subDays(now, 30), endDate: now };
   }, [dateFilter, customDateRange]);
 
-  const { rawData, categories, topTopics, loading: topicsLoading } = useConversationTopics(
+  const { rawData, categories, topTopics, trendData, heatmapData, loading: topicsLoading } = useConversationTopics(
     tableName,
     { startDate: startDate ?? null, endDate: endDate ?? null }
   );
@@ -143,8 +118,7 @@ export default function DashboardAnalytics() {
     return 'Neznano obdobje';
   };
 
-  // Pie chart state
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // Selected category state
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Modal state
@@ -241,28 +215,21 @@ export default function DashboardAnalytics() {
     }
   };
 
-  const handlePieClick = (_: any, index: number) => {
-    const category = categories[index]?.category;
-    if (category === selectedCategory) {
+  const handleCategoryClick = (category: string) => {
+    if (selectedCategory === category) {
       setSelectedCategory(null);
-      setActiveIndex(null);
     } else {
       setSelectedCategory(category);
-      setActiveIndex(index);
     }
   };
 
-  const handlePieEnter = (_: any, index: number) => {
-    if (selectedCategory === null) {
-      setActiveIndex(index);
-    }
-  };
-
-  const handlePieLeave = () => {
-    if (selectedCategory === null) {
-      setActiveIndex(null);
-    }
-  };
+  // Format trend data for chart
+  const formattedTrendData = useMemo(() => {
+    return trendData.map(item => ({
+      ...item,
+      label: format(new Date(item.day), 'd. MMM', { locale: sl })
+    }));
+  }, [trendData]);
 
   if (loading || topicsLoading) {
     return (
@@ -282,7 +249,46 @@ export default function DashboardAnalytics() {
   return (
     <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
       <div className="space-y-6 animate-slide-up">
-        {/* Date Range Picker - same as DashboardConversations */}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-primary/10">
+                <MessageSquare className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Skupaj pogovorov</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalCount}</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-success/10">
+                <FolderOpen className="h-6 w-6 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Kategorij</p>
+                <p className="text-2xl font-bold text-foreground">{stats.uniqueCategories}</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass rounded-2xl p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-warning/10">
+                <TrendingUp className="h-6 w-6 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Najpogostejša tema</p>
+                <p className="text-lg font-bold text-foreground truncate max-w-[200px]">
+                  {stats.mostFrequentTopic}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Date Range Picker */}
         <div className="space-y-2">
           <div className="flex flex-wrap gap-2 items-center">
             {[
@@ -358,111 +364,43 @@ export default function DashboardAnalytics() {
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="glass rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-primary/10">
-                <MessageSquare className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Skupaj pogovorov</p>
-                <p className="text-2xl font-bold text-foreground">{stats.totalCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-success/10">
-                <FolderOpen className="h-6 w-6 text-success" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Kategorij</p>
-                <p className="text-2xl font-bold text-foreground">{stats.uniqueCategories}</p>
-              </div>
-            </div>
-          </div>
-          <div className="glass rounded-2xl p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-warning/10">
-                <TrendingUp className="h-6 w-6 text-warning" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Najpogostejša tema</p>
-                <p className="text-lg font-bold text-foreground truncate max-w-[200px]">
-                  {stats.mostFrequentTopic}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Pie Chart Section */}
-        <div className="glass rounded-2xl p-6">
-          <h3 className="text-lg font-medium text-foreground mb-4">Kategorije pogovorov</h3>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Pie Chart */}
-            <div>
-              {categories.length > 0 ? (
-                <div className="h-[280px]">
+        {/* Main Charts Grid - 2 columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Line Chart - Trends */}
+            <div className="glass rounded-2xl p-6">
+              <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Trendi pogovorov
+              </h3>
+              
+              {formattedTrendData.length > 0 ? (
+                <div className="h-[220px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={categories}
-                        dataKey="count"
-                        nameKey="category"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        activeIndex={activeIndex !== null ? activeIndex : undefined}
-                        activeShape={renderActiveShape}
-                        onMouseEnter={handlePieEnter}
-                        onMouseLeave={handlePieLeave}
-                        onClick={handlePieClick}
-                        style={{ cursor: 'pointer' }}
-                        label={({ category, percent, cx, cy, midAngle, outerRadius }) => {
-                          const RADIAN = Math.PI / 180;
-                          const radius = outerRadius + 25;
-                          const x = cx + radius * Math.cos(-midAngle * RADIAN);
-                          const y = cy + radius * Math.sin(-midAngle * RADIAN);
-                          if (percent < 0.05) return null;
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              fill="hsl(var(--foreground))"
-                              textAnchor={x > cx ? 'start' : 'end'}
-                              dominantBaseline="central"
-                              className="text-xs"
-                            >
-                              {category}
-                            </text>
-                          );
-                        }}
-                        labelLine={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1 }}
-                      >
-                        {categories.map((_, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={CHART_COLORS[index % CHART_COLORS.length]}
-                            style={{
-                              opacity: selectedCategory === null || categories[index].category === selectedCategory ? 1 : 0.4,
-                              transition: 'opacity 0.3s ease',
-                            }}
-                          />
-                        ))}
-                      </Pie>
+                    <LineChart data={formattedTrendData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                      <XAxis 
+                        dataKey="label" 
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis 
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                        allowDecimals={false}
+                      />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (active && payload && payload.length) {
                             const data = payload[0].payload;
-                            const total = categories.reduce((sum, c) => sum + c.count, 0);
                             return (
                               <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-                                <p className="font-medium text-foreground">{data.category}</p>
+                                <p className="font-medium text-foreground">{data.label}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {data.count} pogovorov ({((data.count / total) * 100).toFixed(1)}%)
+                                  {data.count} {data.count === 1 ? 'pogovor' : data.count < 5 ? 'pogovori' : 'pogovorov'}
                                 </p>
                               </div>
                             );
@@ -470,68 +408,61 @@ export default function DashboardAnalytics() {
                           return null;
                         }}
                       />
-                    </PieChart>
+                      <Line
+                        type="monotone"
+                        dataKey="count"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2}
+                        dot={{ fill: 'hsl(var(--primary))', strokeWidth: 0, r: 3 }}
+                        activeDot={{ r: 5, fill: 'hsl(var(--primary))' }}
+                      />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="h-[280px] flex items-center justify-center text-muted-foreground">
-                  Ni podatkov o kategorijah
-                </div>
-              )}
-
-              {/* Legend */}
-              {categories.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-3 justify-center">
-                  {categories.map((cat, index) => {
-                    const total = categories.reduce((sum, c) => sum + c.count, 0);
-                    const percent = ((cat.count / total) * 100).toFixed(1);
-                    return (
-                      <button
-                        key={cat.category}
-                        onClick={() => {
-                          if (selectedCategory === cat.category) {
-                            setSelectedCategory(null);
-                            setActiveIndex(null);
-                          } else {
-                            setSelectedCategory(cat.category);
-                            setActiveIndex(index);
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all",
-                          selectedCategory === cat.category
-                            ? "bg-primary/20 ring-2 ring-primary"
-                            : "bg-muted/50 hover:bg-muted"
-                        )}
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-                        />
-                        <span className="text-foreground">{cat.category}</span>
-                        <span className="text-muted-foreground">{percent}%</span>
-                      </button>
-                    );
-                  })}
+                <div className="h-[220px] flex items-center justify-center text-muted-foreground">
+                  Ni podatkov za prikaz trendov
                 </div>
               )}
             </div>
 
-            {/* Selected Category Topics */}
-            <div>
+            {/* Heatmap - Activity by hours */}
+            <div className="glass rounded-2xl p-6">
+              <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                <Clock className="h-5 w-5 text-primary" />
+                Aktivnost po urah
+              </h3>
+              <ActivityHeatmap data={heatmapData} />
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Horizontal Bar Chart - Categories */}
+            <div className="glass rounded-2xl p-6">
+              <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
+                <FolderOpen className="h-5 w-5 text-primary" />
+                Kategorije pogovorov
+              </h3>
+              <HorizontalBarChart 
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryClick={handleCategoryClick}
+              />
+            </div>
+
+            {/* Selected Category Topics or Top 5 Topics */}
+            <div className="glass rounded-2xl p-6">
               {selectedCategory ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-foreground">
+                    <h3 className="text-lg font-medium text-foreground">
                       Teme v kategoriji: {selectedCategory}
-                    </h4>
+                    </h3>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        setSelectedCategory(null);
-                        setActiveIndex(null);
-                      }}
+                      onClick={() => setSelectedCategory(null)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -571,11 +502,36 @@ export default function DashboardAnalytics() {
                   )}
                 </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
-                  <FolderOpen className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-center">
-                    Kliknite na kategorijo v grafu ali legendi za prikaz specifičnih tem
-                  </p>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Top 5 tem
+                  </h3>
+                  
+                  {topTopics.length > 0 ? (
+                    <div className="space-y-3">
+                      {topTopics.map((topic, index) => (
+                        <div 
+                          key={topic.topic}
+                          className="flex items-center justify-between p-3 rounded-lg bg-muted/30"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm font-medium text-foreground truncate max-w-[200px]">
+                              {topic.topic}
+                            </span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">{topic.count}x</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center text-muted-foreground">
+                      Ni podatkov o temah
+                    </div>
+                  )}
                 </div>
               )}
             </div>

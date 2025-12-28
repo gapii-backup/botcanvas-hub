@@ -19,6 +19,13 @@ export interface TopTopic {
   count: number;
 }
 
+export interface TrendDataPoint {
+  day: string;
+  count: number;
+}
+
+export type HeatmapData = number[][];
+
 interface UseConversationTopicsOptions {
   startDate?: Date | null;
   endDate?: Date | null;
@@ -31,6 +38,8 @@ export function useConversationTopics(
   const [rawData, setRawData] = useState<TopicRecord[]>([]);
   const [categories, setCategories] = useState<TopicCategory[]>([]);
   const [topTopics, setTopTopics] = useState<TopTopic[]>([]);
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
+  const [heatmapData, setHeatmapData] = useState<HeatmapData>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -48,7 +57,7 @@ export function useConversationTopics(
 
         let query = supabase
           .from('conversation_topics')
-          .select('id, category, specific, created_at, session_id')
+          .select('id, category, topic, created_at, session_id')
           .eq('table_name', tableName);
 
         if (startDate) {
@@ -61,13 +70,27 @@ export function useConversationTopics(
         }
 
         const { data, error: fetchError } = await query as { 
-          data: TopicRecord[] | null; 
+          data: Array<{
+            id: string;
+            category: string;
+            topic: string | null;
+            created_at: string;
+            session_id: string;
+          }> | null; 
           error: any 
         };
 
         if (fetchError) throw fetchError;
 
-        const records = data || [];
+        // Map topic to specific for compatibility
+        const records: TopicRecord[] = (data || []).map(item => ({
+          id: item.id,
+          category: item.category,
+          specific: item.topic,
+          created_at: item.created_at,
+          session_id: item.session_id
+        }));
+        
         setRawData(records);
 
         // Group by category
@@ -93,6 +116,44 @@ export function useConversationTopics(
 
         setCategories(categoriesArray);
         setTopTopics(topicsArray);
+
+        // Calculate trend data - unique sessions per day (last 14 days)
+        const trendMap = new Map<string, Set<string>>();
+        const now = new Date();
+        
+        // Initialize last 14 days
+        for (let i = 13; i >= 0; i--) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - i);
+          const dayKey = date.toISOString().split('T')[0];
+          trendMap.set(dayKey, new Set());
+        }
+
+        records.forEach(item => {
+          const dayKey = item.created_at.split('T')[0];
+          if (trendMap.has(dayKey)) {
+            trendMap.get(dayKey)!.add(item.session_id);
+          }
+        });
+
+        const trendArray = Array.from(trendMap.entries())
+          .map(([day, sessions]) => ({ day, count: sessions.size }))
+          .sort((a, b) => a.day.localeCompare(b.day));
+
+        setTrendData(trendArray);
+
+        // Calculate heatmap data - 7 days x 24 hours
+        // Index 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const heatmap: number[][] = Array(7).fill(null).map(() => Array(24).fill(0));
+
+        records.forEach(item => {
+          const date = new Date(item.created_at);
+          const dayOfWeek = date.getDay(); // 0 = Sunday
+          const hour = date.getHours();
+          heatmap[dayOfWeek][hour]++;
+        });
+
+        setHeatmapData(heatmap);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Unknown error'));
       } finally {
@@ -103,5 +164,5 @@ export function useConversationTopics(
     fetchTopics();
   }, [tableName, startDate?.getTime(), endDate?.getTime()]);
 
-  return { rawData, categories, topTopics, loading, error };
+  return { rawData, categories, topTopics, trendData, heatmapData, loading, error };
 }
