@@ -148,11 +148,11 @@ export default function Dashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          price_id: priceId,
           api_key: widget.api_key,
           plan: widget.plan,
           billing_period: billingPeriod,
           user_email: user.email,
+          addons: widget.addons || [],
           success_url: 'https://app.botmotion.ai/dashboard?subscription=success',
           cancel_url: 'https://app.botmotion.ai/dashboard?subscription=cancelled'
         })
