@@ -104,7 +104,9 @@ export default function Dashboard() {
   const { conversations, loading: convsLoading, fetchMessages } = useConversations(tableName);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [dateFilter, setDateFilter] = useState('');
+  const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | 'custom'>('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
@@ -236,9 +238,27 @@ export default function Dashboard() {
   };
 
   const filteredConversations = conversations.filter(conv => {
-    if (!dateFilter) return true;
-    const convDate = new Date(conv.last_message_at).toISOString().split('T')[0];
-    return convDate === dateFilter;
+    if (dateRange === 'all') return true;
+    
+    const convDate = new Date(conv.last_message_at);
+    const now = new Date();
+    
+    if (dateRange === '7days') {
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      return convDate >= weekAgo;
+    }
+    
+    if (dateRange === '30days') {
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      return convDate >= monthAgo;
+    }
+    
+    if (dateRange === 'custom') {
+      if (dateFrom && convDate < new Date(dateFrom)) return false;
+      if (dateTo && convDate > new Date(dateTo + 'T23:59:59')) return false;
+    }
+    
+    return true;
   });
 
   if (loading) {
@@ -400,29 +420,66 @@ export default function Dashboard() {
       </div>
 
       {/* Filter po datumu */}
-      <div className="flex items-center gap-3">
-        <Input
-          type="date"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-          className="w-48"
-        />
-        {dateFilter && (
-          <Button variant="ghost" size="sm" onClick={() => setDateFilter('')}>
-            <X className="h-4 w-4 mr-1" />
-            Počisti filter
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex gap-2">
+          <Button 
+            variant={dateRange === 'all' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setDateRange('all')}
+          >
+            Vsi pogovori
           </Button>
+          <Button 
+            variant={dateRange === '7days' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setDateRange('7days')}
+          >
+            Zadnjih 7 dni
+          </Button>
+          <Button 
+            variant={dateRange === '30days' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setDateRange('30days')}
+          >
+            Zadnjih 30 dni
+          </Button>
+          <Button 
+            variant={dateRange === 'custom' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setDateRange('custom')}
+          >
+            Po meri
+          </Button>
+        </div>
+        
+        {dateRange === 'custom' && (
+          <div className="flex gap-2 items-center">
+            <span className="text-sm text-muted-foreground">Od:</span>
+            <Input 
+              type="date" 
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className="w-40"
+            />
+            <span className="text-sm text-muted-foreground">Do:</span>
+            <Input 
+              type="date" 
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className="w-40"
+            />
+          </div>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Levi panel - seznam pogovorov */}
-        <div className="glass rounded-2xl overflow-hidden flex flex-col">
+        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
           <div className="p-4 border-b border-border">
             <h3 className="font-medium text-foreground">Pogovori ({filteredConversations.length})</h3>
           </div>
           
-          <ScrollArea className="flex-1">
+          <div className="flex-1 overflow-y-auto">
             {convsLoading ? (
               <div className="p-4 text-center text-muted-foreground">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
@@ -434,25 +491,37 @@ export default function Dashboard() {
                   key={conv.session_id}
                   onClick={() => handleSelectConversation(conv.session_id)}
                   className={cn(
-                    "p-4 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors",
-                    selectedConversation === conv.session_id && "bg-primary/10"
+                    "p-4 border-b border-border cursor-pointer transition-all duration-200",
+                    selectedConversation === conv.session_id 
+                      ? "bg-primary/10 border-l-4 border-l-primary" 
+                      : "hover:bg-muted/50"
                   )}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-foreground text-sm truncate max-w-[150px]">
-                      {conv.session_id.slice(0, 20)}...
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(conv.last_message_at).toLocaleDateString('sl-SI')}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      {conv.message_count} sporočil
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(conv.last_message_at).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                  <div className="flex items-start gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                      selectedConversation === conv.session_id ? "bg-primary/20" : "bg-muted"
+                    )}>
+                      <MessageSquare className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-medium text-sm truncate text-foreground">
+                          Pogovor #{conv.session_id.split('_').pop()?.slice(0, 8)}
+                        </span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                          {new Date(conv.last_message_at).toLocaleDateString('sl-SI')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-muted-foreground">
+                          {conv.message_count} sporočil
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(conv.last_message_at).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
@@ -462,18 +531,18 @@ export default function Dashboard() {
                 <p>Ni pogovorov</p>
               </div>
             )}
-          </ScrollArea>
+          </div>
         </div>
 
         {/* Desni panel - sporočila */}
-        <div className="glass rounded-2xl overflow-hidden flex flex-col">
+        <div className="glass rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
           <div className="p-4 border-b border-border">
             <h3 className="font-medium text-foreground truncate">
               {selectedConversation ? `Pogovor: ${selectedConversation.slice(0, 30)}...` : 'Izberite pogovor'}
             </h3>
           </div>
           
-          <ScrollArea className="flex-1 p-4">
+          <div className="flex-1 overflow-y-auto p-4">
             {selectedConversation ? (
               messages.length > 0 ? (
                 <div className="space-y-4">
@@ -487,23 +556,42 @@ export default function Dashboard() {
                       isUser = msg.message.role === 'user';
                     } else {
                       messageContent = String(msg.message);
-                      isUser = messageContent.toLowerCase().startsWith('user:') || messageContent.toLowerCase().startsWith('uporabnik:');
+                      isUser = messageContent.toLowerCase().startsWith('user:');
                     }
                     
                     return (
                       <div
                         key={msg.id}
                         className={cn(
-                          "max-w-[80%] p-3 rounded-lg",
-                          isUser
-                            ? "bg-primary/20 ml-auto"
-                            : "bg-muted"
+                          "flex",
+                          isUser ? "justify-end" : "justify-start"
                         )}
                       >
-                        <p className="text-sm whitespace-pre-wrap">{messageContent}</p>
-                        <span className="text-xs text-muted-foreground mt-1 block">
-                          {new Date(msg.created_at).toLocaleString('sl-SI')}
-                        </span>
+                        <div
+                          className={cn(
+                            "max-w-[75%] p-4 rounded-2xl shadow-sm",
+                            isUser
+                              ? "bg-primary text-primary-foreground rounded-br-md"
+                              : "bg-card border border-border rounded-bl-md"
+                          )}
+                        >
+                          <div 
+                            className="text-sm prose prose-sm dark:prose-invert max-w-none"
+                            dangerouslySetInnerHTML={{ 
+                              __html: messageContent
+                                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                                .replace(/^- /gm, '• ')
+                                .replace(/\n/g, '<br/>') 
+                            }}
+                          />
+                          <span className={cn(
+                            "text-xs mt-2 block",
+                            isUser ? "text-primary-foreground/70" : "text-muted-foreground"
+                          )}>
+                            {new Date(msg.created_at).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     );
                   })}
@@ -521,7 +609,7 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-          </ScrollArea>
+          </div>
         </div>
       </div>
 
