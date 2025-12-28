@@ -395,7 +395,7 @@ export default function Dashboard() {
                 disabled={subscribing !== null}
               >
                 {subscribing === 'yearly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <span className="font-bold">Letna naročnina</span>
+                Letna naročnina
                 <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-sm">-20%</span>
               </Button>
             </div>
