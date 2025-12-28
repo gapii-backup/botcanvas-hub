@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import jsPDF from 'jspdf';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Calendar } from '@/components/ui/calendar';
@@ -143,89 +142,56 @@ export default function DashboardConversations() {
   };
 
   const exportToPDF = (messages: Array<{ session_id: string; date: string; type: string; content: string }>) => {
-    const doc = new jsPDF();
-    
-    // Grupiraj sporočila po session_id
     const grouped: Record<string, Array<{ session_id: string; date: string; type: string; content: string }>> = {};
     messages.forEach(m => {
       if (!grouped[m.session_id]) grouped[m.session_id] = [];
       grouped[m.session_id].push(m);
     });
     
-    let yPosition = 20;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-    const lineHeight = 7;
-    
-    // Naslov
-    doc.setFontSize(18);
-    doc.setTextColor(30, 64, 175);
-    doc.text('Pogovori - BotMotion', margin, yPosition);
-    yPosition += 10;
-    
-    // Obdobje
-    doc.setFontSize(10);
-    doc.setTextColor(107, 114, 128);
-    doc.text(`Obdobje: ${getDateRangeLabel()}`, margin, yPosition);
-    yPosition += 5;
-    doc.text(`Število pogovorov: ${Object.keys(grouped).length}`, margin, yPosition);
-    yPosition += 15;
+    let html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Pogovori - BotMotion</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h1 { color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px; }
+          h2 { color: #374151; margin-top: 30px; }
+          .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
+          .user { background: #dbeafe; margin-left: 20%; }
+          .bot { background: #f3f4f6; margin-right: 20%; }
+          .meta { font-size: 12px; color: #6b7280; margin-top: 5px; }
+          .period { color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <h1>Pogovori - BotMotion</h1>
+        <p class="period">Obdobje: ${getDateRangeLabel()}</p>
+        <p class="period">Število pogovorov: ${Object.keys(grouped).length}</p>
+    `;
     
     Object.entries(grouped).forEach(([, msgs], index) => {
-      // Preveri ali potrebujemo novo stran
-      if (yPosition > pageHeight - 40) {
-        doc.addPage();
-        yPosition = 20;
-      }
-      
-      // Naslov pogovora
-      doc.setFontSize(12);
-      doc.setTextColor(55, 65, 81);
-      doc.text(`Pogovor #${index + 1}`, margin, yPosition);
-      yPosition += 10;
-      
+      html += `<h2>Pogovor #${index + 1}</h2>`;
       msgs.forEach(m => {
-        // Preveri ali potrebujemo novo stran
-        if (yPosition > pageHeight - 30) {
-          doc.addPage();
-          yPosition = 20;
-        }
-        
-        // Pošiljatelj
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(m.type === 'Uporabnik' ? 30 : 75, m.type === 'Uporabnik' ? 64 : 85, m.type === 'Uporabnik' ? 175 : 99);
-        doc.text(`${m.type}:`, margin, yPosition);
-        yPosition += 5;
-        
-        // Sporočilo
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(9);
-        
-        // Razbij dolga sporočila v več vrstic
-        const splitText = doc.splitTextToSize(m.content, 170);
-        splitText.forEach((line: string) => {
-          if (yPosition > pageHeight - 20) {
-            doc.addPage();
-            yPosition = 20;
-          }
-          doc.text(line, margin, yPosition);
-          yPosition += lineHeight;
-        });
-        
-        // Datum
-        doc.setFontSize(8);
-        doc.setTextColor(156, 163, 175);
-        doc.text(m.date, margin, yPosition);
-        yPosition += 10;
+        const msgClass = m.type === 'Uporabnik' ? 'user' : 'bot';
+        html += `
+          <div class="message ${msgClass}">
+            <strong>${m.type}:</strong> ${m.content}
+            <div class="meta">${m.date}</div>
+          </div>
+        `;
       });
-      
-      yPosition += 5;
     });
     
-    // Shrani PDF
-    doc.save(`pogovori_${new Date().toISOString().split('T')[0]}.pdf`);
+    html += '</body></html>';
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+    }
   };
 
   const handleExport = async (formatType: 'csv' | 'pdf') => {
