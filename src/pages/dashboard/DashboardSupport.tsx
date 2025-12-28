@@ -84,8 +84,8 @@ export default function DashboardSupport() {
   const stats = useMemo(() => {
     const total = tickets.length;
     const open = tickets.filter(t => t.status === 'open').length;
-    const today = tickets.filter(t => isToday(new Date(t.created_at))).length;
-    return { total, open, today };
+    const closed = tickets.filter(t => t.status === 'closed').length;
+    return { total, open, closed };
   }, [tickets]);
 
   const handleStatusChange = async (newStatus: 'open' | 'closed') => {
@@ -172,14 +172,14 @@ export default function DashboardSupport() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Danes</CardTitle>
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Zaključeni</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               {loading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                <div className="text-2xl font-bold">{stats.today}</div>
+                <div className="text-2xl font-bold">{stats.closed}</div>
               )}
             </CardContent>
           </Card>
