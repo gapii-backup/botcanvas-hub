@@ -86,7 +86,7 @@ export default function DashboardAnalytics() {
     return { startDate: subDays(now, 30), endDate: now };
   }, [dateFilter, customDateRange]);
 
-  const { rawData, categories, topTopics, trendData, heatmapData, loading: topicsLoading } = useConversationTopics(
+  const { rawData, categories, topTopics, trendData, heatmapData, sessionsCount, humanMessagesCount, loading: topicsLoading } = useConversationTopics(
     tableName,
     { startDate: startDate ?? null, endDate: endDate ?? null }
   );
@@ -260,18 +260,18 @@ export default function DashboardAnalytics() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Skupaj pogovorov</p>
-                <p className="text-2xl font-bold text-foreground">{stats.totalCount}</p>
+                <p className="text-2xl font-bold text-foreground">{sessionsCount}</p>
               </div>
             </div>
           </div>
           <div className="glass rounded-2xl p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-success/10">
-                <FolderOpen className="h-6 w-6 text-success" />
+                <MessageSquare className="h-6 w-6 text-success" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Kategorij</p>
-                <p className="text-2xl font-bold text-foreground">{stats.uniqueCategories}</p>
+                <p className="text-sm text-muted-foreground">Število sporočil</p>
+                <p className="text-2xl font-bold text-foreground">{humanMessagesCount}</p>
               </div>
             </div>
           </div>
@@ -374,7 +374,7 @@ export default function DashboardAnalytics() {
             <div className="glass rounded-2xl p-6">
               <h3 className="text-lg font-medium text-foreground mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                Trendi pogovorov
+                Trendi sporočil
               </h3>
               
               {formattedTrendData.length > 0 ? (
@@ -402,7 +402,7 @@ export default function DashboardAnalytics() {
                               <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
                                 <p className="font-medium text-foreground">{data.label}</p>
                                 <p className="text-sm text-muted-foreground">
-                                  {data.count} {data.count === 1 ? 'pogovor' : data.count < 5 ? 'pogovori' : 'pogovorov'}
+                                  {data.count} {data.count === 1 ? 'sporočilo' : data.count < 5 ? 'sporočila' : 'sporočil'}
                                 </p>
                               </div>
                             );
