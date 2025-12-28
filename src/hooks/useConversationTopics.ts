@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+export interface TopicRecord {
+  id: string;
+  category: string;
+  specific: string | null;
+  created_at: string;
+  session_id: string;
+}
+
 export interface TopicCategory {
   category: string;
   count: number;
@@ -11,11 +19,22 @@ export interface TopTopic {
   count: number;
 }
 
-export function useConversationTopics(tableName: string | null | undefined) {
+interface UseConversationTopicsOptions {
+  startDate?: Date | null;
+  endDate?: Date | null;
+}
+
+export function useConversationTopics(
+  tableName: string | null | undefined,
+  options: UseConversationTopicsOptions = {}
+) {
+  const [rawData, setRawData] = useState<TopicRecord[]>([]);
   const [categories, setCategories] = useState<TopicCategory[]>([]);
   const [topTopics, setTopTopics] = useState<TopTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const { startDate, endDate } = options;
 
   useEffect(() => {
     if (!tableName) {
@@ -27,18 +46,35 @@ export function useConversationTopics(tableName: string | null | undefined) {
       try {
         setLoading(true);
 
-        const { data, error: fetchError } = await supabase
+        let query = supabase
           .from('conversation_topics')
-          .select('category, specific')
-          .eq('table_name', tableName) as { data: { category: string; specific: string | null }[] | null; error: any };
+          .select('id, category, specific, created_at, session_id')
+          .eq('table_name', tableName);
+
+        if (startDate) {
+          query = query.gte('created_at', startDate.toISOString());
+        }
+        if (endDate) {
+          const endOfDay = new Date(endDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          query = query.lte('created_at', endOfDay.toISOString());
+        }
+
+        const { data, error: fetchError } = await query as { 
+          data: TopicRecord[] | null; 
+          error: any 
+        };
 
         if (fetchError) throw fetchError;
+
+        const records = data || [];
+        setRawData(records);
 
         // Group by category
         const categoryMap = new Map<string, number>();
         const topicMap = new Map<string, number>();
 
-        (data || []).forEach(item => {
+        records.forEach(item => {
           categoryMap.set(item.category, (categoryMap.get(item.category) || 0) + 1);
           if (item.specific) {
             topicMap.set(item.specific, (topicMap.get(item.specific) || 0) + 1);
@@ -65,7 +101,7 @@ export function useConversationTopics(tableName: string | null | undefined) {
     };
 
     fetchTopics();
-  }, [tableName]);
+  }, [tableName, startDate?.getTime(), endDate?.getTime()]);
 
-  return { categories, topTopics, loading, error };
+  return { rawData, categories, topTopics, loading, error };
 }
