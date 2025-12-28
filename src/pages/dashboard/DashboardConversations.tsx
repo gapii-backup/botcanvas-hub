@@ -422,7 +422,7 @@ export default function DashboardConversations() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Levi panel - seznam pogovorov */}
-          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 480px)' }}>
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
             <div className="p-4 border-b border-border bg-muted/50">
               <h3 className="font-medium text-foreground">Pogovori ({displayCount})</h3>
             </div>
@@ -498,7 +498,7 @@ export default function DashboardConversations() {
           </div>
 
           {/* Desni panel - sporočila */}
-          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 480px)' }}>
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 280px)' }}>
             <div className="p-4 border-b border-border bg-muted/50">
               <h3 className="font-medium text-foreground truncate">
                 {selectedConversation ? `Pogovor #${selectedConversation.split('_').pop()?.slice(0, 8)}` : 'Izberite pogovor'}
