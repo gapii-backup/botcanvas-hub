@@ -52,6 +52,7 @@ export interface Widget {
   // Website & add-ons
   website_url: string | null;
   addons: string[] | null;
+  table_name: string | null;
   
   // Subscription
   subscription_status: string;
