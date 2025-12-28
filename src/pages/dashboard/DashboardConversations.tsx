@@ -159,8 +159,8 @@ export default function DashboardConversations() {
           h1 { color: #1e40af; border-bottom: 2px solid #1e40af; padding-bottom: 10px; }
           h2 { color: #374151; margin-top: 30px; }
           .message { margin: 10px 0; padding: 10px; border-radius: 8px; }
-          .user { background: #dbeafe; margin-left: 20%; }
-          .bot { background: #f3f4f6; margin-right: 20%; }
+          .user { background: #dbeafe; }
+          .bot { background: #f3f4f6; }
           .meta { font-size: 12px; color: #6b7280; margin-top: 5px; }
           .period { color: #6b7280; font-size: 14px; }
         </style>
