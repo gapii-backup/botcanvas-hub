@@ -1,0 +1,128 @@
+import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+interface ActivityHeatmapProps {
+  data: number[][]; // 7 days x 24 hours
+}
+
+const DAY_LABELS = ['Ned', 'Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob'];
+const DAY_NAMES_FULL = ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'];
+
+// Reorder to start with Monday (index 1, 2, 3, 4, 5, 6, 0)
+const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
+  const { maxValue, reorderedData } = useMemo(() => {
+    let max = 0;
+    data.forEach(day => {
+      day.forEach(hour => {
+        if (hour > max) max = hour;
+      });
+    });
+    
+    // Reorder days to start with Monday
+    const reordered = DAY_ORDER.map(dayIndex => ({
+      dayIndex,
+      label: DAY_LABELS[dayIndex],
+      fullName: DAY_NAMES_FULL[dayIndex],
+      hours: data[dayIndex] || Array(24).fill(0)
+    }));
+    
+    return { maxValue: max, reorderedData: reordered };
+  }, [data]);
+
+  const getColor = (value: number) => {
+    if (value === 0) return 'bg-muted/30';
+    if (maxValue === 0) return 'bg-muted/30';
+    
+    const intensity = value / maxValue;
+    if (intensity < 0.25) return 'bg-primary/20';
+    if (intensity < 0.5) return 'bg-primary/40';
+    if (intensity < 0.75) return 'bg-primary/60';
+    return 'bg-primary/90';
+  };
+
+  const hourLabels = useMemo(() => {
+    const labels: string[] = [];
+    for (let i = 0; i < 24; i += 3) {
+      labels.push(`${i.toString().padStart(2, '0')}:00`);
+    }
+    return labels;
+  }, []);
+
+  if (data.length === 0) {
+    return (
+      <div className="h-48 flex items-center justify-center text-muted-foreground">
+        Ni podatkov za heatmap
+      </div>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="space-y-2">
+        {/* Hour labels */}
+        <div className="flex">
+          <div className="w-10" /> {/* Spacer for day labels */}
+          <div className="flex-1 flex justify-between text-xs text-muted-foreground px-0.5">
+            {hourLabels.map(label => (
+              <span key={label} className="w-8 text-center">{label}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Heatmap grid */}
+        <div className="space-y-1">
+          {reorderedData.map(({ dayIndex, label, fullName, hours }) => (
+            <div key={dayIndex} className="flex items-center gap-1">
+              <span className="w-10 text-xs text-muted-foreground text-right pr-2">
+                {label}
+              </span>
+              <div className="flex-1 flex gap-0.5">
+                {hours.map((value, hourIndex) => (
+                  <Tooltip key={`${dayIndex}-${hourIndex}`}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={cn(
+                          "flex-1 h-5 rounded-sm transition-colors cursor-default",
+                          getColor(value)
+                        )}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-medium">
+                        {fullName} {hourIndex.toString().padStart(2, '0')}:00
+                      </p>
+                      <p className="text-muted-foreground">
+                        {value} {value === 1 ? 'pogovor' : value < 5 ? 'pogovori' : 'pogovorov'}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center justify-end gap-2 pt-2">
+          <span className="text-xs text-muted-foreground">Manj</span>
+          <div className="flex gap-0.5">
+            <div className="w-4 h-4 rounded-sm bg-muted/30" />
+            <div className="w-4 h-4 rounded-sm bg-primary/20" />
+            <div className="w-4 h-4 rounded-sm bg-primary/40" />
+            <div className="w-4 h-4 rounded-sm bg-primary/60" />
+            <div className="w-4 h-4 rounded-sm bg-primary/90" />
+          </div>
+          <span className="text-xs text-muted-foreground">Več</span>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}
