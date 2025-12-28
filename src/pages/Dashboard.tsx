@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -23,6 +24,7 @@ import {
   BarChart3,
   CreditCard,
   HelpCircle,
+  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
@@ -30,6 +32,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversationTopics } from '@/hooks/useConversationTopics';
+import { useConversations, type Message } from '@/hooks/useConversations';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
@@ -97,6 +101,10 @@ export default function Dashboard() {
   const { stats, messagesByDay, loading: statsLoading } = useDashboardStats(tableName);
   const { leads, loading: leadsLoading } = useLeads(tableName);
   const { categories, topTopics, loading: topicsLoading } = useConversationTopics(tableName);
+  const { conversations, loading: convsLoading, fetchMessages } = useConversations(tableName);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [dateFilter, setDateFilter] = useState('');
 
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
@@ -215,6 +223,18 @@ export default function Dashboard() {
     : 0;
 
   const currentPlanName = planNames[plan] || 'Basic';
+
+  const handleSelectConversation = async (sessionId: string) => {
+    setSelectedConversation(sessionId);
+    const msgs = await fetchMessages(sessionId);
+    setMessages(msgs);
+  };
+
+  const filteredConversations = conversations.filter(conv => {
+    if (!dateFilter) return true;
+    const convDate = new Date(conv.last_message_at).toISOString().split('T')[0];
+    return convDate === dateFilter;
+  });
 
   if (loading) {
     return (
@@ -368,59 +388,133 @@ export default function Dashboard() {
   );
 
   const renderConversationsSection = () => (
-    <div className="glass rounded-2xl p-6 animate-slide-up">
-      <h2 className="text-lg font-semibold text-foreground mb-4">Pogovori</h2>
-      
-      {/* Line Chart */}
-      <div className="h-64 mb-6">
-        {messagesByDay.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={messagesByDay}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="count" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={{ fill: 'hsl(var(--primary))' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>Ni podatkov o sporočilih</p>
-              <p className="text-sm">Podatki bodo prikazani, ko bo chatbot aktiven</p>
-            </div>
-          </div>
+    <div className="space-y-6 animate-slide-up">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Pogovori</h2>
+        <p className="text-sm text-muted-foreground">Preglejte vse pogovore z vašim chatbotom</p>
+      </div>
+
+      {/* Filter po datumu */}
+      <div className="flex items-center gap-3">
+        <Input
+          type="date"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+          className="w-48"
+        />
+        {dateFilter && (
+          <Button variant="ghost" size="sm" onClick={() => setDateFilter('')}>
+            <X className="h-4 w-4 mr-1" />
+            Počisti filter
+          </Button>
         )}
       </div>
 
-      {/* Usage Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Poraba:</span>
-          <span className="text-foreground font-medium">
-            {stats.monthlyCount} / {stats.monthlyLimit} pogovorov
-          </span>
-        </div>
-        <Progress value={usagePercentage} className="h-2" />
-        {usagePercentage > 80 && (
-          <div className="flex items-center gap-2 text-warning text-sm mt-2">
-            <AlertCircle className="h-4 w-4" />
-            <span>Približujete se mesečni omejitvi pogovorov</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[500px]">
+        {/* Levi panel - seznam pogovorov */}
+        <div className="glass rounded-2xl overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-border">
+            <h3 className="font-medium text-foreground">Pogovori ({filteredConversations.length})</h3>
           </div>
-        )}
+          
+          <ScrollArea className="flex-1">
+            {convsLoading ? (
+              <div className="p-4 text-center text-muted-foreground">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                Nalagam pogovore...
+              </div>
+            ) : filteredConversations.length > 0 ? (
+              filteredConversations.map((conv) => (
+                <div
+                  key={conv.session_id}
+                  onClick={() => handleSelectConversation(conv.session_id)}
+                  className={cn(
+                    "p-4 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors",
+                    selectedConversation === conv.session_id && "bg-primary/10"
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium text-foreground text-sm truncate max-w-[150px]">
+                      {conv.session_id.slice(0, 20)}...
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(conv.last_message_at).toLocaleDateString('sl-SI')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      {conv.message_count} sporočil
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(conv.last_message_at).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>Ni pogovorov</p>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+
+        {/* Desni panel - sporočila */}
+        <div className="glass rounded-2xl overflow-hidden flex flex-col">
+          <div className="p-4 border-b border-border">
+            <h3 className="font-medium text-foreground truncate">
+              {selectedConversation ? `Pogovor: ${selectedConversation.slice(0, 30)}...` : 'Izberite pogovor'}
+            </h3>
+          </div>
+          
+          <ScrollArea className="flex-1 p-4">
+            {selectedConversation ? (
+              messages.length > 0 ? (
+                <div className="space-y-4">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-foreground text-sm whitespace-pre-wrap">{msg.message}</p>
+                      <span className="text-xs text-muted-foreground mt-2 block">
+                        {new Date(msg.created_at).toLocaleString('sl-SI')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              )
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>Izberite pogovor iz seznama na levi</p>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+      </div>
+
+      {/* Usage Progress */}
+      <div className="glass rounded-2xl p-6">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Poraba:</span>
+            <span className="text-foreground font-medium">
+              {stats.monthlyCount} / {stats.monthlyLimit} pogovorov
+            </span>
+          </div>
+          <Progress value={usagePercentage} className="h-2" />
+          {usagePercentage > 80 && (
+            <div className="flex items-center gap-2 text-warning text-sm mt-2">
+              <AlertCircle className="h-4 w-4" />
+              <span>Približujete se mesečni omejitvi pogovorov</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
