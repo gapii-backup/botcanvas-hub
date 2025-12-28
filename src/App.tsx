@@ -17,6 +17,7 @@ import Pricing from "./pages/Pricing";
 import Customize from "./pages/Customize";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWidgets from "./pages/admin/AdminWidgets";
@@ -82,6 +83,14 @@ const App = () => (
                   <DashboardGuard>
                     <Dashboard />
                   </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment-success"
+              element={
+                <ProtectedRoute>
+                  <PaymentSuccess />
                 </ProtectedRoute>
               }
             />

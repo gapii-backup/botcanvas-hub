@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Settings,
   AlertCircle,
+  Clock,
   CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const { widget, loading } = useWidget();
 
   const isActive = widget?.status === 'active' && widget?.is_active;
+  const isSetupPaid = widget?.status === 'setup_paid';
   const apiKey = widget?.api_key;
 
   const embedCode = apiKey
@@ -85,6 +87,21 @@ export default function Dashboard() {
             Upravljajte in spremljajte vašega AI chatbota
           </p>
         </div>
+
+        {/* Setup Paid Banner */}
+        {isSetupPaid && (
+          <div className="glass rounded-2xl p-4 border-primary/50 animate-slide-up flex items-center gap-4">
+            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-foreground font-medium">Vaš chatbot se pripravlja</p>
+              <p className="text-muted-foreground text-sm">
+                Obvestili vas bomo po e-pošti ko bo pripravljen.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Status Card */}
         <div
