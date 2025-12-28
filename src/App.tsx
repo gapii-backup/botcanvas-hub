@@ -16,13 +16,21 @@ import ResetPassword from "./pages/ResetPassword";
 import Pricing from "./pages/Pricing";
 import Customize from "./pages/Customize";
 import Checkout from "./pages/Checkout";
-import Dashboard from "./pages/Dashboard";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWidgets from "./pages/admin/AdminWidgets";
 import AdminWidgetEdit from "./pages/admin/AdminWidgetEdit";
 import AdminPayments from "./pages/admin/AdminPayments";
+
+// Dashboard pages
+import DashboardOverview from "./pages/dashboard/DashboardOverview";
+import DashboardConversations from "./pages/dashboard/DashboardConversations";
+import DashboardAnalytics from "./pages/dashboard/DashboardAnalytics";
+import DashboardLeads from "./pages/dashboard/DashboardLeads";
+import DashboardSettings from "./pages/dashboard/DashboardSettings";
+import DashboardBilling from "./pages/dashboard/DashboardBilling";
+import DashboardHelp from "./pages/dashboard/DashboardHelp";
 
 const queryClient = new QueryClient();
 
@@ -66,22 +74,73 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Dashboard Routes */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardGuard>
-                    <Dashboard />
+                    <DashboardOverview />
                   </DashboardGuard>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/dashboard/*"
+              path="/dashboard/conversations"
               element={
                 <ProtectedRoute>
                   <DashboardGuard>
-                    <Dashboard />
+                    <DashboardConversations />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/analytics"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardAnalytics />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/leads"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardLeads />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/settings"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardSettings />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/billing"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardBilling />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/help"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardHelp />
                   </DashboardGuard>
                 </ProtectedRoute>
               }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -27,27 +28,25 @@ import {
 interface DashboardSidebarProps {
   hasContactsAddon?: boolean;
   children: React.ReactNode;
-  activeSection: string;
-  setActiveSection: (section: string) => void;
 }
 
 const navItems = [
-  { label: 'Dashboard', icon: LayoutDashboard, section: 'dashboard' },
-  { label: 'Pogovori', icon: MessageSquare, section: 'conversations' },
-  { label: 'Analiza', icon: BarChart3, section: 'analytics' },
-  { label: 'Leads', icon: Users, section: 'leads', requiresAddon: 'contacts' },
-  { label: 'Nastavitve', icon: Settings, section: 'settings' },
-  { label: 'Računi', icon: CreditCard, section: 'billing' },
-  { label: 'Pomoč', icon: HelpCircle, section: 'help' },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
+  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics' },
+  { label: 'Leads', icon: Users, href: '/dashboard/leads', requiresAddon: 'contacts' },
+  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
+  { label: 'Računi', icon: CreditCard, href: '/dashboard/billing' },
+  { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
 
 export function DashboardSidebar({ 
   hasContactsAddon = false, 
   children,
-  activeSection,
-  setActiveSection
 }: DashboardSidebarProps) {
   const { user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const filteredNavItems = navItems.filter(item => {
@@ -61,9 +60,16 @@ export function DashboardSidebar({
     await signOut();
   };
 
-  const handleNavClick = (section: string) => {
-    setActiveSection(section);
+  const handleNavClick = (href: string) => {
+    navigate(href);
     setMobileMenuOpen(false);
+  };
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') {
+      return location.pathname === '/dashboard';
+    }
+    return location.pathname.startsWith(href);
   };
 
   return (
@@ -88,11 +94,11 @@ export function DashboardSidebar({
                 {user?.email}
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
+              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
+              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Nastavitve
               </DropdownMenuItem>
@@ -122,15 +128,15 @@ export function DashboardSidebar({
         <nav className="p-4 space-y-1">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeSection === item.section;
+            const active = isActive(item.href);
             
             return (
               <button
-                key={item.section}
-                onClick={() => handleNavClick(item.section)}
+                key={item.href}
+                onClick={() => handleNavClick(item.href)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
-                  isActive
+                  active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
@@ -154,15 +160,15 @@ export function DashboardSidebar({
         <nav className="flex-1 p-4 space-y-1">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeSection === item.section;
+            const active = isActive(item.href);
             
             return (
               <button
-                key={item.section}
-                onClick={() => handleNavClick(item.section)}
+                key={item.href}
+                onClick={() => handleNavClick(item.href)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
-                  isActive
+                  active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
@@ -189,11 +195,11 @@ export function DashboardSidebar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
+              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
                 <User className="mr-2 h-4 w-4" />
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick('settings')}>
+              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Nastavitve
               </DropdownMenuItem>
