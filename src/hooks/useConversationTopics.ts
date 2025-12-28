@@ -61,12 +61,14 @@ export function useConversationTopics(
           .eq('table_name', tableName);
 
         if (startDate) {
-          query = query.gte('created_at', startDate.toISOString());
+          const start = startDate.toISOString().replace('T', ' ').replace('Z', '');
+          query = query.gte('created_at', start);
         }
         if (endDate) {
           const endOfDay = new Date(endDate);
           endOfDay.setHours(23, 59, 59, 999);
-          query = query.lte('created_at', endOfDay.toISOString());
+          const end = endOfDay.toISOString().replace('T', ' ').replace('Z', '');
+          query = query.lte('created_at', end);
         }
 
         const { data, error: fetchError } = await query as { 
