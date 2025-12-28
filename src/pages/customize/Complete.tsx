@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe('pk_test_51SjJ1X6cfwnnZsVXBsH4Hf42xuJwOkjnrtPzpuQtZbDVOP5zmIhmbCKZQTrxXnrfo0VkDAJHv8LTwWSoYqXOpq7V001LyWRo13');
 import {
   Dialog,
   DialogContent,
@@ -153,9 +156,9 @@ type PreviewType = 'home' | 'chat' | 'trigger';
 
 export default function Complete() {
   const navigate = useNavigate();
-  const { config, resetConfig } = useWizardConfig();
+  const { config } = useWizardConfig();
   const { userBot } = useUserBot();
-  const { upsertWidget } = useWidget();
+  const { widget, upsertWidget } = useWidget();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
@@ -214,44 +217,35 @@ export default function Complete() {
 
     setIsSaving(true);
     try {
-      // Generate API key
-      const generatedApiKey = `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
+      // Generate API key if not existing
+      const existingApiKey = widget?.api_key;
+      const apiKey = existingApiKey || `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
       
       // Save all widget data to widgets table
       await upsertWidget({
-        api_key: generatedApiKey,
-        
-        // Plan & billing
-        plan: userBot?.plan || 'basic',
-        billing_period: userBot?.billing_period || 'monthly',
+        user_id: user.id,
+        user_email: user.email || '',
+        api_key: apiKey,
+        plan: userPlan,
+        billing_period: widget?.billing_period || 'monthly',
         status: 'pending_payment',
         is_active: false,
-        
-        // Basic info
         bot_name: config.name || '',
         welcome_message: config.welcomeMessage || '',
         home_title: config.homeTitle || '',
         home_subtitle_line2: config.homeSubtitle || '',
-        
-        // Colors
         primary_color: config.primaryColor || '#6366f1',
         mode: config.darkMode ? 'dark' : 'light',
         header_style: config.headerStyle || 'solid',
         bot_icon_background: config.iconBgColor || '',
         bot_icon_color: config.iconColor || '',
-        
-        // Icons - save SVG paths instead of icon names
         bot_avatar: config.botAvatar || '',
-        bot_icon: getBotIconPaths(config.botIcon || 'Bot') as any, // JSONB field with SVG paths
+        bot_icon: getBotIconPaths(config.botIcon || 'Bot') as any,
         trigger_icon: getTriggerIconPath(config.triggerIcon || 'MessageCircle'),
-        
-        // Position
         position: config.position || 'right',
         vertical_offset: config.verticalOffset || 20,
         trigger_style: config.triggerStyle || 'floating',
         edge_trigger_text: config.edgeTriggerText || '',
-        
-        // Features
         quick_questions: config.quickQuestions || [],
         show_email_field: config.showEmailField ?? true,
         show_bubble: config.showBubble ?? true,
@@ -259,25 +253,46 @@ export default function Complete() {
         booking_enabled: false,
         booking_url: '',
         support_enabled: false,
-        
-        // Website & Add-ons
         website_url: config.websiteUrl || '',
         addons: selectedAddons,
       });
-      
-      toast({
-        title: 'Shranjeno!',
-        description: 'Vaše nastavitve so bile shranjene.',
+
+      // Setup fee price IDs
+      const setupFeePrices: Record<string, string> = {
+        basic: 'price_1SjJIs6cfwnnZsVXwrLbUCqf',
+        pro: 'price_1SjJJO6cfwnnZsVX7FgojdDM',
+        enterprise: 'price_1SjJJi6cfwnnZsVXld7HUqDF'
+      };
+
+      const priceId = setupFeePrices[userPlan] || setupFeePrices.basic;
+
+      // Call n8n to create checkout session
+      const response = await fetch('https://hub.botmotion.ai/webhook/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          price_id: priceId,
+          api_key: apiKey,
+          plan: userPlan,
+          user_email: user.email,
+          success_url: 'https://app.botmotion.ai/dashboard?payment=success',
+          cancel_url: 'https://app.botmotion.ai/customize/complete?payment=cancelled'
+        })
       });
+
+      const { sessionId } = await response.json();
       
-      resetConfig();
-      setShowPaymentDialog(false);
-      navigate(`/checkout?key=${generatedApiKey}`);
+      // Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (stripe && sessionId) {
+        // Use window.location for redirect since newer Stripe.js uses different API
+        window.location.href = `https://checkout.stripe.com/c/pay/${sessionId}`;
+      }
     } catch (error) {
-      console.error('Error saving widget:', error);
+      console.error('Error:', error);
       toast({
         title: 'Napaka',
-        description: 'Ni bilo mogoče shraniti nastavitev.',
+        description: 'Prišlo je do napake.',
         variant: 'destructive',
       });
     } finally {
