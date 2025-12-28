@@ -137,20 +137,53 @@ export function useConversationTopics(
           console.error('Trend RPC error:', trendError);
         }
 
-        // Use RPC data directly
+        // Fill missing days with 0
+        const fillMissingDays = (data: Array<{ day: string; count: number }>, start: Date | null, end: Date | null): TrendDataPoint[] => {
+          if (!start || !end || data.length === 0) {
+            return data.map(item => ({
+              day: typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
+              count: Number(item.count)
+            }));
+          }
+
+          const filledData: TrendDataPoint[] = [];
+          const dataMap = new Map(
+            data.map(item => [
+              typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
+              Number(item.count)
+            ])
+          );
+
+          const currentDate = new Date(start);
+          currentDate.setHours(0, 0, 0, 0);
+          const endDate = new Date(end);
+          endDate.setHours(0, 0, 0, 0);
+
+          while (currentDate <= endDate) {
+            const dayKey = currentDate.toISOString().split('T')[0];
+            filledData.push({
+              day: dayKey,
+              count: dataMap.get(dayKey) || 0
+            });
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          return filledData;
+        };
+
+        // Use RPC data and fill missing days
         if (trendRaw && Array.isArray(trendRaw)) {
-          const trendArray: TrendDataPoint[] = trendRaw.map((item: { day: string; count: number }) => ({
-            day: typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
-            count: Number(item.count)
-          }));
-          
-          // Sort by date
-          trendArray.sort((a, b) => a.day.localeCompare(b.day));
-          
-          console.log('Processed trend data:', trendArray);
-          setTrendData(trendArray);
+          const filledTrendData = fillMissingDays(trendRaw, startDate, endDate);
+          console.log('Processed trend data with filled days:', filledTrendData);
+          setTrendData(filledTrendData);
         } else {
-          setTrendData([]);
+          // If no data but we have date range, create empty days
+          if (startDate && endDate) {
+            const filledTrendData = fillMissingDays([], startDate, endDate);
+            setTrendData(filledTrendData);
+          } else {
+            setTrendData([]);
+          }
         }
 
         // === 3. Fetch heatmap data via RPC with date range ===
