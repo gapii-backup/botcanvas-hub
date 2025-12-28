@@ -118,9 +118,16 @@ export function useConversationTopics(
         setCategories(categoriesArray);
         setTopTopics(topicsArray);
 
-        // === 2. Fetch trend data via RPC - DIRECTLY, no filtering ===
+        // === 2. Fetch trend data via RPC ===
+        // Calculate number of days based on date range
+        let days = 30; // default
+        if (startDate && endDate) {
+          const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+          days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        }
+
         const { data: trendRaw, error: trendError } = await supabase
-          .rpc('get_messages_by_day', { p_table_name: tableName });
+          .rpc('get_messages_by_day', { p_table_name: tableName, p_days: days });
 
         console.log('Trend RPC raw data:', trendRaw);
 
