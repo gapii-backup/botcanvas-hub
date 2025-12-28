@@ -29,8 +29,8 @@ export function useConversationTopics(tableName: string | null | undefined) {
 
         const { data, error: fetchError } = await supabase
           .from('conversation_topics')
-          .select('category, topic')
-          .eq('table_name', tableName);
+          .select('category, specific')
+          .eq('table_name', tableName) as { data: { category: string; specific: string | null }[] | null; error: any };
 
         if (fetchError) throw fetchError;
 
@@ -40,8 +40,8 @@ export function useConversationTopics(tableName: string | null | undefined) {
 
         (data || []).forEach(item => {
           categoryMap.set(item.category, (categoryMap.get(item.category) || 0) + 1);
-          if (item.topic) {
-            topicMap.set(item.topic, (topicMap.get(item.topic) || 0) + 1);
+          if (item.specific) {
+            topicMap.set(item.specific, (topicMap.get(item.specific) || 0) + 1);
           }
         });
 
