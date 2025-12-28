@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Link2, Home, MessagesSquare, MousePointer, AlertCircle } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { loadStripe } from '@stripe/stripe-js';
 
@@ -42,7 +42,7 @@ const getTriggerIconPath = (iconName: string): string => {
   return paths[iconName] || paths['MessageCircle'];
 };
 
-// Define all add-ons with monthly prices in euros
+// Define all add-ons with monthly prices in euros (removed CRM & INTEGRACIJE)
 const ALL_ADDONS = {
   capacity: {
     title: '📊 DODATNE KAPACITETE',
@@ -75,14 +75,6 @@ const ALL_ADDONS = {
     icon: Headphones,
     items: [
       { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35 },
-    ],
-  },
-  integrations: {
-    title: '🔗 CRM & INTEGRACIJE',
-    icon: Link2,
-    items: [
-      { id: 'crm', label: 'CRM integracija', monthlyPrice: null }, // po dogovoru
-      { id: 'history', label: 'Extended history (+90 dni)', monthlyPrice: 10 },
     ],
   },
 };
@@ -126,8 +118,8 @@ type AddonCategory = {
   items: AddonItem[];
 };
 
-// Get available add-ons based on plan
-function getAvailableAddons(plan: string | null): Record<string, AddonCategory> {
+// Get available add-ons based on plan and billing period
+function getAvailableAddons(plan: string | null, isYearly: boolean): Record<string, AddonCategory> {
   const excluded: Record<string, string[]> = {
     basic: [], // Show all add-ons for basic
     pro: ['multilanguage', 'contacts', 'tickets'], // Exclude for PRO
@@ -140,6 +132,11 @@ function getAvailableAddons(plan: string | null): Record<string, AddonCategory> 
   const filtered: Record<string, AddonCategory> = {};
 
   Object.entries(ALL_ADDONS).forEach(([key, category]) => {
+    // Skip capacity section for yearly billing
+    if (key === 'capacity' && isYearly) {
+      return;
+    }
+    
     const filteredItems = category.items.filter(item => !excludedIds.includes(item.id));
     if (filteredItems.length > 0) {
       filtered[key] = {
@@ -152,6 +149,9 @@ function getAvailableAddons(plan: string | null): Record<string, AddonCategory> 
   return filtered;
 }
 
+// Local storage key for persisting addons
+const ADDONS_STORAGE_KEY = 'botmotion_selected_addons';
+
 type PreviewType = 'home' | 'chat' | 'trigger';
 
 export default function Complete() {
@@ -162,14 +162,32 @@ export default function Complete() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<string[]>(() => {
+    // Load from localStorage on initial render
+    const saved = localStorage.getItem(ADDONS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   const userPlan = userBot?.plan || 'basic';
   const isYearly = userBot?.billing_period === 'yearly';
-  const availableAddons = getAvailableAddons(userPlan);
+  const availableAddons = getAvailableAddons(userPlan, isYearly);
   const hasAddons = Object.keys(availableAddons).length > 0;
+  
+  // Persist selected addons to localStorage
+  useEffect(() => {
+    localStorage.setItem(ADDONS_STORAGE_KEY, JSON.stringify(selectedAddons));
+  }, [selectedAddons]);
+  
+  // Clean up invalid addons when plan/billing changes
+  useEffect(() => {
+    const validAddonIds = Object.values(availableAddons).flatMap(cat => cat.items.map(item => item.id));
+    const validSelected = selectedAddons.filter(id => validAddonIds.includes(id));
+    if (validSelected.length !== selectedAddons.length) {
+      setSelectedAddons(validSelected);
+    }
+  }, [availableAddons]);
   
   // Get pricing for current plan
   const planPricing = PLAN_PRICING[userPlan] || PLAN_PRICING.basic;
@@ -360,31 +378,41 @@ export default function Complete() {
 
                 <div className="space-y-4">
                   {Object.entries(availableAddons).map(([key, category]) => (
-                    <Card key={key} className="border-border">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Card key={key} className="border-border bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                           {category.title}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-2">
+                      <CardContent className="space-y-1">
                         {category.items.map((item) => {
                           const displayLabel = isYearly && 'yearlyLabel' in item && item.yearlyLabel 
                             ? item.yearlyLabel 
                             : item.label;
+                          const isSelected = selectedAddons.includes(item.id);
                           return (
                             <div 
                               key={item.id}
-                              className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                               onClick={() => toggleAddon(item.id)}
+                              className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 group ${
+                                isSelected 
+                                  ? 'bg-primary/15 border-2 border-primary shadow-sm' 
+                                  : 'bg-muted/30 border-2 border-transparent hover:bg-muted/60 hover:border-muted-foreground/20'
+                              }`}
                             >
                               <div className="flex items-center gap-3">
-                                <Checkbox 
-                                  checked={selectedAddons.includes(item.id)}
-                                  onCheckedChange={() => toggleAddon(item.id)}
-                                />
-                                <span className="text-sm">{displayLabel}</span>
+                                <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                                  isSelected 
+                                    ? 'bg-primary text-primary-foreground' 
+                                    : 'bg-muted border border-border group-hover:border-muted-foreground/40'
+                                }`}>
+                                  {isSelected && <Check className="h-3.5 w-3.5" />}
+                                </div>
+                                <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                  {displayLabel}
+                                </span>
                               </div>
-                              <span className="text-sm font-medium text-primary">
+                              <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
                                 {formatPrice(item.monthlyPrice, isYearly)}
                               </span>
                             </div>
@@ -396,12 +424,14 @@ export default function Complete() {
                 </div>
 
                 {selectedAddons.length > 0 && (
-                  <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-                    <p className="text-sm text-center">
-                      <span className="font-medium">Izbrani dodatki:</span>{' '}
-                      {selectedAddons.length} dodatkov bo dodanih vašemu paketu
-                      {isYearly && ' (letna naročnina z 20% popustom)'}
-                    </p>
+                  <div className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                    <div className="flex items-center justify-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <p className="text-sm font-medium text-foreground">
+                        {selectedAddons.length} {selectedAddons.length === 1 ? 'dodatek izbran' : 'dodatkov izbranih'}
+                        {isYearly && <span className="text-primary ml-1">(20% popust)</span>}
+                      </p>
+                    </div>
                   </div>
                 )}
               </>
