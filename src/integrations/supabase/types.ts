@@ -298,7 +298,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_messages_by_day: {
+        Args: { p_table_name: string }
+        Returns: {
+          count: number
+          day: string
+        }[]
+      }
+      get_messages_today: { Args: { p_table_name: string }; Returns: number }
+      get_sessions_this_month: {
+        Args: { p_table_name: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

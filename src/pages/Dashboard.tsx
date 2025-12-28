@@ -94,7 +94,7 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState('dashboard');
 
   const tableName = widget?.table_name;
-  const { stats, loading: statsLoading } = useDashboardStats(tableName);
+  const { stats, messagesByDay, loading: statsLoading } = useDashboardStats(tableName);
   const { leads, loading: leadsLoading } = useLeads(tableName);
   const { categories, topTopics, loading: topicsLoading } = useConversationTopics(tableName);
 
@@ -373,13 +373,37 @@ export default function Dashboard() {
       
       {/* Line Chart */}
       <div className="h-64 mb-6">
-        <div className="h-full flex items-center justify-center text-muted-foreground">
-          <div className="text-center">
-            <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>Ni podatkov za prikaz</p>
-            <p className="text-sm">Podatki bodo prikazani, ko bo chatbot aktiven</p>
+        {messagesByDay.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={messagesByDay}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'hsl(var(--card))', 
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '8px'
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="count" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth={2}
+                dot={{ fill: 'hsl(var(--primary))' }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full flex items-center justify-center text-muted-foreground">
+            <div className="text-center">
+              <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>Ni podatkov o sporočilih</p>
+              <p className="text-sm">Podatki bodo prikazani, ko bo chatbot aktiven</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Usage Progress */}
