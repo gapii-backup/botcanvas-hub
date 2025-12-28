@@ -291,41 +291,64 @@ export default function DashboardAnalytics() {
           </div>
         </div>
 
-        {/* Date Range Picker - angular style */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-0">
-            {[
-              { key: 'all', label: 'Vsi pogovori' },
-              { key: '7days', label: 'Zadnjih 7 dni' },
-              { key: '30days', label: 'Zadnjih 30 dni' },
-            ].map((filter, index) => (
-              <button 
-                key={filter.key}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium transition-all duration-200 border-y border-r first:border-l first:rounded-l-lg last:rounded-r-lg",
-                  dateFilter === filter.key 
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-border/50 bg-background/50"
-                )}
-                onClick={() => {
-                  setDateFilter(filter.key as typeof dateFilter);
-                  setCustomDateRange(undefined);
-                }}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
+        {/* Date Range Picker - exact style like reference */}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* First button - pill shape */}
+          <button 
+            className={cn(
+              "px-5 py-2.5 text-sm font-medium transition-all duration-200 rounded-full",
+              dateFilter === 'all' 
+                ? "bg-primary text-primary-foreground shadow-md" 
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+            )}
+            onClick={() => {
+              setDateFilter('all');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Vsi pogovori
+          </button>
+
+          {/* Middle buttons - flat/angular */}
+          <button 
+            className={cn(
+              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              dateFilter === '7days' 
+                ? "bg-primary text-primary-foreground shadow-md rounded-full" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => {
+              setDateFilter('7days');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Zadnjih 7 dni
+          </button>
+
+          <button 
+            className={cn(
+              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
+              dateFilter === '30days' 
+                ? "bg-primary text-primary-foreground shadow-md rounded-full" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
+            onClick={() => {
+              setDateFilter('30days');
+              setCustomDateRange(undefined);
+            }}
+          >
+            Zadnjih 30 dni
+          </button>
           
           {/* Custom Date Range Picker */}
           <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border",
+                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200",
                   dateFilter === 'custom' 
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-border/50 bg-background/50"
+                    ? "bg-primary text-primary-foreground shadow-md rounded-full" 
+                    : "text-muted-foreground hover:text-foreground"
                 )}
                 onClick={() => setDateFilter('custom')}
               >
@@ -375,7 +398,7 @@ export default function DashboardAnalytics() {
               </h3>
               
               {formattedTrendData.length > 0 ? (
-                <div className="h-[280px]">
+                <div className="h-[240px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={formattedTrendData}>
                       <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
@@ -419,7 +442,7 @@ export default function DashboardAnalytics() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="h-[280px] flex items-center justify-center text-muted-foreground">
+                <div className="h-[240px] flex items-center justify-center text-muted-foreground">
                   Ni podatkov za prikaz trendov
                 </div>
               )}

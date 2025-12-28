@@ -86,7 +86,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
         </div>
 
         {/* Heatmap grid */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {reorderedData.map(({ dayIndex, label, fullName, hours }) => (
             <div key={dayIndex} className="flex items-center gap-1">
               <span className="w-10 text-xs text-muted-foreground text-right pr-2">
@@ -99,7 +99,7 @@ export function ActivityHeatmap({ data }: ActivityHeatmapProps) {
                       <div
                         style={getCellStyle(value)}
                         className={cn(
-                          "flex-1 h-7 rounded-sm transition-colors cursor-default"
+                          "flex-1 h-8 rounded-sm transition-colors cursor-default"
                         )}
                       />
                     </TooltipTrigger>
