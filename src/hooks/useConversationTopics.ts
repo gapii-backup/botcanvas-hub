@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { differenceInDays, eachDayOfInterval, format } from 'date-fns';
 
 export interface TopicRecord {
   id: string;
@@ -107,7 +106,6 @@ export function useConversationTopics(
           }
         });
 
-        // Convert to arrays and sort
         const categoriesArray = Array.from(categoryMap.entries())
           .map(([category, count]) => ({ category, count }))
           .sort((a, b) => b.count - a.count);
@@ -120,85 +118,64 @@ export function useConversationTopics(
         setCategories(categoriesArray);
         setTopTopics(topicsArray);
 
-        // === 2. Fetch trend data via RPC (from dynamic message table) ===
-        const { data: trendRpcData, error: trendError } = await supabase
+        // === 2. Fetch trend data via RPC - DIRECTLY, no filtering ===
+        const { data: trendRaw, error: trendError } = await supabase
           .rpc('get_messages_by_day', { p_table_name: tableName });
+
+        console.log('Trend RPC raw data:', trendRaw);
 
         if (trendError) {
           console.error('Trend RPC error:', trendError);
         }
 
-        // Determine date range for trend data
-        const now = new Date();
-        const effectiveEndDate = endDate || now;
-        const effectiveStartDate = startDate || new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        
-        // Generate all days in the range
-        const trendMap = new Map<string, number>();
-        const daysInRange = eachDayOfInterval({ 
-          start: effectiveStartDate, 
-          end: effectiveEndDate 
-        });
-        
-        // Initialize all days with 0
-        daysInRange.forEach(date => {
-          const dayKey = format(date, 'yyyy-MM-dd');
-          trendMap.set(dayKey, 0);
-        });
-
-        // Fill in actual counts from RPC
-        if (trendRpcData) {
-          (trendRpcData as Array<{ day: string; count: number }>).forEach(item => {
-            // Handle both string and Date types
-            const dayKey = typeof item.day === 'string' 
-              ? item.day.split('T')[0] 
-              : format(new Date(item.day), 'yyyy-MM-dd');
-            
-            // Only include if within our range
-            if (trendMap.has(dayKey)) {
-              trendMap.set(dayKey, Number(item.count));
-            }
-          });
+        // Use RPC data directly
+        if (trendRaw && Array.isArray(trendRaw)) {
+          const trendArray: TrendDataPoint[] = trendRaw.map((item: { day: string; count: number }) => ({
+            day: typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
+            count: Number(item.count)
+          }));
+          
+          // Sort by date
+          trendArray.sort((a, b) => a.day.localeCompare(b.day));
+          
+          console.log('Processed trend data:', trendArray);
+          setTrendData(trendArray);
+        } else {
+          setTrendData([]);
         }
 
-        const trendArray = Array.from(trendMap.entries())
-          .map(([day, count]) => ({ day, count }))
-          .sort((a, b) => a.day.localeCompare(b.day));
-
-        setTrendData(trendArray);
-
-        // === 3. Fetch heatmap data via RPC (from dynamic message table) ===
-        const { data: heatmapRpcData, error: heatmapError } = await supabase
+        // === 3. Fetch heatmap data via RPC ===
+        const { data: heatmapRaw, error: heatmapError } = await supabase
           .rpc('get_activity_heatmap', { p_table_name: tableName });
+
+        console.log('Heatmap RPC raw data:', heatmapRaw);
 
         if (heatmapError) {
           console.error('Heatmap RPC error:', heatmapError);
         }
 
-        // Debug log
-        console.log('Heatmap RPC data:', heatmapRpcData);
+        // Build 7x24 matrix - Index 0 = Sunday
+        const matrix: number[][] = Array(7).fill(null).map(() => Array(24).fill(0));
 
-        // Convert RPC result to 7x24 matrix
-        // Index 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        const heatmap: number[][] = Array(7).fill(null).map(() => Array(24).fill(0));
-
-        if (heatmapRpcData && Array.isArray(heatmapRpcData)) {
-          (heatmapRpcData as Array<{ day_of_week: number; hour: number; count: number }>).forEach(item => {
+        if (heatmapRaw && Array.isArray(heatmapRaw)) {
+          heatmapRaw.forEach((item: { day_of_week: number; hour: number; count: number }) => {
             const dow = Number(item.day_of_week);
             const hour = Number(item.hour);
             const count = Number(item.count);
             
+            console.log(`Heatmap item: dow=${dow}, hour=${hour}, count=${count}`);
+            
             if (dow >= 0 && dow < 7 && hour >= 0 && hour < 24) {
-              heatmap[dow][hour] = count;
+              matrix[dow][hour] = count;
             }
           });
         }
 
-        // Debug log
-        console.log('Processed heatmap matrix:', heatmap);
-        console.log('Max value in heatmap:', Math.max(...heatmap.flat()));
+        console.log('Processed heatmap matrix:', matrix);
+        console.log('Heatmap max value:', Math.max(...matrix.flat()));
+        
+        setHeatmapData(matrix);
 
-        setHeatmapData(heatmap);
       } catch (err) {
         console.error('useConversationTopics error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -211,11 +188,9 @@ export function useConversationTopics(
   }, [tableName, startDate?.getTime(), endDate?.getTime()]);
 
   return { 
-    // Iz conversation_topics:
     rawData, 
     categories, 
     topTopics, 
-    // Iz tabele sporočil (RPC):
     trendData, 
     heatmapData, 
     loading, 
