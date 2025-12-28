@@ -217,14 +217,14 @@ export function PieChart3D({
             "text-center transition-all duration-300",
             selectedCategory ? "scale-90 opacity-80" : "scale-100 opacity-100"
           )}>
-            <p className="text-3xl font-bold text-foreground">{total}</p>
-            <p className="text-xs text-muted-foreground">Skupaj</p>
+            <p className="text-3xl font-bold text-foreground">{categories.length}</p>
+            <p className="text-xs text-muted-foreground">Kategorij</p>
           </div>
         </div>
       </div>
 
       {/* Legend - Horizontal scrollable row */}
-      <div className="flex flex-wrap justify-center gap-3 px-1">
+      <div className="flex flex-wrap justify-center gap-2 px-1">
         {chartData.map((entry, index) => (
           <button
             key={entry.name}
@@ -233,11 +233,11 @@ export function PieChart3D({
             onMouseLeave={() => setHoveredIndex(null)}
             className={cn(
               "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-300 ease-out",
-              "border backdrop-blur-sm",
+              "border backdrop-blur-sm whitespace-nowrap",
               entry.isSelected 
                 ? "bg-primary/15 border-primary/50 shadow-lg shadow-primary/20 scale-105" 
                 : hoveredIndex === index
-                ? "bg-muted/60 border-border/60 scale-102"
+                ? "bg-muted/60 border-border/60"
                 : "bg-muted/30 border-transparent hover:bg-muted/50"
             )}
             style={{
