@@ -67,7 +67,7 @@ export default function Login() {
           navigate('/pricing');
         } else if (widget.status === 'pending_payment') {
           navigate('/customize/complete');
-        } else if (widget.status === 'active') {
+        } else if (widget.status === 'active' || widget.status === 'setup_paid') {
           navigate('/dashboard');
         } else {
           // Plan is set but widget isn't fully activated/customization flow isn't finished yet
