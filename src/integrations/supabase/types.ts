@@ -330,13 +330,21 @@ export type Database = {
         Args: { p_table_name: string }
         Returns: number
       }
-      get_messages_by_day: {
-        Args: { p_table_name: string }
-        Returns: {
-          count: number
-          day: string
-        }[]
-      }
+      get_messages_by_day:
+        | {
+            Args: { p_table_name: string }
+            Returns: {
+              count: number
+              day: string
+            }[]
+          }
+        | {
+            Args: { p_days?: number; p_table_name: string }
+            Returns: {
+              count: number
+              day: string
+            }[]
+          }
       get_messages_today: { Args: { p_table_name: string }; Returns: number }
       get_sessions_this_month: {
         Args: { p_table_name: string }
