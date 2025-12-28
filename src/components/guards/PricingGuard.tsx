@@ -17,8 +17,8 @@ export function PricingGuard({ children }: PricingGuardProps) {
     );
   }
 
-  // If widget is already active, redirect to dashboard
-  if (widget?.status === 'active') {
+  // If widget is already active or setup is paid, redirect to dashboard
+  if (widget?.status === 'active' || widget?.status === 'setup_paid') {
     return <Navigate to="/dashboard" replace />;
   }
 
