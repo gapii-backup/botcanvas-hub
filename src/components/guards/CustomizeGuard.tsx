@@ -22,8 +22,8 @@ export function CustomizeGuard({ children }: CustomizeGuardProps) {
     return <Navigate to="/pricing" replace />;
   }
 
-  // If widget is already active or setup is paid, redirect to dashboard
-  if (widget.status === 'active' || widget.status === 'setup_paid') {
+  // If widget is already active, setup is paid, or cancelling, redirect to dashboard
+  if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
     return <Navigate to="/dashboard" replace />;
   }
 
