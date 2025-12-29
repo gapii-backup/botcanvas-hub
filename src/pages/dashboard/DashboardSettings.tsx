@@ -16,6 +16,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useWizardConfig, TRIGGER_ICONS, BOT_ICONS, BotConfig } from '@/hooks/useWizardConfig';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { ImageUpload } from '@/components/ImageUpload';
 import { EmojiPicker } from '@/components/EmojiPicker';
@@ -64,6 +65,8 @@ const getTriggerIconPath = (iconName: string): string => {
 export default function DashboardSettings() {
   const { toast } = useToast();
   const { widget, loading, upsertWidget } = useWidget();
+  const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
+  const hasTicketsAddon = Array.isArray(widget?.addons) && widget.addons.includes('tickets');
   const { config, setConfig, defaultConfig, resetConfig } = useWizardConfig();
   const { 
     setHasUnsavedChanges: setGlobalUnsavedChanges, 
@@ -936,10 +939,6 @@ export default function DashboardSettings() {
 
   const PreviewPanel = (
     <div className="space-y-4">
-      <div className="glass rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-1">Predogled vašega AI asistenta</h2>
-        <p className="text-sm text-muted-foreground">Tako bo izgledal vaš chatbot na spletni strani.</p>
-      </div>
 
       {/* Preview tabs */}
       <div className="flex gap-2 p-1 bg-muted rounded-lg">
@@ -987,8 +986,21 @@ export default function DashboardSettings() {
   );
 
   return (
-    <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
-      <div className="space-y-6">
+    <DashboardSidebar hasContactsAddon={hasContactsAddon} hasTicketsAddon={hasTicketsAddon}>
+      <div className="p-6 lg:p-8 space-y-6">
+        {/* Header row - both titles side by side */}
+        <div className="grid lg:grid-cols-2 gap-6 items-start">
+          <div className="animate-fade-in">
+            <h1 className="text-3xl font-bold text-foreground">Nastavitve</h1>
+            <p className="text-muted-foreground mt-1">Upravljajte nastavitve vašega chatbota</p>
+          </div>
+          <div className="animate-fade-in">
+            <h1 className="text-3xl font-bold text-foreground">Predogled vašega AI asistenta</h1>
+            <p className="text-muted-foreground mt-1">Tako bo izgledal vaš chatbot na spletni strani.</p>
+          </div>
+        </div>
+
+        {/* Content row */}
         <div className="grid lg:grid-cols-2 gap-6 items-start">
           {SettingsPanel}
           {PreviewPanel}
@@ -1030,6 +1042,6 @@ export default function DashboardSettings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </DashboardLayout>
+    </DashboardSidebar>
   );
 }
