@@ -884,51 +884,53 @@ export default function DashboardSettings() {
         </div>
       </div>
 
-      {/* Embed Code Section */}
-      <div className="glass rounded-2xl p-6 animate-slide-up">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
-            <Bot className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
-            <p className="text-sm text-muted-foreground">
-              Dodajte to kodo pred zaključni &lt;/body&gt; tag
-            </p>
-          </div>
-        </div>
+    </div>
+  );
 
-        {subscriptionStatus === 'active' ? (
-          <div className="relative">
-            <pre className="bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border">
-              <code>{embedCode}</code>
-            </pre>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute top-3 right-3"
-              onClick={copyToClipboard}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Kopirano
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Kopiraj
-                </>
-              )}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/20 rounded-lg">
-            <Lock className="h-5 w-5 text-warning" />
-            <span className="text-warning">Za prikaz embed kode aktivirajte naročnino</span>
-          </div>
-        )}
+  const EmbedCodeSection = (
+    <div className="glass rounded-2xl p-6 animate-slide-up">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-10 w-10 rounded-lg gradient-primary flex items-center justify-center">
+          <Bot className="h-5 w-5 text-primary-foreground" />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Embed koda</h2>
+          <p className="text-sm text-muted-foreground">
+            Dodajte to kodo pred zaključni &lt;/body&gt; tag
+          </p>
+        </div>
       </div>
+
+      {subscriptionStatus === 'active' ? (
+        <div className="relative">
+          <pre className="bg-secondary/50 rounded-xl p-4 overflow-x-auto text-sm text-foreground border border-border">
+            <code>{embedCode}</code>
+          </pre>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="absolute top-3 right-3"
+            onClick={copyToClipboard}
+          >
+            {copied ? (
+              <>
+                <Check className="h-4 w-4 mr-2" />
+                Kopirano
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4 mr-2" />
+                Kopiraj
+              </>
+            )}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/20 rounded-lg">
+          <Lock className="h-5 w-5 text-warning" />
+          <span className="text-warning">Za prikaz embed kode aktivirajte naročnino</span>
+        </div>
+      )}
     </div>
   );
 
@@ -986,9 +988,16 @@ export default function DashboardSettings() {
 
   return (
     <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
-      <div className="grid lg:grid-cols-2 gap-6">
-        {SettingsPanel}
-        {PreviewPanel}
+      <div className="space-y-6">
+        <div className="grid lg:grid-cols-2 gap-6">
+          {SettingsPanel}
+          {PreviewPanel}
+        </div>
+        
+        {/* Embed Code - centered below both panels */}
+        <div className="max-w-3xl mx-auto">
+          {EmbedCodeSection}
+        </div>
       </div>
 
       {/* Unsaved changes dialog */}
