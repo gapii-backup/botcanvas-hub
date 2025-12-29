@@ -401,13 +401,26 @@ export default function DashboardSubscription() {
       <AlertDialog open={!!cancelAddonDialog} onOpenChange={() => setCancelAddonDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Prekliči addon</AlertDialogTitle>
-            <AlertDialogDescription>
-              Ali ste prepričani da želite preklicati addon{' '}
-              <strong className="text-foreground">
-                {cancelAddonDialog ? addonPrices[cancelAddonDialog]?.name : ''}
-              </strong>
-              ? Addon bo ostal aktiven do konca trenutnega plačilnega obdobja.
+            <AlertDialogTitle>Preklic addona</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3" asChild>
+              <div>
+                <p>
+                  Ali ste prepričani da želite preklicati addon{' '}
+                  <strong className="text-foreground">
+                    {cancelAddonDialog ? addonPrices[cancelAddonDialog]?.name : ''}
+                  </strong>
+                  ?
+                </p>
+
+                <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-3 text-sm">
+                  <p className="text-amber-400 font-semibold">⚠️ Pomembno:</p>
+                  <ul className="text-amber-200 mt-2 space-y-1 list-disc list-inside">
+                    <li>Addon bo takoj odstranjen in ne boste imeli več dostopa</li>
+                    <li>Če ste že plačali do konca obdobja, vam sredstev ne vračamo</li>
+                    <li>Addon lahko kadarkoli znova dodate</li>
+                  </ul>
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -415,10 +428,10 @@ export default function DashboardSubscription() {
             <AlertDialogAction
               onClick={() => cancelAddonDialog && handleCancelAddon(cancelAddonDialog)}
               disabled={cancelLoading}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-red-600 hover:bg-red-700"
             >
               {cancelLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              Potrdi preklic
+              Da, odstrani addon
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
