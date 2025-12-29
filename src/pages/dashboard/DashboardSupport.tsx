@@ -43,7 +43,7 @@ type StatusFilter = 'all' | 'open' | 'closed';
 
 export default function DashboardSupport() {
   const { widget, loading: widgetLoading } = useWidget();
-  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
+  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise' || (widget?.addons as string[] | null)?.includes('tickets');
   const { tickets, loading: ticketsLoading, updateTicketStatus } = useSupportTickets(widget?.table_name);
   const { toast } = useToast();
   
