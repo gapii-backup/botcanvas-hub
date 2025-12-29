@@ -430,7 +430,7 @@ export default function DashboardContacts() {
           {/* Export Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-2" disabled={exporting || filteredLeads.length === 0}>
+              <Button size="sm" className="gap-2" disabled={exporting || filteredLeads.length === 0}>
                 {exporting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
