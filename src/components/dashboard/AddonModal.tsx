@@ -37,7 +37,7 @@ const addons: Record<string, { name: string; description: string; priceMonthly: 
 export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
-  const { widget } = useWidget();
+  const { widget, fetchWidget } = useWidget();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -48,7 +48,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const addonData = addons[addon];
 
   const handleAddonPurchase = async () => {
-    if (!widget?.api_key || !user?.email) {
+    if (!widget?.api_key) {
       toast({
         title: 'Napaka',
         description: 'Manjkajo podatki za nakup.',
@@ -65,19 +65,26 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         body: JSON.stringify({
           api_key: widget.api_key,
           addon: addon,
-          billing_period: billingPeriod,
-          email: user.email,
-          success_url: 'https://app.botmotion.ai/dashboard?addon=success',
-          cancel_url: 'https://app.botmotion.ai/dashboard'
+          billing_period: billingPeriod
         })
       });
 
-      const { checkoutUrl } = await response.json();
-      window.location.href = checkoutUrl;
-    } catch (error) {
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: 'Addon dodan!',
+          description: result.message || 'Addon je bil uspešno dodan k vaši naročnini.'
+        });
+        onOpenChange(false);
+        await fetchWidget();
+      } else {
+        throw new Error(result.error || 'Napaka pri dodajanju addona');
+      }
+    } catch (error: any) {
       toast({
         title: 'Napaka',
-        description: 'Nekaj je šlo narobe',
+        description: error.message || 'Nekaj je šlo narobe',
         variant: 'destructive',
       });
     } finally {
