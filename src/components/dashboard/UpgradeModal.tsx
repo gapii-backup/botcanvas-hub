@@ -80,7 +80,9 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
           current_plan: widget.plan,
           new_plan: planId,
           billing_period: billingPeriod,
-          email: user.email
+          email: user.email,
+          success_url: 'https://app.botmotion.ai/dashboard?upgrade=success',
+          cancel_url: 'https://app.botmotion.ai/dashboard'
         })
       });
 
