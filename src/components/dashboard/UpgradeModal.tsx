@@ -114,17 +114,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
       const result = await response.json();
       
-      if (result.success) {
-        toast({ 
-          title: 'Paket nadgrajen!', 
-          description: 'Vaš paket je bil uspešno nadgrajen.'
-        });
-        fetchWidget();
-        onOpenChange(false);
-      } else if (result.checkoutUrl) {
+      // Upgrade VEDNO redirecta na Stripe Checkout
+      if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else {
-        throw new Error(result.error || 'Napaka pri nadgradnji');
+        throw new Error(result.error || 'Napaka pri ustvarjanju plačila');
       }
     } catch (error) {
       console.error('Upgrade error:', error);
@@ -133,10 +127,10 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
         description: error instanceof Error ? error.message : 'Nekaj je šlo narobe. Prosimo, poskusite znova.',
         variant: 'destructive',
       });
-    } finally {
       setLoading(false);
       setSelectedPlan(null);
     }
+    // NE resetiramo loading state ker gremo na Stripe
   };
 
   const getSelectedPlanPrice = () => {
