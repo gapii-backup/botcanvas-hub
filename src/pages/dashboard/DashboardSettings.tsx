@@ -936,7 +936,7 @@ export default function DashboardSettings() {
 
   const PreviewPanel = (
     <div className="space-y-4">
-      <div>
+      <div className="glass rounded-2xl p-6">
         <h2 className="text-lg font-semibold text-foreground mb-1">Predogled vašega AI asistenta</h2>
         <p className="text-sm text-muted-foreground">Tako bo izgledal vaš chatbot na spletni strani.</p>
       </div>
