@@ -989,7 +989,7 @@ export default function DashboardSettings() {
   return (
     <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
       <div className="space-y-6">
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid lg:grid-cols-2 gap-6 items-start">
           {SettingsPanel}
           {PreviewPanel}
         </div>
