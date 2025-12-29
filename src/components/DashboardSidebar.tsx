@@ -37,7 +37,6 @@ import {
   TicketCheck,
   Save,
   Undo2,
-  Lock,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 
@@ -221,8 +220,7 @@ export function DashboardSidebar({
                 )}
               >
                 <Icon className="h-5 w-5" />
-                <span className="flex-1">{item.label}</span>
-                {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                <span>{item.label}</span>
               </button>
             );
           })}
@@ -243,7 +241,7 @@ export function DashboardSidebar({
             const locked = isLocked(item);
             
             return (
-              <button
+            <button
                 key={item.href}
                 onClick={() => handleNavClick(item.href)}
                 className={cn(
@@ -254,8 +252,7 @@ export function DashboardSidebar({
                 )}
               >
                 <Icon className="h-5 w-5" />
-                <span className="flex-1">{item.label}</span>
-                {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
+                <span>{item.label}</span>
               </button>
             );
           })}
