@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { LockedFeature } from '@/components/dashboard/LockedFeature';
 import { useWidget } from '@/hooks/useWidget';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversations, type Message } from '@/hooks/useConversations';
@@ -41,10 +42,10 @@ type DateFilter = 'all' | '7days' | '30days' | 'custom';
 export default function DashboardContacts() {
   const navigate = useNavigate();
   const { widget, loading } = useWidget();
+  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
   const tableName = widget?.table_name;
   const { leads, loading: leadsLoading } = useLeads(tableName);
   const { fetchMessages } = useConversations(tableName);
-  const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
 
   // State
   const [selectedLead, setSelectedLead] = useState<string | null>(null);
@@ -294,26 +295,14 @@ export default function DashboardContacts() {
     );
   }
 
-  if (!hasContactsAddon) {
+  if (!hasAccess) {
     return (
       <DashboardLayout title="Kontakti" subtitle="Zbrani kontakti iz pogovorov">
-        <div className="glass rounded-2xl p-12 animate-slide-up">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <Lock className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              Odklenite zbiranje kontaktov
-            </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Z nadgradnjo paketa omogočite zbiranje email naslovov vaših uporabnikov in 
-              pregledujte njihove pogovore na enem mestu.
-            </p>
-            <Button onClick={() => navigate('/pricing')} size="lg">
-              Nadgradi paket
-            </Button>
-          </div>
-        </div>
+        <LockedFeature 
+          feature="Kontakti"
+          description="Zbirajte kontaktne podatke obiskovalcev in jih izvozite v CSV ali PDF."
+          addon="contacts"
+        />
       </DashboardLayout>
     );
   }

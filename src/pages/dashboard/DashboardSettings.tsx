@@ -986,7 +986,7 @@ export default function DashboardSettings() {
   );
 
   return (
-    <DashboardSidebar hasContactsAddon={hasContactsAddon} hasTicketsAddon={hasTicketsAddon}>
+    <DashboardSidebar>
       <div className="p-6 lg:p-8 space-y-6">
         {/* Header */}
         <div className="animate-fade-in">

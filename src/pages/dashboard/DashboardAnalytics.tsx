@@ -3,6 +3,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useConversationTopics } from '@/hooks/useConversationTopics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { LockedFeature } from '@/components/dashboard/LockedFeature';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
@@ -59,6 +60,7 @@ type SortDirection = 'asc' | 'desc';
 
 export default function DashboardAnalytics() {
   const { widget, loading } = useWidget();
+  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
   const tableName = widget?.table_name;
 
   // Date filter state - same as DashboardConversations
@@ -523,7 +525,33 @@ export default function DashboardAnalytics() {
     getDateRangeLabel
   ]);
 
-  if (loading || topicsLoading) {
+  if (loading) {
+    return (
+      <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+          </div>
+          <Skeleton className="h-96" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
+        <LockedFeature 
+          feature="Analiza"
+          description="Pridobite vpogled v teme pogovorov, trende in aktivnost uporabnikov z naprednimi analitičnimi orodji."
+        />
+      </DashboardLayout>
+    );
+  }
+
+  if (topicsLoading) {
     return (
       <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
         <div className="space-y-6">

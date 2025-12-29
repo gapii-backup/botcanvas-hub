@@ -1,6 +1,4 @@
-import { useLocation } from 'react-router-dom';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
-import { useWidget } from '@/hooks/useWidget';
 
 interface DashboardLayoutProps {
   title: string;
@@ -9,13 +7,8 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ title, subtitle, children }: DashboardLayoutProps) {
-  const location = useLocation();
-  const { widget } = useWidget();
-  const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
-  const hasTicketsAddon = Array.isArray(widget?.addons) && widget.addons.includes('tickets');
-
   return (
-    <DashboardSidebar hasContactsAddon={hasContactsAddon} hasTicketsAddon={hasTicketsAddon}>
+    <DashboardSidebar>
       <div className="p-6 lg:p-8 space-y-8">
         {/* Header */}
         <div className="animate-fade-in">
