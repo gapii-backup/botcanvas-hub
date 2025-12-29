@@ -391,9 +391,6 @@ export default function DashboardSettings() {
     );
   }
 
-  // Determine layout order based on widget position
-  const isLeftPosition = config.position === 'left';
-
   const SettingsPanel = (
     <div className="space-y-6">
       {/* Bot Settings Tabs */}
@@ -989,10 +986,7 @@ export default function DashboardSettings() {
 
   return (
     <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
-      <div className={cn(
-        "grid lg:grid-cols-2 gap-6",
-        isLeftPosition && "lg:[direction:rtl] lg:*:[direction:ltr]"
-      )}>
+      <div className="grid lg:grid-cols-2 gap-6">
         {SettingsPanel}
         {PreviewPanel}
       </div>
