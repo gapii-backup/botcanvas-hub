@@ -8,9 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useWidget } from '@/hooks/useWidget';
-import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 interface AddonModalProps {
@@ -19,35 +28,40 @@ interface AddonModalProps {
   addon: string | null;
 }
 
-const addons: Record<string, { name: string; description: string; priceMonthly: string; priceYearly: string }> = {
+const addonPrices: Record<string, { monthly: number; yearly: number; name: string; description: string }> = {
   contacts: {
+    monthly: 15,
+    yearly: 144,
     name: 'Zbiranje kontaktov',
-    description: 'Avtomatsko zbirajte email naslove obiskovalcev',
-    priceMonthly: '25',
-    priceYearly: '240'
+    description: 'Avtomatsko zbirajte email naslove obiskovalcev'
   },
   tickets: {
+    monthly: 35,
+    yearly: 336,
     name: 'Support Ticketi',
-    description: 'Prejemajte support tickete direktno iz chatbota',
-    priceMonthly: '35',
-    priceYearly: '336'
+    description: 'Prejemajte support tickete direktno iz chatbota'
   }
 };
 
 export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { widget, fetchWidget } = useWidget();
-  const { user } = useAuth();
   const { toast } = useToast();
 
-  if (!addon || !addons[addon]) {
+  if (!addon || !addonPrices[addon]) {
     return null;
   }
 
-  const addonData = addons[addon];
+  const addonData = addonPrices[addon];
+  const billingPeriod = widget?.billing_period || 'monthly';
+  const price = billingPeriod === 'yearly' ? addonData.yearly : addonData.monthly;
 
-  const handleAddonPurchase = async () => {
+  const handleAddonClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmAddon = async () => {
     if (!widget?.api_key) {
       toast({
         title: 'Napaka',
@@ -58,6 +72,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
     }
 
     setLoading(true);
+    setShowConfirmDialog(false);
+    
     try {
       const response = await fetch('https://hub.botmotion.ai/webhook/create-addon-checkout', {
         method: 'POST',
@@ -93,54 +109,77 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Dodaj {addonData.name}</DialogTitle>
-          <DialogDescription>{addonData.description}</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dodaj {addonData.name}</DialogTitle>
+            <DialogDescription>{addonData.description}</DialogDescription>
+          </DialogHeader>
 
-        <div className="flex gap-4 my-6">
-          <div
-            className={cn(
-              'flex-1 border rounded-xl p-4 cursor-pointer transition-colors',
-              billingPeriod === 'monthly'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-muted-foreground'
-            )}
-            onClick={() => !loading && setBillingPeriod('monthly')}
-          >
-            <div className="font-bold text-foreground">Mesečno</div>
-            <div className="text-2xl font-bold text-foreground">
-              €{addonData.priceMonthly}
-              <span className="text-sm text-muted-foreground font-normal">/mesec</span>
+          <div className="my-6">
+            <div className="border border-primary rounded-xl p-4 bg-primary/5">
+              <div className="font-bold text-foreground">
+                {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
+                {billingPeriod === 'yearly' && (
+                  <span className="text-success text-sm font-normal ml-2">20% popust</span>
+                )}
+              </div>
+              <div className="text-2xl font-bold text-foreground">
+                €{price}
+                <span className="text-sm text-muted-foreground font-normal">
+                  /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Billing period se ujema z vašo obstoječo naročnino
+              </p>
             </div>
           </div>
-          <div
-            className={cn(
-              'flex-1 border rounded-xl p-4 cursor-pointer transition-colors',
-              billingPeriod === 'yearly'
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-muted-foreground'
-            )}
-            onClick={() => !loading && setBillingPeriod('yearly')}
-          >
-            <div className="font-bold text-foreground">
-              Letno{' '}
-              <span className="text-success text-sm font-normal">20% popust</span>
-            </div>
-            <div className="text-2xl font-bold text-foreground">
-              €{addonData.priceYearly}
-              <span className="text-sm text-muted-foreground font-normal">/leto</span>
-            </div>
-          </div>
-        </div>
 
-        <Button className="w-full" onClick={handleAddonPurchase} disabled={loading}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-          Dodaj addon
-        </Button>
-      </DialogContent>
-    </Dialog>
+          <Button className="w-full" onClick={handleAddonClick} disabled={loading}>
+            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            Dodaj addon
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potrditev nakupa addona</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3" asChild>
+              <div>
+                <p>
+                  Želite dodati <strong className="text-foreground">{addonData.name}</strong> k vaši naročnini?
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Cena:</span>
+                    <span className="font-semibold text-foreground">
+                      €{price}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Začetek zaračunavanja:</span>
+                    <span className="text-foreground">Ob naslednjem plačilnem obdobju</span>
+                  </div>
+                </div>
+                <p className="text-amber-400 text-sm">
+                  ⚠️ Addon bo aktiviran v roku 72 ur po potrditvi.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAddon} disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Potrjujem nakup
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
