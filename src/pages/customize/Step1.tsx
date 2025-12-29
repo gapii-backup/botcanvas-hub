@@ -89,18 +89,18 @@ export default function Step1() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="home-subtitle">Podnaslov</Label>
-            <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/21</span>
+            <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/25</span>
           </div>
           <div className="flex gap-1">
             <Input
               id="home-subtitle"
               value={config.homeSubtitle}
-              onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 21) })}
+              onChange={(e) => setConfig({ homeSubtitle: e.target.value.slice(0, 25) })}
               placeholder="Kako vam lahko pomagam?"
-              maxLength={21}
+              maxLength={25}
               className="flex-1"
             />
-            <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 21) })} />
+            <EmojiPicker onEmojiSelect={(emoji) => setConfig({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 25) })} />
           </div>
         </div>
 
