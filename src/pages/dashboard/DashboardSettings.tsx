@@ -439,18 +439,18 @@ export default function DashboardSettings() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="home-subtitle">Podnaslov</Label>
-                <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/21</span>
+                <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/25</span>
               </div>
               <div className="flex gap-1">
                 <Input
                   id="home-subtitle"
                   value={config.homeSubtitle}
-                  onChange={(e) => handleConfigChange({ homeSubtitle: e.target.value.slice(0, 21) })}
+                  onChange={(e) => handleConfigChange({ homeSubtitle: e.target.value.slice(0, 25) })}
                   placeholder="Kako vam lahko pomagam?"
-                  maxLength={21}
+                  maxLength={25}
                   className="flex-1"
                 />
-                <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 21) })} />
+                <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 25) })} />
               </div>
             </div>
 
@@ -988,16 +988,10 @@ export default function DashboardSettings() {
   return (
     <DashboardSidebar hasContactsAddon={hasContactsAddon} hasTicketsAddon={hasTicketsAddon}>
       <div className="p-6 lg:p-8 space-y-6">
-        {/* Header row - both titles side by side */}
-        <div className="grid lg:grid-cols-2 gap-6 items-start">
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground">Nastavitve</h1>
-            <p className="text-muted-foreground mt-1">Upravljajte nastavitve vašega chatbota</p>
-          </div>
-          <div className="animate-fade-in">
-            <h1 className="text-3xl font-bold text-foreground">Predogled vašega AI asistenta</h1>
-            <p className="text-muted-foreground mt-1">Tako bo izgledal vaš chatbot na spletni strani.</p>
-          </div>
+        {/* Header */}
+        <div className="animate-fade-in">
+          <h1 className="text-3xl font-bold text-foreground">Nastavitve</h1>
+          <p className="text-muted-foreground mt-1">Upravljajte nastavitve vašega chatbota</p>
         </div>
 
         {/* Content row */}
