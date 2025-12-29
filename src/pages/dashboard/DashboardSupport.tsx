@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
-import { format, subDays, startOfDay, isToday, isThisMonth } from 'date-fns';
+import { format, subDays, startOfDay } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { LockedFeature } from '@/components/dashboard/LockedFeature';
 import { useWidget } from '@/hooks/useWidget';
 import { useSupportTickets, SupportTicket } from '@/hooks/useSupportTickets';
 import { Button } from '@/components/ui/button';
@@ -41,6 +43,7 @@ type StatusFilter = 'all' | 'open' | 'closed';
 
 export default function DashboardSupport() {
   const { widget, loading: widgetLoading } = useWidget();
+  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
   const { tickets, loading: ticketsLoading, updateTicketStatus } = useSupportTickets(widget?.table_name);
   const { toast } = useToast();
   
@@ -49,8 +52,6 @@ export default function DashboardSupport() {
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [updatingStatus, setUpdatingStatus] = useState(false);
-
-  const hasTicketsAddon = widget?.addons && Array.isArray(widget.addons) && widget.addons.includes('tickets');
 
   // Filter tickets
   const filteredTickets = useMemo(() => {
@@ -134,8 +135,35 @@ export default function DashboardSupport() {
 
   const loading = widgetLoading || ticketsLoading;
 
+  if (widgetLoading) {
+    return (
+      <DashboardLayout title="Support Ticketi" subtitle="Pregled in upravljanje support zahtevkov">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+          </div>
+          <Skeleton className="h-[600px]" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <DashboardLayout title="Support Ticketi" subtitle="Pregled in upravljanje support zahtevkov">
+        <LockedFeature 
+          feature="Support Ticketi"
+          description="Prejemajte in upravljajte support tickete neposredno iz chatbota."
+          addon="tickets"
+        />
+      </DashboardLayout>
+    );
+  }
+
   return (
-    <DashboardSidebar hasContactsAddon={widget?.addons?.includes('contacts')} hasTicketsAddon={hasTicketsAddon}>
+    <DashboardSidebar>
       <div className="p-4 lg:p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">Support Ticketi</h1>

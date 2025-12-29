@@ -37,30 +37,36 @@ import {
   TicketCheck,
   Save,
   Undo2,
+  Lock,
 } from 'lucide-react';
+import { useWidget } from '@/hooks/useWidget';
 
 interface DashboardSidebarProps {
-  hasContactsAddon?: boolean;
-  hasTicketsAddon?: boolean;
   children: React.ReactNode;
 }
 
-const navItems = [
+type NavItem = {
+  label: string;
+  icon: typeof LayoutDashboard;
+  href: string;
+  requiresPro?: boolean;
+};
+
+const navItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
-  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics' },
-  { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresAddon: 'contacts' },
-  { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresAddon: 'tickets' },
+  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
+  { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
+  { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Računi', icon: CreditCard, href: '/dashboard/billing' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
 
 export function DashboardSidebar({ 
-  hasContactsAddon = false,
-  hasTicketsAddon = false,
   children,
 }: DashboardSidebarProps) {
+  const { widget } = useWidget();
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -77,15 +83,14 @@ export function DashboardSidebar({
     onDiscard
   } = useUnsavedChanges();
 
-  const filteredNavItems = navItems.filter(item => {
-    if (item.requiresAddon === 'contacts') {
-      return hasContactsAddon;
-    }
-    if (item.requiresAddon === 'tickets') {
-      return hasTicketsAddon;
-    }
-    return true;
-  });
+  // Check if user has Pro or Enterprise plan
+  const hasProAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
+
+  // Check if a section is locked for basic users
+  const isLocked = (item: NavItem) => {
+    if (hasProAccess) return false;
+    return item.requiresPro === true;
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -199,9 +204,10 @@ export function DashboardSidebar({
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <nav className="p-4 space-y-1">
-          {filteredNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const locked = isLocked(item);
             
             return (
               <button
@@ -215,7 +221,8 @@ export function DashboardSidebar({
                 )}
               >
                 <Icon className="h-5 w-5" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
               </button>
             );
           })}
@@ -229,11 +236,11 @@ export function DashboardSidebar({
           <span className="text-lg font-bold text-foreground">BotMotion.ai</span>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
-          {filteredNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const locked = isLocked(item);
             
             return (
               <button
@@ -247,7 +254,8 @@ export function DashboardSidebar({
                 )}
               >
                 <Icon className="h-5 w-5" />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {locked && <Lock className="h-3 w-3 text-muted-foreground" />}
               </button>
             );
           })}
