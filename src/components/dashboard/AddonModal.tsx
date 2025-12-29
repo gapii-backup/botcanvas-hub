@@ -70,23 +70,12 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         })
       });
 
-      const result = await response.json();
-
-      if (result.success) {
-        const addonName = addon ? addons[addon]?.name : addon;
-        toast({ 
-          title: 'Addon dodan!', 
-          description: `${addonName} je bil uspešno dodan k vaši naročnini.` 
-        });
-        window.location.reload();
-      } else {
-        throw new Error(result.error || 'Napaka pri dodajanju addona');
-      }
+      const { checkoutUrl } = await response.json();
+      window.location.href = checkoutUrl;
     } catch (error) {
-      console.error('Addon purchase error:', error);
       toast({
         title: 'Napaka',
-        description: 'Nekaj je šlo narobe. Prosimo, poskusite znova.',
+        description: 'Nekaj je šlo narobe',
         variant: 'destructive',
       });
     } finally {
