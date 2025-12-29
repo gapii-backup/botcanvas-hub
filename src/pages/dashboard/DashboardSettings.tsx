@@ -439,18 +439,18 @@ export default function DashboardSettings() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="home-subtitle">Podnaslov</Label>
-                <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/25</span>
+                <span className="text-xs text-muted-foreground">{config.homeSubtitle.length}/23</span>
               </div>
               <div className="flex gap-1">
                 <Input
                   id="home-subtitle"
                   value={config.homeSubtitle}
-                  onChange={(e) => handleConfigChange({ homeSubtitle: e.target.value.slice(0, 25) })}
+                  onChange={(e) => handleConfigChange({ homeSubtitle: e.target.value.slice(0, 23) })}
                   placeholder="Kako vam lahko pomagam?"
-                  maxLength={25}
+                  maxLength={23}
                   className="flex-1"
                 />
-                <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 25) })} />
+                <EmojiPicker onEmojiSelect={(emoji) => handleConfigChange({ homeSubtitle: (config.homeSubtitle + emoji).slice(0, 23) })} />
               </div>
             </div>
 
