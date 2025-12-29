@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useWidget } from '@/hooks/useWidget';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddonModalProps {
   open: boolean;
@@ -47,6 +47,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { widget, fetchWidget } = useWidget();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   if (!addon || !addonPrices[addon]) {
@@ -81,7 +82,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         body: JSON.stringify({
           api_key: widget.api_key,
           addon: addon,
-          billing_period: billingPeriod
+          billing_period: billingPeriod,
+          user_email: user?.email
         })
       });
 
