@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,11 +68,18 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const { widget, fetchWidget } = useWidget();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const billingPeriod = widget?.billing_period || 'monthly';
+  // Set initial billing period based on widget's current subscription
+  useEffect(() => {
+    if (widget?.billing_period) {
+      setBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    }
+  }, [widget?.billing_period]);
+
   const currentPlanName = widget?.plan ? planPrices[widget.plan as keyof typeof planPrices]?.name || widget.plan : 'Brez paketa';
 
   const handleSelectPlan = (planId: string) => {
@@ -151,6 +158,23 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             <DialogTitle>Nadgradi paket</DialogTitle>
             <DialogDescription>Izberi paket ki ti najbolj ustreza</DialogDescription>
           </DialogHeader>
+
+          <div className="flex gap-2 justify-center mb-6">
+            <Button
+              variant={billingPeriod === 'monthly' ? 'default' : 'outline'}
+              onClick={() => setBillingPeriod('monthly')}
+              disabled={loading}
+            >
+              Mesečno
+            </Button>
+            <Button
+              variant={billingPeriod === 'yearly' ? 'default' : 'outline'}
+              onClick={() => setBillingPeriod('yearly')}
+              disabled={loading}
+            >
+              Letno (20% popust)
+            </Button>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {plans.map(plan => {
