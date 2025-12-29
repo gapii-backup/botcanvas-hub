@@ -66,7 +66,9 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
           api_key: widget.api_key,
           addon: addon,
           billing_period: billingPeriod,
-          email: user.email
+          email: user.email,
+          success_url: 'https://app.botmotion.ai/dashboard?addon=success',
+          cancel_url: 'https://app.botmotion.ai/dashboard'
         })
       });
 
