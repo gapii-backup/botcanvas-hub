@@ -239,13 +239,13 @@ export default function Complete() {
       const existingApiKey = widget?.api_key;
       const apiKey = existingApiKey || `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
       
-      // Save all widget data to widgets table
+      // Save all widget data to widgets table (billing_period NOT saved - only sent to webhook)
       await upsertWidget({
         user_id: user.id,
         user_email: user.email || '',
         api_key: apiKey,
         plan: userPlan,
-        billing_period: widget?.billing_period || 'monthly',
+        // billing_period se NE shranjuje tukaj - shrani se šele po plačilu preko Stripe webhook
         status: 'pending_payment',
         is_active: false,
         bot_name: config.name || '',
@@ -284,7 +284,8 @@ export default function Complete() {
 
       const priceId = setupFeePrices[userPlan] || setupFeePrices.basic;
 
-      // Call n8n to create checkout session
+      // Call n8n to create checkout session - billing_period se pošlje samo v webhook
+      const selectedBillingPeriod = userBot?.billing_period || 'monthly';
       const response = await fetch('https://hub.botmotion.ai/webhook/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -292,7 +293,9 @@ export default function Complete() {
           price_id: priceId,
           api_key: apiKey,
           plan: userPlan,
+          billing_period: selectedBillingPeriod, // samo pošlje, ne shranjuje v DB
           user_email: user.email,
+          addons: selectedAddons,
           success_url: 'https://app.botmotion.ai/payment-success',
           cancel_url: 'https://app.botmotion.ai/customize/complete?payment=cancelled'
         })
