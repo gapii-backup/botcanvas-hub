@@ -31,7 +31,7 @@ import DashboardAnalytics from "./pages/dashboard/DashboardAnalytics";
 import DashboardContacts from "./pages/dashboard/DashboardContacts";
 import DashboardSupport from "./pages/dashboard/DashboardSupport";
 import DashboardSettings from "./pages/dashboard/DashboardSettings";
-import DashboardBilling from "./pages/dashboard/DashboardBilling";
+import DashboardSubscription from "./pages/dashboard/DashboardSubscription";
 import DashboardHelp from "./pages/dashboard/DashboardHelp";
 
 const queryClient = new QueryClient();
@@ -139,11 +139,11 @@ const App = () => (
               }
             />
             <Route
-              path="/dashboard/billing"
+              path="/dashboard/subscription"
               element={
                 <ProtectedRoute>
                   <DashboardGuard>
-                    <DashboardBilling />
+                    <DashboardSubscription />
                   </DashboardGuard>
                 </ProtectedRoute>
               }
