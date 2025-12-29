@@ -1001,7 +1001,7 @@ export default function DashboardSettings() {
         </div>
         
         {/* Embed Code - centered below both panels */}
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {EmbedCodeSection}
         </div>
       </div>
