@@ -70,12 +70,17 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         })
       });
 
-      const data = await response.json();
+      const result = await response.json();
 
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+      if (result.success) {
+        const addonName = addon ? addons[addon]?.name : addon;
+        toast({ 
+          title: 'Addon dodan!', 
+          description: `${addonName} je bil uspešno dodan k vaši naročnini.` 
+        });
+        window.location.reload();
       } else {
-        throw new Error('No checkout URL received');
+        throw new Error(result.error || 'Napaka pri dodajanju addona');
       }
     } catch (error) {
       console.error('Addon purchase error:', error);
