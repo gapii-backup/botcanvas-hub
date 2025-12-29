@@ -42,7 +42,7 @@ type DateFilter = 'all' | '7days' | '30days' | 'custom';
 export default function DashboardContacts() {
   const navigate = useNavigate();
   const { widget, loading } = useWidget();
-  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
+  const hasAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise' || (widget?.addons as string[] | null)?.includes('contacts');
   const tableName = widget?.table_name;
   const { leads, loading: leadsLoading } = useLeads(tableName);
   const { fetchMessages } = useConversations(tableName);
