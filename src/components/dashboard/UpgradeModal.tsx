@@ -183,6 +183,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                   <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
                   <div className="text-3xl font-bold my-4 text-foreground">
                     €{price}
+                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
@@ -232,7 +233,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                   </div>
                   <div className="flex justify-between">
                     <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
                 <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-3 text-sm">
