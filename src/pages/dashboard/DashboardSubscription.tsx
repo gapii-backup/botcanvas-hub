@@ -151,7 +151,7 @@ export default function DashboardSubscription() {
     }
   };
 
-  const handleCancelAddon = async (addon: string) => {
+  const handleCancelAddon = async (addonId: string) => {
     if (!widget?.api_key || !user?.email) {
       toast({
         title: 'Napaka',
@@ -161,6 +161,8 @@ export default function DashboardSubscription() {
       return;
     }
 
+    const addonDetails = getAddonDetails(addonId, billingPeriod);
+
     setCancelLoading(true);
     try {
       const response = await fetch('https://hub.botmotion.ai/webhook/cancel-addon', {
@@ -168,7 +170,8 @@ export default function DashboardSubscription() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           api_key: widget.api_key,
-          addon: addon,
+          addon: addonId,
+          addon_name: addonDetails.name,
           user_email: user.email
         })
       });
@@ -178,7 +181,7 @@ export default function DashboardSubscription() {
       if (result.success) {
         toast({
           title: 'Addon preklican',
-          description: 'Addon bo ostal aktiven do konca trenutnega plačilnega obdobja.',
+          description: 'Addon bo takoj odstranjen.',
         });
         await fetchWidget();
       } else {
