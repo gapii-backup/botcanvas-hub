@@ -96,7 +96,7 @@ export default function DashboardSubscription() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           api_key: widget.api_key,
-          return_url: window.location.href
+          return_url: 'https://app.botmotion.ai/dashboard/upgrade'
         })
       });
 
