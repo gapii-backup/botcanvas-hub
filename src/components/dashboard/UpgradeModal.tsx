@@ -172,21 +172,26 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const getPlanButtonState = (planId: string) => {
     const planIndex = planOrder.indexOf(planId);
     const isExact = isExactCurrentPlan(planId);
+    const isSamePlanDifferentBilling = widget?.plan === planId && widgetBillingPeriod !== billingPeriod;
     
     if (isExact) {
       return { label: 'Trenutni paket', variant: 'outline' as const, disabled: true };
     }
     
-    // If same plan but different billing period, show "Izberi"
-    if (widget?.plan === planId && widgetBillingPeriod !== billingPeriod) {
-      return { label: 'Izberi', variant: 'default' as const, disabled: false };
+    // If same plan but switching to yearly = upgrade, switching to monthly = downgrade
+    if (isSamePlanDifferentBilling) {
+      if (billingPeriod === 'yearly') {
+        return { label: 'Nadgradi', variant: 'default' as const, disabled: false };
+      } else {
+        return { label: 'Downgradi', variant: 'secondary' as const, disabled: false };
+      }
     }
     
     if (planIndex > currentPlanIndex) {
-      return { label: `Nadgradi na ${planPrices[planId as keyof typeof planPrices].name}`, variant: 'default' as const, disabled: false };
+      return { label: 'Nadgradi', variant: 'default' as const, disabled: false };
     }
     
-    return { label: `Downgradi na ${planPrices[planId as keyof typeof planPrices].name}`, variant: 'secondary' as const, disabled: false };
+    return { label: 'Downgradi', variant: 'secondary' as const, disabled: false };
   };
 
   return (
@@ -205,18 +210,12 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
           {/* Billing period toggle */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex rounded-lg bg-muted p-1 relative">
-              {/* Animated background slider */}
-              <div 
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-md shadow-sm transition-all duration-300 ease-out ${
-                  billingPeriod === 'yearly' ? 'left-[calc(50%+2px)]' : 'left-1'
-                }`}
-              />
+            <div className="inline-flex rounded-lg bg-muted p-1">
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   billingPeriod === 'monthly'
-                    ? 'text-foreground'
+                    ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -224,9 +223,9 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               </button>
               <button
                 onClick={() => setBillingPeriod('yearly')}
-                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
                   billingPeriod === 'yearly'
-                    ? 'text-foreground'
+                    ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -245,10 +244,15 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               const buttonState = getPlanButtonState(plan.id);
               const isExact = isExactCurrentPlan(plan.id);
               
+              // Calculate yearly savings
+              const monthlyCost = prices.monthly * 12;
+              const yearlyCost = prices.yearly;
+              const savings = Math.round(monthlyCost - yearlyCost);
+              
               return (
                 <div
                   key={plan.id}
-                  className={`border rounded-xl p-5 bg-card relative transition-all duration-300 ${
+                  className={`border rounded-xl p-5 bg-card relative flex flex-col ${
                     isExact ? 'border-primary ring-2 ring-primary/20' : 'border-border'
                   }`}
                 >
@@ -259,15 +263,22 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                   )}
                   
                   <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
-                  <div className="text-2xl font-bold my-3 text-foreground transition-all duration-300">
+                  <div className="text-2xl font-bold my-2 text-foreground">
                     €{price}
                     <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
                   </div>
+                  {billingPeriod === 'yearly' ? (
+                    <div className="text-xs text-green-500 font-medium mb-3">
+                      Prihranite €{savings}/leto
+                    </div>
+                  ) : (
+                    <div className="mb-3 h-4" />
+                  )}
                   
-                  <ul className="space-y-1.5 mb-4">
+                  <ul className="space-y-1.5 mb-4 flex-grow">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-2">
                         <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
@@ -277,7 +288,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                   </ul>
                   
                   <Button
-                    className="w-full transition-all duration-200"
+                    className="w-full mt-auto"
                     variant={buttonState.variant}
                     onClick={() => handleSelectPlan(plan.id)}
                     disabled={loading || buttonState.disabled}
