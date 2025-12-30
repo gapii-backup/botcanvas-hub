@@ -195,12 +195,18 @@ export default function DashboardUpgrade() {
           <CardContent>
             {/* Billing period toggle */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex rounded-lg bg-muted p-1">
+              <div className="inline-flex rounded-lg bg-muted p-1 relative">
+                {/* Animated background slider */}
+                <div 
+                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-md shadow-sm transition-all duration-300 ease-out ${
+                    displayBillingPeriod === 'yearly' ? 'left-[calc(50%+2px)]' : 'left-1'
+                  }`}
+                />
                 <button
                   onClick={() => setDisplayBillingPeriod('monthly')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     displayBillingPeriod === 'monthly'
-                      ? 'bg-background text-foreground shadow-sm'
+                      ? 'text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -208,9 +214,9 @@ export default function DashboardUpgrade() {
                 </button>
                 <button
                   onClick={() => setDisplayBillingPeriod('yearly')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                  className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
                     displayBillingPeriod === 'yearly'
-                      ? 'bg-background text-foreground shadow-sm'
+                      ? 'text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -224,37 +230,40 @@ export default function DashboardUpgrade() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(planPrices).map(([planId, planData]) => {
-                const isCurrentPlan = currentPlan === planId;
+                // Check exact match: same plan AND same billing period
+                const isExactCurrentPlan = currentPlan === planId && billingPeriod === displayBillingPeriod;
                 const planIndex = planOrder.indexOf(planId);
                 const isUpgrade = planIndex > currentPlanIndex;
                 const isDowngrade = planIndex < currentPlanIndex;
+                // If same plan but different billing period, it's a billing change
+                const isBillingChange = currentPlan === planId && billingPeriod !== displayBillingPeriod;
                 const price = displayBillingPeriod === 'monthly' ? planData.monthly : planData.yearly;
                 
                 return (
                   <div
                     key={planId}
-                    className={`rounded-lg p-4 border ${
-                      isCurrentPlan 
+                    className={`rounded-lg p-4 border transition-all duration-300 ${
+                      isExactCurrentPlan 
                         ? 'border-primary bg-primary/10' 
                         : 'border-border bg-muted/30'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-bold text-foreground">{planData.name}</h3>
-                      {isCurrentPlan && (
+                      {isExactCurrentPlan && (
                         <Badge variant="secondary" className="bg-primary/20 text-primary">
                           Trenutni
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-foreground mb-4">
+                    <div className="text-2xl font-bold text-foreground mb-4 transition-all duration-300">
                       €{price}
                       <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
                         /{displayBillingPeriod === 'monthly' ? 'mes' : 'leto'}
                       </span>
                     </div>
-                    {isCurrentPlan && (
+                    {isExactCurrentPlan && (
                       <Button
                         className="w-full"
                         size="sm"
@@ -264,7 +273,16 @@ export default function DashboardUpgrade() {
                         Trenutni paket
                       </Button>
                     )}
-                    {isUpgrade && (
+                    {isBillingChange && (
+                      <Button
+                        onClick={openUpgradeModal}
+                        className="w-full gap-2"
+                        size="sm"
+                      >
+                        Izberi
+                      </Button>
+                    )}
+                    {isUpgrade && !isBillingChange && (
                       <Button
                         onClick={openUpgradeModal}
                         className="w-full gap-2"
@@ -274,7 +292,7 @@ export default function DashboardUpgrade() {
                         Nadgradi
                       </Button>
                     )}
-                    {isDowngrade && (
+                    {isDowngrade && !isBillingChange && (
                       <Button
                         onClick={openUpgradeModal}
                         className="w-full gap-2"

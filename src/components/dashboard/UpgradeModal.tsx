@@ -98,10 +98,16 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
   const currentPlanName = widget?.plan ? planPrices[widget.plan as keyof typeof planPrices]?.name || widget.plan : 'Brez paketa';
   const currentPlanIndex = widget?.plan ? planOrder.indexOf(widget.plan) : -1;
+  const widgetBillingPeriod = widget?.billing_period || 'monthly';
+
+  // Check if this is the exact current plan (same plan AND same billing period)
+  const isExactCurrentPlan = (planId: string) => {
+    return widget?.plan === planId && widgetBillingPeriod === billingPeriod;
+  };
 
   const handleSelectPlan = (planId: string) => {
     const selectedIndex = planOrder.indexOf(planId);
-    const isDowngrading = selectedIndex < currentPlanIndex;
+    const isDowngrading = selectedIndex < currentPlanIndex && widgetBillingPeriod === billingPeriod;
     
     setSelectedPlan(planId);
     setIsDowngrade(isDowngrading);
@@ -165,9 +171,15 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
   const getPlanButtonState = (planId: string) => {
     const planIndex = planOrder.indexOf(planId);
+    const isExact = isExactCurrentPlan(planId);
     
-    if (planId === widget?.plan) {
+    if (isExact) {
       return { label: 'Trenutni paket', variant: 'outline' as const, disabled: true };
+    }
+    
+    // If same plan but different billing period, show "Izberi"
+    if (widget?.plan === planId && widgetBillingPeriod !== billingPeriod) {
+      return { label: 'Izberi', variant: 'default' as const, disabled: false };
     }
     
     if (planIndex > currentPlanIndex) {
@@ -193,12 +205,18 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
           {/* Billing period toggle */}
           <div className="flex justify-center mb-6">
-            <div className="inline-flex rounded-lg bg-muted p-1">
+            <div className="inline-flex rounded-lg bg-muted p-1 relative">
+              {/* Animated background slider */}
+              <div 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-md shadow-sm transition-all duration-300 ease-out ${
+                  billingPeriod === 'yearly' ? 'left-[calc(50%+2px)]' : 'left-1'
+                }`}
+              />
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                   billingPeriod === 'monthly'
-                    ? 'bg-background text-foreground shadow-sm'
+                    ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -206,9 +224,9 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               </button>
               <button
                 onClick={() => setBillingPeriod('yearly')}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
                   billingPeriod === 'yearly'
-                    ? 'bg-background text-foreground shadow-sm'
+                    ? 'text-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -225,23 +243,23 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               const prices = planPrices[plan.id as keyof typeof planPrices];
               const price = billingPeriod === 'monthly' ? prices.monthly : prices.yearly;
               const buttonState = getPlanButtonState(plan.id);
-              const isCurrentPlan = widget?.plan === plan.id;
+              const isExact = isExactCurrentPlan(plan.id);
               
               return (
                 <div
                   key={plan.id}
-                  className={`border rounded-xl p-5 bg-card relative ${
-                    isCurrentPlan ? 'border-primary ring-2 ring-primary/20' : 'border-border'
+                  className={`border rounded-xl p-5 bg-card relative transition-all duration-300 ${
+                    isExact ? 'border-primary ring-2 ring-primary/20' : 'border-border'
                   }`}
                 >
-                  {isCurrentPlan && (
+                  {isExact && (
                     <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
                       Trenutni paket
                     </Badge>
                   )}
                   
                   <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
-                  <div className="text-2xl font-bold my-3 text-foreground">
+                  <div className="text-2xl font-bold my-3 text-foreground transition-all duration-300">
                     €{price}
                     <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
@@ -259,7 +277,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                   </ul>
                   
                   <Button
-                    className="w-full"
+                    className="w-full transition-all duration-200"
                     variant={buttonState.variant}
                     onClick={() => handleSelectPlan(plan.id)}
                     disabled={loading || buttonState.disabled}
