@@ -91,7 +91,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
       { id: 'capacity_1000', label: '+1.000 pogovorov', yearlyLabel: '+12.000 pogovorov', monthlyPrice: 12, yearlyPrice: 99, monthlyOnly: true },
       { id: 'capacity_2000', label: '+2.000 pogovorov', yearlyLabel: '+24.000 pogovorov', monthlyPrice: 22, yearlyPrice: 99, monthlyOnly: true },
       { id: 'capacity_5000', label: '+5.000 pogovorov', yearlyLabel: '+60.000 pogovorov', monthlyPrice: 52, yearlyPrice: 99, monthlyOnly: true },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+120.000 pogovorov', monthlyPrice: 99, yearlyPrice: 99 },
+      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+10.000 pogovorov', monthlyPrice: 99, yearlyPrice: 99 },
     ],
   },
 };
