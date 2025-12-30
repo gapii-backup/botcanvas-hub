@@ -38,6 +38,18 @@ const planOrder = ['basic', 'pro', 'enterprise'];
 
 const plans = [
   {
+    name: 'Basic',
+    id: 'basic',
+    features: [
+      '1.000 pogovorov/mesec',
+      '1 chatbot',
+      'Osnovna prilagoditev',
+      'Email podpora',
+      '30 dni zgodovina',
+      'Osnovni analytics'
+    ]
+  },
+  {
     name: 'Pro',
     id: 'pro',
     features: [
@@ -225,7 +237,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.map(plan => {
               const prices = planPrices[plan.id as keyof typeof planPrices];
               const price = billingPeriod === 'monthly' ? prices.monthly : prices.yearly;

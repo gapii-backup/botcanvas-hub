@@ -150,7 +150,7 @@ const App = () => (
               }
             />
             <Route
-              path="/dashboard/upgrade"
+              path="/dashboard/nadgradi"
               element={
                 <ProtectedRoute>
                   <DashboardGuard>
