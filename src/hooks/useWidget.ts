@@ -92,6 +92,39 @@ export function useWidget() {
     fetchWidget();
   }, [user]);
 
+  // Sync booking_enabled and support_enabled based on addons
+  useEffect(() => {
+    if (!widget || !user) return;
+    
+    const addons = Array.isArray(widget.addons) ? widget.addons : [];
+    const updates: Partial<Widget> = {};
+    
+    // Support tickets
+    const shouldHaveSupport = addons.includes('tickets');
+    if (widget.support_enabled !== shouldHaveSupport) {
+      updates.support_enabled = shouldHaveSupport;
+    }
+    
+    // Booking
+    const shouldHaveBooking = addons.includes('booking');
+    if (widget.booking_enabled !== shouldHaveBooking) {
+      updates.booking_enabled = shouldHaveBooking;
+    }
+    
+    // Update if there are changes
+    if (Object.keys(updates).length > 0) {
+      supabase
+        .from('widgets')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', widget.id)
+        .then(({ error }) => {
+          if (!error) {
+            setWidget(prev => prev ? { ...prev, ...updates } : null);
+          }
+        });
+    }
+  }, [widget?.addons, widget?.id, user]);
+
   const createWidget = async (email: string, userId: string) => {
     const { data, error } = await supabase
       .from('widgets')
