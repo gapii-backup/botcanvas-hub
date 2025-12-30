@@ -228,6 +228,8 @@ export type Database = {
           show_bubble: boolean
           show_email_field: boolean
           status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_status: string
           support_enabled: boolean
           support_webhook_url: string | null
@@ -275,6 +277,8 @@ export type Database = {
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_status?: string
           support_enabled?: boolean
           support_webhook_url?: string | null
@@ -322,6 +326,8 @@ export type Database = {
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_status?: string
           support_enabled?: boolean
           support_webhook_url?: string | null

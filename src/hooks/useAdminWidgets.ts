@@ -65,8 +65,10 @@ export interface AdminWidget {
   footer_link_url: string | null;
   footer_suffix: string | null;
   
-  // Subscription
+  // Subscription & Stripe
   subscription_status: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
 }
 
 export function useAdminWidgets() {
