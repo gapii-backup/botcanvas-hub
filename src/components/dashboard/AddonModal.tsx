@@ -22,26 +22,40 @@ import { useToast } from '@/hooks/use-toast';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
 
+type AddonItem = { id: string; name: string; price: number; period: string; proOnly?: boolean };
+
+const allAddons: Record<string, AddonItem[]> = {
+  monthly: [
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
+    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
+    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec' },
+    { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec' },
+    { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
+  ],
+  yearly: [
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'leto' },
+    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto' },
+    { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto' },
+    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
+  ]
+};
+
+const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem | null => {
+  const addons = allAddons[billingPeriod] || allAddons.monthly;
+  return addons.find(a => a.id === addonId) || null;
+};
+
 interface AddonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addon: string | null;
 }
-
-const addonPrices: Record<string, { monthly: number; yearly: number; name: string; description: string }> = {
-  contacts: {
-    monthly: 15,
-    yearly: 144,
-    name: 'Zbiranje kontaktov',
-    description: 'Avtomatsko zbirajte email naslove obiskovalcev'
-  },
-  tickets: {
-    monthly: 35,
-    yearly: 336,
-    name: 'Support Ticketi',
-    description: 'Prejemajte support tickete direktno iz chatbota'
-  }
-};
 
 export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const [loading, setLoading] = useState(false);
@@ -50,13 +64,12 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  if (!addon || !addonPrices[addon]) {
+  const billingPeriod = widget?.billing_period || 'monthly';
+  const addonData = addon ? getAddonDetails(addon, billingPeriod) : null;
+
+  if (!addon || !addonData) {
     return null;
   }
-
-  const addonData = addonPrices[addon];
-  const billingPeriod = widget?.billing_period || 'monthly';
-  const price = billingPeriod === 'yearly' ? addonData.yearly : addonData.monthly;
 
   const handleAddonClick = () => {
     setShowConfirmDialog(true);
@@ -116,7 +129,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Dodaj {addonData.name}</DialogTitle>
-            <DialogDescription>{addonData.description}</DialogDescription>
+            <DialogDescription>Dodajte funkcionalnost svoji naročnini</DialogDescription>
           </DialogHeader>
 
           <div className="my-6">
@@ -128,9 +141,9 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                 )}
               </div>
               <div className="text-2xl font-bold text-foreground">
-                €{price}
+                €{addonData.price}
                 <span className="text-sm text-muted-foreground font-normal">
-                  /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
+                  /{addonData.period}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
@@ -155,9 +168,9 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                   <div className="font-semibold text-foreground text-lg">{addonData.name}</div>
                   <div className="text-2xl font-bold text-primary mt-1">
-                    €{price}
+                    €{addonData.price}
                     <span className="text-sm text-muted-foreground font-normal">
-                      /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
+                      /{addonData.period}
                     </span>
                   </div>
                 </div>
@@ -178,7 +191,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">•</span>
-                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{price}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'})</span>
+                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{addonData.price}/{addonData.period})</span>
                     </li>
                   </ul>
                 </div>
