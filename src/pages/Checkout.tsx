@@ -6,10 +6,10 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, CreditCard, Lock, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const planDetails: Record<string, { name: string; price: string }> = {
-  basic: { name: 'Basic', price: '€49/mesec' },
-  pro: { name: 'Pro', price: '€119/mesec' },
-  enterprise: { name: 'Enterprise', price: '€299/mesec' },
+const planDetails: Record<string, { name: string; price: string; priceDisplay: string }> = {
+  basic: { name: 'Basic', price: '€49/mesec', priceDisplay: '€49' },
+  pro: { name: 'Pro', price: '€119/mesec', priceDisplay: '€119' },
+  enterprise: { name: 'Enterprise', price: '€299/mesec', priceDisplay: '€299' },
 };
 
 export default function Checkout() {
@@ -59,11 +59,19 @@ export default function Checkout() {
                       <p className="font-medium text-foreground">{plan.name} paket</p>
                       <p className="text-sm text-muted-foreground">Mesečna naročnina</p>
                     </div>
-                    <p className="text-lg font-semibold text-foreground">{plan.price}</p>
+                    <div className="flex items-start">
+                      <span className="text-lg font-semibold text-foreground">{plan.priceDisplay}</span>
+                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                      <span className="text-lg font-semibold text-foreground">/mesec</span>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <p className="font-medium text-foreground">Skupaj</p>
-                    <p className="text-2xl font-bold text-primary">{plan.price}</p>
+                    <div className="flex items-start">
+                      <span className="text-2xl font-bold text-primary">{plan.priceDisplay}</span>
+                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                      <span className="text-2xl font-bold text-primary">/mesec</span>
+                    </div>
                   </div>
                 </>
               ) : (
@@ -145,7 +153,7 @@ export default function Checkout() {
                 ) : (
                   <>
                     <Lock className="h-4 w-4 mr-2" />
-                    Plačaj {plan?.price}
+                    Plačaj {plan?.priceDisplay}/mesec <span className="text-xs opacity-70">+DDV</span>
                   </>
                 )}
               </Button>

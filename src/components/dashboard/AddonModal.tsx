@@ -142,6 +142,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
               </div>
               <div className="text-2xl font-bold text-foreground">
                 €{addonData.price}
+                <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                 <span className="text-sm text-muted-foreground font-normal">
                   /{addonData.period}
                 </span>
@@ -169,6 +170,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                   <div className="font-semibold text-foreground text-lg">{addonData.name}</div>
                   <div className="text-2xl font-bold text-primary mt-1">
                     €{addonData.price}
+                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{addonData.period}
                     </span>
@@ -191,7 +193,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">•</span>
-                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{addonData.price}/{addonData.period})</span>
+                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
                     </li>
                   </ul>
                 </div>

@@ -113,10 +113,10 @@ const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; 
 function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, isYearly: boolean): string {
   if (isYearly) {
     if (yearlyPrice === null) return 'po dogovoru';
-    return `€${yearlyPrice}/leto`;
+    return `€${yearlyPrice} +DDV/leto`;
   }
   if (monthlyPrice === null) return 'po dogovoru';
-  return `€${monthlyPrice}/mesec`;
+  return `€${monthlyPrice} +DDV/mesec`;
 }
 
 // Get available add-ons based on plan and billing period
@@ -562,7 +562,7 @@ export default function Complete() {
                   <span className="font-medium">Setup fee</span>
                   <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
                 </div>
-                <span className="text-lg font-bold text-primary">€{setupFee}</span>
+                <span className="text-lg font-bold text-primary">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
               </div>
             </div>
 
@@ -579,7 +579,7 @@ export default function Complete() {
                   <div>
                     <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
                   </div>
-                  <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')}</span>
+                  <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
                 </div>
 
                 {/* Selected add-ons */}
@@ -599,7 +599,7 @@ export default function Complete() {
                       return (
                         <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
                           <span className="text-sm">{addonLabel}</span>
-                          <span className="text-sm font-medium">€{price}</span>
+                          <span className="text-sm font-medium">€{price} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
                         </div>
                       );
                     })}
@@ -611,6 +611,7 @@ export default function Complete() {
                   <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
                   <span className="text-lg font-bold text-primary">
                     €{totalSubscription.toFixed(2).replace('.', ',')}
+                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
                   </span>
                 </div>
@@ -635,7 +636,7 @@ export default function Complete() {
               className="w-full sm:w-auto"
             >
               <CreditCard className="h-4 w-4 mr-2" />
-              {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee})`}
+              {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
             </Button>
           </DialogFooter>
         </DialogContent>

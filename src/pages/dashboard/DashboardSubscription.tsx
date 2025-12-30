@@ -246,6 +246,7 @@ export default function DashboardSubscription() {
                 <p className="text-sm text-muted-foreground mb-1">Cena</p>
                 <span className="text-xl font-bold text-foreground">
                   €{currentPlanData ? (billingPeriod === 'monthly' ? currentPlanData.monthly : currentPlanData.yearly) : '0'}
+                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   <span className="text-sm font-normal text-muted-foreground">
                     /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                   </span>
@@ -358,6 +359,7 @@ export default function DashboardSubscription() {
                     </div>
                     <div className="text-2xl font-bold text-foreground mb-4">
                       €{price}
+                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
                         /{billingPeriod === 'monthly' ? 'mes' : 'leto'}
                       </span>
@@ -401,6 +403,7 @@ export default function DashboardSubscription() {
                     <div className="flex items-center justify-between mt-3">
                       <div className="text-xl font-bold text-foreground">
                         €{addon.price}
+                        <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                         <span className="text-sm font-normal text-muted-foreground">
                           /{addon.period}
                         </span>

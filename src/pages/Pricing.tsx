@@ -76,7 +76,7 @@ const comparisonFeatures = [
   { name: 'Support ticket kreiranje', basic: false, pro: true, enterprise: true },
   { name: 'Rezervacija sestankov', basic: false, pro: false, enterprise: true },
   { name: 'AI priporočila izdelkov', basic: false, pro: false, enterprise: true },
-  { name: 'Setup fee (enkratno)', basic: '€80', pro: '€140', enterprise: '€320' },
+  { name: 'Setup fee (enkratno)', basic: '€80 +DDV', pro: '€140 +DDV', enterprise: '€320 +DDV' },
 ];
 
 export default function Pricing() {
@@ -200,6 +200,7 @@ export default function Pricing() {
 
                 <div className="text-center mb-6">
                   <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
+                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   <span className="text-muted-foreground">{period}</span>
                 </div>
 
@@ -223,6 +224,7 @@ export default function Pricing() {
                   <div className="text-center py-2 px-3 rounded-lg bg-secondary/50 border border-border">
                     <span className="text-xs text-muted-foreground">Setup fee (enkratno): </span>
                     <span className="text-sm font-semibold text-foreground">€{plan.setupFee}</span>
+                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   </div>
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}
