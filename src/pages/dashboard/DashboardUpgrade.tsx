@@ -173,7 +173,6 @@ export default function DashboardUpgrade() {
   };
 
   const openUpgradeModal = () => {
-    // Set the display billing period to match widget's current period before opening
     if (widget?.billing_period) {
       setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
     }
@@ -195,18 +194,12 @@ export default function DashboardUpgrade() {
           <CardContent>
             {/* Billing period toggle */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex rounded-lg bg-muted p-1 relative">
-                {/* Animated background slider */}
-                <div 
-                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-background rounded-md shadow-sm transition-all duration-300 ease-out ${
-                    displayBillingPeriod === 'yearly' ? 'left-[calc(50%+2px)]' : 'left-1'
-                  }`}
-                />
+              <div className="inline-flex rounded-lg bg-muted p-1">
                 <button
                   onClick={() => setDisplayBillingPeriod('monthly')}
-                  className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                     displayBillingPeriod === 'monthly'
-                      ? 'text-foreground'
+                      ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -214,9 +207,9 @@ export default function DashboardUpgrade() {
                 </button>
                 <button
                   onClick={() => setDisplayBillingPeriod('yearly')}
-                  className={`relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center gap-2 ${
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
                     displayBillingPeriod === 'yearly'
-                      ? 'text-foreground'
+                      ? 'bg-background text-foreground shadow-sm'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -230,19 +223,24 @@ export default function DashboardUpgrade() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(planPrices).map(([planId, planData]) => {
-                // Check exact match: same plan AND same billing period
                 const isExactCurrentPlan = currentPlan === planId && billingPeriod === displayBillingPeriod;
                 const planIndex = planOrder.indexOf(planId);
-                const isUpgrade = planIndex > currentPlanIndex;
-                const isDowngrade = planIndex < currentPlanIndex;
-                // If same plan but different billing period, it's a billing change
-                const isBillingChange = currentPlan === planId && billingPeriod !== displayBillingPeriod;
+                const isHigherPlan = planIndex > currentPlanIndex;
+                const isLowerPlan = planIndex < currentPlanIndex;
+                const isSamePlanDifferentBilling = currentPlan === planId && billingPeriod !== displayBillingPeriod;
                 const price = displayBillingPeriod === 'monthly' ? planData.monthly : planData.yearly;
+                
+                const monthlyCost = planData.monthly * 12;
+                const yearlyCost = planData.yearly;
+                const savings = Math.round(monthlyCost - yearlyCost);
+                
+                const isUpgrade = isHigherPlan || (isSamePlanDifferentBilling && displayBillingPeriod === 'yearly');
+                const isDowngrade = isLowerPlan || (isSamePlanDifferentBilling && displayBillingPeriod === 'monthly');
                 
                 return (
                   <div
                     key={planId}
-                    className={`rounded-lg p-4 border transition-all duration-300 ${
+                    className={`rounded-lg p-4 border ${
                       isExactCurrentPlan 
                         ? 'border-primary bg-primary/10' 
                         : 'border-border bg-muted/30'
@@ -256,13 +254,20 @@ export default function DashboardUpgrade() {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-foreground mb-4 transition-all duration-300">
+                    <div className="text-2xl font-bold text-foreground mb-1">
                       €{price}
                       <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
                         /{displayBillingPeriod === 'monthly' ? 'mes' : 'leto'}
                       </span>
                     </div>
+                    {displayBillingPeriod === 'yearly' ? (
+                      <div className="text-xs text-green-500 font-medium mb-3">
+                        Prihranite €{savings}/leto
+                      </div>
+                    ) : (
+                      <div className="mb-3 h-4" />
+                    )}
                     {isExactCurrentPlan && (
                       <Button
                         className="w-full"
@@ -273,16 +278,7 @@ export default function DashboardUpgrade() {
                         Trenutni paket
                       </Button>
                     )}
-                    {isBillingChange && (
-                      <Button
-                        onClick={openUpgradeModal}
-                        className="w-full gap-2"
-                        size="sm"
-                      >
-                        Izberi
-                      </Button>
-                    )}
-                    {isUpgrade && !isBillingChange && (
+                    {!isExactCurrentPlan && isUpgrade && (
                       <Button
                         onClick={openUpgradeModal}
                         className="w-full gap-2"
@@ -292,7 +288,7 @@ export default function DashboardUpgrade() {
                         Nadgradi
                       </Button>
                     )}
-                    {isDowngrade && !isBillingChange && (
+                    {!isExactCurrentPlan && isDowngrade && (
                       <Button
                         onClick={openUpgradeModal}
                         className="w-full gap-2"
@@ -402,7 +398,7 @@ export default function DashboardUpgrade() {
       {/* Addon Modal */}
       <AddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addon={selectedAddon} />
 
-      {/* Upgrade Modal - same as locked features popup */}
+      {/* Upgrade Modal */}
       <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
 
       {/* Cancel Addon Dialog */}
