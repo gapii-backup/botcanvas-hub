@@ -43,6 +43,26 @@ const ALL_ADDONS = [
   { id: 'tickets', name: 'Support Ticketi' }
 ];
 
+// Status options
+const STATUS_OPTIONS = [
+  { value: 'new', label: 'Nov' },
+  { value: 'setup_pending', label: 'Setup Pending' },
+  { value: 'setup_paid', label: 'Setup Paid' },
+  { value: 'sub_pending', label: 'Subscription Pending' },
+  { value: 'sub_paid', label: 'Subscription Paid' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
+// Subscription status options
+const SUBSCRIPTION_STATUS_OPTIONS = [
+  { value: 'none', label: 'None' },
+  { value: 'active', label: 'Active' },
+  { value: 'cancelling', label: 'Cancelling' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'failed', label: 'Failed' },
+];
+
 export default function AdminWidgetEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -82,7 +102,10 @@ export default function AdminWidgetEdit() {
     
     setSaving(true);
     try {
-      await updateWidgetById(id, widget);
+      // Exclude stripe fields from update - they are managed by workflows
+      const { stripe_customer_id, stripe_subscription_id, ...updateData } = widget;
+      
+      await updateWidgetById(id, updateData);
       
       // Check if is_active was changed to TRUE
       if (widget.is_active && !originalIsActive) {
@@ -131,6 +154,24 @@ export default function AdminWidgetEdit() {
 
   const updateField = <K extends keyof AdminWidget>(field: K, value: AdminWidget[K]) => {
     setWidget(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  // Quick questions helpers
+  const questions = Array.isArray(widget?.quick_questions) ? widget.quick_questions : [];
+  
+  const updateQuestion = (index: number, value: string) => {
+    const newQuestions = [...questions];
+    newQuestions[index] = value;
+    updateField('quick_questions', newQuestions);
+  };
+
+  const removeQuestion = (index: number) => {
+    const newQuestions = questions.filter((_, i) => i !== index);
+    updateField('quick_questions', newQuestions);
+  };
+
+  const addQuestion = () => {
+    updateField('quick_questions', [...questions, '']);
   };
 
   if (loading) {
@@ -206,20 +247,6 @@ export default function AdminWidgetEdit() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Status</Label>
-                <Select value={widget.status} onValueChange={(v) => updateField('status', v)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="pending_payment">Pending Payment</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
                 <Label>Plan</Label>
                 <Select value={widget.plan || ''} onValueChange={(v) => updateField('plan', v)}>
                   <SelectTrigger>
@@ -232,6 +259,50 @@ export default function AdminWidgetEdit() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Billing Period</Label>
+                <Select value={widget.billing_period} onValueChange={(v) => updateField('billing_period', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={widget.status} onValueChange={(v) => updateField('status', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Subscription Status</Label>
+                <Select value={widget.subscription_status} onValueChange={(v) => updateField('subscription_status', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUBSCRIPTION_STATUS_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <Label>Aktiven</Label>
@@ -240,17 +311,29 @@ export default function AdminWidgetEdit() {
                 onCheckedChange={(v) => updateField('is_active', v)}
               />
             </div>
-            <div className="space-y-2">
-              <Label>API Key (readonly)</Label>
-              <Input value={widget.api_key || ''} readOnly className="bg-muted" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>API Key (readonly)</Label>
+                <Input value={widget.api_key || ''} readOnly className="bg-muted" />
+              </div>
+              <div className="space-y-2">
+                <Label>Table Name</Label>
+                <Input
+                  value={widget.table_name || ''}
+                  onChange={(e) => updateField('table_name', e.target.value)}
+                  placeholder="ime_tabele"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Table Name</Label>
-              <Input
-                value={widget.table_name || ''}
-                onChange={(e) => updateField('table_name', e.target.value)}
-                placeholder="ime_tabele"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Stripe Customer ID (readonly)</Label>
+                <Input value={widget.stripe_customer_id || ''} readOnly className="bg-muted" />
+              </div>
+              <div className="space-y-2">
+                <Label>Stripe Subscription ID (readonly)</Label>
+                <Input value={widget.stripe_subscription_id || ''} readOnly className="bg-muted" />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -526,21 +609,22 @@ export default function AdminWidgetEdit() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label>Quick Questions (JSON array)</Label>
-              <Textarea
-                value={JSON.stringify(widget.quick_questions || [], null, 2)}
-                onChange={(e) => {
-                  try {
-                    const parsed = JSON.parse(e.target.value);
-                    updateField('quick_questions', parsed);
-                  } catch {
-                    // Invalid JSON, don't update
-                  }
-                }}
-                rows={6}
-                placeholder='["Vprašanje 1", "Vprašanje 2"]'
-                className="font-mono text-sm"
-              />
+              <Label className="text-sm font-medium">Vprašanja za hitre predloge</Label>
+              {questions.map((q, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input 
+                    value={q} 
+                    onChange={(e) => updateQuestion(index, e.target.value)}
+                    placeholder="Vprašanje..."
+                  />
+                  <Button variant="destructive" size="icon" onClick={() => removeQuestion(index)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" onClick={addQuestion} className="w-full">
+                <Plus className="h-4 w-4 mr-2" /> Dodaj vprašanje
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -641,46 +725,6 @@ export default function AdminWidgetEdit() {
                   placeholder=""
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Features */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Funkcionalnosti</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Show Email Field</Label>
-              <Switch
-                checked={widget.show_email_field}
-                onCheckedChange={(v) => updateField('show_email_field', v)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label>Booking Enabled</Label>
-              <Switch
-                checked={widget.booking_enabled}
-                onCheckedChange={(v) => updateField('booking_enabled', v)}
-              />
-            </div>
-            {widget.booking_enabled && (
-              <div className="space-y-2">
-                <Label>Booking URL</Label>
-                <Input
-                  value={widget.booking_url || ''}
-                  onChange={(e) => updateField('booking_url', e.target.value)}
-                  placeholder="https://calendly.com/..."
-                />
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              <Label>Support Enabled</Label>
-              <Switch
-                checked={widget.support_enabled}
-                onCheckedChange={(v) => updateField('support_enabled', v)}
-              />
             </div>
           </CardContent>
         </Card>
