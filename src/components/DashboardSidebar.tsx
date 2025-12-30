@@ -37,6 +37,7 @@ import {
   TicketCheck,
   Save,
   Undo2,
+  Sparkles,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 
@@ -57,8 +58,9 @@ const navItems: NavItem[] = [
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
-  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription' },
+  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/nadgradi' },
+  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
 

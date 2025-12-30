@@ -32,6 +32,7 @@ import DashboardContacts from "./pages/dashboard/DashboardContacts";
 import DashboardSupport from "./pages/dashboard/DashboardSupport";
 import DashboardSettings from "./pages/dashboard/DashboardSettings";
 import DashboardSubscription from "./pages/dashboard/DashboardSubscription";
+import DashboardUpgrade from "./pages/dashboard/DashboardUpgrade";
 import DashboardHelp from "./pages/dashboard/DashboardHelp";
 
 const queryClient = new QueryClient();
@@ -144,6 +145,16 @@ const App = () => (
                 <ProtectedRoute>
                   <DashboardGuard>
                     <DashboardSubscription />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/nadgradi"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardUpgrade />
                   </DashboardGuard>
                 </ProtectedRoute>
               }
