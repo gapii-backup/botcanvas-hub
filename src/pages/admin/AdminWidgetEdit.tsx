@@ -376,6 +376,14 @@ export default function AdminWidgetEdit() {
                 placeholder="https://..."
               />
             </div>
+            <div className="space-y-2">
+              <Label>Booking URL</Label>
+              <Input
+                value={widget.booking_url || ''}
+                onChange={(e) => updateField('booking_url', e.target.value)}
+                placeholder="https://cal.com/..."
+              />
+            </div>
           </CardContent>
         </Card>
 
