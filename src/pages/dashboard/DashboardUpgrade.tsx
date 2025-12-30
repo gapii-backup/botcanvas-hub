@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
 import { AddonModal } from '@/components/dashboard/AddonModal';
+import { UpgradeModal } from '@/components/dashboard/UpgradeModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,8 +90,15 @@ export default function DashboardUpgrade() {
   const [selectedAddon, setSelectedAddon] = useState<string | null>(null);
   const [cancelAddonDialog, setCancelAddonDialog] = useState<string | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
-  const [planChangeDialog, setPlanChangeDialog] = useState<{ plan: string; isUpgrade: boolean } | null>(null);
-  const [planChangeLoading, setPlanChangeLoading] = useState(false);
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [displayBillingPeriod, setDisplayBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Initialize display billing period from widget
+  useState(() => {
+    if (widget?.billing_period) {
+      setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    }
+  });
 
   if (loading) {
     return (
@@ -159,58 +167,17 @@ export default function DashboardUpgrade() {
     }
   };
 
-  const handlePlanChange = async (newPlan: string) => {
-    if (!widget?.api_key || !user?.email) {
-      toast({
-        title: 'Napaka',
-        description: 'Manjkajo podatki za spremembo paketa.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setPlanChangeLoading(true);
-    try {
-      const response = await fetch('https://hub.botmotion.ai/webhook/change-plan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: widget.api_key,
-          new_plan: newPlan,
-          billing_period: billingPeriod,
-          user_email: user.email,
-          return_url: window.location.href
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
-      } else if (result.success) {
-        toast({
-          title: 'Paket spremenjen',
-          description: 'Vaš paket je bil uspešno spremenjen.',
-        });
-        await fetchWidget();
-      } else {
-        throw new Error(result.error || 'Napaka pri spremembi paketa');
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Napaka',
-        description: error.message || 'Nekaj je šlo narobe',
-        variant: 'destructive',
-      });
-    } finally {
-      setPlanChangeLoading(false);
-      setPlanChangeDialog(null);
-    }
-  };
-
   const openAddonModal = (addon: string) => {
     setSelectedAddon(addon);
     setAddonModalOpen(true);
+  };
+
+  const openUpgradeModal = () => {
+    // Set the display billing period to match widget's current period before opening
+    if (widget?.billing_period) {
+      setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    }
+    setUpgradeModalOpen(true);
   };
 
   return (
@@ -226,13 +193,42 @@ export default function DashboardUpgrade() {
             <CardDescription>Izberite paket ki najbolj ustreza vašim potrebam</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Billing period toggle */}
+            <div className="flex justify-center mb-6">
+              <div className="inline-flex rounded-lg bg-muted p-1">
+                <button
+                  onClick={() => setDisplayBillingPeriod('monthly')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    displayBillingPeriod === 'monthly'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Mesečno
+                </button>
+                <button
+                  onClick={() => setDisplayBillingPeriod('yearly')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                    displayBillingPeriod === 'yearly'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Letno
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
+                    -20%
+                  </Badge>
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(planPrices).map(([planId, planData]) => {
                 const isCurrentPlan = currentPlan === planId;
                 const planIndex = planOrder.indexOf(planId);
                 const isUpgrade = planIndex > currentPlanIndex;
                 const isDowngrade = planIndex < currentPlanIndex;
-                const price = billingPeriod === 'monthly' ? planData.monthly : planData.yearly;
+                const price = displayBillingPeriod === 'monthly' ? planData.monthly : planData.yearly;
                 
                 return (
                   <div
@@ -255,12 +251,22 @@ export default function DashboardUpgrade() {
                       €{price}
                       <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
-                        /{billingPeriod === 'monthly' ? 'mes' : 'leto'}
+                        /{displayBillingPeriod === 'monthly' ? 'mes' : 'leto'}
                       </span>
                     </div>
+                    {isCurrentPlan && (
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        variant="outline"
+                        disabled
+                      >
+                        Trenutni paket
+                      </Button>
+                    )}
                     {isUpgrade && (
                       <Button
-                        onClick={() => setPlanChangeDialog({ plan: planId, isUpgrade: true })}
+                        onClick={openUpgradeModal}
                         className="w-full gap-2"
                         size="sm"
                       >
@@ -270,7 +276,7 @@ export default function DashboardUpgrade() {
                     )}
                     {isDowngrade && (
                       <Button
-                        onClick={() => setPlanChangeDialog({ plan: planId, isUpgrade: false })}
+                        onClick={openUpgradeModal}
                         className="w-full gap-2"
                         size="sm"
                         variant="secondary"
@@ -378,6 +384,9 @@ export default function DashboardUpgrade() {
       {/* Addon Modal */}
       <AddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addon={selectedAddon} />
 
+      {/* Upgrade Modal - same as locked features popup */}
+      <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
+
       {/* Cancel Addon Dialog */}
       <AlertDialog open={!!cancelAddonDialog} onOpenChange={() => setCancelAddonDialog(null)}>
         <AlertDialogContent>
@@ -413,49 +422,6 @@ export default function DashboardUpgrade() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
               Prekliči addon
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Plan Change Dialog */}
-      <AlertDialog open={!!planChangeDialog} onOpenChange={() => setPlanChangeDialog(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {planChangeDialog?.isUpgrade ? 'Nadgradnja paketa' : 'Downgrade paketa'}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3" asChild>
-              <div>
-                <p>
-                  Ali ste prepričani da želite {planChangeDialog?.isUpgrade ? 'nadgraditi' : 'downgradati'} na paket{' '}
-                  <strong className="text-foreground">
-                    {planChangeDialog ? planPrices[planChangeDialog.plan as keyof typeof planPrices]?.name : ''}
-                  </strong>
-                  ?
-                </p>
-
-                {!planChangeDialog?.isUpgrade && (
-                  <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-3 text-sm">
-                    <p className="text-amber-400 font-semibold">⚠️ Pomembno:</p>
-                    <p className="text-amber-200 mt-1">
-                      Pri downgradu lahko izgubite dostop do nekaterih funkcionalnosti.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Prekliči</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => planChangeDialog && handlePlanChange(planChangeDialog.plan)}
-              disabled={planChangeLoading}
-            >
-              {planChangeLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {planChangeDialog?.isUpgrade ? 'Nadgradi' : 'Downgradi'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

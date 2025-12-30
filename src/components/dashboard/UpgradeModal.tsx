@@ -186,6 +186,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             <DialogDescription>Izberi paket ki ti najbolj ustreza</DialogDescription>
           </DialogHeader>
 
+          {/* Info text */}
+          <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
+            Ob spremembi paketa boste preusmerjeni na varno Stripe plačilno stran. Trenutna naročnina bo preklicana in nova aktivirana po uspešnem plačilu.
+          </div>
+
           {/* Billing period toggle */}
           <div className="flex justify-center mb-6">
             <div className="inline-flex rounded-lg bg-muted p-1">
