@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Loader2, Lock } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,12 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useWidget } from '@/hooks/useWidget';
@@ -90,12 +84,17 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isDowngrade, setIsDowngrade] = useState(false);
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const { widget, fetchWidget } = useWidget();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Billing period is locked to user's current billing period
-  const billingPeriod = (widget?.billing_period as 'monthly' | 'yearly') || 'monthly';
+  // Set initial billing period based on user's current subscription
+  useEffect(() => {
+    if (widget?.billing_period) {
+      setBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    }
+  }, [widget?.billing_period]);
 
   const currentPlanName = widget?.plan ? planPrices[widget.plan as keyof typeof planPrices]?.name || widget.plan : 'Brez paketa';
   const currentPlanIndex = widget?.plan ? planOrder.indexOf(widget.plan) : -1;
@@ -187,24 +186,34 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
             <DialogDescription>Izberi paket ki ti najbolj ustreza</DialogDescription>
           </DialogHeader>
 
-          {/* Locked billing period indicator */}
-          <TooltipProvider>
-            <div className="flex justify-center mb-6">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-4 py-2 cursor-not-allowed">
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {billingPeriod === 'monthly' ? 'Mesečno obračunavanje' : 'Letno obračunavanje'}
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Billing period ni mogoče spremeniti</p>
-                </TooltipContent>
-              </Tooltip>
+          {/* Billing period toggle */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex rounded-lg bg-muted p-1">
+              <button
+                onClick={() => setBillingPeriod('monthly')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  billingPeriod === 'monthly'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Mesečno
+              </button>
+              <button
+                onClick={() => setBillingPeriod('yearly')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                  billingPeriod === 'yearly'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Letno
+                <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
+                  -20%
+                </Badge>
+              </button>
             </div>
-          </TooltipProvider>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.map(plan => {
