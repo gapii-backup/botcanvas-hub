@@ -96,7 +96,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
           api_key: widget.api_key,
           addon: addon,
           billing_period: billingPeriod,
-          user_email: user?.email
+          user_email: user?.email,
+          cancel_url: window.location.href
         })
       });
 

@@ -120,7 +120,8 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
           api_key: widget.api_key,
           new_plan: selectedPlan,
           billing_period: billingPeriod,
-          email: user.email
+          email: user.email,
+          cancel_url: window.location.href
         })
       });
 
