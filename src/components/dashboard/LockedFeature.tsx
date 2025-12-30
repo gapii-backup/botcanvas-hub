@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { UpgradeModal } from './UpgradeModal';
+import { ProUpgradeModal } from './ProUpgradeModal';
 import { AddonModal } from './AddonModal';
 
 interface LockedFeatureProps {
@@ -47,7 +47,7 @@ export function LockedFeature({ feature, description, addon }: LockedFeatureProp
         </p>
       </div>
 
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
+      <ProUpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} />
       {addon && (
         <AddonModal open={showAddonModal} onOpenChange={setShowAddonModal} addon={addon} />
       )}
