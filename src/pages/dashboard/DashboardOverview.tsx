@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 
 const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = {
   basic: {
@@ -149,6 +150,16 @@ export default function DashboardOverview() {
   return (
     <DashboardLayout title="Dashboard" subtitle="Upravljajte in spremljajte vašega AI chatbota">
       <div className="space-y-8">
+        {/* Message Usage Card */}
+        {subscriptionStatus === 'active' && (
+          <MessageUsageCard
+            tableName={widget?.table_name}
+            billingPeriodStart={widget?.billing_period_start}
+            messagesLimit={widget?.messages_limit}
+            billingPeriod={widget?.billing_period}
+          />
+        )}
+
         {/* Subscription Activation Section */}
         {isActive && subscriptionStatus === 'none' && (
           <div className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20 rounded-xl p-6 animate-slide-up">
