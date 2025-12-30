@@ -30,13 +30,17 @@ import { ArrowLeft, Save, Trash2, Loader2, Plus, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-// Predefined addons that can be enabled
-const AVAILABLE_ADDONS = [
-  { id: 'contacts', label: 'Kontakti', description: 'Zbiranje email naslovov in pregled pogovorov' },
-  { id: 'analytics', label: 'Napredna analitika', description: 'Podrobnejša analiza pogovorov' },
-  { id: 'export', label: 'Izvoz podatkov', description: 'Izvoz pogovorov in kontaktov' },
-  { id: 'branding', label: 'Custom branding', description: 'Odstranitev BotMotion brandinga' },
-  { id: 'priority', label: 'Priority support', description: 'Prednostna podpora' },
+// All available addons
+const ALL_ADDONS = [
+  { id: 'capacity_1000', name: '+1.000 pogovorov' },
+  { id: 'capacity_2000', name: '+2.000 pogovorov' },
+  { id: 'capacity_5000', name: '+5.000 pogovorov' },
+  { id: 'capacity_10000', name: '+10.000 pogovorov' },
+  { id: 'multilanguage', name: 'Multilanguage' },
+  { id: 'booking', name: 'Rezervacija sestankov' },
+  { id: 'contacts', name: 'Zbiranje kontaktov' },
+  { id: 'product_ai', name: 'Product AI' },
+  { id: 'tickets', name: 'Support Ticketi' }
 ];
 
 export default function AdminWidgetEdit() {
@@ -544,107 +548,55 @@ export default function AdminWidgetEdit() {
         {/* Addons */}
         <Card>
           <CardHeader>
-            <CardTitle>Addons</CardTitle>
+            <CardTitle>Addoni</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Predefined Addons */}
-            <div className="space-y-3">
-              <Label>Razpoložljivi addoni</Label>
-              {AVAILABLE_ADDONS.map((addon) => {
-                const currentAddons = Array.isArray(widget.addons) ? widget.addons : [];
-                const isEnabled = currentAddons.includes(addon.id);
-                
-                return (
-                  <div 
-                    key={addon.id} 
-                    className="flex items-center justify-between p-3 rounded-lg border border-border"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">{addon.label}</p>
-                      <p className="text-sm text-muted-foreground">{addon.description}</p>
-                    </div>
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={(checked) => {
-                        const newAddons = checked
-                          ? [...currentAddons, addon.id]
-                          : currentAddons.filter(a => a !== addon.id);
-                        updateField('addons', newAddons);
-                      }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Custom Addons */}
-            <div className="space-y-3 pt-4 border-t border-border">
-              <Label>Aktivni addoni</Label>
-              <div className="flex flex-wrap gap-2">
-                {(Array.isArray(widget.addons) ? widget.addons : []).map((addon, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary"
-                    className="flex items-center gap-1 pr-1"
-                  >
-                    {addon}
-                    <button
-                      onClick={() => {
-                        const newAddons = (widget.addons || []).filter((_, i) => i !== index);
-                        updateField('addons', newAddons);
-                      }}
-                      className="ml-1 hover:bg-destructive/20 rounded p-0.5"
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Izberi aktivne addone</Label>
+              <div className="grid grid-cols-2 gap-3">
+                {ALL_ADDONS.map((addon) => {
+                  const currentAddons = Array.isArray(widget.addons) ? widget.addons : [];
+                  const isEnabled = currentAddons.includes(addon.id);
+                  
+                  return (
+                    <label
+                      key={addon.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
                     >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-                {(!widget.addons || widget.addons.length === 0) && (
-                  <p className="text-sm text-muted-foreground">Ni aktivnih addonov</p>
-                )}
+                      <input
+                        type="checkbox"
+                        checked={isEnabled}
+                        onChange={(e) => {
+                          const newAddons = e.target.checked
+                            ? [...currentAddons, addon.id]
+                            : currentAddons.filter(a => a !== addon.id);
+                          updateField('addons', newAddons);
+                        }}
+                        className="w-4 h-4 rounded border-border bg-background"
+                      />
+                      <span className="text-sm font-medium">{addon.name}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
-            {/* Add Custom Addon */}
-            <div className="space-y-2 pt-4 border-t border-border">
-              <Label>Dodaj custom addon</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="custom-addon-input"
-                  placeholder="Ime addona..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const input = e.target as HTMLInputElement;
-                      const value = input.value.trim();
-                      if (value) {
-                        const currentAddons = Array.isArray(widget.addons) ? widget.addons : [];
-                        if (!currentAddons.includes(value)) {
-                          updateField('addons', [...currentAddons, value]);
-                          input.value = '';
-                        }
-                      }
-                    }
-                  }}
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => {
-                    const input = document.getElementById('custom-addon-input') as HTMLInputElement;
-                    const value = input?.value.trim();
-                    if (value) {
-                      const currentAddons = Array.isArray(widget.addons) ? widget.addons : [];
-                      if (!currentAddons.includes(value)) {
-                        updateField('addons', [...currentAddons, value]);
-                        input.value = '';
-                      }
-                    }
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+            {/* Show active addons summary */}
+            {widget.addons && (widget.addons as string[]).length > 0 && (
+              <div className="pt-4 border-t border-border">
+                <Label className="text-sm text-muted-foreground">Aktivni addoni:</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {(widget.addons as string[]).map((addonId) => {
+                    const addon = ALL_ADDONS.find(a => a.id === addonId);
+                    return (
+                      <Badge key={addonId} variant="secondary">
+                        {addon?.name || addonId}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
