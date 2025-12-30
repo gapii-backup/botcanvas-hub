@@ -36,22 +36,39 @@ const planPrices = {
   enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
 };
 
-const addonPrices: Record<string, { monthly: number; yearly: number; name: string; description: string }> = {
-  contacts: {
-    monthly: 15,
-    yearly: 144,
-    name: 'Zbiranje kontaktov',
-    description: 'Avtomatsko zbirajte email naslove obiskovalcev'
-  },
-  tickets: {
-    monthly: 35,
-    yearly: 336,
-    name: 'Support Ticketi',
-    description: 'Prejemajte support tickete direktno iz chatbota'
-  }
+type AddonItem = { id: string; name: string; price: number; period: string };
+
+const allAddons: Record<string, AddonItem[]> = {
+  monthly: [
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
+    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
+    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec' },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec' },
+    { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec' },
+    { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
+  ],
+  yearly: [
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'leto' },
+    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto' },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto' },
+    { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto' },
+    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
+  ]
 };
 
-const allAddonKeys = Object.keys(addonPrices);
+const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem => {
+  const addons = allAddons[billingPeriod] || allAddons.monthly;
+  return addons.find(a => a.id === addonId) || { 
+    id: addonId, 
+    name: addonId, 
+    price: 0, 
+    period: billingPeriod === 'yearly' ? 'leto' : 'mesec' 
+  };
+};
 
 export default function DashboardSubscription() {
   const { widget, loading, fetchWidget } = useWidget();
@@ -77,9 +94,12 @@ export default function DashboardSubscription() {
 
   const currentPlan = widget?.plan || 'basic';
   const billingPeriod = widget?.billing_period || 'monthly';
-  const activeAddons = (widget?.addons as string[]) || [];
+  const activeAddonIds = (widget?.addons as string[]) || [];
   const currentPlanData = planPrices[currentPlan as keyof typeof planPrices];
-  const availableAddons = allAddonKeys.filter(addon => !activeAddons.includes(addon));
+  
+  const periodAddons = allAddons[billingPeriod] || allAddons.monthly;
+  const availableAddons = periodAddons.filter(addon => !activeAddonIds.includes(addon.id));
+  const activeAddons = activeAddonIds.map(addonId => getAddonDetails(addonId, billingPeriod));
 
   const handleManagePayment = async () => {
     if (!widget?.api_key) {
@@ -230,12 +250,12 @@ export default function DashboardSubscription() {
                 <p className="text-sm text-muted-foreground mb-3">Aktivni dodatki</p>
                 <div className="flex flex-wrap gap-2">
                   {activeAddons.map(addon => (
-                    <div key={addon} className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-lg px-3 py-2">
+                    <div key={addon.id} className="flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-lg px-3 py-2">
                       <span className="text-sm font-medium text-foreground">
-                        {addonPrices[addon]?.name || addon}
+                        {addon.name}
                       </span>
                       <button
-                        onClick={() => setCancelAddonDialog(addon)}
+                        onClick={() => setCancelAddonDialog(addon.id)}
                         className="text-muted-foreground hover:text-destructive transition-colors"
                         title="Prekliči addon"
                       >
@@ -357,36 +377,30 @@ export default function DashboardSubscription() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {availableAddons.map(addon => {
-                  const addonData = addonPrices[addon];
-                  const price = billingPeriod === 'monthly' ? addonData.monthly : addonData.yearly;
-                  
-                  return (
-                    <div
-                      key={addon}
-                      className="rounded-lg p-4 border border-border bg-muted/30"
-                    >
-                      <h3 className="font-bold text-foreground">{addonData.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-3">{addonData.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="text-xl font-bold text-foreground">
-                          €{price}
-                          <span className="text-sm font-normal text-muted-foreground">
-                            /{billingPeriod === 'monthly' ? 'mes' : 'leto'}
-                          </span>
-                        </div>
-                        <Button
-                          onClick={() => openAddonModal(addon)}
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Dodaj
-                        </Button>
+                {availableAddons.map(addon => (
+                  <div
+                    key={addon.id}
+                    className="rounded-lg p-4 border border-border bg-muted/30"
+                  >
+                    <h3 className="font-bold text-foreground">{addon.name}</h3>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="text-xl font-bold text-foreground">
+                        €{addon.price}
+                        <span className="text-sm font-normal text-muted-foreground">
+                          /{addon.period}
+                        </span>
                       </div>
+                      <Button
+                        onClick={() => openAddonModal(addon.id)}
+                        size="sm"
+                        variant="outline"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Dodaj
+                      </Button>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -407,7 +421,7 @@ export default function DashboardSubscription() {
                 <p>
                   Ali ste prepričani da želite preklicati addon{' '}
                   <strong className="text-foreground">
-                    {cancelAddonDialog ? addonPrices[cancelAddonDialog]?.name : ''}
+                    {cancelAddonDialog ? getAddonDetails(cancelAddonDialog, billingPeriod).name : ''}
                   </strong>
                   ?
                 </p>
