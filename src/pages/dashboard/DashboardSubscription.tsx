@@ -36,7 +36,7 @@ const planPrices = {
   enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
 };
 
-type AddonItem = { id: string; name: string; price: number; period: string };
+type AddonItem = { id: string; name: string; price: number; period: string; proOnly?: boolean };
 
 const allAddons: Record<string, AddonItem[]> = {
   monthly: [
@@ -45,7 +45,7 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
     { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
     { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec' },
     { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec' },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
@@ -53,7 +53,7 @@ const allAddons: Record<string, AddonItem[]> = {
   yearly: [
     { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'leto' },
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto' },
     { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto' },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
@@ -68,6 +68,19 @@ const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem => {
     price: 0, 
     period: billingPeriod === 'yearly' ? 'leto' : 'mesec' 
   };
+};
+
+const getFilteredAddons = (billingPeriod: string, plan: string, activeAddonIds: string[]): AddonItem[] => {
+  const periodAddons = allAddons[billingPeriod] || allAddons.monthly;
+  const showBooking = plan === 'pro' || plan === 'enterprise';
+  
+  return periodAddons.filter(addon => {
+    // Already active, don't show in available
+    if (activeAddonIds.includes(addon.id)) return false;
+    // Booking only for pro/enterprise
+    if (addon.proOnly && !showBooking) return false;
+    return true;
+  });
 };
 
 export default function DashboardSubscription() {
@@ -97,8 +110,7 @@ export default function DashboardSubscription() {
   const activeAddonIds = (widget?.addons as string[]) || [];
   const currentPlanData = planPrices[currentPlan as keyof typeof planPrices];
   
-  const periodAddons = allAddons[billingPeriod] || allAddons.monthly;
-  const availableAddons = periodAddons.filter(addon => !activeAddonIds.includes(addon.id));
+  const availableAddons = getFilteredAddons(billingPeriod, currentPlan, activeAddonIds);
   const activeAddons = activeAddonIds.map(addonId => getAddonDetails(addonId, billingPeriod));
 
   const handleManagePayment = async () => {

@@ -42,39 +42,56 @@ const getTriggerIconPath = (iconName: string): string => {
   return paths[iconName] || paths['MessageCircle'];
 };
 
+// Addon item type
+type AddonItem = {
+  id: string;
+  label: string;
+  yearlyLabel?: string;
+  monthlyPrice: number | null;
+  yearlyPrice?: number | null;
+  proOnly?: boolean;
+  monthlyOnly?: boolean;
+};
+
+type AddonCategory = {
+  title: string;
+  icon: any;
+  items: AddonItem[];
+};
+
 // Define all add-ons with monthly prices in euros (removed CRM & INTEGRACIJE)
-const ALL_ADDONS = {
-  capacity: {
-    title: '📊 DODATNE KAPACITETE',
-    icon: MessageCircle,
-    items: [
-      { id: 'capacity_1000', label: '+1.000 pogovorov', yearlyLabel: '+12.000 pogovorov', monthlyPrice: 12 },
-      { id: 'capacity_2000', label: '+2.000 pogovorov', yearlyLabel: '+24.000 pogovorov', monthlyPrice: 22 },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', yearlyLabel: '+60.000 pogovorov', monthlyPrice: 52 },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+120.000 pogovorov', monthlyPrice: 99 },
-    ],
-  },
+const ALL_ADDONS: Record<string, AddonCategory> = {
   languages: {
     title: '🌍 JEZIKI',
     icon: Globe,
     items: [
-      { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30 },
+      { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30, yearlyPrice: 288 },
     ],
   },
   sales: {
     title: '💼 SALES & LEAD GENERATION',
     icon: Users,
     items: [
-      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35 },
-      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 15 },
-      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 50 },
+      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336, proOnly: true },
+      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 15, yearlyPrice: 144 },
+      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 50, yearlyPrice: 480 },
     ],
   },
   support: {
     title: '🎧 SUPPORT & CUSTOMER SERVICE',
     icon: Headphones,
     items: [
-      { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35 },
+      { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35, yearlyPrice: 336 },
+    ],
+  },
+  capacity: {
+    title: '📊 DODATNE KAPACITETE',
+    icon: MessageCircle,
+    items: [
+      { id: 'capacity_1000', label: '+1.000 pogovorov', yearlyLabel: '+12.000 pogovorov', monthlyPrice: 12, yearlyPrice: 99, monthlyOnly: true },
+      { id: 'capacity_2000', label: '+2.000 pogovorov', yearlyLabel: '+24.000 pogovorov', monthlyPrice: 22, yearlyPrice: 99, monthlyOnly: true },
+      { id: 'capacity_5000', label: '+5.000 pogovorov', yearlyLabel: '+60.000 pogovorov', monthlyPrice: 52, yearlyPrice: 99, monthlyOnly: true },
+      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+120.000 pogovorov', monthlyPrice: 99, yearlyPrice: 99 },
     ],
   },
 };
@@ -93,30 +110,14 @@ const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; 
 };
 
 // Calculate price based on billing period
-function formatPrice(monthlyPrice: number | null, isYearly: boolean): string {
-  if (monthlyPrice === null) return 'po dogovoru';
-  
+function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, isYearly: boolean): string {
   if (isYearly) {
-    // 20% discount for yearly, show yearly total price
-    const yearlyPrice = Math.round(monthlyPrice * 12 * 0.8);
+    if (yearlyPrice === null) return 'po dogovoru';
     return `€${yearlyPrice}/leto`;
   }
+  if (monthlyPrice === null) return 'po dogovoru';
   return `€${monthlyPrice}/mesec`;
 }
-
-// Addon item type
-type AddonItem = {
-  id: string;
-  label: string;
-  yearlyLabel?: string;
-  monthlyPrice: number | null;
-};
-
-type AddonCategory = {
-  title: string;
-  icon: any;
-  items: AddonItem[];
-};
 
 // Get available add-ons based on plan and billing period
 function getAvailableAddons(plan: string | null, isYearly: boolean): Record<string, AddonCategory> {
@@ -128,16 +129,24 @@ function getAvailableAddons(plan: string | null, isYearly: boolean): Record<stri
 
   const planKey = (plan || 'basic').toLowerCase();
   const excludedIds = excluded[planKey] || [];
+  const showBooking = planKey === 'pro' || planKey === 'enterprise';
 
   const filtered: Record<string, AddonCategory> = {};
 
   Object.entries(ALL_ADDONS).forEach(([key, category]) => {
-    // Skip capacity section for yearly billing
-    if (key === 'capacity' && isYearly) {
-      return;
-    }
+    let filteredItems = category.items.filter(item => {
+      // Check excluded by plan
+      if (excludedIds.includes(item.id)) return false;
+      
+      // Booking only for pro/enterprise
+      if (item.proOnly && !showBooking) return false;
+      
+      // For yearly billing, exclude monthly-only capacity items
+      if (isYearly && item.monthlyOnly) return false;
+      
+      return true;
+    });
     
-    const filteredItems = category.items.filter(item => !excludedIds.includes(item.id));
     if (filteredItems.length > 0) {
       filtered[key] = {
         ...category,
@@ -198,11 +207,11 @@ export default function Complete() {
   const getAddonPrice = (addonId: string): number => {
     for (const category of Object.values(ALL_ADDONS)) {
       const addon = category.items.find(item => item.id === addonId);
-      if (addon && addon.monthlyPrice) {
-        if (isYearly) {
-          return Math.round(addon.monthlyPrice * 12 * 0.8);
+      if (addon) {
+        if (isYearly && addon.yearlyPrice) {
+          return addon.yearlyPrice;
         }
-        return addon.monthlyPrice;
+        return addon.monthlyPrice || 0;
       }
     }
     return 0;
@@ -416,7 +425,7 @@ export default function Complete() {
                                 </span>
                               </div>
                               <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                {formatPrice(item.monthlyPrice, isYearly)}
+                                {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly)}
                               </span>
                             </div>
                           );
