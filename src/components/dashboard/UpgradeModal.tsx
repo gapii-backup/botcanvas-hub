@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,6 +18,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,7 +40,21 @@ const planPrices = {
   enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
 };
 
+const planOrder = ['basic', 'pro', 'enterprise'];
+
 const plans = [
+  {
+    name: 'Basic',
+    id: 'basic',
+    features: [
+      '1.000 pogovorov/mesec',
+      '1 chatbot',
+      'Osnovna prilagoditev',
+      'Email podpora',
+      '30 dni zgodovina',
+      'Osnovni analytics'
+    ]
+  },
   {
     name: 'Pro',
     id: 'pro',
@@ -68,30 +89,31 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [isDowngrade, setIsDowngrade] = useState(false);
   const { widget, fetchWidget } = useWidget();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Set initial billing period based on widget's current subscription
-  useEffect(() => {
-    if (widget?.billing_period) {
-      setBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
-    }
-  }, [widget?.billing_period]);
+  // Billing period is locked to user's current billing period
+  const billingPeriod = (widget?.billing_period as 'monthly' | 'yearly') || 'monthly';
 
   const currentPlanName = widget?.plan ? planPrices[widget.plan as keyof typeof planPrices]?.name || widget.plan : 'Brez paketa';
+  const currentPlanIndex = widget?.plan ? planOrder.indexOf(widget.plan) : -1;
 
   const handleSelectPlan = (planId: string) => {
+    const selectedIndex = planOrder.indexOf(planId);
+    const isDowngrading = selectedIndex < currentPlanIndex;
+    
     setSelectedPlan(planId);
+    setIsDowngrade(isDowngrading);
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmUpgrade = async () => {
+  const handleConfirmChange = async () => {
     if (!widget?.api_key || !user?.email || !selectedPlan) {
       toast({
         title: 'Napaka',
-        description: 'Manjkajo podatki za nadgradnjo.',
+        description: 'Manjkajo podatki za spremembo paketa.',
         variant: 'destructive',
       });
       return;
@@ -114,14 +136,13 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
 
       const result = await response.json();
       
-      // Upgrade VEDNO redirecta na Stripe Checkout
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else {
         throw new Error(result.error || 'Napaka pri ustvarjanju plačila');
       }
     } catch (error) {
-      console.error('Upgrade error:', error);
+      console.error('Plan change error:', error);
       toast({
         title: 'Napaka',
         description: error instanceof Error ? error.message : 'Nekaj je šlo narobe. Prosimo, poskusite znova.',
@@ -130,7 +151,6 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
       setLoading(false);
       setSelectedPlan(null);
     }
-    // NE resetiramo loading state ker gremo na Stripe
   };
 
   const getSelectedPlanPrice = () => {
@@ -144,67 +164,96 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
     return planPrices[selectedPlan as keyof typeof planPrices]?.name || selectedPlan;
   };
 
+  const getPlanButtonState = (planId: string) => {
+    const planIndex = planOrder.indexOf(planId);
+    
+    if (planId === widget?.plan) {
+      return { label: 'Trenutni paket', variant: 'outline' as const, disabled: true };
+    }
+    
+    if (planIndex > currentPlanIndex) {
+      return { label: `Nadgradi na ${planPrices[planId as keyof typeof planPrices].name}`, variant: 'default' as const, disabled: false };
+    }
+    
+    return { label: `Downgradi na ${planPrices[planId as keyof typeof planPrices].name}`, variant: 'secondary' as const, disabled: false };
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nadgradi paket</DialogTitle>
+            <DialogTitle>Spremeni paket</DialogTitle>
             <DialogDescription>Izberi paket ki ti najbolj ustreza</DialogDescription>
           </DialogHeader>
 
-          <div className="flex gap-2 justify-center mb-6">
-            <Button
-              variant={billingPeriod === 'monthly' ? 'default' : 'outline'}
-              onClick={() => setBillingPeriod('monthly')}
-              disabled={loading}
-            >
-              Mesečno
-            </Button>
-            <Button
-              variant={billingPeriod === 'yearly' ? 'default' : 'outline'}
-              onClick={() => setBillingPeriod('yearly')}
-              disabled={loading}
-            >
-              Letno (20% popust)
-            </Button>
-          </div>
+          {/* Locked billing period indicator */}
+          <TooltipProvider>
+            <div className="flex justify-center mb-6">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-4 py-2 cursor-not-allowed">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      {billingPeriod === 'monthly' ? 'Mesečno obračunavanje' : 'Letno obračunavanje'}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Billing period ni mogoče spremeniti</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {plans.map(plan => {
               const prices = planPrices[plan.id as keyof typeof planPrices];
               const price = billingPeriod === 'monthly' ? prices.monthly : prices.yearly;
+              const buttonState = getPlanButtonState(plan.id);
+              const isCurrentPlan = widget?.plan === plan.id;
               
               return (
                 <div
                   key={plan.id}
-                  className="border border-border rounded-xl p-6 bg-card"
+                  className={`border rounded-xl p-5 bg-card relative ${
+                    isCurrentPlan ? 'border-primary ring-2 ring-primary/20' : 'border-border'
+                  }`}
                 >
-                  <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                  <div className="text-3xl font-bold my-4 text-foreground">
+                  {isCurrentPlan && (
+                    <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
+                      Trenutni paket
+                    </Badge>
+                  )}
+                  
+                  <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
+                  <div className="text-2xl font-bold my-3 text-foreground">
                     €{price}
                     <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
                   </div>
-                  <ul className="space-y-2 mb-6">
+                  
+                  <ul className="space-y-1.5 mb-4">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-success flex-shrink-0" />
-                        <span className="text-sm text-foreground">{f}</span>
+                      <li key={f} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground">{f}</span>
                       </li>
                     ))}
                   </ul>
+                  
                   <Button
                     className="w-full"
+                    variant={buttonState.variant}
                     onClick={() => handleSelectPlan(plan.id)}
-                    disabled={loading || widget?.plan === plan.id}
+                    disabled={loading || buttonState.disabled}
                   >
                     {loading && selectedPlan === plan.id ? (
                       <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     ) : null}
-                    {widget?.plan === plan.id ? 'Trenutni paket' : `Nadgradi na ${plan.name}`}
+                    {buttonState.label}
                   </Button>
                 </div>
               );
@@ -213,7 +262,8 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      {/* Upgrade confirmation dialog */}
+      <AlertDialog open={showConfirmDialog && !isDowngrade} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Potrditev nadgradnje paketa</AlertDialogTitle>
@@ -222,23 +272,23 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                 <p>
                   Želite nadgraditi na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
                 </p>
-                <div className="bg-slate-800 rounded-lg p-4 space-y-2 text-sm">
+                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Trenutni paket:</span>
                     <span>{currentPlanName}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Nov paket:</span>
-                    <span className="font-semibold text-green-400">{getSelectedPlanName()}</span>
+                    <span className="font-semibold text-green-500">{getSelectedPlanName()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Nova cena:</span>
                     <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
-                <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-3 text-sm">
-                  <p className="text-amber-400 font-semibold mb-1">⚠️ Pomembno:</p>
-                  <ul className="text-amber-200 space-y-1 list-disc list-inside">
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
+                  <p className="text-amber-500 font-semibold mb-1">⚠️ Pomembno:</p>
+                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Vaša trenutna naročnina bo preklicana</li>
                     <li>Vsi aktivni addoni bodo odstranjeni</li>
                     <li>Nov paket bo aktiviran v roku 72 ur</li>
@@ -251,12 +301,62 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleConfirmUpgrade}
+              onClick={handleConfirmChange}
               disabled={loading}
               className="bg-green-600 hover:bg-green-700"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Potrjujem nadgradnjo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Downgrade confirmation dialog */}
+      <AlertDialog open={showConfirmDialog && isDowngrade} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potrditev downgrada paketa</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3" asChild>
+              <div>
+                <p>
+                  Želite downgradi na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Trenutni paket:</span>
+                    <span>{currentPlanName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Nov paket:</span>
+                    <span className="font-semibold text-orange-500">{getSelectedPlanName()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Nova cena:</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                  </div>
+                </div>
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
+                  <p className="text-destructive font-semibold mb-1">⚠️ Opozorilo:</p>
+                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
+                    <li>Vsi aktivni addoni bodo odstranjeni</li>
+                    <li>Sprememba bo aktivirana v roku 72 ur</li>
+                    <li>Sredstev ne vračamo</li>
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmChange}
+              disabled={loading}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Potrjujem downgrade
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
