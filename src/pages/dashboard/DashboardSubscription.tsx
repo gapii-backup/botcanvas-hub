@@ -121,7 +121,11 @@ export default function DashboardSubscription() {
     const today = new Date();
     const daysToAdd = billingPeriod === 'monthly' ? 30 : 365;
     const nextDate = new Date(today.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-    return nextDate.toLocaleDateString('sl-SI');
+    // Use UTC to avoid timezone offset issues
+    const day = nextDate.getUTCDate();
+    const month = nextDate.getUTCMonth() + 1;
+    const year = nextDate.getUTCFullYear();
+    return `${day}. ${month}. ${year}`;
   };
 
   return (
