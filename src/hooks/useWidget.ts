@@ -56,6 +56,10 @@ export interface Widget {
   
   // Subscription
   subscription_status: string;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  billing_period_start: string | null;
+  messages_limit: number | null;
 }
 
 export function useWidget() {

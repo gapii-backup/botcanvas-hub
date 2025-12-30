@@ -199,6 +199,7 @@ export type Database = {
           addons: Json | null
           api_key: string | null
           billing_period: string
+          billing_period_start: string | null
           booking_enabled: boolean
           booking_url: string | null
           bot_avatar: string | null
@@ -220,6 +221,7 @@ export type Database = {
           id: string
           is_active: boolean
           lead_webhook_url: string | null
+          messages_limit: number | null
           mode: string
           plan: string | null
           position: string
@@ -248,6 +250,7 @@ export type Database = {
           addons?: Json | null
           api_key?: string | null
           billing_period?: string
+          billing_period_start?: string | null
           booking_enabled?: boolean
           booking_url?: string | null
           bot_avatar?: string | null
@@ -269,6 +272,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           lead_webhook_url?: string | null
+          messages_limit?: number | null
           mode?: string
           plan?: string | null
           position?: string
@@ -297,6 +301,7 @@ export type Database = {
           addons?: Json | null
           api_key?: string | null
           billing_period?: string
+          billing_period_start?: string | null
           booking_enabled?: boolean
           booking_url?: string | null
           bot_avatar?: string | null
@@ -318,6 +323,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           lead_webhook_url?: string | null
+          messages_limit?: number | null
           mode?: string
           plan?: string | null
           position?: string
