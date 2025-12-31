@@ -245,6 +245,7 @@ export type Database = {
           home_title: string | null
           id: string
           is_active: boolean
+          is_partner: boolean
           lead_webhook_url: string | null
           messages_limit: number | null
           mode: string
@@ -252,6 +253,7 @@ export type Database = {
           position: string
           primary_color: string | null
           quick_questions: Json | null
+          retention_days: number
           setup_fee_basic_paid: boolean
           setup_fee_enterprise_paid: boolean
           setup_fee_pro_paid: boolean
@@ -304,6 +306,7 @@ export type Database = {
           home_title?: string | null
           id?: string
           is_active?: boolean
+          is_partner?: boolean
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
@@ -311,6 +314,7 @@ export type Database = {
           position?: string
           primary_color?: string | null
           quick_questions?: Json | null
+          retention_days?: number
           setup_fee_basic_paid?: boolean
           setup_fee_enterprise_paid?: boolean
           setup_fee_pro_paid?: boolean
@@ -363,6 +367,7 @@ export type Database = {
           home_title?: string | null
           id?: string
           is_active?: boolean
+          is_partner?: boolean
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
@@ -370,6 +375,7 @@ export type Database = {
           position?: string
           primary_color?: string | null
           quick_questions?: Json | null
+          retention_days?: number
           setup_fee_basic_paid?: boolean
           setup_fee_enterprise_paid?: boolean
           setup_fee_pro_paid?: boolean
