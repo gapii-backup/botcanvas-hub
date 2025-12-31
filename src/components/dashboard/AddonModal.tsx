@@ -109,7 +109,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
           description: result.message || 'Addon je bil uspešno dodan k vaši naročnini.'
         });
         onOpenChange(false);
-        await fetchWidget();
+        // Refresh the page to reload all data
+        window.location.reload();
       } else {
         throw new Error(result.error || 'Napaka pri dodajanju addona');
       }
