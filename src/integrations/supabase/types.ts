@@ -209,6 +209,7 @@ export type Database = {
           bot_name: string | null
           bubble_text: string | null
           created_at: string
+          custom_capacity: number
           edge_trigger_text: string | null
           footer_link_text: string | null
           footer_link_url: string | null
@@ -260,6 +261,7 @@ export type Database = {
           bot_name?: string | null
           bubble_text?: string | null
           created_at?: string
+          custom_capacity?: number
           edge_trigger_text?: string | null
           footer_link_text?: string | null
           footer_link_url?: string | null
@@ -311,6 +313,7 @@ export type Database = {
           bot_name?: string | null
           bubble_text?: string | null
           created_at?: string
+          custom_capacity?: number
           edge_trigger_text?: string | null
           footer_link_text?: string | null
           footer_link_url?: string | null

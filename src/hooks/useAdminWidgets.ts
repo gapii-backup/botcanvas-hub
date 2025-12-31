@@ -69,6 +69,10 @@ export interface AdminWidget {
   subscription_status: string;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  
+  // Capacity
+  messages_limit: number | null;
+  custom_capacity: number;
 }
 
 export function useAdminWidgets() {
