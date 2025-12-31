@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface Widget {
   id: string;
@@ -65,6 +66,9 @@ export interface Widget {
   setup_fee_basic_paid: boolean;
   setup_fee_pro_paid: boolean;
   setup_fee_enterprise_paid: boolean;
+  
+  // Support tickets
+  support_tickets: Json | null;
 }
 
 export function useWidget() {
