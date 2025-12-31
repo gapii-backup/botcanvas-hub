@@ -97,7 +97,6 @@ export type Database = {
       }
       support_tickets: {
         Row: {
-          admin_response: string | null
           chat_history: string | null
           created_at: string
           email: string
@@ -105,18 +104,13 @@ export type Database = {
           message: string
           name: string
           phone: string | null
-          priority: string
-          responded_at: string | null
           session_id: string
           status: string
-          subject: string | null
           table_name: string
           ticket_id: string
           updated_at: string
-          widget_id: string | null
         }
         Insert: {
-          admin_response?: string | null
           chat_history?: string | null
           created_at?: string
           email: string
@@ -124,18 +118,13 @@ export type Database = {
           message: string
           name: string
           phone?: string | null
-          priority?: string
-          responded_at?: string | null
           session_id: string
           status?: string
-          subject?: string | null
           table_name: string
           ticket_id: string
           updated_at?: string
-          widget_id?: string | null
         }
         Update: {
-          admin_response?: string | null
           chat_history?: string | null
           created_at?: string
           email?: string
@@ -143,25 +132,13 @@ export type Database = {
           message?: string
           name?: string
           phone?: string | null
-          priority?: string
-          responded_at?: string | null
           session_id?: string
           status?: string
-          subject?: string | null
           table_name?: string
           ticket_id?: string
           updated_at?: string
-          widget_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "support_tickets_widget_id_fkey"
-            columns: ["widget_id"]
-            isOneToOne: false
-            referencedRelation: "widgets"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_bots: {
         Row: {

@@ -23,7 +23,6 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWidgets from "./pages/admin/AdminWidgets";
 import AdminWidgetEdit from "./pages/admin/AdminWidgetEdit";
 import AdminPayments from "./pages/admin/AdminPayments";
-import AdminTickets from "./pages/admin/AdminTickets";
 
 // Dashboard pages
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
@@ -212,14 +211,6 @@ const App = () => (
               element={
                 <AdminGuard>
                   <AdminPayments />
-                </AdminGuard>
-              }
-            />
-            <Route
-              path="/admin/tickets"
-              element={
-                <AdminGuard>
-                  <AdminTickets />
                 </AdminGuard>
               }
             />

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, CreditCard, LogOut, Shield, TicketCheck } from 'lucide-react';
+import { LayoutDashboard, Package, CreditCard, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,6 @@ const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Widgets', href: '/admin/widgets', icon: Package },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
-  { label: 'Tickets', href: '/admin/tickets', icon: TicketCheck },
 ];
 
 export function AdminLayout({ children }: AdminLayoutProps) {
