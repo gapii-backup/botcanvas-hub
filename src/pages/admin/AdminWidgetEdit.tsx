@@ -32,16 +32,22 @@ import { toast } from 'sonner';
 
 // All available addons
 const ALL_ADDONS = [
-  { id: 'capacity_1000', name: '+1.000 pogovorov' },
-  { id: 'capacity_2000', name: '+2.000 pogovorov' },
-  { id: 'capacity_5000', name: '+5.000 pogovorov' },
-  { id: 'capacity_10000', name: '+10.000 pogovorov' },
-  { id: 'multilanguage', name: 'Multilanguage' },
-  { id: 'booking', name: 'Rezervacija sestankov' },
-  { id: 'contacts', name: 'Zbiranje kontaktov' },
-  { id: 'product_ai', name: 'Product AI' },
-  { id: 'tickets', name: 'Support Ticketi' }
+  { id: 'capacity_1000', name: '+1.000 pogovorov', capacityValue: 1000 },
+  { id: 'capacity_2000', name: '+2.000 pogovorov', capacityValue: 2000 },
+  { id: 'capacity_5000', name: '+5.000 pogovorov', capacityValue: 5000 },
+  { id: 'capacity_10000', name: '+10.000 pogovorov', capacityValue: 10000 },
+  { id: 'multilanguage', name: 'Multilanguage', capacityValue: 0 },
+  { id: 'booking', name: 'Rezervacija sestankov', capacityValue: 0 },
+  { id: 'contacts', name: 'Zbiranje kontaktov', capacityValue: 0 },
+  { id: 'product_ai', name: 'Product AI', capacityValue: 0 },
+  { id: 'tickets', name: 'Support Ticketi', capacityValue: 0 }
 ];
+
+// Helper to get capacity value for an addon
+const getAddonCapacity = (addonId: string): number => {
+  const addon = ALL_ADDONS.find(a => a.id === addonId);
+  return addon?.capacityValue || 0;
+};
 
 // Status options
 const STATUS_OPTIONS = [
@@ -658,11 +664,57 @@ export default function AdminWidgetEdit() {
                       <input
                         type="checkbox"
                         checked={isEnabled}
-                        onChange={(e) => {
-                          const newAddons = e.target.checked
-                            ? [...currentAddons, addon.id]
-                            : currentAddons.filter(a => a !== addon.id);
-                          updateField('addons', newAddons);
+                        onChange={async (e) => {
+                          const capacityValue = getAddonCapacity(addon.id);
+                          const currentMessagesLimit = widget.messages_limit || 0;
+                          
+                          if (e.target.checked) {
+                            // ENABLE addon
+                            const newAddons = [...currentAddons, addon.id];
+                            const newMessagesLimit = currentMessagesLimit + capacityValue;
+                            
+                            try {
+                              await updateWidgetById(id!, {
+                                addons: newAddons,
+                                messages_limit: newMessagesLimit,
+                                is_active: true,
+                                grace_ends_at: null,
+                                warning_80_sent: false,
+                                warning_100_sent: false
+                              });
+                              setWidget(prev => prev ? {
+                                ...prev,
+                                addons: newAddons,
+                                messages_limit: newMessagesLimit,
+                                is_active: true,
+                                grace_ends_at: null,
+                                warning_80_sent: false,
+                                warning_100_sent: false
+                              } : null);
+                              toast.success(`Addon ${addon.name} vklopljen`);
+                            } catch (error) {
+                              toast.error('Napaka pri vklopu addona');
+                            }
+                          } else {
+                            // DISABLE addon
+                            const newAddons = currentAddons.filter(a => a !== addon.id);
+                            const newMessagesLimit = Math.max(0, currentMessagesLimit - capacityValue);
+                            
+                            try {
+                              await updateWidgetById(id!, {
+                                addons: newAddons,
+                                messages_limit: newMessagesLimit
+                              });
+                              setWidget(prev => prev ? {
+                                ...prev,
+                                addons: newAddons,
+                                messages_limit: newMessagesLimit
+                              } : null);
+                              toast.success(`Addon ${addon.name} izklopljen`);
+                            } catch (error) {
+                              toast.error('Napaka pri izklopu addona');
+                            }
+                          }
                         }}
                         className="w-4 h-4 rounded border-border bg-background"
                       />

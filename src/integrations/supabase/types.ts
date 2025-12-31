@@ -215,6 +215,7 @@ export type Database = {
           footer_link_url: string | null
           footer_prefix: string | null
           footer_suffix: string | null
+          grace_ends_at: string | null
           header_style: string
           health_check_url: string | null
           home_subtitle_line2: string | null
@@ -243,6 +244,8 @@ export type Database = {
           user_email: string
           user_id: string
           vertical_offset: number
+          warning_100_sent: boolean
+          warning_80_sent: boolean
           webhook_url: string | null
           website_url: string | null
           welcome_message: string | null
@@ -267,6 +270,7 @@ export type Database = {
           footer_link_url?: string | null
           footer_prefix?: string | null
           footer_suffix?: string | null
+          grace_ends_at?: string | null
           header_style?: string
           health_check_url?: string | null
           home_subtitle_line2?: string | null
@@ -295,6 +299,8 @@ export type Database = {
           user_email: string
           user_id: string
           vertical_offset?: number
+          warning_100_sent?: boolean
+          warning_80_sent?: boolean
           webhook_url?: string | null
           website_url?: string | null
           welcome_message?: string | null
@@ -319,6 +325,7 @@ export type Database = {
           footer_link_url?: string | null
           footer_prefix?: string | null
           footer_suffix?: string | null
+          grace_ends_at?: string | null
           header_style?: string
           health_check_url?: string | null
           home_subtitle_line2?: string | null
@@ -347,6 +354,8 @@ export type Database = {
           user_email?: string
           user_id?: string
           vertical_offset?: number
+          warning_100_sent?: boolean
+          warning_80_sent?: boolean
           webhook_url?: string | null
           website_url?: string | null
           welcome_message?: string | null
