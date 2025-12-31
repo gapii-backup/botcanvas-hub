@@ -60,6 +60,11 @@ export interface Widget {
   stripe_subscription_id: string | null;
   billing_period_start: string | null;
   messages_limit: number | null;
+  
+  // Setup fee tracking
+  setup_fee_basic_paid: boolean;
+  setup_fee_pro_paid: boolean;
+  setup_fee_enterprise_paid: boolean;
 }
 
 export function useWidget() {
