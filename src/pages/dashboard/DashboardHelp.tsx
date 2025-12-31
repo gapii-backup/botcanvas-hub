@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mail, Send, Clock, MessageSquare, AlertCircle, ArrowLeft, Paperclip, X } from 'lucide-react';
+import { Mail, Send, Clock, MessageSquare, AlertCircle, ArrowLeft, Paperclip, X, Phone } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
@@ -319,13 +319,13 @@ export default function DashboardHelp() {
     <DashboardLayout title="Pomoč" subtitle="Kontaktne informacije in podpora">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
         {/* New Ticket Form */}
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-6">
+        <div className="glass rounded-2xl p-6 h-[600px] flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
             <Mail className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Nov ticket</h2>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-3">
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Zadeva *</label>
               <Input
@@ -336,13 +336,13 @@ export default function DashboardHelp() {
               />
             </div>
 
-            <div>
+            <div className="flex-1 flex flex-col">
               <label className="text-sm text-muted-foreground mb-1 block">Sporočilo *</label>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Podrobno opišite vašo težavo ali vprašanje..."
-                rows={5}
+                className="flex-1 min-h-[120px] resize-none"
                 required
               />
             </div>
@@ -360,6 +360,7 @@ export default function DashboardHelp() {
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full"
+                size="sm"
               >
                 <Paperclip className="h-4 w-4 mr-2" />
                 Dodaj prilogo
@@ -367,13 +368,13 @@ export default function DashboardHelp() {
               {newAttachments.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {newAttachments.map((file, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
+                    <div key={index} className="flex items-center gap-2 text-xs bg-muted/50 p-2 rounded">
                       <span className="truncate flex-1">{file.name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6"
+                        className="h-5 w-5"
                         onClick={() => removeAttachment(index, false)}
                       >
                         <X className="h-3 w-3" />
@@ -390,19 +391,25 @@ export default function DashboardHelp() {
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Pošlji
+                  Pošlji ticket
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground text-center">
-              Lahko nas kontaktirate tudi na{' '}
+          <div className="mt-4 pt-4 border-t border-border space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Mail className="h-4 w-4" />
               <a href="mailto:info@botmotion.ai" className="text-primary hover:underline">
                 info@botmotion.ai
               </a>
-            </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <Phone className="h-4 w-4" />
+              <a href="tel:+38641353600" className="text-primary hover:underline">
+                +386 41 353 600
+              </a>
+            </div>
           </div>
         </div>
 
