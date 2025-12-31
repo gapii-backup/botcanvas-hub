@@ -73,6 +73,11 @@ export interface AdminWidget {
   // Capacity
   messages_limit: number | null;
   custom_capacity: number;
+  
+  // Warning & grace tracking
+  grace_ends_at: string | null;
+  warning_80_sent: boolean;
+  warning_100_sent: boolean;
 }
 
 export function useAdminWidgets() {
