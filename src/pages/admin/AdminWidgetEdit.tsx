@@ -669,34 +669,26 @@ export default function AdminWidgetEdit() {
                           const currentMessagesLimit = widget.messages_limit || 0;
                           
                           if (e.target.checked) {
-                            // ENABLE addon
+                            // ENABLE addon - add capacity to messages_limit
                             const newAddons = [...currentAddons, addon.id];
                             const newMessagesLimit = currentMessagesLimit + capacityValue;
                             
                             try {
                               await updateWidgetById(id!, {
                                 addons: newAddons,
-                                messages_limit: newMessagesLimit,
-                                is_active: true,
-                                grace_ends_at: null,
-                                warning_80_sent: false,
-                                warning_100_sent: false
+                                messages_limit: newMessagesLimit
                               });
                               setWidget(prev => prev ? {
                                 ...prev,
                                 addons: newAddons,
-                                messages_limit: newMessagesLimit,
-                                is_active: true,
-                                grace_ends_at: null,
-                                warning_80_sent: false,
-                                warning_100_sent: false
+                                messages_limit: newMessagesLimit
                               } : null);
                               toast.success(`Addon ${addon.name} vklopljen`);
                             } catch (error) {
                               toast.error('Napaka pri vklopu addona');
                             }
                           } else {
-                            // DISABLE addon
+                            // DISABLE addon - subtract capacity from messages_limit
                             const newAddons = currentAddons.filter(a => a !== addon.id);
                             const newMessagesLimit = Math.max(0, currentMessagesLimit - capacityValue);
                             
