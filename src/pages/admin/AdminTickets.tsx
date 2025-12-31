@@ -218,13 +218,14 @@ export default function AdminTickets() {
 
       // Call webhook
       try {
-        await fetch('https://n8n.botmotion.ai/webhook/ticket-response', {
+        await fetch('https://hub.botmotion.ai/webhook/ticket-response', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           mode: 'no-cors',
           body: JSON.stringify({
-            ticket_id: selectedTicket.id,
+            widget_id: widget.id,
             user_email: selectedTicket.user_email,
+            ticket_id: selectedTicket.id,
             subject: selectedTicket.subject,
             admin_response: replyMessage.trim(),
           }),
