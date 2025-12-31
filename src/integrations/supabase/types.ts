@@ -262,6 +262,7 @@ export type Database = {
           stripe_subscription_id: string | null
           subscription_status: string
           support_enabled: boolean
+          support_tickets: Json | null
           support_webhook_url: string | null
           table_name: string | null
           trigger_icon: string | null
@@ -320,6 +321,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: string
           support_enabled?: boolean
+          support_tickets?: Json | null
           support_webhook_url?: string | null
           table_name?: string | null
           trigger_icon?: string | null
@@ -378,6 +380,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_status?: string
           support_enabled?: boolean
+          support_tickets?: Json | null
           support_webhook_url?: string | null
           table_name?: string | null
           trigger_icon?: string | null
