@@ -36,6 +36,22 @@ const planPrices = {
 
 const planOrder = ['basic', 'pro', 'enterprise'];
 
+// Setup fee configuration
+const setupFees = {
+  basic: {
+    fromNone: { price: 80, name: 'Basic Setup Fee', priceId: null }, // No stripe price id for basic setup
+  },
+  pro: {
+    fromNone: { price: 140, name: 'Pro Setup Fee', priceId: null },
+    fromBasic: { price: 60, name: 'Basic to Pro Upgrade Fee', priceId: 'price_1SkRYj6cfwnnZsVXMp3H5O4T' },
+  },
+  enterprise: {
+    fromNone: { price: 320, name: 'Enterprise Setup Fee', priceId: null },
+    fromBasic: { price: 240, name: 'Basic to Enterprise Upgrade Fee', priceId: 'price_1SkRZ36cfwnnZsVXQCpslYYY' },
+    fromPro: { price: 180, name: 'Pro to Enterprise Upgrade Fee', priceId: 'price_1SkRZO6cfwnnZsVXJBICSiGI' },
+  },
+};
+
 const plans = [
   {
     name: 'Basic',
@@ -105,6 +121,49 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
     return widget?.plan === planId && widgetBillingPeriod === billingPeriod;
   };
 
+  // Get setup fee for a plan based on current plan and paid status
+  const getSetupFee = (targetPlan: string): { price: number; name: string; priceId: string | null } | null => {
+    if (!widget) return null;
+    
+    const currentPlan = widget.plan || 'none';
+    const selectedIndex = planOrder.indexOf(targetPlan);
+    const currentIndex = widget.plan ? planOrder.indexOf(widget.plan) : -1;
+    
+    // Downgrade - no setup fee
+    if (selectedIndex <= currentIndex) {
+      return null;
+    }
+    
+    // Check if setup fee is already paid for target plan
+    if (targetPlan === 'basic' && widget.setup_fee_basic_paid) return null;
+    if (targetPlan === 'pro' && widget.setup_fee_pro_paid) return null;
+    if (targetPlan === 'enterprise' && widget.setup_fee_enterprise_paid) return null;
+    
+    // Determine which setup fee to apply
+    if (targetPlan === 'basic') {
+      return setupFees.basic.fromNone;
+    }
+    
+    if (targetPlan === 'pro') {
+      if (currentPlan === 'basic') {
+        return setupFees.pro.fromBasic;
+      }
+      return setupFees.pro.fromNone;
+    }
+    
+    if (targetPlan === 'enterprise') {
+      if (currentPlan === 'pro') {
+        return setupFees.enterprise.fromPro;
+      }
+      if (currentPlan === 'basic') {
+        return setupFees.enterprise.fromBasic;
+      }
+      return setupFees.enterprise.fromNone;
+    }
+    
+    return null;
+  };
+
   const handleSelectPlan = (planId: string) => {
     const selectedIndex = planOrder.indexOf(planId);
     const isDowngrading = selectedIndex < currentPlanIndex && widgetBillingPeriod === billingPeriod;
@@ -128,6 +187,8 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
     setShowConfirmDialog(false);
     
     try {
+      const setupFee = getSetupFee(selectedPlan);
+      
       const response = await fetch('https://hub.botmotion.ai/webhook/create-upgrade-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -136,7 +197,11 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
           new_plan: selectedPlan,
           billing_period: billingPeriod,
           email: user.email,
-          cancel_url: window.location.href
+          cancel_url: window.location.href,
+          // Pass setup fee info if applicable
+          setup_fee_price_id: setupFee?.priceId || null,
+          setup_fee_amount: setupFee?.price || null,
+          setup_fee_name: setupFee?.name || null,
         })
       });
 
@@ -168,6 +233,17 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const getSelectedPlanName = () => {
     if (!selectedPlan) return '';
     return planPrices[selectedPlan as keyof typeof planPrices]?.name || selectedPlan;
+  };
+
+  const getSelectedSetupFee = () => {
+    if (!selectedPlan) return null;
+    return getSetupFee(selectedPlan);
+  };
+
+  const getTotalPrice = () => {
+    const planPrice = getSelectedPlanPrice();
+    const setupFee = getSelectedSetupFee();
+    return planPrice + (setupFee?.price || 0);
   };
 
   const getPlanButtonState = (planId: string) => {
@@ -244,6 +320,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
               const price = billingPeriod === 'monthly' ? prices.monthly : prices.yearly;
               const buttonState = getPlanButtonState(plan.id);
               const isExact = isExactCurrentPlan(plan.id);
+              const setupFee = getSetupFee(plan.id);
               
               // Calculate yearly savings
               const monthlyCost = prices.monthly * 12;
@@ -272,12 +349,20 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                     </span>
                   </div>
                   {billingPeriod === 'yearly' ? (
-                    <div className="text-xs text-green-500 font-medium mb-3">
+                    <div className="text-xs text-green-500 font-medium mb-1">
                       Prihranite €{savings}/leto
                     </div>
                   ) : (
-                    <div className="mb-3 h-4" />
+                    <div className="mb-1 h-4" />
                   )}
+                  
+                  {/* Setup fee indicator */}
+                  {setupFee && (
+                    <div className="text-xs text-amber-500 font-medium mb-2">
+                      + €{setupFee.price} enkratni setup fee
+                    </div>
+                  )}
+                  {!setupFee && <div className="mb-2 h-4" />}
                   
                   <ul className="space-y-1.5 mb-4 flex-grow">
                     {plan.features.map(f => (
@@ -325,9 +410,19 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                     <span>Nov paket:</span>
                     <span className="font-semibold text-green-500">{getSelectedPlanName()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                  <div className="flex justify-between border-t border-border pt-2 mt-2">
+                    <span>Naročnina ({billingPeriod === 'monthly' ? 'mesečna' : 'letna'}):</span>
+                    <span>€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span></span>
+                  </div>
+                  {getSelectedSetupFee() && (
+                    <div className="flex justify-between text-amber-500">
+                      <span>Enkratni setup fee:</span>
+                      <span>€{getSelectedSetupFee()?.price} <span className="text-xs opacity-70">+DDV</span></span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold border-t border-border pt-2">
+                    <span>Skupaj danes:</span>
+                    <span>€{getTotalPrice()} <span className="text-xs opacity-70 font-normal">+DDV</span></span>
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
@@ -375,7 +470,7 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
                     <span>Nov paket:</span>
                     <span className="font-semibold text-orange-500">{getSelectedPlanName()}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between border-t border-border pt-2 mt-2">
                     <span>Nova cena:</span>
                     <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>

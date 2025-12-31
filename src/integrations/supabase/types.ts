@@ -229,6 +229,9 @@ export type Database = {
           position: string
           primary_color: string | null
           quick_questions: Json | null
+          setup_fee_basic_paid: boolean
+          setup_fee_enterprise_paid: boolean
+          setup_fee_pro_paid: boolean
           show_bubble: boolean
           show_email_field: boolean
           status: string
@@ -284,6 +287,9 @@ export type Database = {
           position?: string
           primary_color?: string | null
           quick_questions?: Json | null
+          setup_fee_basic_paid?: boolean
+          setup_fee_enterprise_paid?: boolean
+          setup_fee_pro_paid?: boolean
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
@@ -339,6 +345,9 @@ export type Database = {
           position?: string
           primary_color?: string | null
           quick_questions?: Json | null
+          setup_fee_basic_paid?: boolean
+          setup_fee_enterprise_paid?: boolean
+          setup_fee_pro_paid?: boolean
           show_bubble?: boolean
           show_email_field?: boolean
           status?: string
