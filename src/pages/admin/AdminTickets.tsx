@@ -374,13 +374,13 @@ export default function AdminTickets() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[550px]">
           {/* Tickets List */}
-          <div className="bg-card border border-border rounded-lg">
-            <div className="p-4 border-b border-border flex items-center justify-between">
+          <div className="bg-card border border-border rounded-xl flex flex-col h-full">
+            <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
               <h2 className="font-semibold">Ticketi</h2>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-36">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -393,12 +393,12 @@ export default function AdminTickets() {
             </div>
 
             {filteredTickets.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mb-4 opacity-50" />
                 <p>Ni ticketov za prikaz.</p>
               </div>
             ) : (
-              <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
+              <div className="flex-1 overflow-y-auto divide-y divide-border">
                 {filteredTickets.map((ticket) => (
                   <div
                     key={`${ticket.widget_id}-${ticket.id}`}
@@ -410,26 +410,26 @@ export default function AdminTickets() {
                     }}
                     className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
                       selectedTicketId === ticket.id && selectedWidgetId === ticket.widget_id
-                        ? 'bg-muted/50'
+                        ? 'bg-muted/50 border-l-2 border-l-primary'
                         : ''
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium">Zadeva: {ticket.subject}</p>
-                        <p className="text-sm text-muted-foreground mt-1 truncate">
+                        <p className="font-medium text-sm">Zadeva: {ticket.subject}</p>
+                        <p className="text-xs text-muted-foreground mt-1 truncate">
                           {getLastMessage(ticket)}
                         </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
                           <User className="h-3 w-3" />
-                          <span>{ticket.user_email}</span>
+                          <span className="truncate">{ticket.user_email}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {getStatusBadge(ticket)}
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground">
                             {format(new Date(ticket.created_at), 'd. MMM', { locale: sl })}
                           </span>
                         </div>
@@ -442,10 +442,10 @@ export default function AdminTickets() {
           </div>
 
           {/* Ticket Detail */}
-          <div className="bg-card border border-border rounded-lg">
+          <div className="bg-card border border-border rounded-xl flex flex-col h-full">
             {selectedTicket ? (
               <>
-                <div className="p-4 border-b border-border">
+                <div className="p-4 border-b border-border shrink-0">
                   <div className="flex items-center gap-2">
                     <Button 
                       variant="ghost" 
@@ -454,21 +454,21 @@ export default function AdminTickets() {
                         setSelectedTicketId(null);
                         setSelectedWidgetId(null);
                       }}
-                      className="lg:hidden"
+                      className="lg:hidden shrink-0"
                     >
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <div className="flex-1">
-                      <h2 className="font-semibold">Zadeva: {selectedTicket.subject}</h2>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="font-semibold text-sm truncate">Zadeva: {selectedTicket.subject}</h2>
                       <div className="flex items-center gap-2 mt-1">
                         {getStatusBadge(selectedTicket)}
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground truncate">
                           {selectedTicket.user_email}
                         </span>
                       </div>
                     </div>
                     {selectedTicket.status !== 'closed' && (
-                      <Button variant="outline" size="sm" onClick={handleCloseTicket} disabled={submitting}>
+                      <Button variant="outline" size="sm" onClick={handleCloseTicket} disabled={submitting} className="shrink-0">
                         <CheckCircle className="h-4 w-4 mr-1" />
                         Zapri
                       </Button>
@@ -477,56 +477,73 @@ export default function AdminTickets() {
                 </div>
 
                 {/* Messages */}
-                <div className="p-4 space-y-3 max-h-[350px] overflow-y-auto">
-                  {selectedTicket.messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] p-3 rounded-lg ${
-                          msg.sender === 'admin'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
-                        {msg.attachments && msg.attachments.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {msg.attachments.map((url, i) => (
-                              <a
-                                key={i}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`text-xs underline block ${
-                                  msg.sender === 'admin' ? 'text-primary-foreground/80' : 'text-primary'
-                                }`}
-                              >
-                                Priloga {i + 1}
-                              </a>
-                            ))}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {selectedTicket.messages.map((msg, index) => {
+                    const isAdmin = msg.sender === 'admin';
+                    const showDate = index === 0 || 
+                      format(new Date(msg.created_at), 'yyyy-MM-dd') !== 
+                      format(new Date(selectedTicket.messages[index - 1].created_at), 'yyyy-MM-dd');
+                    
+                    return (
+                      <div key={msg.id}>
+                        {showDate && (
+                          <div className="flex items-center justify-center my-4">
+                            <div className="bg-muted/50 text-muted-foreground text-xs px-3 py-1 rounded-full">
+                              {format(new Date(msg.created_at), 'd. MMMM yyyy', { locale: sl })}
+                            </div>
                           </div>
                         )}
-                        <p className={`text-xs mt-1 ${
-                          msg.sender === 'admin' ? 'text-primary-foreground/60' : 'text-muted-foreground'
-                        }`}>
-                          {format(new Date(msg.created_at), 'HH:mm', { locale: sl })}
-                        </p>
+                        <div className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                          <div className="max-w-[80%]">
+                            <div
+                              className={`px-4 py-3 rounded-2xl shadow-sm ${
+                                isAdmin
+                                  ? 'bg-primary text-primary-foreground rounded-br-md'
+                                  : 'bg-muted border border-border rounded-bl-md'
+                              }`}
+                            >
+                              <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.message}</p>
+                              {msg.attachments && msg.attachments.length > 0 && (
+                                <div className="mt-3 pt-2 border-t border-current/10 space-y-1">
+                                  {msg.attachments.map((url, i) => (
+                                    <a
+                                      key={i}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={`text-xs underline flex items-center gap-1 ${
+                                        isAdmin ? 'text-primary-foreground/80' : 'text-primary'
+                                      }`}
+                                    >
+                                      <Paperclip className="h-3 w-3" />
+                                      Priloga {i + 1}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <p className={`text-[10px] mt-1 px-1 ${
+                              isAdmin ? 'text-right text-muted-foreground' : 'text-muted-foreground'
+                            }`}>
+                              {isAdmin ? 'Vi' : 'Uporabnik'} · {format(new Date(msg.created_at), 'HH:mm', { locale: sl })}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={messagesEndRef} />
                 </div>
 
                 {/* Reply Input */}
                 {selectedTicket.status !== 'closed' && (
-                  <div className="p-4 border-t border-border space-y-2">
+                  <div className="p-4 border-t border-border space-y-2 shrink-0">
                     <Textarea
                       value={replyMessage}
                       onChange={(e) => setReplyMessage(e.target.value)}
                       placeholder="Napišite odgovor..."
-                      rows={3}
+                      rows={2}
+                      className="resize-none"
                     />
                     <div className="flex gap-2">
                       <input
@@ -558,13 +575,13 @@ export default function AdminTickets() {
                     {replyAttachments.length > 0 && (
                       <div className="space-y-1">
                         {replyAttachments.map((file, index) => (
-                          <div key={index} className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
+                          <div key={index} className="flex items-center gap-2 text-xs bg-muted/50 p-2 rounded">
                             <span className="truncate flex-1">{file.name}</span>
                             <Button
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6"
+                              className="h-5 w-5"
                               onClick={() => removeAttachment(index)}
                             >
                               <X className="h-3 w-3" />
@@ -577,9 +594,9 @@ export default function AdminTickets() {
                 )}
               </>
             ) : (
-              <div className="p-8 text-center text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Izberite ticket za prikaz podrobnosti.</p>
+              <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mb-4 opacity-50" />
+                <p className="text-sm">Izberite ticket za prikaz podrobnosti.</p>
               </div>
             )}
           </div>
