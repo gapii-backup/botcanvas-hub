@@ -12,10 +12,51 @@ import { sl } from 'date-fns/locale';
 import { MessageSquare, Clock, User, Send, CheckCircle, ArrowLeft, Paperclip, X } from 'lucide-react';
 import type { SupportTicketItem, TicketMessage } from '@/types/supportTicket';
 
+// Helper to migrate old ticket format to new format
+const migrateTicket = (ticket: any): SupportTicketItem => {
+  // If ticket already has messages array, return as-is
+  if (Array.isArray(ticket.messages)) {
+    return ticket as SupportTicketItem;
+  }
+  
+  // Migrate old format to new format
+  const messages: TicketMessage[] = [];
+  
+  // Add original message
+  if (ticket.message) {
+    messages.push({
+      id: crypto.randomUUID(),
+      sender: 'user',
+      message: ticket.message,
+      attachments: [],
+      created_at: ticket.created_at,
+    });
+  }
+  
+  // Add admin response if exists
+  if (ticket.admin_response) {
+    messages.push({
+      id: crypto.randomUUID(),
+      sender: 'admin',
+      message: ticket.admin_response,
+      attachments: [],
+      created_at: ticket.responded_at || ticket.created_at,
+    });
+  }
+  
+  return {
+    id: ticket.id,
+    subject: ticket.subject,
+    status: ticket.status,
+    created_at: ticket.created_at,
+    messages,
+  };
+};
+
 interface WidgetWithTickets {
   id: string;
   user_email: string;
-  support_tickets: SupportTicketItem[];
+  support_tickets: any[];
 }
 
 interface FlatTicket extends SupportTicketItem {
@@ -67,7 +108,8 @@ export default function AdminTickets() {
     const tickets: FlatTicket[] = [];
     widgets.forEach(widget => {
       const widgetTickets = Array.isArray(widget.support_tickets) ? widget.support_tickets : [];
-      widgetTickets.forEach(ticket => {
+      widgetTickets.forEach(rawTicket => {
+        const ticket = migrateTicket(rawTicket);
         tickets.push({
           ...ticket,
           widget_id: widget.id,
