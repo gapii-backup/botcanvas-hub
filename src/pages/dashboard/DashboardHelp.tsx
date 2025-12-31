@@ -150,16 +150,17 @@ export default function DashboardHelp() {
 
       // Call webhook
       try {
-        await fetch('https://n8n.botmotion.ai/webhook/support-ticket', {
+        await fetch('https://hub.botmotion.ai/webhook/support-ticket', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           mode: 'no-cors',
           body: JSON.stringify({
             widget_id: widget.id,
             user_email: widget.user_email,
+            ticket_id: newTicket.id,
             subject: newTicket.subject,
             message: message.trim(),
-            ticket_id: newTicket.id,
+            is_new_ticket: true,
           }),
         });
       } catch (webhookError) {
@@ -232,16 +233,17 @@ export default function DashboardHelp() {
 
       // Call webhook
       try {
-        await fetch('https://n8n.botmotion.ai/webhook/support-ticket', {
+        await fetch('https://hub.botmotion.ai/webhook/support-ticket', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           mode: 'no-cors',
           body: JSON.stringify({
             widget_id: widget.id,
             user_email: widget.user_email,
+            ticket_id: selectedTicket.id,
             subject: selectedTicket.subject,
             message: replyMessage.trim(),
-            ticket_id: selectedTicket.id,
+            is_new_ticket: false,
           }),
         });
       } catch (webhookError) {
