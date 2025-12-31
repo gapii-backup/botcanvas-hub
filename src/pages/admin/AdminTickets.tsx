@@ -374,9 +374,9 @@ export default function AdminTickets() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[550px]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Tickets List */}
-          <div className="bg-card border border-border rounded-xl flex flex-col h-full">
+          <div className="bg-card border border-border rounded-xl flex flex-col h-[600px]">
             <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
               <h2 className="font-semibold">Ticketi</h2>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -420,17 +420,16 @@ export default function AdminTickets() {
                         <p className="text-xs text-muted-foreground mt-1 truncate">
                           {getLastMessage(ticket)}
                         </p>
-                        <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-                          <User className="h-3 w-3" />
-                          <span className="truncate">{ticket.user_email}</span>
-                        </div>
+                        <p className="text-sm font-medium text-primary mt-2">
+                          {ticket.user_email}
+                        </p>
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         {getStatusBadge(ticket)}
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-[10px] text-muted-foreground">
-                            {format(new Date(ticket.created_at), 'd. MMM', { locale: sl })}
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span className="text-xs">
+                            {format(new Date(ticket.created_at), 'd. MMM, HH:mm', { locale: sl })}
                           </span>
                         </div>
                       </div>
@@ -442,7 +441,7 @@ export default function AdminTickets() {
           </div>
 
           {/* Ticket Detail */}
-          <div className="bg-card border border-border rounded-xl flex flex-col h-full">
+          <div className="bg-card border border-border rounded-xl flex flex-col h-[600px]">
             {selectedTicket ? (
               <>
                 <div className="p-4 border-b border-border shrink-0">
