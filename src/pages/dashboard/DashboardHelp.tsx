@@ -1,31 +1,67 @@
-import { useState } from 'react';
-import { Mail, Send, Clock, MessageSquare, AlertCircle, ChevronRight, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Mail, Send, Clock, MessageSquare, AlertCircle, ArrowLeft, Paperclip, X } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
-import type { SupportTicketItem } from '@/types/supportTicket';
+import type { SupportTicketItem, TicketMessage } from '@/types/supportTicket';
 
 export default function DashboardHelp() {
   const { widget, loading, fetchWidget } = useWidget();
   const { toast } = useToast();
   const [subject, setSubject] = useState('');
-  const [priority, setPriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicketItem | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [replyAttachments, setReplyAttachments] = useState<File[]>([]);
+  const [newAttachments, setNewAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const replyFileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const tickets: SupportTicketItem[] = Array.isArray(widget?.support_tickets) 
     ? (widget.support_tickets as unknown as SupportTicketItem[])
     : [];
+
+  const selectedTicket = tickets.find(t => t.id === selectedTicketId);
+
+  useEffect(() => {
+    if (selectedTicket && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedTicket?.messages?.length]);
+
+  const uploadFiles = async (files: File[]): Promise<string[]> => {
+    const urls: string[] = [];
+    for (const file of files) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('bot-avatars')
+        .upload(`tickets/${widget?.id}/${fileName}`, file);
+      
+      if (error) {
+        console.error('Upload error:', error);
+        continue;
+      }
+      
+      const { data: publicUrl } = supabase.storage
+        .from('bot-avatars')
+        .getPublicUrl(`tickets/${widget?.id}/${fileName}`);
+      
+      if (publicUrl) {
+        urls.push(publicUrl.publicUrl);
+      }
+    }
+    return urls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,20 +79,24 @@ export default function DashboardHelp() {
     setSubmitting(true);
 
     try {
+      const attachmentUrls = await uploadFiles(newAttachments);
+
       const newTicket: SupportTicketItem = {
         id: crypto.randomUUID(),
         subject: subject.trim(),
-        message: message.trim(),
-        priority,
         status: 'open',
-        admin_response: null,
         created_at: new Date().toISOString(),
-        responded_at: null,
+        messages: [{
+          id: crypto.randomUUID(),
+          sender: 'user',
+          message: message.trim(),
+          attachments: attachmentUrls,
+          created_at: new Date().toISOString(),
+        }],
       };
 
       const updatedTickets = [newTicket, ...tickets];
 
-      // Update widget with new ticket
       const { error: updateError } = await supabase
         .from('widgets')
         .update({ 
@@ -77,8 +117,7 @@ export default function DashboardHelp() {
             widget_id: widget.id,
             user_email: widget.user_email,
             subject: newTicket.subject,
-            priority: newTicket.priority,
-            message: newTicket.message,
+            message: message.trim(),
             ticket_id: newTicket.id,
           }),
         });
@@ -93,7 +132,7 @@ export default function DashboardHelp() {
 
       setSubject('');
       setMessage('');
-      setPriority('normal');
+      setNewAttachments([]);
       fetchWidget();
     } catch (err) {
       console.error('Error submitting ticket:', err);
@@ -107,31 +146,123 @@ export default function DashboardHelp() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'open':
-        return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">Odprto</Badge>;
-      case 'answered':
-        return <Badge variant="secondary" className="bg-green-500/20 text-green-400">Odgovorjeno</Badge>;
-      case 'closed':
-        return <Badge variant="secondary" className="bg-muted text-muted-foreground">Zaprto</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
+  const handleReply = async () => {
+    if (!widget || !selectedTicket || !replyMessage.trim()) {
+      toast({
+        title: "Napaka",
+        description: "Vnesite sporočilo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const attachmentUrls = await uploadFiles(replyAttachments);
+
+      const newMessage: TicketMessage = {
+        id: crypto.randomUUID(),
+        sender: 'user',
+        message: replyMessage.trim(),
+        attachments: attachmentUrls,
+        created_at: new Date().toISOString(),
+      };
+
+      const updatedTickets = tickets.map(t => 
+        t.id === selectedTicket.id
+          ? {
+              ...t,
+              status: 'open' as const,
+              messages: [...t.messages, newMessage],
+            }
+          : t
+      );
+
+      const { error: updateError } = await supabase
+        .from('widgets')
+        .update({ 
+          support_tickets: updatedTickets as unknown as null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', widget.id);
+
+      if (updateError) throw updateError;
+
+      // Call webhook
+      try {
+        await fetch('https://n8n.botmotion.ai/webhook/support-ticket', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors',
+          body: JSON.stringify({
+            widget_id: widget.id,
+            user_email: widget.user_email,
+            subject: selectedTicket.subject,
+            message: replyMessage.trim(),
+            ticket_id: selectedTicket.id,
+          }),
+        });
+      } catch (webhookError) {
+        console.error('Webhook error:', webhookError);
+      }
+
+      toast({
+        title: "Uspešno",
+        description: "Sporočilo je bilo poslano.",
+      });
+
+      setReplyMessage('');
+      setReplyAttachments([]);
+      fetchWidget();
+    } catch (err) {
+      console.error('Error sending reply:', err);
+      toast({
+        title: "Napaka",
+        description: "Napaka pri pošiljanju sporočila.",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'urgent':
-        return <Badge variant="destructive">Nujno</Badge>;
-      case 'high':
-        return <Badge variant="secondary" className="bg-orange-500/20 text-orange-400">Visoka</Badge>;
-      case 'normal':
-        return <Badge variant="secondary">Normalna</Badge>;
-      case 'low':
-        return <Badge variant="secondary" className="bg-muted text-muted-foreground">Nizka</Badge>;
-      default:
-        return <Badge variant="secondary">{priority}</Badge>;
+  const getStatusBadge = (ticket: SupportTicketItem) => {
+    const hasAdminResponse = ticket.messages.some(m => m.sender === 'admin');
+    
+    if (ticket.status === 'closed') {
+      return <Badge variant="secondary" className="bg-muted text-muted-foreground">Zaprto</Badge>;
+    }
+    if (hasAdminResponse) {
+      return <Badge variant="secondary" className="bg-green-500/20 text-green-400">Odgovorjeno</Badge>;
+    }
+    return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400">Nov</Badge>;
+  };
+
+  const getLastMessage = (ticket: SupportTicketItem): string => {
+    if (ticket.messages.length === 0) return '';
+    const lastMsg = ticket.messages[ticket.messages.length - 1];
+    const prefix = lastMsg.sender === 'admin' ? 'Podpora: ' : 'Vi: ';
+    const text = lastMsg.message.length > 50 
+      ? lastMsg.message.substring(0, 50) + '...' 
+      : lastMsg.message;
+    return prefix + text;
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, isReply: boolean) => {
+    const files = Array.from(e.target.files || []);
+    if (isReply) {
+      setReplyAttachments(prev => [...prev, ...files]);
+    } else {
+      setNewAttachments(prev => [...prev, ...files]);
+    }
+  };
+
+  const removeAttachment = (index: number, isReply: boolean) => {
+    if (isReply) {
+      setReplyAttachments(prev => prev.filter((_, i) => i !== index));
+    } else {
+      setNewAttachments(prev => prev.filter((_, i) => i !== index));
     }
   };
 
@@ -165,21 +296,6 @@ export default function DashboardHelp() {
             </div>
 
             <div>
-              <label className="text-sm text-muted-foreground mb-1 block">Prioriteta</label>
-              <Select value={priority} onValueChange={(v) => setPriority(v as typeof priority)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Nizka</SelectItem>
-                  <SelectItem value="normal">Normalna</SelectItem>
-                  <SelectItem value="high">Visoka</SelectItem>
-                  <SelectItem value="urgent">Nujno</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
               <label className="text-sm text-muted-foreground mb-1 block">Sporočilo *</label>
               <Textarea
                 value={message}
@@ -188,6 +304,43 @@ export default function DashboardHelp() {
                 rows={5}
                 required
               />
+            </div>
+
+            <div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => handleFileChange(e, false)}
+                multiple
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full"
+              >
+                <Paperclip className="h-4 w-4 mr-2" />
+                Dodaj prilogo
+              </Button>
+              {newAttachments.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {newAttachments.map((file, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
+                      <span className="truncate flex-1">{file.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => removeAttachment(index, false)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button type="submit" disabled={submitting} className="w-full">
@@ -212,95 +365,172 @@ export default function DashboardHelp() {
           </div>
         </div>
 
-        {/* Tickets List */}
+        {/* Tickets List / Detail */}
         <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Moji ticketi</h2>
-            <span className="text-sm text-muted-foreground">({tickets.length})</span>
-          </div>
-
-          {tickets.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nimate še nobenih ticketov.</p>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-[500px] overflow-y-auto">
-              {tickets.map((ticket) => (
-                <div
-                  key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
-                  className="p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{ticket.subject}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">
-                          {format(new Date(ticket.created_at), 'd. MMM yyyy, HH:mm', { locale: sl })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(ticket.status)}
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
+          {selectedTicket ? (
+            <>
+              {/* Ticket Detail Header */}
+              <div className="flex items-center gap-2 mb-4">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedTicketId(null)}>
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex-1">
+                  <h2 className="font-semibold">Zadeva: {selectedTicket.subject}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getStatusBadge(selectedTicket)}
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(selectedTicket.created_at), 'd. MMM yyyy', { locale: sl })}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Ticket Detail Modal */}
-      {selectedTicket && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-border flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{selectedTicket.subject}</h3>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedTicket(null)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                {getStatusBadge(selectedTicket.status)}
-                {getPriorityBadge(selectedTicket.priority)}
-                <span className="text-sm text-muted-foreground">
-                  {format(new Date(selectedTicket.created_at), 'd. MMM yyyy, HH:mm', { locale: sl })}
-                </span>
               </div>
 
-              <div className="p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">Vaše sporočilo:</p>
-                <p className="whitespace-pre-wrap">{selectedTicket.message}</p>
+              {/* Messages */}
+              <div className="space-y-3 max-h-[350px] overflow-y-auto mb-4 pr-2">
+                {selectedTicket.messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        msg.sender === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted'
+                      }`}
+                    >
+                      <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {msg.attachments.map((url, i) => (
+                            <a
+                              key={i}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`text-xs underline block ${
+                                msg.sender === 'user' ? 'text-primary-foreground/80' : 'text-primary'
+                              }`}
+                            >
+                              Priloga {i + 1}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                      <p className={`text-xs mt-1 ${
+                        msg.sender === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
+                      }`}>
+                        {format(new Date(msg.created_at), 'HH:mm', { locale: sl })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
               </div>
 
-              {selectedTicket.admin_response && (
-                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <p className="text-sm text-green-400 mb-1">Odgovor podpore:</p>
-                  <p className="whitespace-pre-wrap">{selectedTicket.admin_response}</p>
-                  {selectedTicket.responded_at && (
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Odgovorjeno: {format(new Date(selectedTicket.responded_at), 'd. MMM yyyy, HH:mm', { locale: sl })}
-                    </p>
+              {/* Reply Input */}
+              {selectedTicket.status !== 'closed' && (
+                <div className="space-y-2 border-t border-border pt-4">
+                  <Textarea
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    placeholder="Napišite sporočilo..."
+                    rows={3}
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      ref={replyFileInputRef}
+                      onChange={(e) => handleFileChange(e, true)}
+                      multiple
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => replyFileInputRef.current?.click()}
+                    >
+                      <Paperclip className="h-4 w-4" />
+                    </Button>
+                    <Button onClick={handleReply} disabled={submitting} className="flex-1">
+                      {submitting ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" />
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Pošlji
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  {replyAttachments.length > 0 && (
+                    <div className="space-y-1">
+                      {replyAttachments.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded">
+                          <span className="truncate flex-1">{file.name}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => removeAttachment(index, true)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
-            </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 mb-6">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold">Moji ticketi</h2>
+                <span className="text-sm text-muted-foreground">({tickets.length})</span>
+              </div>
 
-            <div className="p-6 border-t border-border">
-              <Button variant="outline" onClick={() => setSelectedTicket(null)} className="w-full">
-                Zapri
-              </Button>
-            </div>
-          </div>
+              {tickets.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Nimate še nobenih ticketov.</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                  {tickets.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      onClick={() => setSelectedTicketId(ticket.id)}
+                      className="p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium">Zadeva: {ticket.subject}</p>
+                          <p className="text-sm text-muted-foreground mt-1 truncate">
+                            {getLastMessage(ticket)}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          {getStatusBadge(ticket)}
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(ticket.created_at), 'd. MMM', { locale: sl })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
-      )}
+      </div>
     </DashboardLayout>
   );
 }
