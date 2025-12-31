@@ -338,88 +338,6 @@ export default function AdminWidgetEdit() {
           </CardContent>
         </Card>
 
-        {/* Custom Capacity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Custom Capacity</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="space-y-2 flex-1">
-                <Label>Trenutna custom capacity</Label>
-                <div className="text-2xl font-bold">{widget.custom_capacity?.toLocaleString() || 0}</div>
-              </div>
-              <div className="space-y-2 flex-1">
-                <Label>Messages Limit</Label>
-                <div className="text-2xl font-bold">{widget.messages_limit?.toLocaleString() || 0}</div>
-              </div>
-            </div>
-            <div className="flex items-end gap-4">
-              <div className="space-y-2 flex-1">
-                <Label>Nova custom capacity vrednost</Label>
-                <Input
-                  type="number"
-                  id="custom-capacity-input"
-                  placeholder="npr. 5000, 10000"
-                  min={0}
-                />
-              </div>
-              <Button
-                onClick={async () => {
-                  const input = document.getElementById('custom-capacity-input') as HTMLInputElement;
-                  const value = parseInt(input.value);
-                  if (isNaN(value) || value <= 0) {
-                    toast.error('Vnesite veljavno število');
-                    return;
-                  }
-                  try {
-                    const newMessagesLimit = (widget.messages_limit || 0) + value;
-                    await updateWidgetById(id!, { 
-                      custom_capacity: value, 
-                      messages_limit: newMessagesLimit 
-                    });
-                    setWidget(prev => prev ? { 
-                      ...prev, 
-                      custom_capacity: value, 
-                      messages_limit: newMessagesLimit 
-                    } : null);
-                    input.value = '';
-                    toast.success('Custom capacity dodan');
-                  } catch (error) {
-                    toast.error('Napaka pri posodabljanju');
-                  }
-                }}
-              >
-                Dodaj custom capacity
-              </Button>
-              <Button
-                variant="destructive"
-                disabled={!widget.custom_capacity || widget.custom_capacity === 0}
-                onClick={async () => {
-                  try {
-                    const currentCustom = widget.custom_capacity || 0;
-                    const newMessagesLimit = Math.max(0, (widget.messages_limit || 0) - currentCustom);
-                    await updateWidgetById(id!, { 
-                      custom_capacity: 0, 
-                      messages_limit: newMessagesLimit 
-                    });
-                    setWidget(prev => prev ? { 
-                      ...prev, 
-                      custom_capacity: 0, 
-                      messages_limit: newMessagesLimit 
-                    } : null);
-                    toast.success('Custom capacity odstranjen');
-                  } catch (error) {
-                    toast.error('Napaka pri odstranjevanju');
-                  }
-                }}
-              >
-                Odstrani custom capacity
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Webhooks */}
         <Card>
           <CardHeader>
@@ -816,6 +734,95 @@ export default function AdminWidgetEdit() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Custom Capacity - at the bottom */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Custom Capacity</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="space-y-2 flex-1">
+                <Label>Trenutna custom capacity</Label>
+                <div className="text-2xl font-bold">{widget.custom_capacity?.toLocaleString() || 0}</div>
+              </div>
+              <div className="space-y-2 flex-1">
+                <Label>Messages Limit</Label>
+                <div className="text-2xl font-bold">{widget.messages_limit?.toLocaleString() || 0}</div>
+              </div>
+            </div>
+            {widget.custom_capacity && widget.custom_capacity > 0 ? (
+              <div className="flex items-center gap-4">
+                <p className="text-muted-foreground flex-1">
+                  Custom capacity je že dodan. Odstranite ga, če želite dodati novega.
+                </p>
+                <Button
+                  variant="destructive"
+                  onClick={async () => {
+                    try {
+                      const currentCustom = widget.custom_capacity || 0;
+                      const newMessagesLimit = Math.max(0, (widget.messages_limit || 0) - currentCustom);
+                      await updateWidgetById(id!, { 
+                        custom_capacity: 0, 
+                        messages_limit: newMessagesLimit 
+                      });
+                      setWidget(prev => prev ? { 
+                        ...prev, 
+                        custom_capacity: 0, 
+                        messages_limit: newMessagesLimit 
+                      } : null);
+                      toast.success('Custom capacity odstranjen');
+                    } catch (error) {
+                      toast.error('Napaka pri odstranjevanju');
+                    }
+                  }}
+                >
+                  Odstrani custom capacity
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-end gap-4">
+                <div className="space-y-2 flex-1">
+                  <Label>Nova custom capacity vrednost</Label>
+                  <Input
+                    type="number"
+                    id="custom-capacity-input"
+                    placeholder="npr. 5000, 10000"
+                    min={0}
+                  />
+                </div>
+                <Button
+                  onClick={async () => {
+                    const input = document.getElementById('custom-capacity-input') as HTMLInputElement;
+                    const value = parseInt(input.value);
+                    if (isNaN(value) || value <= 0) {
+                      toast.error('Vnesite veljavno število');
+                      return;
+                    }
+                    try {
+                      const newMessagesLimit = (widget.messages_limit || 0) + value;
+                      await updateWidgetById(id!, { 
+                        custom_capacity: value, 
+                        messages_limit: newMessagesLimit 
+                      });
+                      setWidget(prev => prev ? { 
+                        ...prev, 
+                        custom_capacity: value, 
+                        messages_limit: newMessagesLimit 
+                      } : null);
+                      input.value = '';
+                      toast.success('Custom capacity dodan');
+                    } catch (error) {
+                      toast.error('Napaka pri posodabljanju');
+                    }
+                  }}
+                >
+                  Dodaj custom capacity
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
