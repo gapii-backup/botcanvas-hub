@@ -13,6 +13,47 @@ import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import type { SupportTicketItem, TicketMessage } from '@/types/supportTicket';
 
+// Helper to migrate old ticket format to new format
+const migrateTicket = (ticket: any): SupportTicketItem => {
+  // If ticket already has messages array, return as-is
+  if (Array.isArray(ticket.messages)) {
+    return ticket as SupportTicketItem;
+  }
+  
+  // Migrate old format to new format
+  const messages: TicketMessage[] = [];
+  
+  // Add original message
+  if (ticket.message) {
+    messages.push({
+      id: crypto.randomUUID(),
+      sender: 'user',
+      message: ticket.message,
+      attachments: [],
+      created_at: ticket.created_at,
+    });
+  }
+  
+  // Add admin response if exists
+  if (ticket.admin_response) {
+    messages.push({
+      id: crypto.randomUUID(),
+      sender: 'admin',
+      message: ticket.admin_response,
+      attachments: [],
+      created_at: ticket.responded_at || ticket.created_at,
+    });
+  }
+  
+  return {
+    id: ticket.id,
+    subject: ticket.subject,
+    status: ticket.status,
+    created_at: ticket.created_at,
+    messages,
+  };
+};
+
 export default function DashboardHelp() {
   const { widget, loading, fetchWidget } = useWidget();
   const { toast } = useToast();
@@ -28,7 +69,7 @@ export default function DashboardHelp() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const tickets: SupportTicketItem[] = Array.isArray(widget?.support_tickets) 
-    ? (widget.support_tickets as unknown as SupportTicketItem[])
+    ? (widget.support_tickets as unknown as any[]).map(migrateTicket)
     : [];
 
   const selectedTicket = tickets.find(t => t.id === selectedTicketId);
