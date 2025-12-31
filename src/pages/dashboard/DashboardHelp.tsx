@@ -407,16 +407,16 @@ export default function DashboardHelp() {
         </div>
 
         {/* Tickets List / Detail */}
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-6 h-[600px] flex flex-col">
           {selectedTicket ? (
-            <>
+            <div className="flex flex-col h-full">
               {/* Ticket Detail Header */}
-              <div className="flex items-center gap-2 mb-4">
-                <Button variant="ghost" size="icon" onClick={() => setSelectedTicketId(null)}>
+              <div className="flex items-center gap-3 pb-4 border-b border-border">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedTicketId(null)} className="shrink-0">
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <div className="flex-1">
-                  <h2 className="font-semibold">Zadeva: {selectedTicket.subject}</h2>
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold truncate">Zadeva: {selectedTicket.subject}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     {getStatusBadge(selectedTicket)}
                     <span className="text-xs text-muted-foreground">
@@ -427,45 +427,61 @@ export default function DashboardHelp() {
               </div>
 
               {/* Messages */}
-              <div className="space-y-3 max-h-[350px] overflow-y-auto mb-4 pr-2">
-                {selectedTicket.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.sender === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <p className="whitespace-pre-wrap text-sm">{msg.message}</p>
-                      {msg.attachments && msg.attachments.length > 0 && (
-                        <div className="mt-2 space-y-1">
-                          {msg.attachments.map((url, i) => (
-                            <a
-                              key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`text-xs underline block ${
-                                msg.sender === 'user' ? 'text-primary-foreground/80' : 'text-primary'
-                              }`}
-                            >
-                              Priloga {i + 1}
-                            </a>
-                          ))}
+              <div className="flex-1 overflow-y-auto py-4 space-y-4">
+                {selectedTicket.messages.map((msg, index) => {
+                  const isUser = msg.sender === 'user';
+                  const showDate = index === 0 || 
+                    format(new Date(msg.created_at), 'yyyy-MM-dd') !== 
+                    format(new Date(selectedTicket.messages[index - 1].created_at), 'yyyy-MM-dd');
+                  
+                  return (
+                    <div key={msg.id}>
+                      {showDate && (
+                        <div className="flex items-center justify-center my-4">
+                          <div className="bg-muted/50 text-muted-foreground text-xs px-3 py-1 rounded-full">
+                            {format(new Date(msg.created_at), 'd. MMMM yyyy', { locale: sl })}
+                          </div>
                         </div>
                       )}
-                      <p className={`text-xs mt-1 ${
-                        msg.sender === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
-                      }`}>
-                        {format(new Date(msg.created_at), 'HH:mm', { locale: sl })}
-                      </p>
+                      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[80%] ${isUser ? 'order-1' : 'order-1'}`}>
+                          <div
+                            className={`px-4 py-3 rounded-2xl shadow-sm ${
+                              isUser
+                                ? 'bg-primary text-primary-foreground rounded-br-md'
+                                : 'bg-muted border border-border rounded-bl-md'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.message}</p>
+                            {msg.attachments && msg.attachments.length > 0 && (
+                              <div className="mt-3 pt-2 border-t border-current/10 space-y-1">
+                                {msg.attachments.map((url, i) => (
+                                  <a
+                                    key={i}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`text-xs underline flex items-center gap-1 ${
+                                      isUser ? 'text-primary-foreground/80' : 'text-primary'
+                                    }`}
+                                  >
+                                    <Paperclip className="h-3 w-3" />
+                                    Priloga {i + 1}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <p className={`text-[10px] mt-1 px-1 ${
+                            isUser ? 'text-right text-muted-foreground' : 'text-muted-foreground'
+                          }`}>
+                            {isUser ? 'Vi' : 'Podpora'} · {format(new Date(msg.created_at), 'HH:mm', { locale: sl })}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 
@@ -525,40 +541,40 @@ export default function DashboardHelp() {
                   )}
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <>
-              <div className="flex items-center gap-2 mb-6">
+            <div className="flex flex-col h-full">
+              <div className="flex items-center gap-2 mb-4">
                 <MessageSquare className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">Moji ticketi</h2>
                 <span className="text-sm text-muted-foreground">({tickets.length})</span>
               </div>
 
               {tickets.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
+                  <AlertCircle className="h-12 w-12 mb-4 opacity-50" />
                   <p>Nimate še nobenih ticketov.</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto space-y-2">
                   {tickets.map((ticket) => (
                     <div
                       key={ticket.id}
                       onClick={() => setSelectedTicketId(ticket.id)}
-                      className="p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                      className="p-4 bg-muted/30 hover:bg-muted/50 rounded-xl cursor-pointer transition-all border border-border/50 hover:border-border"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium">Zadeva: {ticket.subject}</p>
-                          <p className="text-sm text-muted-foreground mt-1 truncate">
+                          <p className="font-medium text-sm">Zadeva: {ticket.subject}</p>
+                          <p className="text-xs text-muted-foreground mt-1.5 truncate">
                             {getLastMessage(ticket)}
                           </p>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
                           {getStatusBadge(ticket)}
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-[10px] text-muted-foreground">
                               {format(new Date(ticket.created_at), 'd. MMM', { locale: sl })}
                             </span>
                           </div>
@@ -568,7 +584,7 @@ export default function DashboardHelp() {
                   ))}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>
