@@ -39,7 +39,8 @@ import {
   MessageSquare,
   File,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Info
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
@@ -156,7 +157,7 @@ export default function DashboardKnowledge() {
 
   const handleTrain = async () => {
     if (!widget?.qa_webhook_url) {
-      toast({ title: 'Napaka', description: 'Webhook URL ni nastavljen. Prosim nastavite ga v admin panelu.', variant: 'destructive' });
+      toast({ title: 'Napaka', description: 'Webhook URL ni nastavljen.', variant: 'destructive' });
       return;
     }
 
@@ -166,27 +167,29 @@ export default function DashboardKnowledge() {
     }
 
     setTraining(true);
-    try {
-      const response = await fetch(widget.qa_webhook_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          markdown: buildMarkdown(),
-          lastmod: getLatestTimestamp()
-        })
-      });
 
-      if (response.ok) {
-        await updateLastTrained();
-        await fetchLastmod();
-        toast({ title: 'Uspeh', description: 'Chatbot je bil uspešno natreniran!' });
-      } else {
-        toast({ title: 'Napaka', description: 'Napaka pri pošiljanju na webhook.', variant: 'destructive' });
-      }
-    } catch (error) {
-      toast({ title: 'Napaka', description: 'Napaka pri povezavi z webhookom.', variant: 'destructive' });
-    }
+    // Sproži webhook TAKOJ (fire and forget)
+    fetch(widget.qa_webhook_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        markdown: buildMarkdown(),
+        lastmod: getLatestTimestamp()
+      })
+    }).catch(console.error);
+
+    // Počakaj NAJMANJ 2 sekundi za boljši UX
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Posodobi last_trained
+    await updateLastTrained();
+    await fetchLastmod();
+
     setTraining(false);
+    toast({ 
+      title: '✓ Uspešno natrenirano', 
+      description: 'Vaš chatbot je bil uspešno posodobljen z novimi Q&A pari.' 
+    });
   };
 
   const handleFileUpload = useCallback(async (files: FileList | null) => {
@@ -272,18 +275,41 @@ export default function DashboardKnowledge() {
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {training ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
-                  Treniraj chatbota
+                  {training ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Treniram...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Treniraj chatbota
+                    </>
+                  )}
                 </Button>
               ) : qaItems.length > 0 ? (
-                <div className="flex items-center gap-1.5 text-green-600 text-sm">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Natrenirano</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-600">Chatbot je natreniran</span>
                 </div>
               ) : null}
             </div>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto max-h-[600px]">
+            {/* Info box z nasvetom */}
+            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex gap-2">
+                <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="font-medium">Nasvet za boljše odgovore</p>
+                  <p className="mt-1 text-blue-600 dark:text-blue-400">
+                    Odgovori naj bodo čim bolj podrobni in obsežni. Vključite vse pomembne informacije, 
+                    da bo chatbot lahko natančno odgovoril na vprašanja vaših strank.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {qaLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -425,8 +451,15 @@ export default function DashboardKnowledge() {
               <Textarea
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Vnesite vprašanje..."
-                rows={3}
+                onKeyDown={(e) => {
+                  // Prepreči Enter pri vprašanju
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="Vnesite vprašanje (brez prelomov vrstic)..."
+                rows={2}
+                className="resize-none"
               />
             </div>
             <div>
@@ -434,9 +467,12 @@ export default function DashboardKnowledge() {
               <Textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Vnesite odgovor..."
-                rows={5}
+                placeholder="Vnesite podroben odgovor... (Enter za novo vrstico)"
+                rows={6}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Napišite čim bolj podroben odgovor z vsemi relevantnimi informacijami.
+              </p>
             </div>
           </div>
           <DialogFooter>
