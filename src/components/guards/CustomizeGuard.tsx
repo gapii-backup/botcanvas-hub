@@ -17,6 +17,11 @@ export function CustomizeGuard({ children }: CustomizeGuardProps) {
     );
   }
 
+  // Partner users - redirect to dashboard (they don't need customization)
+  if (widget?.is_partner === true) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   // If no widget or no plan selected, redirect to pricing
   if (!widget?.plan) {
     return <Navigate to="/pricing" replace />;

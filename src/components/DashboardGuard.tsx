@@ -22,8 +22,13 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     return <Navigate to="/pricing" replace />;
   }
 
-  // Partner users - skip onboarding, go directly to dashboard
-  if (widget.is_partner === true && widget.status === 'partner') {
+  // Partner users - skip all checks, go directly to dashboard
+  if (widget.is_partner === true) {
+    return <>{children}</>;
+  }
+
+  // Regular users with active subscription - allow access
+  if (widget.subscription_status === 'active') {
     return <>{children}</>;
   }
 
