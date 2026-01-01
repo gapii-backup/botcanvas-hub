@@ -181,7 +181,7 @@ export default function AdminUsers() {
           .insert({
             user_id: newUserId,
             user_email: newEmail,
-            api_key: crypto.randomUUID(),
+            api_key: `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,
             is_partner: true,
             subscription_status: 'active',
             status: 'partner',
@@ -208,7 +208,7 @@ export default function AdminUsers() {
           .insert({
             user_id: newUserId,
             user_email: newEmail,
-            api_key: crypto.randomUUID(),
+            api_key: `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`,
             is_partner: false,
             subscription_status: 'inactive',
             status: 'new',
