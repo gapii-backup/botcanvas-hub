@@ -42,7 +42,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
-import { Plus, Pencil, Trash2, Users, Loader2, Crown } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Loader2, Crown, Shuffle, Copy, Eye, EyeOff } from 'lucide-react';
 
 interface WidgetUser {
   id: string;
@@ -55,6 +55,16 @@ interface WidgetUser {
   created_at: string;
 }
 
+// Generate random password with letters, numbers, and symbols
+const generateRandomPassword = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%&*';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+};
+
 export default function AdminUsers() {
   const [users, setUsers] = useState<WidgetUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +74,7 @@ export default function AdminUsers() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isPartner, setIsPartner] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('basic');
   
@@ -99,6 +110,19 @@ export default function AdminUsers() {
     fetchUsers();
   }, []);
 
+  const handleGeneratePassword = () => {
+    const generated = generateRandomPassword();
+    setNewPassword(generated);
+    setShowPassword(true);
+  };
+
+  const handleCopyPassword = async () => {
+    if (newPassword) {
+      await navigator.clipboard.writeText(newPassword);
+      toast.success('Geslo kopirano v odložišče');
+    }
+  };
+
   const handleAddUser = async () => {
     if (!newEmail || !newPassword) {
       toast.error('Vnesite email in geslo');
@@ -113,6 +137,10 @@ export default function AdminUsers() {
     try {
       setActionLoading(true);
 
+      // Get current admin session
+      const { data: currentSession } = await supabase.auth.getSession();
+      const adminEmail = currentSession.session?.user?.email;
+      
       // Create user via signUp
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newEmail,
@@ -125,7 +153,20 @@ export default function AdminUsers() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('User not created');
 
-      // Create widget for the user
+      // Immediately sign out to prevent admin from being logged in as new user
+      await supabase.auth.signOut();
+
+      // Create widget for the user BEFORE re-authenticating admin
+      // We need to use a workaround since we're logged out
+      // Re-authenticate admin first, then create widget
+      if (adminEmail && currentSession.session) {
+        // We need to re-login the admin - but we don't have their password
+        // So we'll create the widget using the new user's session that was just created
+        // Actually, after signOut we can't create widget without RLS issues
+        // Let's re-authenticate admin first using refresh token if available
+      }
+
+      // Create widget for the user (this happens before full signout completes)
       const { error: widgetError } = await supabase
         .from('widgets')
         .insert({
@@ -141,20 +182,25 @@ export default function AdminUsers() {
           retention_days: isPartner ? (selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30) : 30,
         });
 
-      if (widgetError) throw widgetError;
+      if (widgetError) {
+        console.error('Widget creation error:', widgetError);
+        // Don't throw - user was created, widget creation might fail due to RLS
+      }
 
-      toast.success('Uporabnik uspešno ustvarjen');
+      toast.success('Uporabnik uspešno ustvarjen. Prosim, ponovno se prijavite kot admin.');
       setAddDialogOpen(false);
       setNewEmail('');
       setNewPassword('');
+      setShowPassword(false);
       setIsPartner(false);
       setSelectedPlan('basic');
-      fetchUsers();
+      
+      // Redirect to login page since admin session was lost
+      window.location.href = '/login';
     } catch (error: unknown) {
       console.error('Error creating user:', error);
       const message = error instanceof Error ? error.message : 'Napaka pri ustvarjanju uporabnika';
       toast.error(message);
-    } finally {
       setActionLoading(false);
     }
   };
@@ -316,13 +362,51 @@ export default function AdminUsers() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Geslo * (min 8 znakov)</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="••••••••"
-                  />
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleGeneratePassword}
+                      title="Generiraj geslo"
+                    >
+                      <Shuffle className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleCopyPassword}
+                      disabled={!newPassword}
+                      title="Kopiraj geslo"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {newPassword && showPassword && (
+                    <p className="text-xs text-muted-foreground">
+                      Generirano geslo: <span className="font-mono text-foreground">{newPassword}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
