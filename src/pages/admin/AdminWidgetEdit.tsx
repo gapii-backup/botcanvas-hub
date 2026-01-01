@@ -383,32 +383,14 @@ export default function AdminWidgetEdit() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Q&A Webhook URL</Label>
+              <Label htmlFor="knowledge_webhook_url">Knowledge Base Webhook URL</Label>
               <Input
-                value={widget.qa_webhook_url || ''}
-                onChange={(e) => updateField('qa_webhook_url', e.target.value)}
-                placeholder="https://n8n.example.com/webhook/..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="documents_webhook_url">Documents Upload Webhook URL</Label>
-              <Input
-                id="documents_webhook_url"
-                value={widget.documents_webhook_url || ''}
-                onChange={(e) => updateField('documents_webhook_url', e.target.value)}
+                id="knowledge_webhook_url"
+                value={(widget as any).knowledge_webhook_url || ''}
+                onChange={(e) => setWidget({ ...widget, knowledge_webhook_url: e.target.value } as any)}
                 placeholder="https://hub.botmotion.ai/webhook/..."
               />
-              <p className="text-xs text-muted-foreground">Webhook za procesiranje PDF dokumentov</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="documents_delete_webhook_url">Documents Delete Webhook URL</Label>
-              <Input
-                id="documents_delete_webhook_url"
-                value={(widget as any).documents_delete_webhook_url || ''}
-                onChange={(e) => setWidget({ ...widget, documents_delete_webhook_url: e.target.value } as any)}
-                placeholder="https://hub.botmotion.ai/webhook/..."
-              />
-              <p className="text-xs text-muted-foreground">Webhook za brisanje PDF dokumentov iz Qdrant</p>
+              <p className="text-xs text-muted-foreground">Webhook za Q&A, PDF upload in PDF delete</p>
             </div>
             <div className="space-y-2">
               <Label>Booking URL</Label>

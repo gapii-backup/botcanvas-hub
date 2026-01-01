@@ -137,6 +137,7 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'pdf_upload',
           file_url: fileUrl,
           file_name: fileName,
           doc_id: docId,
@@ -190,6 +191,7 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
+          action: 'pdf_delete',
           doc_id: docId,
           table_name: tableName 
         })
