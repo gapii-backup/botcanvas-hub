@@ -38,33 +38,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { Plus, Pencil, Trash2, Users, Loader2, Crown } from 'lucide-react';
 
-interface UserWidget {
+interface WidgetUser {
+  id: string;
   user_id: string;
   user_email: string;
   is_partner: boolean;
   plan: string | null;
   status: string;
   is_active: boolean;
-}
-
-interface AdminUser {
-  id: string;
-  email: string;
   created_at: string;
-  last_sign_in_at: string | null;
-  widget: UserWidget | null;
 }
 
 export default function AdminUsers() {
-  const { session } = useAuth();
-  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [users, setUsers] = useState<WidgetUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   
@@ -77,25 +69,24 @@ export default function AdminUsers() {
   
   // Edit user dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editingUser, setEditingUser] = useState<WidgetUser | null>(null);
   const [editIsPartner, setEditIsPartner] = useState(false);
   const [editPlan, setEditPlan] = useState('basic');
   
   // Delete confirmation
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deletingUser, setDeletingUser] = useState<AdminUser | null>(null);
+  const [deletingUser, setDeletingUser] = useState<WidgetUser | null>(null);
 
   const fetchUsers = async () => {
-    if (!session?.access_token) return;
-    
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('admin-users', {
-        body: { action: 'list' },
-      });
+      const { data, error } = await supabase
+        .from('widgets')
+        .select('id, user_id, user_email, is_partner, plan, status, is_active, created_at')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data.users || []);
+      setUsers((data as WidgetUser[]) || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Napaka pri nalaganju uporabnikov');
@@ -106,7 +97,7 @@ export default function AdminUsers() {
 
   useEffect(() => {
     fetchUsers();
-  }, [session]);
+  }, []);
 
   const handleAddUser = async () => {
     if (!newEmail || !newPassword) {
@@ -121,17 +112,36 @@ export default function AdminUsers() {
 
     try {
       setActionLoading(true);
-      const { error } = await supabase.functions.invoke('admin-users', {
-        body: {
-          action: 'create',
-          email: newEmail,
-          password: newPassword,
-          isPartner,
-          plan: isPartner ? selectedPlan : null,
+
+      // Create user via signUp
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newEmail,
+        password: newPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
         },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('User not created');
+
+      // Create widget for the user
+      const { error: widgetError } = await supabase
+        .from('widgets')
+        .insert({
+          user_id: authData.user.id,
+          user_email: newEmail,
+          api_key: crypto.randomUUID(),
+          is_partner: isPartner || false,
+          subscription_status: isPartner ? 'active' : 'inactive',
+          status: isPartner ? 'partner' : 'new',
+          is_active: isPartner,
+          plan: isPartner ? selectedPlan : null,
+          messages_limit: isPartner ? (selectedPlan === 'enterprise' ? 10000 : selectedPlan === 'pro' ? 5000 : 2000) : 1000,
+          retention_days: isPartner ? (selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30) : 30,
+        });
+
+      if (widgetError) throw widgetError;
 
       toast.success('Uporabnik uspešno ustvarjen');
       setAddDialogOpen(false);
@@ -140,9 +150,10 @@ export default function AdminUsers() {
       setIsPartner(false);
       setSelectedPlan('basic');
       fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating user:', error);
-      toast.error(error.message || 'Napaka pri ustvarjanju uporabnika');
+      const message = error instanceof Error ? error.message : 'Napaka pri ustvarjanju uporabnika';
+      toast.error(message);
     } finally {
       setActionLoading(false);
     }
@@ -153,14 +164,41 @@ export default function AdminUsers() {
 
     try {
       setActionLoading(true);
-      const { error } = await supabase.functions.invoke('admin-users', {
-        body: {
-          action: 'update',
-          userId: editingUser.id,
-          isPartner: editIsPartner,
-          plan: editIsPartner ? editPlan : null,
-        },
-      });
+
+      const updateData: Record<string, unknown> = {
+        is_partner: editIsPartner,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (editIsPartner) {
+        updateData.subscription_status = 'active';
+        updateData.status = 'partner';
+        updateData.is_active = true;
+        updateData.plan = editPlan;
+        
+        switch (editPlan) {
+          case 'enterprise':
+            updateData.messages_limit = 10000;
+            updateData.retention_days = 180;
+            break;
+          case 'pro':
+            updateData.messages_limit = 5000;
+            updateData.retention_days = 60;
+            break;
+          case 'basic':
+          default:
+            updateData.messages_limit = 2000;
+            updateData.retention_days = 30;
+            break;
+        }
+      } else {
+        updateData.is_partner = false;
+      }
+
+      const { error } = await supabase
+        .from('widgets')
+        .update(updateData)
+        .eq('id', editingUser.id);
 
       if (error) throw error;
 
@@ -168,9 +206,10 @@ export default function AdminUsers() {
       setEditDialogOpen(false);
       setEditingUser(null);
       fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating user:', error);
-      toast.error(error.message || 'Napaka pri posodabljanju uporabnika');
+      const message = error instanceof Error ? error.message : 'Napaka pri posodabljanju uporabnika';
+      toast.error(message);
     } finally {
       setActionLoading(false);
     }
@@ -181,12 +220,12 @@ export default function AdminUsers() {
 
     try {
       setActionLoading(true);
-      const { error } = await supabase.functions.invoke('admin-users', {
-        body: {
-          action: 'delete',
-          userId: deletingUser.id,
-        },
-      });
+
+      // Only delete widget, not auth user
+      const { error } = await supabase
+        .from('widgets')
+        .delete()
+        .eq('id', deletingUser.id);
 
       if (error) throw error;
 
@@ -194,22 +233,23 @@ export default function AdminUsers() {
       setDeleteDialogOpen(false);
       setDeletingUser(null);
       fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting user:', error);
-      toast.error(error.message || 'Napaka pri brisanju uporabnika');
+      const message = error instanceof Error ? error.message : 'Napaka pri brisanju uporabnika';
+      toast.error(message);
     } finally {
       setActionLoading(false);
     }
   };
 
-  const openEditDialog = (user: AdminUser) => {
+  const openEditDialog = (user: WidgetUser) => {
     setEditingUser(user);
-    setEditIsPartner(user.widget?.is_partner || false);
-    setEditPlan(user.widget?.plan || 'basic');
+    setEditIsPartner(user.is_partner || false);
+    setEditPlan(user.plan || 'basic');
     setEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (user: AdminUser) => {
+  const openDeleteDialog = (user: WidgetUser) => {
     setDeletingUser(user);
     setDeleteDialogOpen(true);
   };
@@ -347,32 +387,25 @@ export default function AdminUsers() {
                       <TableHead>Plan</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Ustvarjen</TableHead>
-                      <TableHead>Zadnja prijava</TableHead>
                       <TableHead className="text-right">Akcije</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {users.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.email}</TableCell>
+                        <TableCell className="font-medium">{user.user_email}</TableCell>
                         <TableCell>
-                          {user.widget?.is_partner && (
+                          {user.is_partner && (
                             <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
                               <Crown className="h-3 w-3 mr-1" />
                               Partner
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell>{getPlanBadge(user.widget?.plan || null)}</TableCell>
-                        <TableCell>{getStatusBadge(user.widget?.status || 'new')}</TableCell>
+                        <TableCell>{getPlanBadge(user.plan)}</TableCell>
+                        <TableCell>{getStatusBadge(user.status || 'new')}</TableCell>
                         <TableCell>
                           {format(new Date(user.created_at), 'd. MMM yyyy', { locale: sl })}
-                        </TableCell>
-                        <TableCell>
-                          {user.last_sign_in_at 
-                            ? format(new Date(user.last_sign_in_at), 'd. MMM yyyy, HH:mm', { locale: sl })
-                            : '-'
-                          }
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
@@ -411,7 +444,7 @@ export default function AdminUsers() {
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="text-sm text-muted-foreground">
-              Email: <span className="font-medium text-foreground">{editingUser?.email}</span>
+              Email: <span className="font-medium text-foreground">{editingUser?.user_email}</span>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -458,8 +491,8 @@ export default function AdminUsers() {
           <AlertDialogHeader>
             <AlertDialogTitle>Izbriši uporabnika?</AlertDialogTitle>
             <AlertDialogDescription>
-              Ali ste prepričani, da želite izbrisati uporabnika <strong>{deletingUser?.email}</strong>? 
-              Ta akcija bo izbrisala tudi vse povezane podatke in je ni mogoče razveljaviti.
+              Ali ste prepričani, da želite izbrisati widget za uporabnika <strong>{deletingUser?.user_email}</strong>? 
+              Ta akcija bo izbrisala vse povezane podatke in je ni mogoče razveljaviti.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
