@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, MessageCirclePlus, Phone, Mail } from 'lucide-react';
+import { Loader2, MessageCirclePlus, Phone, Mail, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -41,7 +41,7 @@ interface CapacityAddonModalProps {
 }
 
 export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalProps) {
-  const [loading, setLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedOption, setSelectedOption] = useState<CapacityOption | null>(null);
   const { widget, fetchWidget } = useWidget();
@@ -50,7 +50,13 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
 
   const billingPeriod = widget?.billing_period || 'monthly';
   const isYearly = billingPeriod === 'yearly';
-  const capacityOptions = isYearly ? yearlyCapacityOptions : monthlyCapacityOptions;
+  
+  // Get current addons from widget
+  const currentAddons = (widget?.addons as string[] | null) || [];
+  
+  // Filter out already purchased addons
+  const baseOptions = isYearly ? yearlyCapacityOptions : monthlyCapacityOptions;
+  const capacityOptions = baseOptions.filter(option => !currentAddons.includes(option.id));
 
   const handleOptionClick = (option: CapacityOption) => {
     setSelectedOption(option);
@@ -67,8 +73,8 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
       return;
     }
 
-    setLoading(true);
     setShowConfirmDialog(false);
+    setIsProcessing(true);
     
     try {
       const response = await fetch('https://hub.botmotion.ai/webhook/create-addon-checkout', {
@@ -90,7 +96,6 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
           title: 'Addon dodan!',
           description: result.message || 'Addon je bil uspešno dodan k vaši naročnini.'
         });
-        onOpenChange(false);
         window.location.reload();
       } else {
         throw new Error(result.error || 'Napaka pri dodajanju addona');
@@ -101,11 +106,39 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
         description: error.message || 'Nekaj je šlo narobe',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
+      setIsProcessing(false);
       setSelectedOption(null);
     }
   };
+
+  // Show processing overlay when addon is being added
+  if (isProcessing) {
+    return (
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogContent className="max-w-sm [&>button]:hidden">
+          <div className="flex flex-col items-center justify-center py-8 space-y-6">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 animate-pulse flex items-center justify-center">
+                <Sparkles className="h-10 w-10 text-black animate-bounce" />
+              </div>
+              <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-amber-500/30 animate-ping" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Dodajanje addona...</h3>
+              <p className="text-sm text-muted-foreground">
+                {selectedOption?.name}
+              </p>
+              <div className="flex items-center justify-center gap-1 pt-2">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
@@ -120,27 +153,32 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
           </DialogHeader>
 
           <div className="space-y-3 my-4">
-            {capacityOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => handleOptionClick(option)}
-                disabled={loading}
-                className="w-full flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/50 transition-all text-left group"
-              >
-                <div>
-                  <span className="font-semibold text-foreground group-hover:text-amber-500 transition-colors">
-                    {option.name}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-foreground">
-                    €{option.price}
-                    <span className="text-xs text-muted-foreground ml-1">+DDV</span>
+            {capacityOptions.length > 0 ? (
+              capacityOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleOptionClick(option)}
+                  className="w-full flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/50 transition-all text-left group"
+                >
+                  <div>
+                    <span className="font-semibold text-foreground group-hover:text-amber-500 transition-colors">
+                      {option.name}
+                    </span>
                   </div>
-                  <div className="text-xs text-muted-foreground">/{option.period}</div>
-                </div>
-              </button>
-            ))}
+                  <div className="text-right">
+                    <div className="font-bold text-foreground">
+                      €{option.price}
+                      <span className="text-xs text-muted-foreground ml-1">+DDV</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">/{option.period}</div>
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="p-4 rounded-xl border border-green-500/30 bg-green-500/10 text-center">
+                <p className="text-green-400 font-medium">✓ Že imate vse standardne addone</p>
+              </div>
+            )}
 
             {/* Custom option */}
             <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5">
@@ -217,13 +255,11 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
+            <AlertDialogCancel>Prekliči</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmAddon} 
-              disabled={loading}
               className="bg-amber-500 hover:bg-amber-600 text-black"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Potrjujem nakup
             </AlertDialogAction>
           </AlertDialogFooter>
