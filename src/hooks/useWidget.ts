@@ -16,6 +16,8 @@ export interface Widget {
   billing_period: string;
   status: string;
   is_active: boolean;
+  is_partner: boolean;
+  retention_days: number;
   
   // Basic info
   bot_name: string | null;

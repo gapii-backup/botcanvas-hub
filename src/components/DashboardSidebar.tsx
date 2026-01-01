@@ -50,6 +50,7 @@ type NavItem = {
   icon: typeof LayoutDashboard;
   href: string;
   requiresPro?: boolean;
+  hideForPartner?: boolean;
 };
 
 const navItems: NavItem[] = [
@@ -58,8 +59,8 @@ const navItems: NavItem[] = [
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
-  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription' },
-  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade' },
+  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', hideForPartner: true },
+  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', hideForPartner: true },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
@@ -86,12 +87,21 @@ export function DashboardSidebar({
 
   // Check if user has Pro or Enterprise plan
   const hasProAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
+  
+  // Check if user is a partner
+  const isPartner = widget?.is_partner === true;
 
   // Check if a section is locked for basic users
   const isLocked = (item: NavItem) => {
     if (hasProAccess) return false;
     return item.requiresPro === true;
   };
+
+  // Filter nav items based on partner status
+  const filteredNavItems = navItems.filter(item => {
+    if (isPartner && item.hideForPartner) return false;
+    return true;
+  });
 
   const handleSignOut = async () => {
     await signOut();
@@ -205,10 +215,9 @@ export function DashboardSidebar({
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            const locked = isLocked(item);
             
             return (
               <button
@@ -237,13 +246,12 @@ export function DashboardSidebar({
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            const locked = isLocked(item);
             
             return (
-            <button
+              <button
                 key={item.href}
                 onClick={() => handleNavClick(item.href)}
                 className={cn(

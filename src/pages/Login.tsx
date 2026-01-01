@@ -63,7 +63,10 @@ export default function Login() {
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
     if (user && !widgetLoading) {
-        if (!widget?.plan) {
+        // Partners skip onboarding and go directly to dashboard
+        if (widget?.is_partner) {
+          navigate('/dashboard');
+        } else if (!widget?.plan) {
           navigate('/pricing');
         } else if (widget.status === 'pending_payment') {
           navigate('/customize/complete');
