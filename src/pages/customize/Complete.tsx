@@ -246,7 +246,7 @@ export default function Complete() {
     try {
       // Generate API key if not existing
       const existingApiKey = widget?.api_key;
-      const apiKey = existingApiKey || `bm_live_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`;
+      const apiKey = existingApiKey || `bm_live_${crypto.randomUUID().slice(0, 18)}`;
       
       // Save all widget data to widgets table (billing_period NOT saved - only sent to webhook)
       await upsertWidget({
