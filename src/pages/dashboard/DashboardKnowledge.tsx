@@ -147,7 +147,7 @@ export default function DashboardKnowledge() {
         itemToDelete.id, 
         itemToDelete.fileUrl,
         itemToDelete.docId,
-        (widget as any)?.documents_delete_webhook_url
+        (widget as any)?.knowledge_webhook_url
       );
       if (error) {
         toast({ title: 'Napaka', description: 'Napaka pri brisanju dokumenta.', variant: 'destructive' });
@@ -161,7 +161,7 @@ export default function DashboardKnowledge() {
   };
 
   const handleTrain = async () => {
-    if (!widget?.qa_webhook_url) {
+    if (!(widget as any)?.knowledge_webhook_url) {
       toast({ title: 'Napaka', description: 'Webhook URL ni nastavljen.', variant: 'destructive' });
       return;
     }
@@ -174,10 +174,11 @@ export default function DashboardKnowledge() {
     setTraining(true);
 
     // Sproži webhook TAKOJ (fire and forget)
-    fetch(widget.qa_webhook_url, {
+    fetch((widget as any).knowledge_webhook_url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'qa_upload',
         markdown: buildMarkdown(),
         lastmod: getLatestTimestamp(),
         table_name: widget.table_name
@@ -207,13 +208,13 @@ export default function DashboardKnowledge() {
       return;
     }
 
-    const { data, error } = await uploadDocument(file, widget?.documents_webhook_url);
+    const { data, error } = await uploadDocument(file, (widget as any)?.knowledge_webhook_url);
     if (error) {
       toast({ title: 'Napaka', description: error.message || 'Napaka pri nalaganju dokumenta.', variant: 'destructive' });
     } else {
       toast({ title: 'Uspeh', description: 'Dokument naložen in se procesira.' });
     }
-  }, [uploadDocument, widget?.documents_webhook_url, toast]);
+  }, [uploadDocument, (widget as any)?.knowledge_webhook_url, toast]);
 
   const handleOpenDocument = (fileUrl: string) => {
     if (!fileUrl) {
