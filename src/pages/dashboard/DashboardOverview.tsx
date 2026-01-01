@@ -300,7 +300,7 @@ export default function DashboardOverview() {
               </div>
             </div>
             <p className="text-3xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
-            <p className="text-sm text-muted-foreground mt-1">Pogovori ta mesec</p>
+            <p className="text-sm text-muted-foreground mt-1">Število uporabnikov ta mesec</p>
           </div>
 
           {hasContactsAddon && (
