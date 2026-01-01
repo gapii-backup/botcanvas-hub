@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+// File size limit
+const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 export interface KnowledgeDocument {
   id: string;
   table_name: string;
@@ -46,6 +50,14 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
 
   const uploadDocument = async (file: File, webhookUrl?: string | null) => {
     if (!tableName) return { data: null, error: new Error('No table name') };
+    
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return { 
+        data: null, 
+        error: new Error(`Datoteka je prevelika. Maksimalna velikost je ${MAX_FILE_SIZE_MB}MB.`) 
+      };
+    }
     
     setUploading(true);
     try {
