@@ -63,12 +63,17 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
         return { data: null, error: uploadError };
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Get signed URL (1 year validity for private bucket)
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('knowledge-documents')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365);
 
-      const fileUrl = urlData.publicUrl;
+      if (signedUrlError) {
+        setUploading(false);
+        return { data: null, error: signedUrlError };
+      }
+
+      const fileUrl = signedUrlData.signedUrl;
 
       // Insert record with doc_id
       const { data, error } = await supabase
