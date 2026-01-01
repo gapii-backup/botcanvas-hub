@@ -38,7 +38,6 @@ import {
   Save,
   Undo2,
   Sparkles,
-  Shield,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -93,9 +92,6 @@ export function DashboardSidebar({
   
   // Check if user is a partner
   const isPartner = widget?.is_partner === true;
-  
-  // Check if user is an admin
-  const isAdmin = widget?.is_admin === true;
 
   // Check if a section is locked for basic users
   const isLocked = (item: NavItem) => {
@@ -252,22 +248,6 @@ export function DashboardSidebar({
               </button>
             );
           })}
-          
-          {/* Admin Panel Link - Mobile */}
-          {isAdmin && (
-            <button
-              onClick={() => handleNavClick('/admin')}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left mt-4 border-t border-border pt-4",
-                location.pathname.startsWith('/admin')
-                  ? "bg-purple-500/10 text-purple-400"
-                  : "text-purple-400 hover:bg-purple-500/10"
-              )}
-            >
-              <Shield className="h-5 w-5" />
-              <span>Admin Panel</span>
-            </button>
-          )}
         </nav>
       </div>
 
@@ -301,22 +281,6 @@ export function DashboardSidebar({
               </button>
             );
           })}
-          
-          {/* Admin Panel Link */}
-          {isAdmin && (
-            <button
-              onClick={() => handleNavClick('/admin')}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left mt-4 border-t border-border pt-4",
-                location.pathname.startsWith('/admin')
-                  ? "bg-purple-500/10 text-purple-400"
-                  : "text-purple-400 hover:bg-purple-500/10"
-              )}
-            >
-              <Shield className="h-5 w-5" />
-              <span>Admin Panel</span>
-            </button>
-          )}
         </nav>
 
         {/* User Info at Bottom */}

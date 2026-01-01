@@ -245,7 +245,6 @@ export type Database = {
           home_title: string | null
           id: string
           is_active: boolean
-          is_admin: boolean
           is_partner: boolean
           lead_webhook_url: string | null
           messages_limit: number | null
@@ -307,7 +306,6 @@ export type Database = {
           home_title?: string | null
           id?: string
           is_active?: boolean
-          is_admin?: boolean
           is_partner?: boolean
           lead_webhook_url?: string | null
           messages_limit?: number | null
@@ -369,7 +367,6 @@ export type Database = {
           home_title?: string | null
           id?: string
           is_active?: boolean
-          is_admin?: boolean
           is_partner?: boolean
           lead_webhook_url?: string | null
           messages_limit?: number | null
@@ -492,7 +489,6 @@ export type Database = {
         Args: { p_table_name: string }
         Returns: number
       }
-      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

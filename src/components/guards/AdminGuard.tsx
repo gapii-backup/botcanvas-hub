@@ -1,56 +1,20 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+
+const ADMIN_EMAIL = 'gasper.perko2@gmail.com';
 
 interface AdminGuardProps {
   children: ReactNode;
 }
 
 export function AdminGuard({ children }: AdminGuardProps) {
-  const { user, loading: authLoading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    async function checkAdminStatus() {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('widgets')
-          .select('is_admin')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error checking admin status:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(data?.is_admin === true);
-        }
-      } catch (err) {
-        console.error('Error checking admin status:', err);
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (!authLoading) {
-      checkAdminStatus();
-    }
-  }, [user, authLoading]);
-
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -59,7 +23,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!isAdmin) {
+  if (user.email !== ADMIN_EMAIL) {
     return <Navigate to="/dashboard" replace />;
   }
 

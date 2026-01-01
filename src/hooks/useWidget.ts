@@ -17,7 +17,6 @@ export interface Widget {
   status: string;
   is_active: boolean;
   is_partner: boolean;
-  is_admin: boolean;
   retention_days: number;
   
   // Basic info

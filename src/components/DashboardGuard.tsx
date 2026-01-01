@@ -17,16 +17,6 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     );
   }
 
-  // Admins always have access - no restrictions
-  if (widget?.is_admin) {
-    return <>{children}</>;
-  }
-
-  // Partners always have access
-  if (widget?.is_partner) {
-    return <>{children}</>;
-  }
-
   // No widget exists - redirect to pricing
   if (!widget) {
     return <Navigate to="/pricing" replace />;

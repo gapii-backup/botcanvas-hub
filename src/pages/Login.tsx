@@ -63,12 +63,6 @@ export default function Login() {
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
     if (user && !widgetLoading) {
-        // Admins always go directly to dashboard - no restrictions
-        if (widget?.is_admin) {
-          navigate('/dashboard');
-          return;
-        }
-        
         // Partners skip onboarding and go directly to dashboard
         if (widget?.is_partner) {
           navigate('/dashboard');
