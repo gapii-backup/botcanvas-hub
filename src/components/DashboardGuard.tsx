@@ -22,6 +22,11 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     return <Navigate to="/pricing" replace />;
   }
 
+  // Partner users - skip onboarding, go directly to dashboard
+  if (widget.is_partner === true && widget.status === 'partner') {
+    return <>{children}</>;
+  }
+
   // No plan selected - redirect to pricing
   if (!widget.plan) {
     return <Navigate to="/pricing" replace />;
