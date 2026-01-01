@@ -132,17 +132,44 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
       fetch(deleteWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          doc_id: docId
-        })
+        body: JSON.stringify({ doc_id: docId })
       }).catch(err => console.error('Delete webhook error:', err));
     }
 
-    // Izbriši iz storage
-    const urlParts = fileUrl.split('/knowledge-documents/');
-    if (urlParts.length > 1) {
-      const filePath = urlParts[1];
-      await supabase.storage.from('knowledge-documents').remove([filePath]);
+    // Izbriši iz storage - popravljeno za signed URL
+    try {
+      // Signed URL format: .../storage/v1/object/sign/knowledge-documents/table_name/file.pdf?token=...
+      // Public URL format: .../storage/v1/object/public/knowledge-documents/table_name/file.pdf
+      
+      let filePath = '';
+      
+      if (fileUrl.includes('/storage/v1/object/sign/knowledge-documents/')) {
+        // Signed URL
+        const pathPart = fileUrl.split('/storage/v1/object/sign/knowledge-documents/')[1];
+        filePath = pathPart?.split('?')[0] || ''; // Odstrani query params
+      } else if (fileUrl.includes('/storage/v1/object/public/knowledge-documents/')) {
+        // Public URL
+        filePath = fileUrl.split('/storage/v1/object/public/knowledge-documents/')[1] || '';
+      } else if (fileUrl.includes('/knowledge-documents/')) {
+        // Fallback
+        filePath = fileUrl.split('/knowledge-documents/')[1]?.split('?')[0] || '';
+      }
+      
+      if (filePath) {
+        // Decode URL encoded characters (npr. %20 za presledke)
+        filePath = decodeURIComponent(filePath);
+        console.log('Deleting file from storage:', filePath);
+        
+        const { error: storageError } = await supabase.storage
+          .from('knowledge-documents')
+          .remove([filePath]);
+          
+        if (storageError) {
+          console.error('Storage delete error:', storageError);
+        }
+      }
+    } catch (err) {
+      console.error('Error extracting file path:', err);
     }
 
     // Izbriši iz baze
