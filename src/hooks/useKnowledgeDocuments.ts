@@ -189,7 +189,10 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
       fetch(deleteWebhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ doc_id: docId })
+        body: JSON.stringify({ 
+          doc_id: docId,
+          table_name: tableName 
+        })
       }).catch(err => console.error('Delete webhook error:', err));
     }
 
