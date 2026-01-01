@@ -214,6 +214,14 @@ export default function DashboardKnowledge() {
     }
   }, [uploadDocument, widget?.documents_webhook_url, toast]);
 
+  const handleOpenDocument = (fileUrl: string) => {
+    if (!fileUrl) {
+      toast({ title: 'Napaka', description: 'URL dokumenta ni na voljo.', variant: 'destructive' });
+      return;
+    }
+    window.open(fileUrl, '_blank');
+  };
+
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     handleFileUpload(e.dataTransfer.files);
@@ -415,11 +423,18 @@ export default function DashboardKnowledge() {
             ) : (
               <div className="space-y-2">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="flex items-center justify-between border rounded-lg p-3 hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div 
+                    key={doc.id} 
+                    className="flex items-center justify-between border rounded-lg p-3 hover:bg-muted/30 transition-colors"
+                  >
+                    <div 
+                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => doc.file_url && handleOpenDocument(doc.file_url)}
+                      title="Klikni za ogled dokumenta"
+                    >
                       <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{doc.file_name}</p>
+                        <p className="font-medium text-sm truncate hover:underline">{doc.file_name}</p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(doc.created_at), 'dd. MMM yyyy', { locale: sl })}
                         </p>
@@ -431,7 +446,8 @@ export default function DashboardKnowledge() {
                         variant="ghost" 
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setItemToDelete({ type: 'doc', id: doc.id, fileUrl: doc.file_url, docId: doc.doc_id });
                           setDeleteDialogOpen(true);
                         }}
