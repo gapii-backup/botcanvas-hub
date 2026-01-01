@@ -2,8 +2,6 @@ import { Navigate } from 'react-router-dom';
 import { useWidget } from '@/hooks/useWidget';
 import { Loader2 } from 'lucide-react';
 
-const ADMIN_EMAILS = ['info@botmotion.ai', 'admin@botmotion.ai', 'gasper.perko2@gmail.com'];
-
 interface DashboardGuardProps {
   children: React.ReactNode;
 }
@@ -19,11 +17,8 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     );
   }
 
-  // Check if user is admin by is_admin flag OR by email
-  const isAdmin = widget?.is_admin || (widget?.user_email && ADMIN_EMAILS.includes(widget.user_email));
-
   // Admins always have access - no restrictions
-  if (isAdmin) {
+  if (widget?.is_admin) {
     return <>{children}</>;
   }
 

@@ -17,6 +17,11 @@ export function CustomizeGuard({ children }: CustomizeGuardProps) {
     );
   }
 
+  // Admins always have access - send them to dashboard
+  if (widget?.is_admin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   // If no widget or no plan selected, redirect to pricing
   if (!widget?.plan) {
     return <Navigate to="/pricing" replace />;

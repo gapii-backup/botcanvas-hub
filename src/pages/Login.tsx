@@ -60,16 +60,11 @@ export default function Login() {
     setResetSent(false);
   };
 
-  const ADMIN_EMAILS = ['info@botmotion.ai', 'admin@botmotion.ai', 'gasper.perko2@gmail.com'];
-
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
     if (user && !widgetLoading) {
-        // Check if user is admin by is_admin flag OR by email
-        const isAdmin = widget?.is_admin || (widget?.user_email && ADMIN_EMAILS.includes(widget.user_email));
-        
         // Admins always go directly to dashboard - no restrictions
-        if (isAdmin) {
+        if (widget?.is_admin) {
           navigate('/dashboard');
           return;
         }
