@@ -187,6 +187,24 @@ export default function AdminUsers() {
         // Don't throw - user was created, widget creation might fail due to RLS
       }
 
+      // Send webhook notification for new user
+      try {
+        await fetch('https://hub.botmotion.ai/webhook/new-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: newEmail,
+            name: newEmail.split('@')[0], // Use email prefix as name
+            is_partner: isPartner || false,
+          }),
+        });
+      } catch (webhookError) {
+        console.error('Webhook notification failed:', webhookError);
+        // Don't fail user creation if webhook fails
+      }
+
       toast.success('Uporabnik uspešno ustvarjen. Prosim, ponovno se prijavite kot admin.');
       setAddDialogOpen(false);
       setNewEmail('');
