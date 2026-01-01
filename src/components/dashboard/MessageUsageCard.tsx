@@ -87,7 +87,7 @@ export function MessageUsageCard({
           <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
             <Zap className="h-5 w-5 text-primary" />
           </div>
-          <span className="text-sm text-muted-foreground">Poraba sporočil</span>
+          <span className="text-sm text-muted-foreground">Porabljena sporočila ta mesec</span>
         </div>
         <span className="text-sm font-medium text-foreground">
           {messagesUsed.toLocaleString('sl-SI')} / {limit.toLocaleString('sl-SI')}
