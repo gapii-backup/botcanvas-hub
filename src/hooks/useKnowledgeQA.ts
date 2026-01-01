@@ -49,9 +49,28 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
   const updateLastTrained = async () => {
     if (!tableName) return;
     const now = new Date().toISOString();
-    await supabase
+    
+    // POMEMBNO: Posodobi SAMO last_trained, NE lastmod!
+    // lastmod se posodablja avtomatsko preko database triggerja
+    const { data: existing } = await supabase
       .from('knowledge_qa_lastmod')
-      .upsert({ table_name: tableName, last_trained: now, lastmod: now });
+      .select('lastmod')
+      .eq('table_name', tableName)
+      .maybeSingle();
+
+    if (existing) {
+      // Če zapis obstaja, posodobi samo last_trained
+      await supabase
+        .from('knowledge_qa_lastmod')
+        .update({ last_trained: now })
+        .eq('table_name', tableName);
+    } else {
+      // Če zapis ne obstaja, ustvari novega
+      await supabase
+        .from('knowledge_qa_lastmod')
+        .insert({ table_name: tableName, last_trained: now });
+    }
+    
     setLastTrained(now);
   };
 

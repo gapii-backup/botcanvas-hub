@@ -64,9 +64,17 @@ export default function DashboardKnowledge() {
 
   // Calculate if training is needed
   const needsTraining = useMemo(() => {
+    // Če ni Q&A parov, ni potrebe za training
     if (qaItems.length === 0) return false;
-    if (!lastmod) return false;
-    if (!lastTrained) return true; // Never trained yet
+    
+    // Če ni lastmod (ni bilo še nobenih sprememb v bazi), preveri ali obstajajo items
+    // To se lahko zgodi če so bili Q&A dodani pred uvedbo lastmod sistema
+    if (!lastmod) return qaItems.length > 0;
+    
+    // Če ni bilo še nobenega traininga, potrebujemo training
+    if (!lastTrained) return true;
+    
+    // Če je lastmod novejši od last_trained, potrebujemo training
     return new Date(lastmod) > new Date(lastTrained);
   }, [lastmod, lastTrained, qaItems.length]);
 
