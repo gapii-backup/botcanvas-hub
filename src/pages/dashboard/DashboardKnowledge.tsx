@@ -206,11 +206,11 @@ export default function DashboardKnowledge() {
       return;
     }
 
-    const { error } = await uploadDocument(file, widget?.documents_webhook_url);
+    const { data, error } = await uploadDocument(file, widget?.documents_webhook_url);
     if (error) {
-      toast({ title: 'Napaka', description: 'Napaka pri nalaganju dokumenta.', variant: 'destructive' });
+      toast({ title: 'Napaka', description: error.message || 'Napaka pri nalaganju dokumenta.', variant: 'destructive' });
     } else {
-      toast({ title: 'Uspeh', description: 'Dokument naložen.' });
+      toast({ title: 'Uspeh', description: 'Dokument naložen in se procesira.' });
     }
   }, [uploadDocument, widget?.documents_webhook_url, toast]);
 
@@ -387,6 +387,9 @@ export default function DashboardKnowledge() {
                   <Upload className="h-6 w-6 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">
                     Povlecite PDF sem ali kliknite
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Maksimalna velikost: 10MB
                   </p>
                 </div>
               )}
