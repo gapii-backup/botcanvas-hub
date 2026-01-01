@@ -137,10 +137,16 @@ export default function AdminUsers() {
     try {
       setActionLoading(true);
 
-      // Get current admin session
-      const { data: currentSession } = await supabase.auth.getSession();
-      const adminEmail = currentSession.session?.user?.email;
+      // IMPORTANT: Save admin session BEFORE signUp
+      const { data: adminSessionData } = await supabase.auth.getSession();
+      const adminSession = adminSessionData.session;
       
+      if (!adminSession) {
+        toast.error('Admin seja ni najdena. Prosim, ponovno se prijavite.');
+        setActionLoading(false);
+        return;
+      }
+
       // Create user via signUp
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newEmail,
@@ -153,59 +159,93 @@ export default function AdminUsers() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('User not created');
 
-      // Immediately sign out to prevent admin from being logged in as new user
-      await supabase.auth.signOut();
+      const newUserId = authData.user.id;
 
-      // Create widget for the user BEFORE re-authenticating admin
-      // We need to use a workaround since we're logged out
-      // Re-authenticate admin first, then create widget
-      if (adminEmail && currentSession.session) {
-        // We need to re-login the admin - but we don't have their password
-        // So we'll create the widget using the new user's session that was just created
-        // Actually, after signOut we can't create widget without RLS issues
-        // Let's re-authenticate admin first using refresh token if available
+      // IMMEDIATELY restore admin session
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
+
+      if (sessionError) {
+        console.error('Failed to restore admin session:', sessionError);
+        toast.error('Uporabnik ustvarjen, vendar je seja potekla. Prosim, ponovno se prijavite.');
+        window.location.href = '/login';
+        return;
       }
 
-      // Create widget for the user (this happens before full signout completes)
-      const { error: widgetError } = await supabase
-        .from('widgets')
-        .insert({
-          user_id: authData.user.id,
-          user_email: newEmail,
-          api_key: crypto.randomUUID(),
-          is_partner: isPartner || false,
-          subscription_status: isPartner ? 'active' : 'inactive',
-          status: isPartner ? 'partner' : 'new',
-          is_active: isPartner,
-          plan: isPartner ? selectedPlan : null,
-          messages_limit: isPartner ? (selectedPlan === 'enterprise' ? 10000 : selectedPlan === 'pro' ? 5000 : 2000) : 1000,
-          retention_days: isPartner ? (selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30) : 30,
-        });
+      // Now create widget for the user (admin is authenticated again)
+      if (isPartner) {
+        const { error: widgetError } = await supabase
+          .from('widgets')
+          .insert({
+            user_id: newUserId,
+            user_email: newEmail,
+            api_key: crypto.randomUUID(),
+            is_partner: true,
+            subscription_status: 'active',
+            status: 'partner',
+            is_active: true,
+            plan: selectedPlan,
+            messages_limit: selectedPlan === 'enterprise' ? 10000 : selectedPlan === 'pro' ? 5000 : 2000,
+            retention_days: selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30,
+            billing_period: 'monthly',
+            support_tickets: [],
+          });
 
-      if (widgetError) {
-        console.error('Widget creation error:', widgetError);
-        // Don't throw - user was created, widget creation might fail due to RLS
+        if (widgetError) {
+          console.error('Widget creation error:', widgetError);
+          toast.error('Uporabnik ustvarjen, vendar widget ni bil ustvarjen: ' + widgetError.message);
+        } else {
+          toast.success('Partner uspešno ustvarjen z widgetom');
+        }
+        
+        // DO NOT send webhook for partners - they don't get welcome email
+      } else {
+        // For non-partner users, create basic widget entry
+        const { error: widgetError } = await supabase
+          .from('widgets')
+          .insert({
+            user_id: newUserId,
+            user_email: newEmail,
+            api_key: crypto.randomUUID(),
+            is_partner: false,
+            subscription_status: 'inactive',
+            status: 'new',
+            is_active: false,
+            plan: null,
+            messages_limit: 1000,
+            retention_days: 30,
+            billing_period: 'monthly',
+            support_tickets: [],
+          });
+
+        if (widgetError) {
+          console.error('Widget creation error:', widgetError);
+          // Don't fail completely - user was created
+        }
+
+        // Send webhook notification ONLY for non-partner users
+        try {
+          await fetch('https://hub.botmotion.ai/webhook/new-user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: newEmail,
+              name: newEmail.split('@')[0],
+              is_partner: false,
+            }),
+          });
+        } catch (webhookError) {
+          console.error('Webhook notification failed:', webhookError);
+        }
+
+        toast.success('Uporabnik uspešno ustvarjen');
       }
 
-      // Send webhook notification for new user
-      try {
-        await fetch('https://hub.botmotion.ai/webhook/new-user', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: newEmail,
-            name: newEmail.split('@')[0], // Use email prefix as name
-            is_partner: isPartner || false,
-          }),
-        });
-      } catch (webhookError) {
-        console.error('Webhook notification failed:', webhookError);
-        // Don't fail user creation if webhook fails
-      }
-
-      toast.success('Uporabnik uspešno ustvarjen. Prosim, ponovno se prijavite kot admin.');
+      // Reset form and close dialog
       setAddDialogOpen(false);
       setNewEmail('');
       setNewPassword('');
@@ -213,12 +253,13 @@ export default function AdminUsers() {
       setIsPartner(false);
       setSelectedPlan('basic');
       
-      // Redirect to login page since admin session was lost
-      window.location.href = '/login';
+      // Refresh users list
+      fetchUsers();
     } catch (error: unknown) {
       console.error('Error creating user:', error);
       const message = error instanceof Error ? error.message : 'Napaka pri ustvarjanju uporabnika';
       toast.error(message);
+    } finally {
       setActionLoading(false);
     }
   };
