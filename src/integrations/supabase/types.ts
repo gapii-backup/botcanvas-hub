@@ -44,6 +44,7 @@ export type Database = {
       knowledge_documents: {
         Row: {
           created_at: string
+          doc_id: string | null
           file_name: string
           file_url: string
           id: string
@@ -53,6 +54,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          doc_id?: string | null
           file_name: string
           file_url: string
           id?: string
@@ -62,6 +64,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          doc_id?: string | null
           file_name?: string
           file_url?: string
           id?: string
@@ -308,6 +311,7 @@ export type Database = {
           bubble_text: string | null
           created_at: string
           custom_capacity: number
+          documents_delete_webhook_url: string | null
           documents_webhook_url: string | null
           edge_trigger_text: string | null
           footer_link_text: string | null
@@ -372,6 +376,7 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           custom_capacity?: number
+          documents_delete_webhook_url?: string | null
           documents_webhook_url?: string | null
           edge_trigger_text?: string | null
           footer_link_text?: string | null
@@ -436,6 +441,7 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           custom_capacity?: number
+          documents_delete_webhook_url?: string | null
           documents_webhook_url?: string | null
           edge_trigger_text?: string | null
           footer_link_text?: string | null
