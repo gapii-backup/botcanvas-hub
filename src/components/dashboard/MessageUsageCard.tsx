@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addMonths, addYears } from 'date-fns';
 import { sl } from 'date-fns/locale';
-import { Zap } from 'lucide-react';
+import { Zap, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CapacityAddonModal } from './CapacityAddonModal';
 
 interface MessageUsageCardProps {
   tableName: string | null | undefined;
@@ -19,6 +21,7 @@ export function MessageUsageCard({
 }: MessageUsageCardProps) {
   const [messagesUsed, setMessagesUsed] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [capacityModalOpen, setCapacityModalOpen] = useState(false);
 
   useEffect(() => {
     const getMessagesUsed = async () => {
@@ -81,29 +84,43 @@ export function MessageUsageCard({
   }
 
   return (
-    <div className="glass rounded-2xl p-8 animate-slide-up">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Zap className="h-6 w-6 text-primary" />
+    <>
+      <div className="glass rounded-2xl p-8 animate-slide-up">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-lg font-medium text-foreground">Poraba sporočil</span>
           </div>
-          <span className="text-lg font-medium text-foreground">Poraba sporočil</span>
+          <span className="text-xl font-semibold text-foreground">
+            {messagesUsed.toLocaleString('sl-SI')} / {limit.toLocaleString('sl-SI')}
+          </span>
         </div>
-        <span className="text-xl font-semibold text-foreground">
-          {messagesUsed.toLocaleString('sl-SI')} / {limit.toLocaleString('sl-SI')}
-        </span>
+        
+        <div className="w-full bg-muted rounded-full h-3">
+          <div 
+            className={`h-3 rounded-full transition-all duration-500 ${getProgressColor()}`}
+            style={{ width: `${Math.min(percentage, 100)}%` }}
+          />
+        </div>
+        
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Obdobje se ponastavi: {format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}
+          </p>
+          <Button
+            onClick={() => setCapacityModalOpen(true)}
+            size="sm"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Dodaj kapaciteto
+          </Button>
+        </div>
       </div>
-      
-      <div className="w-full bg-muted rounded-full h-3">
-        <div 
-          className={`h-3 rounded-full transition-all duration-500 ${getProgressColor()}`}
-          style={{ width: `${Math.min(percentage, 100)}%` }}
-        />
-      </div>
-      
-      <p className="text-sm text-muted-foreground mt-4">
-        Obdobje se ponastavi: {format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}
-      </p>
-    </div>
+
+      <CapacityAddonModal open={capacityModalOpen} onOpenChange={setCapacityModalOpen} />
+    </>
   );
 }
