@@ -38,6 +38,7 @@ import {
   Save,
   Undo2,
   Sparkles,
+  BookOpen,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -57,6 +58,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
+  { label: 'Baza znanja', icon: BookOpen, href: '/dashboard/knowledge' },
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },

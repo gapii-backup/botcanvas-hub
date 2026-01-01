@@ -41,6 +41,63 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_documents: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_url: string
+          id: string
+          status: string
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_url: string
+          id?: string
+          status?: string
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          status?: string
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      knowledge_qa: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          question: string
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          question: string
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
@@ -233,6 +290,7 @@ export type Database = {
           bubble_text: string | null
           created_at: string
           custom_capacity: number
+          documents_webhook_url: string | null
           edge_trigger_text: string | null
           footer_link_text: string | null
           footer_link_url: string | null
@@ -253,6 +311,7 @@ export type Database = {
           plan: string | null
           position: string
           primary_color: string | null
+          qa_webhook_url: string | null
           quick_questions: Json | null
           retention_days: number
           setup_fee_basic_paid: boolean
@@ -295,6 +354,7 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           custom_capacity?: number
+          documents_webhook_url?: string | null
           edge_trigger_text?: string | null
           footer_link_text?: string | null
           footer_link_url?: string | null
@@ -315,6 +375,7 @@ export type Database = {
           plan?: string | null
           position?: string
           primary_color?: string | null
+          qa_webhook_url?: string | null
           quick_questions?: Json | null
           retention_days?: number
           setup_fee_basic_paid?: boolean
@@ -357,6 +418,7 @@ export type Database = {
           bubble_text?: string | null
           created_at?: string
           custom_capacity?: number
+          documents_webhook_url?: string | null
           edge_trigger_text?: string | null
           footer_link_text?: string | null
           footer_link_url?: string | null
@@ -377,6 +439,7 @@ export type Database = {
           plan?: string | null
           position?: string
           primary_color?: string | null
+          qa_webhook_url?: string | null
           quick_questions?: Json | null
           retention_days?: number
           setup_fee_basic_paid?: boolean
