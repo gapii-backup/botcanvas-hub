@@ -327,6 +327,7 @@ export type Database = {
           is_active: boolean
           is_admin: boolean
           is_partner: boolean
+          knowledge_webhook_url: string | null
           lead_webhook_url: string | null
           messages_limit: number | null
           mode: string
@@ -392,6 +393,7 @@ export type Database = {
           is_active?: boolean
           is_admin?: boolean
           is_partner?: boolean
+          knowledge_webhook_url?: string | null
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
@@ -457,6 +459,7 @@ export type Database = {
           is_active?: boolean
           is_admin?: boolean
           is_partner?: boolean
+          knowledge_webhook_url?: string | null
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
