@@ -49,6 +49,7 @@ interface WidgetUser {
   user_id: string;
   user_email: string;
   is_partner: boolean;
+  is_admin: boolean;
   plan: string | null;
   status: string;
   is_active: boolean;
@@ -93,7 +94,7 @@ export default function AdminUsers() {
       setLoading(true);
       const { data, error } = await supabase
         .from('widgets')
-        .select('id, user_id, user_email, is_partner, plan, status, is_active, created_at')
+        .select('id, user_id, user_email, is_partner, is_admin, plan, status, is_active, created_at')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -495,12 +496,19 @@ export default function AdminUsers() {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.user_email}</TableCell>
                         <TableCell>
-                          {user.is_partner && (
-                            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                              <Crown className="h-3 w-3 mr-1" />
-                              Partner
-                            </Badge>
-                          )}
+                          <div className="flex gap-1 flex-wrap">
+                            {user.is_admin && (
+                              <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                                Admin
+                              </Badge>
+                            )}
+                            {user.is_partner && (
+                              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                                <Crown className="h-3 w-3 mr-1" />
+                                Partner
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>{getPlanBadge(user.plan)}</TableCell>
                         <TableCell>{getStatusBadge(user.status || 'new')}</TableCell>
