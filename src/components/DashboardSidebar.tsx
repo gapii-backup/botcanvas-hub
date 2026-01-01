@@ -40,6 +40,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
+import { useToast } from '@/hooks/use-toast';
 
 interface DashboardSidebarProps {
   children: React.ReactNode;
@@ -50,7 +51,7 @@ type NavItem = {
   icon: typeof LayoutDashboard;
   href: string;
   requiresPro?: boolean;
-  hideForPartner?: boolean;
+  blockedForPartner?: boolean;
 };
 
 const navItems: NavItem[] = [
@@ -59,8 +60,8 @@ const navItems: NavItem[] = [
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
-  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', hideForPartner: true },
-  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', hideForPartner: true },
+  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true },
+  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
@@ -72,6 +73,7 @@ export function DashboardSidebar({
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -97,17 +99,26 @@ export function DashboardSidebar({
     return item.requiresPro === true;
   };
 
-  // Filter nav items based on partner status
-  const filteredNavItems = navItems.filter(item => {
-    if (isPartner && item.hideForPartner) return false;
-    return true;
-  });
+  // Check if item is blocked for partners
+  const isBlockedForPartner = (item: NavItem) => {
+    return isPartner && item.blockedForPartner === true;
+  };
 
   const handleSignOut = async () => {
     await signOut();
   };
 
-  const handleNavClick = (href: string) => {
+  const handleNavClick = (href: string, item?: NavItem) => {
+    // Check if blocked for partner
+    if (item && isBlockedForPartner(item)) {
+      toast({
+        title: 'Ni na voljo',
+        description: 'Ta funkcija ni na voljo za partnerske račune.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     // Check for unsaved changes before navigating
     if (hasUnsavedChanges && location.pathname !== href) {
       setPendingNavigation(href);
@@ -215,16 +226,18 @@ export function DashboardSidebar({
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <nav className="p-4 space-y-1">
-          {filteredNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const blocked = isBlockedForPartner(item);
             
             return (
               <button
                 key={item.href}
-                onClick={() => handleNavClick(item.href)}
+                onClick={() => handleNavClick(item.href, item)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
+                  blocked && "opacity-50 cursor-not-allowed",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -246,16 +259,18 @@ export function DashboardSidebar({
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {filteredNavItems.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            const blocked = isBlockedForPartner(item);
             
             return (
               <button
                 key={item.href}
-                onClick={() => handleNavClick(item.href)}
+                onClick={() => handleNavClick(item.href, item)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors w-full text-left",
+                  blocked && "opacity-50 cursor-not-allowed",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
