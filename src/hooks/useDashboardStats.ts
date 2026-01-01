@@ -41,12 +41,18 @@ export function useDashboardStats(tableName: string | null | undefined) {
         setLoading(true);
         console.log('Fetching stats for table:', tableName);
 
-        // Get messages today using RPC
+        // Get human messages today (count only messages where message.type = 'human')
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
         const { data: messagesTodayData, error: msgError } = await supabase
-          .rpc('get_messages_today', { p_table_name: tableName });
-        
-        if (msgError) console.error('Messages today error:', msgError);
-        console.log('Messages today:', messagesTodayData);
+          .rpc('get_human_messages_count_range', {
+            p_table_name: tableName,
+            p_start_date: todayStart.toISOString(),
+          });
+
+        if (msgError) console.error('Messages today (human) error:', msgError);
+        console.log('Messages today (human):', messagesTodayData);
 
         // Get sessions this month using RPC
         const { data: sessionsData, error: sessError } = await supabase
