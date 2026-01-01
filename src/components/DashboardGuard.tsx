@@ -42,8 +42,9 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
     return <Navigate to="/customize/complete" replace />;
   }
 
-  // Widget is active, pending, setup_paid, sub_paid, or cancelling - allow access
-  if (['active', 'pending', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
+  // Widget is active, setup_paid, sub_paid, or cancelling - allow access
+  // Note: 'pending' status is NOT allowed - user must complete setup and pay first
+  if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
     return <>{children}</>;
   }
 
