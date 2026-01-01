@@ -295,7 +295,7 @@ export default function DashboardKnowledge() {
               ) : null}
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-auto max-h-[600px]">
+          <CardContent className="flex-1 overflow-auto max-h-[570px]">
             {/* Info box z nasvetom */}
             <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
               <div className="flex gap-2">
@@ -364,7 +364,7 @@ export default function DashboardKnowledge() {
               <CardTitle>Dokumenti</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 space-y-4 overflow-auto max-h-[600px]">
+          <CardContent className="flex-1 space-y-4 overflow-auto max-h-[570px]">
             {/* Upload Area */}
             <div
               className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
