@@ -179,7 +179,8 @@ export default function DashboardKnowledge() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         markdown: buildMarkdown(),
-        lastmod: getLatestTimestamp()
+        lastmod: getLatestTimestamp(),
+        table_name: widget.table_name
       })
     }).catch(console.error);
 
