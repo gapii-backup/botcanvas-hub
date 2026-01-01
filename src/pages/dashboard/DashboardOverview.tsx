@@ -224,7 +224,11 @@ export default function DashboardOverview() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/upgrade')}>
+              <Button 
+                size="sm" 
+                onClick={() => navigate('/dashboard/upgrade')}
+                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25"
+              >
                 <Zap className="h-4 w-4 mr-1" />
                 Nadgradi
               </Button>
