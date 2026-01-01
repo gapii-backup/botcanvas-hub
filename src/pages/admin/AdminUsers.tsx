@@ -137,36 +137,36 @@ export default function AdminUsers() {
     try {
       setActionLoading(true);
 
-      // Get current admin session
-      const { data: currentSession } = await supabase.auth.getSession();
-      const adminEmail = currentSession.session?.user?.email;
+      // Save admin session before creating new user
+      const { data: { session: adminSession } } = await supabase.auth.getSession();
       
-      // Create user via signUp
+      if (!adminSession) {
+        toast.error('Admin seja ni na voljo');
+        setActionLoading(false);
+        return;
+      }
+
+      // Create user via signUp (this should NOT log out admin, but we save session just in case)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newEmail,
         password: newPassword,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            is_partner: isPartner
+          }
         },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('User not created');
 
-      // Immediately sign out to prevent admin from being logged in as new user
-      await supabase.auth.signOut();
+      // Restore admin session immediately after signUp
+      await supabase.auth.setSession({
+        access_token: adminSession.access_token,
+        refresh_token: adminSession.refresh_token,
+      });
 
-      // Create widget for the user BEFORE re-authenticating admin
-      // We need to use a workaround since we're logged out
-      // Re-authenticate admin first, then create widget
-      if (adminEmail && currentSession.session) {
-        // We need to re-login the admin - but we don't have their password
-        // So we'll create the widget using the new user's session that was just created
-        // Actually, after signOut we can't create widget without RLS issues
-        // Let's re-authenticate admin first using refresh token if available
-      }
-
-      // Create widget for the user (this happens before full signout completes)
+      // Create widget for the user
       const { error: widgetError } = await supabase
         .from('widgets')
         .insert({
@@ -184,7 +184,7 @@ export default function AdminUsers() {
 
       if (widgetError) {
         console.error('Widget creation error:', widgetError);
-        // Don't throw - user was created, widget creation might fail due to RLS
+        throw widgetError;
       }
 
       // Send webhook notification for new user
@@ -196,29 +196,27 @@ export default function AdminUsers() {
           },
           body: JSON.stringify({
             email: newEmail,
-            name: newEmail.split('@')[0], // Use email prefix as name
+            name: newEmail.split('@')[0],
             is_partner: isPartner || false,
           }),
         });
       } catch (webhookError) {
         console.error('Webhook notification failed:', webhookError);
-        // Don't fail user creation if webhook fails
       }
 
-      toast.success('Uporabnik uspešno ustvarjen. Prosim, ponovno se prijavite kot admin.');
+      toast.success('Uporabnik uspešno ustvarjen');
       setAddDialogOpen(false);
       setNewEmail('');
       setNewPassword('');
       setShowPassword(false);
       setIsPartner(false);
       setSelectedPlan('basic');
-      
-      // Redirect to login page since admin session was lost
-      window.location.href = '/login';
+      fetchUsers();
     } catch (error: unknown) {
       console.error('Error creating user:', error);
       const message = error instanceof Error ? error.message : 'Napaka pri ustvarjanju uporabnika';
       toast.error(message);
+    } finally {
       setActionLoading(false);
     }
   };
