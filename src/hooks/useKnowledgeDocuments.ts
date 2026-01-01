@@ -182,5 +182,19 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
     return { error };
   };
 
-  return { documents, loading, uploading, fetchDocuments, uploadDocument, deleteDocument };
+  const updateDocumentStatus = async (docId: string, status: 'pending' | 'processing' | 'done' | 'error') => {
+    const { error } = await supabase
+      .from('knowledge_documents')
+      .update({ status })
+      .eq('doc_id', docId);
+    
+    if (!error) {
+      setDocuments(prev => prev.map(doc => 
+        doc.doc_id === docId ? { ...doc, status } : doc
+      ));
+    }
+    return { error };
+  };
+
+  return { documents, loading, uploading, fetchDocuments, uploadDocument, deleteDocument, updateDocumentStatus };
 }

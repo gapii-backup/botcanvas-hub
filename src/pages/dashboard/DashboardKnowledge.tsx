@@ -228,19 +228,16 @@ export default function DashboardKnowledge() {
   }, [handleFileUpload]);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      pending: 'secondary',
-      processing: 'default',
-      done: 'outline',
-      error: 'destructive'
+    const config: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
+      pending: { variant: 'secondary', label: 'V procesu' },
+      processing: { variant: 'default', label: 'V procesu' },
+      done: { variant: 'outline', label: 'Naloženo' },
+      error: { variant: 'destructive', label: 'Napaka' }
     };
-    const labels: Record<string, string> = {
-      pending: 'Čaka',
-      processing: 'V obdelavi',
-      done: 'Končano',
-      error: 'Napaka'
-    };
-    return <Badge variant={variants[status] || 'secondary'}>{labels[status] || status}</Badge>;
+    
+    const { variant, label } = config[status] || config.pending;
+    
+    return <Badge variant={variant}>{label}</Badge>;
   };
 
   return (
