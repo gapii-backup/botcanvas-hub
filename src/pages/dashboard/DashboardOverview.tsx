@@ -5,16 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 import {
   MessageSquare,
   Users,
-  TrendingUp,
   Settings,
   CheckCircle,
   Loader2,
   Calendar,
   BarChart3,
-  Activity,
   ChevronRight,
   Bot,
-  ExternalLink,
   BookOpen,
   Zap,
 } from 'lucide-react';
@@ -25,7 +22,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
+
 import { formatDistanceToNow } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -61,7 +58,7 @@ export default function DashboardOverview() {
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
   const tableName = widget?.table_name;
-  const { stats, messagesByDay, loading: statsLoading } = useDashboardStats(tableName);
+  const { stats, loading: statsLoading } = useDashboardStats(tableName);
   
   // Conversations hook - za zadnje pogovore
   const { conversations, loading: convsLoading } = useConversations(tableName);
@@ -230,14 +227,10 @@ export default function DashboardOverview() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {widget?.website_url && (
-                <Button variant="ghost" size="sm" asChild>
-                  <a href={widget.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                    <ExternalLink className="h-4 w-4" />
-                    Odpri stran
-                  </a>
-                </Button>
-              )}
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/upgrade')}>
+                <Zap className="h-4 w-4 mr-1" />
+                Nadgradi
+              </Button>
               <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/settings')}>
                 <Settings className="h-4 w-4 mr-1" />
                 Uredi
@@ -327,60 +320,7 @@ export default function DashboardOverview() {
             </div>
           )}
 
-          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: hasContactsAddon ? '300ms' : '200ms' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-lg bg-destructive/20 flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-destructive" />
-              </div>
-            </div>
-            <p className="text-3xl font-bold text-foreground">{stats.conversionRate}%</p>
-            <p className="text-sm text-muted-foreground mt-1">Konverzijska stopnja</p>
-          </div>
         </div>
-
-        {/* Activity Trend - Last 7 Days */}
-        {messagesByDay && messagesByDay.length > 0 && (
-          <div className="glass rounded-2xl p-6 animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Aktivnost zadnjih 7 dni</h3>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/analytics')}>
-                Podrobnosti
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-            <div className="h-[180px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={messagesByDay}>
-                  <defs>
-                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="count" 
-                    stroke="hsl(var(--primary))" 
-                    fillOpacity={1} 
-                    fill="url(#colorCount)" 
-                    strokeWidth={2}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
 
         {/* Recent Conversations Preview */}
         {recentConversations.length > 0 && (
