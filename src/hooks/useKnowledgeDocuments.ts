@@ -61,7 +61,6 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
     
     setUploading(true);
     try {
-      // Generiraj doc_id
       const docId = generateDocId();
 
       // Upload to storage
@@ -87,7 +86,7 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
 
       const fileUrl = signedUrlData.signedUrl;
 
-      // Insert record with doc_id
+      // Insert record - status pending
       const { data, error } = await supabase
         .from('knowledge_documents')
         .insert({
@@ -100,29 +99,87 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
         .select()
         .single();
 
-      if (!error && data) {
+      if (error) {
+        setUploading(false);
+        return { data: null, error };
+      }
+
+      // Dodaj v seznam takoj
+      if (data) {
         setDocuments(prev => [data as KnowledgeDocument, ...prev]);
-        
-        // Pošlji webhook TAKOJ (fire and forget)
-        if (webhookUrl) {
-          fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              file_url: fileUrl,
-              file_name: file.name,
-              doc_id: docId,
-              table_name: tableName
-            })
-          }).catch(err => console.error('Upload webhook error:', err));
-        }
       }
 
       setUploading(false);
-      return { data, error };
+
+      // Pošlji webhook in čakaj na response (v ozadju)
+      if (webhookUrl && data) {
+        processWebhook(webhookUrl, fileUrl, file.name, docId, tableName, data.id);
+      }
+
+      return { data, error: null };
     } catch (err) {
       setUploading(false);
       return { data: null, error: err as Error };
+    }
+  };
+
+  // Nova funkcija - procesira webhook v ozadju
+  const processWebhook = async (
+    webhookUrl: string, 
+    fileUrl: string, 
+    fileName: string, 
+    docId: string, 
+    tblName: string,
+    recordId: string
+  ) => {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          file_url: fileUrl,
+          file_name: fileName,
+          doc_id: docId,
+          table_name: tblName
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        
+        // Če webhook vrne success, posodobi status na 'done'
+        if (result.success) {
+          await supabase
+            .from('knowledge_documents')
+            .update({ status: 'done' })
+            .eq('id', recordId);
+          
+          setDocuments(prev => prev.map(doc => 
+            doc.id === recordId ? { ...doc, status: 'done' as const } : doc
+          ));
+        }
+      } else {
+        // Webhook failed - nastavi status na error
+        await supabase
+          .from('knowledge_documents')
+          .update({ status: 'error' })
+          .eq('id', recordId);
+        
+        setDocuments(prev => prev.map(doc => 
+          doc.id === recordId ? { ...doc, status: 'error' as const } : doc
+        ));
+      }
+    } catch (err) {
+      console.error('Webhook error:', err);
+      // Pri napaki nastavi status na error
+      await supabase
+        .from('knowledge_documents')
+        .update({ status: 'error' })
+        .eq('id', recordId);
+      
+      setDocuments(prev => prev.map(doc => 
+        doc.id === recordId ? { ...doc, status: 'error' as const } : doc
+      ));
     }
   };
 
