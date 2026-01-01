@@ -9,6 +9,7 @@ export interface DashboardStats {
   monthlyCount: number;
   monthlyLimit: number;
   humanMessagesCount: number;
+  sessionsToday: number;
 }
 
 export interface MessagesByDay {
@@ -25,6 +26,7 @@ export function useDashboardStats(tableName: string | null | undefined) {
     monthlyCount: 0,
     monthlyLimit: 1000,
     humanMessagesCount: 0,
+    sessionsToday: 0,
   });
   const [messagesByDay, setMessagesByDay] = useState<MessagesByDay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,16 @@ export function useDashboardStats(tableName: string | null | undefined) {
         
         if (sessError) console.error('Sessions error:', sessError);
         console.log('Sessions this month:', sessionsData);
+
+        // Get sessions today (unique users today)
+        const { data: sessionsTodayData, error: sessionsTodayError } = await supabase
+          .rpc('get_sessions_count', { 
+            p_table_name: tableName,
+            p_start_date: todayStart.toISOString(),
+          });
+        
+        if (sessionsTodayError) console.error('Sessions today error:', sessionsTodayError);
+        console.log('Sessions today:', sessionsTodayData);
 
         // Get messages by day using RPC
         const { data: msgByDayData, error: dayError } = await supabase
@@ -108,6 +120,7 @@ export function useDashboardStats(tableName: string | null | undefined) {
           monthlyCount: humanMessagesData || 0,
           monthlyLimit: limitsData?.monthly_limit || 1000,
           humanMessagesCount: humanMessagesData || 0,
+          sessionsToday: sessionsTodayData || 0,
         });
 
         // Format messages by day for chart

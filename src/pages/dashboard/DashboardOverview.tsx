@@ -17,6 +17,8 @@ import {
   Code,
   Copy,
   Check,
+  Mail,
+  UserCheck,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -281,8 +283,8 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Stats Grid - 4 cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats Grid - 6 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="glass rounded-2xl p-6 animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -293,21 +295,41 @@ export default function DashboardOverview() {
             <p className="text-sm text-muted-foreground mt-1">Sporočila danes</p>
           </div>
 
+          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '50ms' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-accent" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground">{stats.humanMessagesCount}</p>
+            <p className="text-sm text-muted-foreground mt-1">Sporočila ta mesec</p>
+          </div>
+
           <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <div className="flex items-center justify-between mb-4">
               <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
-                <Calendar className="h-5 w-5 text-success" />
+                <UserCheck className="h-5 w-5 text-success" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground">{stats.sessionsToday}</p>
+            <p className="text-sm text-muted-foreground mt-1">Uporabniki danes</p>
+          </div>
+
+          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
+                <Users className="h-5 w-5 text-warning" />
               </div>
             </div>
             <p className="text-3xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
-            <p className="text-sm text-muted-foreground mt-1">Število uporabnikov ta mesec</p>
+            <p className="text-sm text-muted-foreground mt-1">Uporabniki ta mesec</p>
           </div>
 
           {hasContactsAddon && (
             <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
               <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-warning" />
+                <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <BarChart3 className="h-5 w-5 text-primary" />
                 </div>
               </div>
               <p className="text-3xl font-bold text-foreground">{stats.leadsCount}</p>
