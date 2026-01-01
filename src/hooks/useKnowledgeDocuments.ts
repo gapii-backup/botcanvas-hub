@@ -4,11 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 export interface KnowledgeDocument {
   id: string;
   table_name: string;
+  doc_id: string;
   file_name: string;
-  file_url: string;
+  file_url: string | null;
   status: 'pending' | 'processing' | 'done' | 'error';
   created_at: string;
-  updated_at: string;
+}
+
+function generateDocId(): string {
+  return 'pdf_' + 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 export function useKnowledgeDocuments(tableName: string | null | undefined) {
@@ -41,8 +49,11 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
     
     setUploading(true);
     try {
+      // Generiraj doc_id
+      const docId = generateDocId();
+
       // Upload to storage
-      const filePath = `${tableName}/${Date.now()}_${file.name}`;
+      const filePath = `${tableName}/${docId}_${file.name}`;
       const { error: uploadError } = await supabase.storage
         .from('knowledge-documents')
         .upload(filePath, file);
@@ -59,11 +70,12 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
 
       const fileUrl = urlData.publicUrl;
 
-      // Insert record
+      // Insert record with doc_id
       const { data, error } = await supabase
         .from('knowledge_documents')
         .insert({
           table_name: tableName,
+          doc_id: docId,
           file_name: file.name,
           file_url: fileUrl,
           status: 'pending'
@@ -74,21 +86,18 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
       if (!error && data) {
         setDocuments(prev => [data as KnowledgeDocument, ...prev]);
         
-        // Send webhook if URL exists
+        // Pošlji webhook TAKOJ (fire and forget)
         if (webhookUrl) {
-          try {
-            await fetch(webhookUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                file_url: fileUrl,
-                file_name: file.name,
-                document_id: data.id
-              })
-            });
-          } catch (webhookError) {
-            console.error('Webhook error:', webhookError);
-          }
+          fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              file_url: fileUrl,
+              file_name: file.name,
+              doc_id: docId,
+              table_name: tableName
+            })
+          }).catch(err => console.error('Upload webhook error:', err));
         }
       }
 
@@ -100,14 +109,26 @@ export function useKnowledgeDocuments(tableName: string | null | undefined) {
     }
   };
 
-  const deleteDocument = async (id: string, fileUrl: string) => {
-    // Extract file path from URL
+  const deleteDocument = async (id: string, fileUrl: string, docId?: string, deleteWebhookUrl?: string | null) => {
+    // Pošlji delete webhook NAJPREJ
+    if (deleteWebhookUrl && docId) {
+      fetch(deleteWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          doc_id: docId
+        })
+      }).catch(err => console.error('Delete webhook error:', err));
+    }
+
+    // Izbriši iz storage
     const urlParts = fileUrl.split('/knowledge-documents/');
     if (urlParts.length > 1) {
       const filePath = urlParts[1];
       await supabase.storage.from('knowledge-documents').remove([filePath]);
     }
 
+    // Izbriši iz baze
     const { error } = await supabase
       .from('knowledge_documents')
       .delete()

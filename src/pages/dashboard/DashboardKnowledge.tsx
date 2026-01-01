@@ -88,7 +88,7 @@ export default function DashboardKnowledge() {
 
   // Delete Dialog State
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ type: 'qa' | 'doc'; id: string; fileUrl?: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'qa' | 'doc'; id: string; fileUrl?: string; docId?: string } | null>(null);
 
   // Training State
   const [training, setTraining] = useState(false);
@@ -143,7 +143,12 @@ export default function DashboardKnowledge() {
         toast({ title: 'Uspeh', description: 'Q&A izbrisan.' });
       }
     } else if (itemToDelete.type === 'doc' && itemToDelete.fileUrl) {
-      const { error } = await deleteDocument(itemToDelete.id, itemToDelete.fileUrl);
+      const { error } = await deleteDocument(
+        itemToDelete.id, 
+        itemToDelete.fileUrl,
+        itemToDelete.docId,
+        (widget as any)?.documents_delete_webhook_url
+      );
       if (error) {
         toast({ title: 'Napaka', description: 'Napaka pri brisanju dokumenta.', variant: 'destructive' });
       } else {
@@ -424,7 +429,7 @@ export default function DashboardKnowledge() {
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => {
-                          setItemToDelete({ type: 'doc', id: doc.id, fileUrl: doc.file_url });
+                          setItemToDelete({ type: 'doc', id: doc.id, fileUrl: doc.file_url, docId: doc.doc_id });
                           setDeleteDialogOpen(true);
                         }}
                       >
