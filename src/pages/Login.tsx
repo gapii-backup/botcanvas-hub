@@ -63,19 +63,28 @@ export default function Login() {
   // Redirect based on widget status when user is already logged in
   useEffect(() => {
     if (user && !widgetLoading) {
-        // Partners skip onboarding and go directly to dashboard
-        if (widget?.is_partner) {
-          navigate('/dashboard');
-        } else if (!widget?.plan) {
-          navigate('/pricing');
-        } else if (widget.status === 'pending_payment') {
-          navigate('/customize/complete');
-        } else if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
-          navigate('/dashboard');
-        } else {
-          // Plan is set but widget isn't fully activated/customization flow isn't finished yet
-          navigate('/pricing');
-        }
+      // 1. Partners skip onboarding and go directly to dashboard
+      if (widget?.is_partner === true) {
+        navigate('/dashboard');
+        return;
+      }
+      
+      // 2. Regular users with active subscription go to dashboard
+      if (widget?.subscription_status === 'active') {
+        navigate('/dashboard');
+        return;
+      }
+      
+      // 3. Otherwise normal flow (onboarding/pricing)
+      if (!widget?.plan) {
+        navigate('/pricing');
+      } else if (widget.status === 'pending_payment') {
+        navigate('/customize/complete');
+      } else if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
+        navigate('/dashboard');
+      } else {
+        navigate('/pricing');
+      }
     }
   }, [user, widget, widgetLoading, navigate]);
 
