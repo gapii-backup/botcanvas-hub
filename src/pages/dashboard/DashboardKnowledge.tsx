@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useWidget } from '@/hooks/useWidget';
 import { useKnowledgeQA, KnowledgeQA } from '@/hooks/useKnowledgeQA';
@@ -37,16 +37,38 @@ import {
   Loader2,
   Zap,
   MessageSquare,
-  File
+  File,
+  CheckCircle,
+  Sparkles
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 
 export default function DashboardKnowledge() {
   const { widget } = useWidget();
-  const { items: qaItems, loading: qaLoading, addItem, updateItem, deleteItem, getLatestTimestamp, buildMarkdown } = useKnowledgeQA(widget?.table_name);
+  const { 
+    items: qaItems, 
+    loading: qaLoading, 
+    addItem, 
+    updateItem, 
+    deleteItem, 
+    getLatestTimestamp, 
+    buildMarkdown,
+    lastmod,
+    lastTrained,
+    updateLastTrained,
+    fetchLastmod
+  } = useKnowledgeQA(widget?.table_name);
   const { documents, loading: docsLoading, uploading, uploadDocument, deleteDocument } = useKnowledgeDocuments(widget?.table_name);
   const { toast } = useToast();
+
+  // Calculate if training is needed
+  const needsTraining = useMemo(() => {
+    if (qaItems.length === 0) return false;
+    if (!lastmod) return false;
+    if (!lastTrained) return true; // Never trained yet
+    return new Date(lastmod) > new Date(lastTrained);
+  }, [lastmod, lastTrained, qaItems.length]);
 
   // Q&A Modal State
   const [qaModalOpen, setQaModalOpen] = useState(false);
@@ -147,7 +169,9 @@ export default function DashboardKnowledge() {
       });
 
       if (response.ok) {
-        toast({ title: 'Uspeh', description: 'Treniranje uspešno poslano!' });
+        await updateLastTrained();
+        await fetchLastmod();
+        toast({ title: 'Uspeh', description: 'Chatbot je bil uspešno natreniran!' });
       } else {
         toast({ title: 'Napaka', description: 'Napaka pri pošiljanju na webhook.', variant: 'destructive' });
       }
@@ -228,20 +252,27 @@ export default function DashboardKnowledge() {
               <BookOpen className="h-5 w-5 text-primary" />
               <CardTitle>Q&A</CardTitle>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Button onClick={() => handleOpenQaModal()} size="sm" variant="outline">
                 <Plus className="h-4 w-4 mr-1" />
                 Dodaj
               </Button>
-              <Button 
-                onClick={handleTrain} 
-                disabled={training || qaItems.length === 0}
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {training ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
-                Treniraj
-              </Button>
+              {needsTraining ? (
+                <Button 
+                  onClick={handleTrain} 
+                  disabled={training || qaItems.length === 0}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {training ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+                  Treniraj chatbota
+                </Button>
+              ) : qaItems.length > 0 ? (
+                <div className="flex items-center gap-1.5 text-green-600 text-sm">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Natrenirano</span>
+                </div>
+              ) : null}
             </div>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto max-h-[600px]">

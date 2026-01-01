@@ -98,6 +98,24 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_qa_lastmod: {
+        Row: {
+          last_trained: string | null
+          lastmod: string
+          table_name: string
+        }
+        Insert: {
+          last_trained?: string | null
+          lastmod?: string
+          table_name: string
+        }
+        Update: {
+          last_trained?: string | null
+          lastmod?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           created_at: string
