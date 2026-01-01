@@ -18,6 +18,12 @@ export default function Index() {
     }
 
     // User is logged in - check widget status
+    // Admins/partners always go straight to dashboard
+    if (widget?.is_admin || widget?.is_partner) {
+      navigate('/dashboard');
+      return;
+    }
+
     if (!widget?.plan) {
       navigate('/pricing');
     } else if (widget.status === 'pending_payment') {
