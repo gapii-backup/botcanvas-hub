@@ -18,6 +18,19 @@ export default function Index() {
     }
 
     // User is logged in - check widget status
+    // 1. Partners skip onboarding and go directly to dashboard
+    if (widget?.is_partner === true) {
+      navigate('/dashboard');
+      return;
+    }
+    
+    // 2. Regular users with active subscription go to dashboard
+    if (widget?.subscription_status === 'active') {
+      navigate('/dashboard');
+      return;
+    }
+    
+    // 3. Otherwise normal flow (onboarding/pricing)
     if (!widget?.plan) {
       navigate('/pricing');
     } else if (widget.status === 'pending_payment') {
@@ -25,7 +38,6 @@ export default function Index() {
     } else if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
       navigate('/dashboard');
     } else {
-      // Plan is set but widget isn't fully activated/customization flow isn't finished yet
       navigate('/pricing');
     }
   }, [user, widget, authLoading, widgetLoading, navigate]);
