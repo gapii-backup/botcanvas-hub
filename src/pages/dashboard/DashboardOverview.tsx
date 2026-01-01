@@ -283,61 +283,61 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Stats Grid - 6 cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="glass rounded-2xl p-6 animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-primary" />
+        {/* Stats Grid - 4 cards in a row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="glass rounded-2xl p-5 animate-slide-up">
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/20 flex items-center justify-center">
+                <MessageSquare className="h-4 w-4 text-primary" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground">{stats.messagesToday}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sporočila danes</p>
+            <p className="text-2xl font-bold text-foreground">{stats.messagesToday}</p>
+            <p className="text-xs text-muted-foreground mt-1">Sporočila danes</p>
           </div>
 
-          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '50ms' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                <Mail className="h-5 w-5 text-accent" />
+          <div className="glass rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '50ms' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-lg bg-success/20 flex items-center justify-center">
+                <UserCheck className="h-4 w-4 text-success" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground">{stats.humanMessagesCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sporočila ta mesec</p>
+            <p className="text-2xl font-bold text-foreground">{stats.sessionsToday}</p>
+            <p className="text-xs text-muted-foreground mt-1">Uporabniki danes</p>
           </div>
 
-          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
-                <UserCheck className="h-5 w-5 text-success" />
+          <div className="glass rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-lg bg-accent/20 flex items-center justify-center">
+                <Mail className="h-4 w-4 text-accent" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground">{stats.sessionsToday}</p>
-            <p className="text-sm text-muted-foreground mt-1">Uporabniki danes</p>
+            <p className="text-2xl font-bold text-foreground">{stats.humanMessagesCount}</p>
+            <p className="text-xs text-muted-foreground mt-1">Sporočila ta mesec</p>
           </div>
 
-          <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '150ms' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
-                <Users className="h-5 w-5 text-warning" />
+          <div className="glass rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '150ms' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-lg bg-warning/20 flex items-center justify-center">
+                <Users className="h-4 w-4 text-warning" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
-            <p className="text-sm text-muted-foreground mt-1">Uporabniki ta mesec</p>
+            <p className="text-2xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
+            <p className="text-xs text-muted-foreground mt-1">Uporabniki ta mesec</p>
           </div>
-
-          {hasContactsAddon && (
-            <div className="glass rounded-2xl p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-              <div className="flex items-center justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-foreground">{stats.leadsCount}</p>
-              <p className="text-sm text-muted-foreground mt-1">Leads</p>
-            </div>
-          )}
-
         </div>
+
+        {/* Leads card - separate row if addon is active */}
+        {hasContactsAddon && (
+          <div className="glass rounded-2xl p-5 animate-slide-up max-w-xs" style={{ animationDelay: '200ms' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="h-9 w-9 rounded-lg bg-primary/20 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{stats.leadsCount}</p>
+            <p className="text-xs text-muted-foreground mt-1">Leads</p>
+          </div>
+        )}
 
         {/* Recent Conversations Preview */}
         {recentConversations.length > 0 && (
