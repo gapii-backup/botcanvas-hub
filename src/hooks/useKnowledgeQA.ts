@@ -13,6 +13,8 @@ export interface KnowledgeQA {
 export function useKnowledgeQA(tableName: string | null | undefined) {
   const [items, setItems] = useState<KnowledgeQA[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastmod, setLastmod] = useState<string | null>(null);
+  const [lastTrained, setLastTrained] = useState<string | null>(null);
 
   const fetchItems = async () => {
     if (!tableName) {
@@ -30,8 +32,32 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
     setLoading(false);
   };
 
+  const fetchLastmod = async () => {
+    if (!tableName) return;
+    const { data } = await supabase
+      .from('knowledge_qa_lastmod')
+      .select('lastmod, last_trained')
+      .eq('table_name', tableName)
+      .maybeSingle();
+    
+    if (data) {
+      setLastmod(data.lastmod);
+      setLastTrained(data.last_trained);
+    }
+  };
+
+  const updateLastTrained = async () => {
+    if (!tableName) return;
+    const now = new Date().toISOString();
+    await supabase
+      .from('knowledge_qa_lastmod')
+      .upsert({ table_name: tableName, last_trained: now, lastmod: now });
+    setLastTrained(now);
+  };
+
   useEffect(() => {
     fetchItems();
+    fetchLastmod();
   }, [tableName]);
 
   const addItem = async (question: string, answer: string) => {
@@ -41,7 +67,10 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
       .insert({ table_name: tableName, question, answer })
       .select()
       .single();
-    if (!error && data) setItems(prev => [data as KnowledgeQA, ...prev]);
+    if (!error && data) {
+      setItems(prev => [data as KnowledgeQA, ...prev]);
+      await fetchLastmod();
+    }
     return { data, error };
   };
 
@@ -54,6 +83,7 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
       .single();
     if (!error && data) {
       setItems(prev => prev.map(item => item.id === id ? data as KnowledgeQA : item));
+      await fetchLastmod();
     }
     return { data, error };
   };
@@ -63,17 +93,15 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
       .from('knowledge_qa')
       .delete()
       .eq('id', id);
-    if (!error) setItems(prev => prev.filter(item => item.id !== id));
+    if (!error) {
+      setItems(prev => prev.filter(item => item.id !== id));
+      await fetchLastmod();
+    }
     return { error };
   };
 
   const getLatestTimestamp = () => {
-    if (items.length === 0) return new Date().toISOString();
-    const latest = items.reduce((acc, item) => {
-      const itemDate = new Date(item.updated_at || item.created_at);
-      return itemDate > acc ? itemDate : acc;
-    }, new Date(0));
-    return latest.toISOString();
+    return lastmod || new Date().toISOString();
   };
 
   const buildMarkdown = () => {
@@ -82,5 +110,18 @@ export function useKnowledgeQA(tableName: string | null | undefined) {
       .join('\n---\n');
   };
 
-  return { items, loading, fetchItems, addItem, updateItem, deleteItem, getLatestTimestamp, buildMarkdown };
+  return { 
+    items, 
+    loading, 
+    fetchItems, 
+    addItem, 
+    updateItem, 
+    deleteItem, 
+    getLatestTimestamp, 
+    buildMarkdown,
+    lastmod,
+    lastTrained,
+    updateLastTrained,
+    fetchLastmod
+  };
 }
