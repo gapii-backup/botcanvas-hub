@@ -268,46 +268,46 @@ export default function DashboardKnowledge() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
         {/* Q&A Column */}
         <Card className="flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <CardTitle>Q&A</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button onClick={() => handleOpenQaModal()} size="sm" variant="outline">
-                <Plus className="h-4 w-4 mr-1" />
-                Dodaj
-              </Button>
-              {needsTraining ? (
-                <Button 
-                  onClick={handleTrain} 
-                  disabled={training || qaItems.length === 0}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {training ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Treniram...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Treniraj chatbota
-                    </>
-                  )}
+          <CardHeader className="space-y-4 pb-4">
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-primary" />
+                <CardTitle>Q&A</CardTitle>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button onClick={() => handleOpenQaModal()} size="sm" variant="outline">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Dodaj
                 </Button>
-              ) : qaItems.length > 0 ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span className="text-sm font-medium text-green-600">Chatbot je natreniran</span>
-                </div>
-              ) : null}
+                {needsTraining ? (
+                  <Button 
+                    onClick={handleTrain} 
+                    disabled={training || qaItems.length === 0}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {training ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Treniram...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Treniraj chatbota
+                      </>
+                    )}
+                  </Button>
+                ) : qaItems.length > 0 ? (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-600">Chatbot je natreniran</span>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-auto max-h-[570px]">
-            {/* Info box z nasvetom */}
-            <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            {/* Info box z nasvetom - FIKSIRAN v headerju */}
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
               <div className="flex gap-2">
                 <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-700 dark:text-blue-300">
@@ -319,7 +319,8 @@ export default function DashboardKnowledge() {
                 </div>
               </div>
             </div>
-
+          </CardHeader>
+          <CardContent className="flex-1 overflow-auto max-h-[450px]">
             {qaLoading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -368,14 +369,14 @@ export default function DashboardKnowledge() {
 
         {/* Documents Column */}
         <Card className="flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>Dokumenti</CardTitle>
+          <CardHeader className="space-y-4 pb-4">
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle>Dokumenti</CardTitle>
+              </div>
             </div>
-          </CardHeader>
-          <CardContent className="flex-1 space-y-4 overflow-auto max-h-[570px]">
-            {/* Upload Area */}
+            {/* Upload Area - FIKSIRAN v headerju */}
             <div
               className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
               onDrop={handleDrop}
@@ -406,7 +407,8 @@ export default function DashboardKnowledge() {
                 onChange={(e) => handleFileUpload(e.target.files)}
               />
             </div>
-
+          </CardHeader>
+          <CardContent className="flex-1 overflow-auto max-h-[450px]">
             {/* Documents List */}
             {docsLoading ? (
               <div className="flex justify-center py-8">
