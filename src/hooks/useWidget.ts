@@ -71,6 +71,10 @@ export interface Widget {
   
   // Support tickets
   support_tickets: Json | null;
+  
+  // Knowledge webhooks
+  qa_webhook_url: string | null;
+  documents_webhook_url: string | null;
 }
 
 export function useWidget() {

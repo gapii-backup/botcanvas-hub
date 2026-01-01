@@ -383,6 +383,22 @@ export default function AdminWidgetEdit() {
               />
             </div>
             <div className="space-y-2">
+              <Label>Q&A Webhook URL</Label>
+              <Input
+                value={widget.qa_webhook_url || ''}
+                onChange={(e) => updateField('qa_webhook_url', e.target.value)}
+                placeholder="https://n8n.example.com/webhook/..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Documents Webhook URL</Label>
+              <Input
+                value={widget.documents_webhook_url || ''}
+                onChange={(e) => updateField('documents_webhook_url', e.target.value)}
+                placeholder="https://n8n.example.com/webhook/..."
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Booking URL</Label>
               <Input
                 value={widget.booking_url || ''}

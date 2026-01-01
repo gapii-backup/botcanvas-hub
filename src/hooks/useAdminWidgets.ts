@@ -57,6 +57,8 @@ export interface AdminWidget {
   lead_webhook_url: string | null;
   support_webhook_url: string | null;
   health_check_url: string | null;
+  qa_webhook_url: string | null;
+  documents_webhook_url: string | null;
   table_name: string | null;
   
   // Footer
