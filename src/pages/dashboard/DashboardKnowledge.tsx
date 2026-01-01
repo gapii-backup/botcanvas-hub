@@ -2,8 +2,8 @@ import { useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useWidget } from '@/hooks/useWidget';
 import { useKnowledgeQA, KnowledgeQA } from '@/hooks/useKnowledgeQA';
-import { useKnowledgeDocuments, KnowledgeDocument } from '@/hooks/useKnowledgeDocuments';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useKnowledgeDocuments } from '@/hooks/useKnowledgeDocuments';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -219,164 +219,160 @@ export default function DashboardKnowledge() {
         </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="qa" className="animate-fade-in">
-        <TabsList className="mb-4">
-          <TabsTrigger value="qa" className="flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Q&A
-          </TabsTrigger>
-          <TabsTrigger value="documents" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Dokumenti
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Q&A Tab */}
-        <TabsContent value="qa">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Vprašanja in odgovori</CardTitle>
-              <div className="flex gap-2">
-                <Button onClick={() => handleOpenQaModal()} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Dodaj novo
-                </Button>
-                <Button 
-                  onClick={handleTrain} 
-                  disabled={training || qaItems.length === 0}
-                  size="sm"
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {training ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Zap className="h-4 w-4 mr-2" />}
-                  Treniraj
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {qaLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : qaItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Ni Q&A parov. Kliknite "Dodaj novo" za začetek.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {qaItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-medium text-foreground">{item.question}</p>
-                          <p className="text-muted-foreground mt-1">{item.answer}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {format(new Date(item.created_at), 'dd. MMM yyyy, HH:mm', { locale: sl })}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <Button variant="ghost" size="icon" onClick={() => handleOpenQaModal(item)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => {
-                              setItemToDelete({ type: 'qa', id: item.id });
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Documents Tab */}
-        <TabsContent value="documents">
-          <Card>
-            <CardHeader>
-              <CardTitle>Dokumenti</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Upload Area */}
-              <div
-                className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                onClick={() => document.getElementById('file-input')?.click()}
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+        {/* Q&A Column */}
+        <Card className="flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" />
+              <CardTitle>Q&A</CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => handleOpenQaModal()} size="sm" variant="outline">
+                <Plus className="h-4 w-4 mr-1" />
+                Dodaj
+              </Button>
+              <Button 
+                onClick={handleTrain} 
+                disabled={training || qaItems.length === 0}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
               >
-                {uploading ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-muted-foreground">Nalaganje...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">
-                      Povlecite PDF datoteko sem ali kliknite za izbiro
-                    </p>
-                  </div>
-                )}
-                <input
-                  id="file-input"
-                  type="file"
-                  accept=".pdf"
-                  className="hidden"
-                  onChange={(e) => handleFileUpload(e.target.files)}
-                />
+                {training ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
+                Treniraj
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-auto max-h-[600px]">
+            {qaLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
-
-              {/* Documents List */}
-              {docsLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : documents.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  Ni naloženih dokumentov.
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between border rounded-lg p-3">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium">{doc.file_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(doc.created_at), 'dd. MMM yyyy, HH:mm', { locale: sl })}
-                          </p>
-                        </div>
+            ) : qaItems.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p>Ni Q&A parov.</p>
+                <p className="text-sm">Kliknite "Dodaj" za začetek.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {qaItems.map((item) => (
+                  <div key={item.id} className="border rounded-lg p-3 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-sm line-clamp-2">{item.question}</p>
+                        <p className="text-muted-foreground text-sm mt-1 line-clamp-2">{item.answer}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {format(new Date(item.created_at), 'dd. MMM yyyy', { locale: sl })}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-3">
-                        {getStatusBadge(doc.status)}
+                      <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenQaModal(item)}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          className="h-8 w-8"
                           onClick={() => {
-                            setItemToDelete({ type: 'doc', id: doc.id, fileUrl: doc.file_url });
+                            setItemToDelete({ type: 'qa', id: item.id });
                             setDeleteDialogOpen(true);
                           }}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Documents Column */}
+        <Card className="flex flex-col">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>Dokumenti</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 space-y-4 overflow-auto max-h-[600px]">
+            {/* Upload Area */}
+            <div
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => document.getElementById('file-input')?.click()}
+            >
+              {uploading ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Nalaganje...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="h-6 w-6 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Povlecite PDF sem ali kliknite
+                  </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <input
+                id="file-input"
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
+            </div>
+
+            {/* Documents List */}
+            {docsLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : documents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <File className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <p>Ni naloženih dokumentov.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="flex items-center justify-between border rounded-lg p-3 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">{doc.file_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(doc.created_at), 'dd. MMM yyyy', { locale: sl })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {getStatusBadge(doc.status)}
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setItemToDelete({ type: 'doc', id: doc.id, fileUrl: doc.file_url });
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Q&A Modal */}
       <Dialog open={qaModalOpen} onOpenChange={setQaModalOpen}>
