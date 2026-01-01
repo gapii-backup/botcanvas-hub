@@ -81,27 +81,27 @@ export function MessageUsageCard({
   }
 
   return (
-    <div className="glass rounded-2xl p-6 animate-slide-up">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-primary" />
+    <div className="glass rounded-2xl p-8 animate-slide-up">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center">
+            <Zap className="h-6 w-6 text-primary" />
           </div>
-          <span className="text-sm text-muted-foreground">Porabljena sporočila ta mesec</span>
+          <span className="text-lg font-medium text-foreground">Poraba sporočil</span>
         </div>
-        <span className="text-sm font-medium text-foreground">
+        <span className="text-xl font-semibold text-foreground">
           {messagesUsed.toLocaleString('sl-SI')} / {limit.toLocaleString('sl-SI')}
         </span>
       </div>
       
-      <div className="w-full bg-muted rounded-full h-2">
+      <div className="w-full bg-muted rounded-full h-3">
         <div 
-          className={`h-2 rounded-full transition-all duration-500 ${getProgressColor()}`}
+          className={`h-3 rounded-full transition-all duration-500 ${getProgressColor()}`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
       
-      <p className="text-xs text-muted-foreground mt-3">
+      <p className="text-sm text-muted-foreground mt-4">
         Obdobje se ponastavi: {format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}
       </p>
     </div>

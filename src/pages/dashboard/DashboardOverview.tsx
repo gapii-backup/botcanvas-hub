@@ -14,6 +14,9 @@ import {
   Bot,
   BookOpen,
   Zap,
+  Code,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -63,9 +66,12 @@ export default function DashboardOverview() {
   // Conversations hook - za zadnje pogovore
   const { conversations, loading: convsLoading } = useConversations(tableName);
 
-  // Knowledge stats
-  const [knowledgeStats, setKnowledgeStats] = useState({ qaCount: 0, docsCount: 0, lastUpdate: null as string | null });
-
+// Embed code state
+  const [copied, setCopied] = useState(false);
+  const apiKey = widget?.api_key;
+  const embedCode = apiKey
+    ? `<script src="https://cdn.botmotion.ai/widget.js" data-key="${apiKey}"></script>`
+    : `<script src="https://cdn.botmotion.ai/widget.js" data-key="YOUR_API_KEY"></script>`;
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
   const plan = widget?.plan || 'basic';
@@ -74,35 +80,24 @@ export default function DashboardOverview() {
   // Get only first 5 conversations for preview
   const recentConversations = conversations.slice(0, 5);
 
-  // Fetch knowledge stats
-  useEffect(() => {
-    if (!widget?.table_name) return;
-    
-    const fetchKnowledgeStats = async () => {
-      // Get Q&A count
-      const { count: qaCount } = await supabase
-        .from('knowledge_qa')
-        .select('*', { count: 'exact', head: true })
-        .eq('table_name', widget.table_name);
-      
-      // Get documents count and last update
-      const { count: docsCount, data: docs } = await supabase
-        .from('knowledge_documents')
-        .select('created_at', { count: 'exact' })
-        .eq('table_name', widget.table_name)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      
-      setKnowledgeStats({
-        qaCount: qaCount || 0,
-        docsCount: docsCount || 0,
-        lastUpdate: docs?.[0]?.created_at || null
+  // Copy embed code to clipboard
+  const copyEmbedCode = () => {
+    if (!apiKey) {
+      toast({
+        title: 'API ključ ni na voljo',
+        description: 'Vaš chatbot še ni aktiven.',
+        variant: 'destructive',
       });
-    };
-    
-    fetchKnowledgeStats();
-  }, [widget?.table_name]);
-
+      return;
+    }
+    navigator.clipboard.writeText(embedCode);
+    setCopied(true);
+    toast({
+      title: 'Kopirano!',
+      description: 'Embed koda je bila kopirana v odložišče.',
+    });
+    setTimeout(() => setCopied(false), 2000);
+  };
   // Handle subscription success/cancelled from URL
   useEffect(() => {
     const subscriptionResult = searchParams.get('subscription');
@@ -361,32 +356,27 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Knowledge Base Status */}
+        {/* Embed Code Card */}
         <div className="glass rounded-2xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-warning/20 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-warning" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Baza znanja</h3>
-                <p className="text-sm text-muted-foreground">
-                  {knowledgeStats.qaCount} vprašanj • {knowledgeStats.docsCount} dokumentov
-                </p>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Code className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Embed koda</h3>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/knowledge')}>
-              Uredi
-              <ChevronRight className="h-4 w-4 ml-1" />
+            <Button variant="outline" size="sm" onClick={copyEmbedCode}>
+              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+              {copied ? 'Kopirano' : 'Kopiraj'}
             </Button>
           </div>
-          {knowledgeStats.lastUpdate && (
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <p className="text-xs text-muted-foreground">
-                Zadnja posodobitev: {formatDistanceToNow(new Date(knowledgeStats.lastUpdate), { addSuffix: true, locale: sl })}
-              </p>
-            </div>
-          )}
+          <textarea
+            readOnly
+            value={embedCode}
+            className="w-full p-3 rounded-lg bg-muted/50 text-sm font-mono text-foreground border border-border/50 resize-none"
+            rows={2}
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Prilepite to kodo na vašo spletno stran
+          </p>
         </div>
 
         {/* Quick Links */}
