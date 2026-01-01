@@ -11,13 +11,25 @@ import {
   Loader2,
   Calendar,
   BarChart3,
+  Activity,
+  ChevronRight,
+  Bot,
+  ExternalLink,
+  BookOpen,
+  Zap,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useConversations } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
+import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
+import { formatDistanceToNow } from 'date-fns';
+import { sl } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = {
   basic: {
@@ -49,13 +61,51 @@ export default function DashboardOverview() {
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
 
   const tableName = widget?.table_name;
-  const { stats, loading: statsLoading } = useDashboardStats(tableName);
+  const { stats, messagesByDay, loading: statsLoading } = useDashboardStats(tableName);
+  
+  // Conversations hook - za zadnje pogovore
+  const { conversations, loading: convsLoading } = useConversations(tableName);
+
+  // Knowledge stats
+  const [knowledgeStats, setKnowledgeStats] = useState({ qaCount: 0, docsCount: 0, lastUpdate: null as string | null });
 
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
   const plan = widget?.plan || 'basic';
   const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
   
+  // Get only first 5 conversations for preview
+  const recentConversations = conversations.slice(0, 5);
+
+  // Fetch knowledge stats
+  useEffect(() => {
+    if (!widget?.table_name) return;
+    
+    const fetchKnowledgeStats = async () => {
+      // Get Q&A count
+      const { count: qaCount } = await supabase
+        .from('knowledge_qa')
+        .select('*', { count: 'exact', head: true })
+        .eq('table_name', widget.table_name);
+      
+      // Get documents count and last update
+      const { count: docsCount, data: docs } = await supabase
+        .from('knowledge_documents')
+        .select('created_at', { count: 'exact' })
+        .eq('table_name', widget.table_name)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      setKnowledgeStats({
+        qaCount: qaCount || 0,
+        docsCount: docsCount || 0,
+        lastUpdate: docs?.[0]?.created_at || null
+      });
+    };
+    
+    fetchKnowledgeStats();
+  }, [widget?.table_name]);
+
   // Handle subscription success/cancelled from URL
   useEffect(() => {
     const subscriptionResult = searchParams.get('subscription');
@@ -150,6 +200,52 @@ export default function DashboardOverview() {
   return (
     <DashboardLayout title="Dashboard" subtitle="Upravljajte in spremljajte vašega AI chatbota">
       <div className="space-y-8">
+        {/* Chatbot Status Card */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Bot className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-semibold text-foreground">{widget?.bot_name || 'Moj Chatbot'}</h2>
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-xs font-medium",
+                    subscriptionStatus === 'active' 
+                      ? "bg-success/20 text-success" 
+                      : "bg-muted text-muted-foreground"
+                  )}>
+                    <span className={cn(
+                      "inline-block w-1.5 h-1.5 rounded-full mr-1",
+                      subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
+                    )} />
+                    {subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {plan ? `${planNames[plan]} paket` : 'Brez paketa'} 
+                  {widget?.billing_period && ` • ${widget.billing_period === 'yearly' ? 'Letno' : 'Mesečno'}`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {widget?.website_url && (
+                <Button variant="ghost" size="sm" asChild>
+                  <a href={widget.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    Odpri stran
+                  </a>
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/settings')}>
+                <Settings className="h-4 w-4 mr-1" />
+                Uredi
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Message Usage Card */}
         {subscriptionStatus === 'active' && (
           <MessageUsageCard
@@ -242,8 +338,119 @@ export default function DashboardOverview() {
           </div>
         </div>
 
+        {/* Activity Trend - Last 7 Days */}
+        {messagesByDay && messagesByDay.length > 0 && (
+          <div className="glass rounded-2xl p-6 animate-slide-up">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">Aktivnost zadnjih 7 dni</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/analytics')}>
+                Podrobnosti
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            <div className="h-[180px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={messagesByDay}>
+                  <defs>
+                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="hsl(var(--primary))" 
+                    fillOpacity={1} 
+                    fill="url(#colorCount)" 
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Conversations Preview */}
+        {recentConversations.length > 0 && (
+          <div className="glass rounded-2xl p-6 animate-slide-up">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-foreground">Zadnji pogovori</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/conversations')}>
+                Vsi pogovori
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {recentConversations.map((conv) => (
+                <div 
+                  key={conv.session_id}
+                  className="p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => navigate('/dashboard/conversations')}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {conv.first_question || 'Brez vprašanja'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {conv.first_answer || 'Brez odgovora'}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true, locale: sl })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Knowledge Base Status */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-warning/20 flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-warning" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Baza znanja</h3>
+                <p className="text-sm text-muted-foreground">
+                  {knowledgeStats.qaCount} vprašanj • {knowledgeStats.docsCount} dokumentov
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/knowledge')}>
+              Uredi
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+          {knowledgeStats.lastUpdate && (
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <p className="text-xs text-muted-foreground">
+                Zadnja posodobitev: {formatDistanceToNow(new Date(knowledgeStats.lastUpdate), { addSuffix: true, locale: sl })}
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
             onClick={() => navigate('/dashboard/conversations')}
             className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
@@ -269,17 +476,57 @@ export default function DashboardOverview() {
             </div>
           </button>
           <button
-            onClick={() => navigate('/dashboard/settings')}
+            onClick={() => navigate('/dashboard/knowledge')}
             className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
           >
             <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
-              <Settings className="h-5 w-5 text-warning" />
+              <BookOpen className="h-5 w-5 text-warning" />
+            </div>
+            <div>
+              <p className="font-medium text-foreground">Baza znanja</p>
+              <p className="text-sm text-muted-foreground">Q&A in dokumenti</p>
+            </div>
+          </button>
+          {hasContactsAddon && (
+            <button
+              onClick={() => navigate('/dashboard/contacts')}
+              className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+            >
+              <div className="h-10 w-10 rounded-lg bg-destructive/20 flex items-center justify-center">
+                <Users className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Kontakti</p>
+                <p className="text-sm text-muted-foreground">Leads in podatki</p>
+              </div>
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/dashboard/settings')}
+            className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+          >
+            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+              <Settings className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <p className="font-medium text-foreground">Nastavitve</p>
               <p className="text-sm text-muted-foreground">Uredite chatbota</p>
             </div>
           </button>
+          {plan === 'basic' && (
+            <button
+              onClick={() => navigate('/dashboard/upgrade')}
+              className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left border border-primary/20"
+            >
+              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Zap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Nadgradnja</p>
+                <p className="text-sm text-muted-foreground">Pro funkcije</p>
+              </div>
+            </button>
+          )}
         </div>
       </div>
     </DashboardLayout>
