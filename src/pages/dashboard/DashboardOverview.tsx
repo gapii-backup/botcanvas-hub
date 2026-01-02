@@ -19,7 +19,8 @@ import {
   UserCheck,
   CreditCard,
   HelpCircle,
-  Headphones,
+  TicketCheck,
+  Sparkles,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -342,6 +343,7 @@ export default function DashboardOverview() {
             <h3 className="font-semibold text-foreground">Hitri dostop</h3>
           </div>
           <div className="grid grid-cols-3 gap-4">
+            {/* Pogovori */}
             <button
               onClick={() => navigate('/dashboard/conversations')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all"
@@ -352,16 +354,7 @@ export default function DashboardOverview() {
               <span className="text-sm font-medium text-foreground">Pogovori</span>
             </button>
             
-            <button
-              onClick={() => navigate('/dashboard/analytics')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-success/10 hover:border-success/30 border border-transparent transition-all"
-            >
-              <div className="h-12 w-12 rounded-xl bg-success/20 group-hover:bg-success/30 flex items-center justify-center transition-colors">
-                <BarChart3 className="h-6 w-6 text-success" />
-              </div>
-              <span className="text-sm font-medium text-foreground">Analitika</span>
-            </button>
-            
+            {/* Baza znanja */}
             <button
               onClick={() => navigate('/dashboard/knowledge')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-warning/10 hover:border-warning/30 border border-transparent transition-all"
@@ -369,9 +362,21 @@ export default function DashboardOverview() {
               <div className="h-12 w-12 rounded-xl bg-warning/20 group-hover:bg-warning/30 flex items-center justify-center transition-colors">
                 <BookOpen className="h-6 w-6 text-warning" />
               </div>
-              <span className="text-sm font-medium text-foreground">Znanje</span>
+              <span className="text-sm font-medium text-foreground">Baza znanja</span>
             </button>
             
+            {/* Analiza */}
+            <button
+              onClick={() => navigate('/dashboard/analytics')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-success/10 hover:border-success/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-success/20 group-hover:bg-success/30 flex items-center justify-center transition-colors">
+                <BarChart3 className="h-6 w-6 text-success" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Analiza</span>
+            </button>
+            
+            {/* Kontakti */}
             <button
               onClick={() => navigate('/dashboard/contacts')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-accent/10 hover:border-accent/30 border border-transparent transition-all"
@@ -382,26 +387,29 @@ export default function DashboardOverview() {
               <span className="text-sm font-medium text-foreground">Kontakti</span>
             </button>
             
+            {/* Support Ticketi */}
             <button
-              onClick={() => navigate('/dashboard/settings')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent transition-all"
+              onClick={() => navigate('/dashboard/support')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-blue-500/10 hover:border-blue-500/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-muted group-hover:bg-muted/80 flex items-center justify-center transition-colors">
-                <Settings className="h-6 w-6 text-muted-foreground" />
+              <div className="h-12 w-12 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 flex items-center justify-center transition-colors">
+                <TicketCheck className="h-6 w-6 text-blue-500" />
               </div>
-              <span className="text-sm font-medium text-foreground">Nastavitve</span>
+              <span className="text-sm font-medium text-foreground">Support Ticketi</span>
             </button>
             
+            {/* Nadgradi */}
             <button
               onClick={() => navigate('/dashboard/upgrade')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/30 border border-transparent transition-all"
             >
               <div className="h-12 w-12 rounded-xl bg-amber-500/20 group-hover:bg-amber-500/30 flex items-center justify-center transition-colors">
-                <Zap className="h-6 w-6 text-amber-500" />
+                <Sparkles className="h-6 w-6 text-amber-500" />
               </div>
               <span className="text-sm font-medium text-foreground">Nadgradi</span>
             </button>
             
+            {/* Naročnina */}
             <button
               onClick={() => navigate('/dashboard/subscription')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-emerald-500/10 hover:border-emerald-500/30 border border-transparent transition-all"
@@ -412,16 +420,18 @@ export default function DashboardOverview() {
               <span className="text-sm font-medium text-foreground">Naročnina</span>
             </button>
             
+            {/* Nastavitve */}
             <button
-              onClick={() => navigate('/dashboard/support')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-blue-500/10 hover:border-blue-500/30 border border-transparent transition-all"
+              onClick={() => navigate('/dashboard/settings')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 flex items-center justify-center transition-colors">
-                <Headphones className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 rounded-xl bg-muted group-hover:bg-muted/80 flex items-center justify-center transition-colors">
+                <Settings className="h-6 w-6 text-muted-foreground" />
               </div>
-              <span className="text-sm font-medium text-foreground">Podpora</span>
+              <span className="text-sm font-medium text-foreground">Nastavitve</span>
             </button>
             
+            {/* Pomoč */}
             <button
               onClick={() => navigate('/dashboard/help')}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-violet-500/10 hover:border-violet-500/30 border border-transparent transition-all"
