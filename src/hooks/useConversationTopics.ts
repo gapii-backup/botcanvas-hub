@@ -139,14 +139,27 @@ export function useConversationTopics(
 
         // Fill missing days with 0
         const fillMissingDays = (data: Array<{ day: string; count: number }>, start: Date | null, end: Date | null): TrendDataPoint[] => {
-          if (!start || !end || data.length === 0) {
-            return data.map(item => ({
-              day: typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
-              count: Number(item.count)
-            }));
+          // If no data at all, return empty
+          if (data.length === 0) {
+            if (start && end) {
+              // Create empty days for the range
+              const filledData: TrendDataPoint[] = [];
+              const currentDate = new Date(start);
+              currentDate.setHours(0, 0, 0, 0);
+              const endDateObj = new Date(end);
+              endDateObj.setHours(0, 0, 0, 0);
+
+              while (currentDate <= endDateObj) {
+                const dayKey = currentDate.toISOString().split('T')[0];
+                filledData.push({ day: dayKey, count: 0 });
+                currentDate.setDate(currentDate.getDate() + 1);
+              }
+              return filledData;
+            }
+            return [];
           }
 
-          const filledData: TrendDataPoint[] = [];
+          // Parse all days from data
           const dataMap = new Map(
             data.map(item => [
               typeof item.day === 'string' ? item.day.split('T')[0] : String(item.day),
@@ -154,12 +167,28 @@ export function useConversationTopics(
             ])
           );
 
-          const currentDate = new Date(start);
-          currentDate.setHours(0, 0, 0, 0);
-          const endDate = new Date(end);
-          endDate.setHours(0, 0, 0, 0);
+          // Determine actual start and end dates
+          let actualStart: Date;
+          let actualEnd: Date;
 
-          while (currentDate <= endDate) {
+          if (start && end) {
+            // Use provided date range
+            actualStart = new Date(start);
+            actualEnd = new Date(end);
+          } else {
+            // For "all" filter - find oldest date from data and use today as end
+            const sortedDays = Array.from(dataMap.keys()).sort();
+            actualStart = new Date(sortedDays[0]);
+            actualEnd = new Date(); // today
+          }
+
+          actualStart.setHours(0, 0, 0, 0);
+          actualEnd.setHours(0, 0, 0, 0);
+
+          const filledData: TrendDataPoint[] = [];
+          const currentDate = new Date(actualStart);
+
+          while (currentDate <= actualEnd) {
             const dayKey = currentDate.toISOString().split('T')[0];
             filledData.push({
               day: dayKey,
