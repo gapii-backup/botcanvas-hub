@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   MessageSquare,
-  AlertCircle,
   Loader2,
   CalendarIcon,
   Download,
@@ -23,10 +21,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useConversations, type Message } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
@@ -35,7 +33,6 @@ import { useToast } from '@/hooks/use-toast';
 export default function DashboardConversations() {
   const { widget, loading } = useWidget();
   const tableName = widget?.table_name;
-  const { stats } = useDashboardStats(tableName);
   const { conversations, loading: convsLoading, loadingMore, hasMore, loadMore, fetchMessages, fetchAllConversations } = useConversations(tableName);
   
   const conversationsListRef = useRef<HTMLDivElement>(null);
@@ -56,9 +53,6 @@ export default function DashboardConversations() {
     }
   }, [messages]);
 
-  const usagePercentage = stats.monthlyLimit > 0 
-    ? Math.round((stats.humanMessagesCount / stats.monthlyLimit) * 100) 
-    : 0;
 
   const handleSelectConversation = async (sessionId: string) => {
     setSelectedConversation(sessionId);
@@ -310,22 +304,13 @@ export default function DashboardConversations() {
         </div>
       )}
       <div className="space-y-6 animate-slide-up">
-        {/* Usage Progress */}
-        <div className="bg-muted rounded-xl p-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-muted-foreground">Poraba sporočil</span>
-            <span className="text-sm font-semibold text-foreground">
-              {stats.humanMessagesCount} / {stats.monthlyLimit} sporočil
-            </span>
-          </div>
-          <Progress value={usagePercentage} className="h-2" />
-          {usagePercentage > 80 && (
-            <div className="flex items-center gap-2 text-warning text-xs mt-2">
-              <AlertCircle className="h-4 w-4" />
-              <span>Približujete se mesečni omejitvi</span>
-            </div>
-          )}
-        </div>
+        {/* Usage Progress - same as on main page */}
+        <MessageUsageCard
+          tableName={widget?.table_name}
+          billingPeriodStart={widget?.billing_period_start}
+          messagesLimit={widget?.messages_limit}
+          billingPeriod={widget?.billing_period}
+        />
 
         {/* Filter gumbi in izvoz */}
         <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
@@ -422,7 +407,7 @@ export default function DashboardConversations() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Levi panel - seznam pogovorov */}
-          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ minHeight: '400px', maxHeight: 'calc(100vh - 380px)' }}>
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col h-[500px]">
             <div className="p-3 sm:p-4 border-b border-border bg-muted/50">
               <h3 className="font-medium text-foreground text-sm sm:text-base">Pogovori ({displayCount})</h3>
             </div>
@@ -498,7 +483,7 @@ export default function DashboardConversations() {
           </div>
 
           {/* Desni panel - sporočila */}
-          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 320px)' }}>
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col h-[500px]">
             <div className="p-4 border-b border-border bg-muted/50">
               <h3 className="font-medium text-foreground truncate">
                 {selectedConversation ? `Pogovor #${selectedConversation.split('_').pop()?.slice(0, 8)}` : 'Izberite pogovor'}
