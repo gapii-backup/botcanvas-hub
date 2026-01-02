@@ -58,40 +58,38 @@ const plans = [
     name: 'Basic',
     id: 'basic',
     features: [
-      '1.000 pogovorov/mesec',
-      '1 chatbot',
-      'Osnovna prilagoditev',
-      'Email podpora',
-      '30 dni zgodovina',
-      'Osnovni analytics'
+      '2.000 pogovorov na mesec',
+      'Podpora za 1 jezik',
+      'Dodajanje Q&A vprašanj',
+      'Nalaganje PDF/Word dokumentov',
+      'Učenje iz vaše spletne strani',
+      'Widget za vgradnjo na vašo spletno stran',
+      'Osnovni pregled statistike pogovorov',
+      'Zgodovina pogovorov – 30 dni'
     ]
   },
   {
     name: 'Pro',
     id: 'pro',
     features: [
-      '5.000 pogovorov/mesec',
-      'Multilanguage (SLO + HR + SRB)',
-      '+1 multi-channel kanal',
-      'Analiza pogovorov',
-      'Zbiranje kontaktov',
-      'Support ticketi',
-      'Napredni analytics',
-      '60 dni zgodovina'
+      'Vse iz BASIC paketa, plus:',
+      '5.000 pogovorov na mesec',
+      'Podpora za več jezikov',
+      'Zbiranje kontaktov (leadov) neposredno v pogovoru',
+      'Kreiranje support ticketov neposredno preko chatbota',
+      'Napredni pregled statistike in analitike',
+      'Zgodovina pogovorov – 60 dni'
     ]
   },
   {
     name: 'Enterprise',
     id: 'enterprise',
     features: [
-      '10.000 pogovorov/mesec',
-      'Vse iz Pro paketa',
-      '+2 multi-channel kanala',
-      'Meeting booking',
-      'Product recommendations',
-      'Status naročil',
-      '180 dni zgodovina',
-      'Prioritetna podpora'
+      'Vse iz PRO paketa, plus:',
+      '10.000 pogovorov na mesec',
+      'Zgodovina pogovorov – 180 dni',
+      'Rezervacija sestankov neposredno preko chatbota',
+      'Pametna priporočila izdelkov (AI)'
     ]
   }
 ];
