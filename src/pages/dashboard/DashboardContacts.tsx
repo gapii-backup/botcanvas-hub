@@ -17,7 +17,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversations, type Message } from '@/hooks/useConversations';
 import { cn } from '@/lib/utils';
-import { format, startOfMonth, startOfDay, subDays } from 'date-fns';
+import { format, startOfDay, subDays } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import type { DateRange } from 'react-day-picker';
 import jsPDF from 'jspdf';
@@ -139,17 +139,17 @@ export default function DashboardContacts() {
   const stats = useMemo(() => {
     const total = uniqueLeads.length;
     const today = startOfDay(new Date());
-    const thisMonth = startOfMonth(new Date());
+    const thirtyDaysAgo = subDays(new Date(), 30);
     
     // For today: unique emails from leads created today
     const todayLeads = leads.filter(lead => new Date(lead.created_at) >= today);
     const uniqueToday = [...new Set(todayLeads.map(lead => lead.email))].length;
     
-    // For this month: unique emails from leads created this month
-    const monthLeads = leads.filter(lead => new Date(lead.created_at) >= thisMonth);
-    const uniqueThisMonth = [...new Set(monthLeads.map(lead => lead.email))].length;
+    // For last 30 days: unique emails from leads created in last 30 days
+    const monthLeads = leads.filter(lead => new Date(lead.created_at) >= thirtyDaysAgo);
+    const uniqueLastMonth = [...new Set(monthLeads.map(lead => lead.email))].length;
 
-    return { total, todayCount: uniqueToday, monthCount: uniqueThisMonth };
+    return { total, todayCount: uniqueToday, monthCount: uniqueLastMonth };
   }, [leads, uniqueLeads]);
 
   // Handle lead selection
@@ -331,7 +331,7 @@ export default function DashboardContacts() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-foreground">{stats.monthCount}</p>
-                <p className="text-sm text-muted-foreground">Ta mesec</p>
+                <p className="text-sm text-muted-foreground">V zadnjem mesecu</p>
               </div>
             </div>
           </div>
