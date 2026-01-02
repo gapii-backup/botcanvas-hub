@@ -150,10 +150,10 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
 
           {/* Opozorilo za mesečno zaračunavanje - samo za letne naročnine */}
           {isYearly && (
-            <div className="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+              <Info className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
-                Dodatni pogovori se <strong className="text-foreground">vedno zaračunavajo mesečno</strong>, ne glede na vaše obračunsko obdobje.
+                <strong className="text-amber-500">Mesečno</strong> — Dodatni pogovori se <strong className="text-foreground">vedno zaračunavajo mesečno</strong>, ne glede na vaše obračunsko obdobje. Brez 20% popusta.
               </p>
             </div>
           )}
@@ -239,7 +239,11 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                     <ul className="space-y-2 text-muted-foreground">
                       <li className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">•</span>
-                        <span>Funkcija se zaračuna mesečno saj se dodatni pogovori zaračunavajo mesečno (€{selectedOption?.price} +DDV/mesec)</span>
+                        <span>Kapacitete se <strong className="text-foreground">vedno zaračunavajo MESEČNO</strong> (ne letno), saj se dodatni pogovori obračunavajo mesečno.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span>Cena: <strong className="text-foreground">€{selectedOption?.price} +DDV/mesec</strong></span>
                       </li>
                     </ul>
                   </div>
