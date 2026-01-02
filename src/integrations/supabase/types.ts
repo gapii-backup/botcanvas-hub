@@ -143,36 +143,6 @@ export type Database = {
         }
         Relationships: []
       }
-      message_limits: {
-        Row: {
-          created_at: string
-          id: string
-          monthly_count: number
-          monthly_limit: number
-          reset_at: string
-          table_name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          monthly_count?: number
-          monthly_limit?: number
-          reset_at?: string
-          table_name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          monthly_count?: number
-          monthly_limit?: number
-          reset_at?: string
-          table_name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       support_tickets: {
         Row: {
           admin_response: string | null
