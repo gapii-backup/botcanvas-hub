@@ -151,8 +151,11 @@ export default function DashboardSubscription() {
   };
 
   const subscriptionStatus = widget?.subscription_status || 'active';
-  const isCanceling = subscriptionStatus === 'canceling';
-  const isActive = widget?.is_active !== false && subscriptionStatus === 'active';
+  const normalizedSubscriptionStatus = String(subscriptionStatus).toLowerCase();
+  const isCanceling = ['canceling', 'cancelling', 'cenceling', 'canceled', 'cancelled'].includes(
+    normalizedSubscriptionStatus
+  );
+  const isActive = widget?.is_active !== false && normalizedSubscriptionStatus === 'active';
 
   return (
     <DashboardLayout title="Naročnina" subtitle="Upravljajte svojo naročnino">

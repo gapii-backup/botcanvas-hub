@@ -72,7 +72,10 @@ export default function DashboardOverview() {
     : `<script src="https://cdn.botmotion.ai/widget.js" data-key="YOUR_API_KEY"></script>`;
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
-  const isCanceling = subscriptionStatus === 'canceling';
+  const normalizedSubscriptionStatus = String(subscriptionStatus).toLowerCase();
+  const isCanceling = ['canceling', 'cancelling', 'cenceling', 'canceled', 'cancelled'].includes(
+    normalizedSubscriptionStatus
+  );
   const plan = widget?.plan || 'basic';
   const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
 
