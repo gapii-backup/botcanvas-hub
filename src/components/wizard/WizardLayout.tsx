@@ -21,6 +21,7 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setIsVisible(false);
     const timer = setTimeout(() => setIsVisible(true), 50);
     return () => clearTimeout(timer);
