@@ -6,7 +6,8 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   Loader2,
-  Sparkles
+  Sparkles,
+  Check
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +18,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
 import { AddonModal } from '@/components/dashboard/AddonModal';
-import { UpgradeModal } from '@/components/dashboard/UpgradeModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,9 +30,41 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const planPrices = {
-  basic: { monthly: 49.99, yearly: 479.99, name: 'Basic' },
-  pro: { monthly: 119.99, yearly: 1149.99, name: 'Pro' },
-  enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
+  basic: { 
+    monthly: 49.99, yearly: 479.99, name: 'Basic',
+    features: [
+      '2.000 pogovorov na mesec',
+      'Podpora za 1 jezik',
+      'Dodajanje Q&A vprašanj',
+      'Nalaganje PDF/Word dokumentov',
+      'Učenje iz vaše spletne strani',
+      'Widget za vgradnjo na vašo spletno stran',
+      'Osnovni pregled statistike pogovorov',
+      'Zgodovina pogovorov – 30 dni'
+    ]
+  },
+  pro: { 
+    monthly: 119.99, yearly: 1149.99, name: 'Pro',
+    features: [
+      'Vse iz BASIC paketa, plus:',
+      '5.000 pogovorov na mesec',
+      'Podpora za več jezikov',
+      'Zbiranje kontaktov (leadov) neposredno v pogovoru',
+      'Kreiranje support ticketov neposredno preko chatbota',
+      'Napredni pregled statistike in analitike',
+      'Zgodovina pogovorov – 60 dni'
+    ]
+  },
+  enterprise: { 
+    monthly: 299.99, yearly: 2879.99, name: 'Enterprise',
+    features: [
+      'Vse iz PRO paketa, plus:',
+      '10.000 pogovorov na mesec',
+      'Rezervacija sestankov neposredno preko chatbota',
+      'Pametna priporočila izdelkov (AI)',
+      'Zgodovina pogovorov – 180 dni'
+    ]
+  }
 };
 
 const planOrder = ['basic', 'pro', 'enterprise'];
@@ -95,8 +127,15 @@ export default function DashboardUpgrade() {
   const [selectedAddon, setSelectedAddon] = useState<string | null>(null);
   const [cancelAddonDialog, setCancelAddonDialog] = useState<string | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [displayBillingPeriod, setDisplayBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  
+  // Upgrade/Downgrade confirmation state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    planId: string | null;
+    isDowngrade: boolean;
+  }>({ open: false, planId: null, isDowngrade: false });
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   // Initialize display billing period from widget when it loads
   const [initialized, setInitialized] = useState(false);
@@ -177,9 +216,63 @@ export default function DashboardUpgrade() {
     setAddonModalOpen(true);
   };
 
-  const openUpgradeModal = () => {
-    // Keep the current displayBillingPeriod - don't reset it
-    setUpgradeModalOpen(true);
+  const openConfirmDialog = (planId: string, isDowngrade: boolean) => {
+    setConfirmDialog({ open: true, planId, isDowngrade });
+  };
+
+  const handleConfirmChange = async () => {
+    if (!widget?.api_key || !user?.email || !confirmDialog.planId) {
+      toast({
+        title: 'Napaka',
+        description: 'Manjkajo podatki za spremembo paketa.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUpgradeLoading(true);
+    
+    try {
+      const response = await fetch('https://hub.botmotion.ai/webhook/create-upgrade-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: widget.api_key,
+          new_plan: confirmDialog.planId,
+          billing_period: displayBillingPeriod,
+          email: user.email,
+          cancel_url: window.location.href,
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        throw new Error(result.error || 'Napaka pri ustvarjanju plačila');
+      }
+    } catch (error) {
+      console.error('Plan change error:', error);
+      toast({
+        title: 'Napaka',
+        description: error instanceof Error ? error.message : 'Nekaj je šlo narobe. Prosimo, poskusite znova.',
+        variant: 'destructive',
+      });
+      setUpgradeLoading(false);
+      setConfirmDialog({ open: false, planId: null, isDowngrade: false });
+    }
+  };
+
+  const getSelectedPlanPrice = () => {
+    if (!confirmDialog.planId) return 0;
+    const prices = planPrices[confirmDialog.planId as keyof typeof planPrices];
+    return displayBillingPeriod === 'monthly' ? prices.monthly : prices.yearly;
+  };
+
+  const getSelectedPlanName = () => {
+    if (!confirmDialog.planId) return '';
+    return planPrices[confirmDialog.planId as keyof typeof planPrices]?.name || confirmDialog.planId;
   };
 
   return (
@@ -243,7 +336,7 @@ export default function DashboardUpgrade() {
                 return (
                   <div
                     key={planId}
-                    className={`rounded-xl p-5 border-2 transition-all duration-200 ${
+                    className={`rounded-xl p-5 border-2 transition-all duration-200 flex flex-col ${
                       isExactCurrentPlan 
                         ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 to-yellow-500/10 shadow-lg shadow-amber-500/10' 
                         : 'border-border bg-muted/30 hover:border-amber-500/40 hover:bg-amber-500/5'
@@ -271,9 +364,20 @@ export default function DashboardUpgrade() {
                     ) : (
                       <div className="mb-4 h-4" />
                     )}
+                    
+                    {/* Features list */}
+                    <ul className="space-y-1.5 mb-4 flex-grow">
+                      {planData.features.map(f => (
+                        <li key={f} className="flex items-start gap-2">
+                          <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-foreground">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    
                     {isExactCurrentPlan && (
                       <Button
-                        className="w-full border-amber-500/30 text-amber-500"
+                        className="w-full border-amber-500/30 text-amber-500 mt-auto"
                         size="sm"
                         variant="outline"
                         disabled
@@ -283,23 +387,23 @@ export default function DashboardUpgrade() {
                     )}
                     {!isExactCurrentPlan && isUpgrade && (
                       <Button
-                        onClick={openUpgradeModal}
-                        className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25"
+                        onClick={() => openConfirmDialog(planId, false)}
+                        className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25 mt-auto"
                         size="sm"
                       >
                         <ArrowUpCircle className="h-4 w-4" />
-                        Nadgradi
+                        Upgrade
                       </Button>
                     )}
                     {!isExactCurrentPlan && isDowngrade && (
                       <Button
-                        onClick={openUpgradeModal}
-                        className="w-full gap-2"
+                        onClick={() => openConfirmDialog(planId, true)}
+                        className="w-full gap-2 mt-auto"
                         size="sm"
                         variant="secondary"
                       >
                         <ArrowDownCircle className="h-4 w-4" />
-                        Downgradi
+                        Downgrade
                       </Button>
                     )}
                   </div>
@@ -401,12 +505,105 @@ export default function DashboardUpgrade() {
       {/* Addon Modal */}
       <AddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addon={selectedAddon} />
 
-      {/* Upgrade Modal */}
-      <UpgradeModal 
-        open={upgradeModalOpen} 
-        onOpenChange={setUpgradeModalOpen} 
-        initialBillingPeriod={displayBillingPeriod}
-      />
+      {/* Upgrade Confirmation Dialog */}
+      <AlertDialog open={confirmDialog.open && !confirmDialog.isDowngrade} onOpenChange={(open) => !open && setConfirmDialog({ open: false, planId: null, isDowngrade: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potrditev upgrade paketa</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3" asChild>
+              <div>
+                <p>
+                  Želite nadgraditi na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Trenutni paket:</span>
+                    <span>{planPrices[currentPlan as keyof typeof planPrices]?.name || currentPlan}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Nov paket:</span>
+                    <span className="font-semibold text-green-500">{getSelectedPlanName()}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-border pt-2 mt-2">
+                    <span>Naročnina ({displayBillingPeriod === 'monthly' ? 'mesečna' : 'letna'}):</span>
+                    <span>€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span></span>
+                  </div>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
+                  <p className="text-amber-500 font-semibold mb-1">⚠️ Pomembno:</p>
+                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Vaša trenutna naročnina bo preklicana</li>
+                    <li>Vsi aktivni addoni bodo odstranjeni</li>
+                    <li>Nov paket bo aktiviran v roku 72 ur</li>
+                    <li>Zaračunavanje se začne ob naslednjem plačilnem obdobju</li>
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={upgradeLoading}>Prekliči</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmChange}
+              disabled={upgradeLoading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {upgradeLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Potrjujem upgrade
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Downgrade Confirmation Dialog */}
+      <AlertDialog open={confirmDialog.open && confirmDialog.isDowngrade} onOpenChange={(open) => !open && setConfirmDialog({ open: false, planId: null, isDowngrade: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potrditev downgrade paketa</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3" asChild>
+              <div>
+                <p>
+                  Želite downgrade na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
+                </p>
+                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Trenutni paket:</span>
+                    <span>{planPrices[currentPlan as keyof typeof planPrices]?.name || currentPlan}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Nov paket:</span>
+                    <span className="font-semibold text-orange-500">{getSelectedPlanName()}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-border pt-2 mt-2">
+                    <span>Nova cena:</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{displayBillingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                  </div>
+                </div>
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
+                  <p className="text-destructive font-semibold mb-1">⚠️ Opozorilo:</p>
+                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
+                    <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
+                    <li>Vsi aktivni addoni bodo odstranjeni</li>
+                    <li>Sprememba bo aktivirana v roku 72 ur</li>
+                    <li>Sredstev ne vračamo</li>
+                  </ul>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={upgradeLoading}>Prekliči</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmChange}
+              disabled={upgradeLoading}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {upgradeLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Potrjujem downgrade
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Cancel Addon Dialog */}
       <AlertDialog open={!!cancelAddonDialog} onOpenChange={() => setCancelAddonDialog(null)}>

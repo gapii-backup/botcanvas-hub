@@ -87,9 +87,9 @@ const plans = [
     features: [
       'Vse iz PRO paketa, plus:',
       '10.000 pogovorov na mesec',
-      'Zgodovina pogovorov – 180 dni',
       'Rezervacija sestankov neposredno preko chatbota',
-      'Pametna priporočila izdelkov (AI)'
+      'Pametna priporočila izdelkov (AI)',
+      'Zgodovina pogovorov – 180 dni'
     ]
   }
 ];
