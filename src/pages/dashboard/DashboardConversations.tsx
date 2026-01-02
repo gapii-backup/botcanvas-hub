@@ -24,6 +24,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useConversations, type Message } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
@@ -287,6 +288,14 @@ export default function DashboardConversations() {
     return (
       <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
         <Skeleton className="h-64 w-full" />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.status === 'setup_paid') {
+    return (
+      <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
+        <SetupPendingLock />
       </DashboardLayout>
     );
   }
