@@ -270,8 +270,8 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                 )}
 
                 <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/5 rounded-lg p-3">
-                  <span>⏱️</span>
-                  <span>Kapaciteta bo aktivirana v roku <strong>72 ur</strong> po potrditvi nakupa.</span>
+                  <span>⚡</span>
+                  <span>Kapaciteta bo aktivirana <strong>TAKOJ</strong> po potrditvi nakupa.</span>
                 </div>
               </div>
             </AlertDialogDescription>
