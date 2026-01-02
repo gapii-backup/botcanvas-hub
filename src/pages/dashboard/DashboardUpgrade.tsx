@@ -178,9 +178,7 @@ export default function DashboardUpgrade() {
   };
 
   const openUpgradeModal = () => {
-    if (widget?.billing_period) {
-      setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
-    }
+    // Keep the current displayBillingPeriod - don't reset it
     setUpgradeModalOpen(true);
   };
 
