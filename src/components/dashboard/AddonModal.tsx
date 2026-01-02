@@ -135,7 +135,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Dodaj {addonData.name}</DialogTitle>
+            <DialogTitle>Dodaj funkcijo: {addonData.name}</DialogTitle>
             <DialogDescription>Dodajte funkcionalnost svoji naročnini</DialogDescription>
           </DialogHeader>
 
@@ -162,7 +162,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
 
           <Button className="w-full" onClick={handleAddonClick} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Dodaj addon
+            Dodaj funkcijo
           </Button>
         </DialogContent>
       </Dialog>
@@ -170,7 +170,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Potrditev nakupa addona</AlertDialogTitle>
+            <AlertDialogTitle>Potrditev nakupa funkcije</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4" asChild>
               <div>
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
