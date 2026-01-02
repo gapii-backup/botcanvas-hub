@@ -1,17 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
   Loader2,
-  Sparkles,
-  MessageSquare,
-  Languages,
-  Users,
-  Ticket,
-  LineChart,
-  History,
-  Calendar,
-  Lightbulb,
-  AlertTriangle,
-  LucideIcon
+  Check,
+  AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,8 +32,6 @@ interface ProUpgradeModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type FeatureItem = { text: string; icon: LucideIcon };
-
 const planPrices = {
   pro: { monthly: 119.99, yearly: 1149.99, name: 'Pro' },
   enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
@@ -55,25 +44,25 @@ const plans = [
     name: 'Pro',
     id: 'pro',
     features: [
-      { text: 'Vse iz BASIC paketa, plus:', icon: Sparkles },
-      { text: '5.000 pogovorov na mesec', icon: MessageSquare },
-      { text: 'Podpora za več jezikov', icon: Languages },
-      { text: 'Zbiranje kontaktov (leadov) neposredno v pogovoru', icon: Users },
-      { text: 'Kreiranje support ticketov neposredno preko chatbota', icon: Ticket },
-      { text: 'Napredni pregled statistike in analitike', icon: LineChart },
-      { text: 'Zgodovina pogovorov – 60 dni', icon: History }
-    ] as FeatureItem[]
+      'Vse iz BASIC paketa, plus:',
+      '5.000 pogovorov na mesec',
+      'Podpora za več jezikov',
+      'Zbiranje kontaktov (leadov) neposredno v pogovoru',
+      'Kreiranje support ticketov neposredno preko chatbota',
+      'Napredni pregled statistike in analitike',
+      'Zgodovina pogovorov – 60 dni'
+    ]
   },
   {
     name: 'Enterprise',
     id: 'enterprise',
     features: [
-      { text: 'Vse iz PRO paketa, plus:', icon: Sparkles },
-      { text: '10.000 pogovorov na mesec', icon: MessageSquare },
-      { text: 'Rezervacija sestankov neposredno preko chatbota', icon: Calendar },
-      { text: 'Pametna priporočila izdelkov (AI)', icon: Lightbulb },
-      { text: 'Zgodovina pogovorov – 180 dni', icon: History }
-    ] as FeatureItem[]
+      'Vse iz PRO paketa, plus:',
+      '10.000 pogovorov na mesec',
+      'Rezervacija sestankov neposredno preko chatbota',
+      'Pametna priporočila izdelkov (AI)',
+      'Zgodovina pogovorov – 180 dni'
+    ]
   }
 ];
 
@@ -272,15 +261,12 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   )}
                   
                   <ul className="space-y-2.5 mb-4 flex-grow">
-                    {plan.features.map((feature) => {
-                      const IconComponent = feature.icon;
-                      return (
-                        <li key={feature.text} className="flex items-start gap-3">
-                          <IconComponent className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-foreground leading-relaxed">{feature.text}</span>
-                        </li>
-                      );
-                    })}
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-foreground leading-relaxed">{feature}</span>
+                      </li>
+                    ))}
                   </ul>
                   
                   <Button
