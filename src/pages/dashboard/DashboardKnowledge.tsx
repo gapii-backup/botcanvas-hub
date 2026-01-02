@@ -482,7 +482,7 @@ export default function DashboardKnowledge() {
                     e.preventDefault();
                   }
                 }}
-                placeholder="Vnesite vprašanje (brez prelomov vrstic)..."
+                placeholder="Vnesite vprašanje..."
                 rows={2}
                 className="resize-none"
               />
@@ -492,7 +492,7 @@ export default function DashboardKnowledge() {
               <Textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                placeholder="Vnesite podroben odgovor... (Enter za novo vrstico)"
+                placeholder="Vnesite podroben odgovor..."
                 rows={6}
               />
               <p className="text-xs text-muted-foreground mt-1">
