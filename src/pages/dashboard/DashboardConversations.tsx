@@ -328,8 +328,8 @@ export default function DashboardConversations() {
         </div>
 
         {/* Filter gumbi in izvoz */}
-        <div className="flex flex-wrap gap-2 items-center justify-between">
-          <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
+          <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
             {[
               { key: 'all', label: 'Vsi pogovori' },
               { key: '7days', label: 'Zadnjih 7 dni' },
@@ -420,11 +420,11 @@ export default function DashboardConversations() {
           </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Levi panel - seznam pogovorov */}
-          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 320px)' }}>
-            <div className="p-4 border-b border-border bg-muted/50">
-              <h3 className="font-medium text-foreground">Pogovori ({displayCount})</h3>
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col" style={{ minHeight: '400px', maxHeight: 'calc(100vh - 380px)' }}>
+            <div className="p-3 sm:p-4 border-b border-border bg-muted/50">
+              <h3 className="font-medium text-foreground text-sm sm:text-base">Pogovori ({displayCount})</h3>
             </div>
             
             <div 
