@@ -8,9 +8,7 @@ import {
   Settings,
   CheckCircle,
   Loader2,
-  Calendar,
   BarChart3,
-  ChevronRight,
   Bot,
   BookOpen,
   Zap,
@@ -19,17 +17,17 @@ import {
   Check,
   Mail,
   UserCheck,
+  CreditCard,
+  HelpCircle,
+  Headphones,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useConversations } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 
-import { formatDistanceToNow } from 'date-fns';
-import { sl } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -64,9 +62,6 @@ export default function DashboardOverview() {
 
   const tableName = widget?.table_name;
   const { stats, loading: statsLoading } = useDashboardStats(tableName);
-  
-  // Conversations hook - za zadnje pogovore
-  const { conversations, loading: convsLoading } = useConversations(tableName);
 
 // Embed code state
   const [copied, setCopied] = useState(false);
@@ -78,9 +73,6 @@ export default function DashboardOverview() {
   const subscriptionStatus = widget?.subscription_status || 'none';
   const plan = widget?.plan || 'basic';
   const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
-  
-  // Get only first 5 conversations for preview
-  const recentConversations = conversations.slice(0, 5);
 
   // Copy embed code to clipboard
   const copyEmbedCode = () => {
@@ -343,44 +335,104 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Recent Conversations Preview */}
-        {recentConversations.length > 0 && (
-          <div className="glass rounded-2xl p-6 animate-slide-up">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-foreground">Zadnji pogovori</h3>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/conversations')}>
-                Vsi pogovori
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-            <div className="space-y-3">
-              {recentConversations.map((conv) => (
-                <div 
-                  key={conv.session_id}
-                  className="p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate('/dashboard/conversations')}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {conv.first_question || 'Brez vprašanja'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {conv.first_answer || 'Brez odgovora'}
-                      </p>
-                    </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true, locale: sl })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* Quick Shortcuts - 3x3 Grid */}
+        <div className="glass rounded-2xl p-6 animate-slide-up">
+          <div className="flex items-center gap-2 mb-6">
+            <Zap className="h-5 w-5 text-amber-500" />
+            <h3 className="font-semibold text-foreground">Hitri dostop</h3>
           </div>
-        )}
+          <div className="grid grid-cols-3 gap-4">
+            <button
+              onClick={() => navigate('/dashboard/conversations')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-primary/20 group-hover:bg-primary/30 flex items-center justify-center transition-colors">
+                <MessageSquare className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Pogovori</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/analytics')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-success/10 hover:border-success/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-success/20 group-hover:bg-success/30 flex items-center justify-center transition-colors">
+                <BarChart3 className="h-6 w-6 text-success" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Analitika</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/knowledge')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-warning/10 hover:border-warning/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-warning/20 group-hover:bg-warning/30 flex items-center justify-center transition-colors">
+                <BookOpen className="h-6 w-6 text-warning" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Znanje</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/contacts')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-accent/10 hover:border-accent/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-accent/20 group-hover:bg-accent/30 flex items-center justify-center transition-colors">
+                <Users className="h-6 w-6 text-accent" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Kontakti</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/settings')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-muted group-hover:bg-muted/80 flex items-center justify-center transition-colors">
+                <Settings className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Nastavitve</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/upgrade')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-amber-500/20 group-hover:bg-amber-500/30 flex items-center justify-center transition-colors">
+                <Zap className="h-6 w-6 text-amber-500" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Nadgradi</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/subscription')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-emerald-500/10 hover:border-emerald-500/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/20 group-hover:bg-emerald-500/30 flex items-center justify-center transition-colors">
+                <CreditCard className="h-6 w-6 text-emerald-500" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Naročnina</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/support')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-blue-500/10 hover:border-blue-500/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 flex items-center justify-center transition-colors">
+                <Headphones className="h-6 w-6 text-blue-500" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Podpora</span>
+            </button>
+            
+            <button
+              onClick={() => navigate('/dashboard/help')}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-violet-500/10 hover:border-violet-500/30 border border-transparent transition-all"
+            >
+              <div className="h-12 w-12 rounded-xl bg-violet-500/20 group-hover:bg-violet-500/30 flex items-center justify-center transition-colors">
+                <HelpCircle className="h-6 w-6 text-violet-500" />
+              </div>
+              <span className="text-sm font-medium text-foreground">Pomoč</span>
+            </button>
+          </div>
+        </div>
 
         {/* Embed Code Card */}
         <div className="glass rounded-2xl p-6 animate-slide-up">
@@ -403,86 +455,6 @@ export default function DashboardOverview() {
           <p className="text-xs text-muted-foreground mt-2">
             Prilepite to kodo na vašo spletno stran
           </p>
-        </div>
-
-        {/* Quick Links */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            onClick={() => navigate('/dashboard/conversations')}
-            className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-              <MessageSquare className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Pogovori</p>
-              <p className="text-sm text-muted-foreground">Preglejte aktivnost</p>
-            </div>
-          </button>
-          <button
-            onClick={() => navigate('/dashboard/analytics')}
-            className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-success" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Analiza</p>
-              <p className="text-sm text-muted-foreground">Teme in kategorije</p>
-            </div>
-          </button>
-          <button
-            onClick={() => navigate('/dashboard/knowledge')}
-            className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="h-10 w-10 rounded-lg bg-warning/20 flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-warning" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Baza znanja</p>
-              <p className="text-sm text-muted-foreground">Q&A in dokumenti</p>
-            </div>
-          </button>
-          {hasContactsAddon && (
-            <button
-              onClick={() => navigate('/dashboard/contacts')}
-              className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-            >
-              <div className="h-10 w-10 rounded-lg bg-destructive/20 flex items-center justify-center">
-                <Users className="h-5 w-5 text-destructive" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Kontakti</p>
-                <p className="text-sm text-muted-foreground">Leads in podatki</p>
-              </div>
-            </button>
-          )}
-          <button
-            onClick={() => navigate('/dashboard/settings')}
-            className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-          >
-            <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
-              <Settings className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">Nastavitve</p>
-              <p className="text-sm text-muted-foreground">Uredite chatbota</p>
-            </div>
-          </button>
-          {plan === 'basic' && (
-            <button
-              onClick={() => navigate('/dashboard/upgrade')}
-              className="glass rounded-xl p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left border border-primary/20"
-            >
-              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Zap className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Nadgradnja</p>
-                <p className="text-sm text-muted-foreground">Pro funkcije</p>
-              </div>
-            </button>
-          )}
         </div>
       </div>
     </DashboardLayout>
