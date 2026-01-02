@@ -11,6 +11,7 @@ import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview
 import { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { loadStripe } from '@stripe/stripe-js';
+import logoInline from '@/assets/logo-inline-light.png';
 
 const stripePromise = loadStripe('pk_test_51SjJ1X6cfwnnZsVXBsH4Hf42xuJwOkjnrtPzpuQtZbDVOP5zmIhmbCKZQTrxXnrfo0VkDAJHv8LTwWSoYqXOpq7V001LyWRo13');
 import {
@@ -348,16 +349,40 @@ export default function Complete() {
     { id: 'trigger' as const, label: 'Gumb', icon: MousePointer },
   ];
 
+  const steps = [
+    { id: 1, label: 'Povezava', completed: true },
+    { id: 2, label: 'Chat', completed: true },
+    { id: 3, label: 'Izgled', completed: true },
+    { id: 4, label: 'Bubble', completed: true },
+  ];
+
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
+      {/* Header with logo and steps */}
       <div className="border-b border-border bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-              <Check className="h-4 w-4" />
-            </div>
-            <span className="font-medium text-foreground">Konfiguracija zaključena</span>
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <a href="https://botmotion.ai/" className="block">
+              <img src={logoInline} alt="BotMotion.AI" className="h-10" />
+            </a>
+          </div>
+
+          {/* Steps indicator */}
+          <div className="flex items-center justify-center">
+            {steps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{step.label}</span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className="w-16 h-0.5 bg-primary mx-3" />
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import logoInline from '@/assets/logo-inline-light.png';
 
 const plans = [
   {
@@ -129,7 +130,14 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        {/* Logo */}
+        <div className="flex justify-center mb-10">
+          <a href="https://botmotion.ai/" className="block">
+            <img src={logoInline} alt="BotMotion.AI" className="h-10" />
+          </a>
+        </div>
+
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-4xl font-bold text-foreground sm:text-5xl">
             Izberite svoj paket
