@@ -98,12 +98,12 @@ export default function DashboardUpgrade() {
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
   const [displayBillingPeriod, setDisplayBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
-  // Initialize display billing period from widget
-  useState(() => {
-    if (widget?.billing_period) {
-      setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
-    }
-  });
+  // Initialize display billing period from widget when it loads
+  const [initialized, setInitialized] = useState(false);
+  if (!initialized && widget?.billing_period) {
+    setDisplayBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    setInitialized(true);
+  }
 
   if (loading) {
     return (
@@ -188,38 +188,38 @@ export default function DashboardUpgrade() {
     <DashboardLayout title="Nadgradi" subtitle="Spremenite paket ali dodajte dodatke">
       <div className="space-y-6 animate-slide-up">
         {/* SPREMENI PAKET */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+        <Card className="overflow-hidden border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-yellow-500/5 to-orange-500/5">
+          <CardHeader className="bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-b border-amber-500/20">
+            <CardTitle className="flex items-center gap-2 text-amber-500">
+              <Sparkles className="h-5 w-5" />
               Spremeni paket
             </CardTitle>
             <CardDescription>Izberite paket ki najbolj ustreza vašim potrebam</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {/* Billing period toggle */}
             <div className="flex justify-center mb-6">
-              <div className="inline-flex rounded-lg bg-muted p-1">
+              <div className="inline-flex rounded-xl bg-amber-500/10 p-1.5 border border-amber-500/20">
                 <button
                   onClick={() => setDisplayBillingPeriod('monthly')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 ${
                     displayBillingPeriod === 'monthly'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/25'
+                      : 'text-amber-600 hover:text-amber-500 hover:bg-amber-500/10'
                   }`}
                 >
                   Mesečno
                 </button>
                 <button
                   onClick={() => setDisplayBillingPeriod('yearly')}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                  className={`px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 ${
                     displayBillingPeriod === 'yearly'
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground'
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/25'
+                      : 'text-amber-600 hover:text-amber-500 hover:bg-amber-500/10'
                   }`}
                 >
                   Letno
-                  <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
+                  <Badge className="bg-green-500 text-white text-xs border-0">
                     -20%
                   </Badge>
                 </button>
@@ -245,21 +245,21 @@ export default function DashboardUpgrade() {
                 return (
                   <div
                     key={planId}
-                    className={`rounded-lg p-4 border ${
+                    className={`rounded-xl p-5 border-2 transition-all duration-200 ${
                       isExactCurrentPlan 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-border bg-muted/30'
+                        ? 'border-amber-500 bg-gradient-to-br from-amber-500/10 to-yellow-500/10 shadow-lg shadow-amber-500/10' 
+                        : 'border-amber-500/20 bg-card/50 hover:border-amber-500/40 hover:bg-amber-500/5'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-bold text-foreground">{planData.name}</h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-bold text-lg text-foreground">{planData.name}</h3>
                       {isExactCurrentPlan && (
-                        <Badge variant="secondary" className="bg-primary/20 text-primary">
+                        <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0">
                           Trenutni
                         </Badge>
                       )}
                     </div>
-                    <div className="text-2xl font-bold text-foreground mb-1">
+                    <div className="text-3xl font-bold text-foreground mb-1">
                       €{price}
                       <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
@@ -267,15 +267,15 @@ export default function DashboardUpgrade() {
                       </span>
                     </div>
                     {displayBillingPeriod === 'yearly' ? (
-                      <div className="text-xs text-green-500 font-medium mb-3">
+                      <div className="text-xs text-green-500 font-semibold mb-4">
                         Prihranite €{savings}/leto
                       </div>
                     ) : (
-                      <div className="mb-3 h-4" />
+                      <div className="mb-4 h-4" />
                     )}
                     {isExactCurrentPlan && (
                       <Button
-                        className="w-full"
+                        className="w-full border-amber-500/30 text-amber-500"
                         size="sm"
                         variant="outline"
                         disabled
@@ -286,7 +286,7 @@ export default function DashboardUpgrade() {
                     {!isExactCurrentPlan && isUpgrade && (
                       <Button
                         onClick={openUpgradeModal}
-                        className="w-full gap-2"
+                        className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25"
                         size="sm"
                       >
                         <ArrowUpCircle className="h-4 w-4" />
@@ -296,9 +296,9 @@ export default function DashboardUpgrade() {
                     {!isExactCurrentPlan && isDowngrade && (
                       <Button
                         onClick={openUpgradeModal}
-                        className="w-full gap-2"
+                        className="w-full gap-2 border-amber-500/30 text-amber-600 hover:bg-amber-500/10 hover:text-amber-500"
                         size="sm"
-                        variant="secondary"
+                        variant="outline"
                       >
                         <ArrowDownCircle className="h-4 w-4" />
                         Downgradi
@@ -404,7 +404,11 @@ export default function DashboardUpgrade() {
       <AddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addon={selectedAddon} />
 
       {/* Upgrade Modal */}
-      <UpgradeModal open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen} />
+      <UpgradeModal 
+        open={upgradeModalOpen} 
+        onOpenChange={setUpgradeModalOpen} 
+        initialBillingPeriod={displayBillingPeriod}
+      />
 
       {/* Cancel Addon Dialog */}
       <AlertDialog open={!!cancelAddonDialog} onOpenChange={() => setCancelAddonDialog(null)}>
