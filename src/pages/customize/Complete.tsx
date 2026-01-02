@@ -190,6 +190,11 @@ export default function Complete() {
   const availableAddons = getAvailableAddons(userPlan, isYearly);
   const hasAddons = Object.keys(availableAddons).length > 0;
   
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // Persist selected addons to localStorage
   useEffect(() => {
     localStorage.setItem(ADDONS_STORAGE_KEY, JSON.stringify(selectedAddons));

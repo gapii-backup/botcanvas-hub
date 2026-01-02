@@ -18,7 +18,7 @@ const passwordRequirements = [
 const registerSchema = z.object({
   name: z.string().min(2, 'Ime mora imeti vsaj 2 znaka'),
   email: z.string().email('Neveljaven email naslov'),
-  phone: z.string().min(9, 'Telefonska številka mora imeti vsaj 9 znakov'),
+  phone: z.string().optional(),
   password: z.string()
     .min(8, 'Geslo mora imeti vsaj 8 znakov')
     .regex(/[A-Z]/, 'Geslo mora vsebovati vsaj 1 veliko črko')
