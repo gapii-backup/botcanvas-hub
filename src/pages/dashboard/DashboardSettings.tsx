@@ -167,14 +167,16 @@ export default function DashboardSettings() {
   useEffect(() => {
     setOnSave(handleSaveForNavigation);
     setOnDiscard(handleCancelForNavigation);
-    
-    // Cleanup on unmount
+  }, [handleSaveForNavigation, handleCancelForNavigation, setOnSave, setOnDiscard]);
+
+  // Cleanup handlers only on unmount
+  useEffect(() => {
     return () => {
       setOnSave(null);
       setOnDiscard(null);
       setGlobalUnsavedChanges(false);
     };
-  }, [handleSaveForNavigation, handleCancelForNavigation, setOnSave, setOnDiscard, setGlobalUnsavedChanges]);
+  }, [setOnSave, setOnDiscard, setGlobalUnsavedChanges]);
 
   // Sync active tab with preview
   useEffect(() => {
