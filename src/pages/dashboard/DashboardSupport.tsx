@@ -4,6 +4,7 @@ import { sl } from 'date-fns/locale';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LockedFeature } from '@/components/dashboard/LockedFeature';
+import { PendingSetup } from '@/components/dashboard/PendingSetup';
 import { useWidget } from '@/hooks/useWidget';
 import { useSupportTickets, SupportTicket } from '@/hooks/useSupportTickets';
 import { Button } from '@/components/ui/button';
@@ -145,6 +146,14 @@ export default function DashboardSupport() {
           </div>
           <Skeleton className="h-[600px]" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.status === 'sub_paid') {
+    return (
+      <DashboardLayout title="Support Ticketi" subtitle="Pregled in upravljanje support zahtevkov">
+        <PendingSetup />
       </DashboardLayout>
     );
   }
