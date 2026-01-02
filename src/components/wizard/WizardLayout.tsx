@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoInline from '@/assets/logo-inline-light.png';
 
 type WizardLayoutProps = {
   currentStep: number;
@@ -27,9 +28,21 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Progress bar */}
+      {/* Header with logo and progress bar */}
       <div className="border-b border-border bg-background">
         <div className="max-w-6xl mx-auto px-4 py-4">
+          {/* Logo */}
+          <div className="flex justify-center mb-4">
+            <a href="https://botmotion.ai/" className="block">
+              <img 
+                src={logoInline} 
+                alt="BotMotion.AI" 
+                className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+              />
+            </a>
+          </div>
+          
+          {/* Steps */}
           <div className="flex items-center justify-center gap-2">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">

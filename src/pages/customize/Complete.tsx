@@ -362,24 +362,28 @@ export default function Complete() {
       <div className="border-b border-border bg-background">
         <div className="max-w-4xl mx-auto px-4 py-6">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4">
             <a href="https://botmotion.ai/" className="block">
-              <img src={logoInline} alt="BotMotion.AI" className="h-10" />
+              <img 
+                src={logoInline} 
+                alt="BotMotion.AI" 
+                className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+              />
             </a>
           </div>
 
-          {/* Steps indicator */}
+          {/* Steps indicator - minimal */}
           <div className="flex items-center justify-center">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                    <Check className="h-4 w-4" />
+                <div className="flex items-center gap-1.5">
+                  <div className="h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                    <Check className="h-3 w-3" />
                   </div>
-                  <span className="text-sm font-medium text-foreground">{step.label}</span>
+                  <span className="text-xs font-medium text-muted-foreground hidden sm:block">{step.label}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="w-16 h-0.5 bg-primary mx-3" />
+                  <div className="w-8 sm:w-12 h-px bg-primary/50 mx-2" />
                 )}
               </div>
             ))}
@@ -567,7 +571,7 @@ export default function Complete() {
         {/* Navigation - Full width sticky bottom */}
         <div className="mt-8 pt-6 border-t border-border">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <Button variant="outline" onClick={() => navigate('/customize/step-3')} size="lg">
+            <Button variant="outline" onClick={() => navigate('/customize/step-4')} size="lg">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nazaj
             </Button>
