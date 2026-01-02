@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
@@ -142,6 +142,9 @@ function getAvailableAddons(plan: string | null, isYearly: boolean): Record<stri
     let filteredItems = category.items.filter(item => {
       // Check excluded by plan
       if (excludedIds.includes(item.id)) return false;
+      
+      // For yearly billing, exclude ALL capacity items (they are added separately after checkout)
+      if (isYearly && item.id.startsWith('capacity_')) return false;
       
       // Booking only for pro/enterprise
       if (item.proOnly && !showBooking) return false;
@@ -440,6 +443,22 @@ export default function Complete() {
                       </CardContent>
                     </Card>
                   ))}
+
+                  {/* Info za yearly - capacity addoni */}
+                  {isYearly && (
+                    <div className="mt-4">
+                      <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                        <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <p className="font-medium text-foreground mb-1">Dodatne kapacitete pogovorov</p>
+                          <p className="text-muted-foreground">
+                            Pri letni naročnini lahko dodatne pogovore dodate <strong>po aktivaciji</strong> v sekciji 
+                            <strong> Nadgradi </strong> v vašem dashboardu. Zaračunavajo se mesečno.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {selectedAddons.length > 0 && (
