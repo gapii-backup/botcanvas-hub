@@ -145,29 +145,37 @@ export default function DashboardSubscription() {
     return `${day}. ${month}. ${year}`;
   };
 
+  const isActive = widget?.is_active !== false && widget?.subscription_status === 'active';
+
   return (
     <DashboardLayout title="Naročnina" subtitle="Upravljajte svojo naročnino">
       <div className="space-y-6 animate-slide-up">
-        {/* PREGLED NAROČNINE */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-primary" />
-              Pregled naročnine
-            </CardTitle>
-            <CardDescription>Podatki o vaši trenutni naročnini</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* PREGLED NAROČNINE - polovična širina */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                Pregled naročnine
+              </CardTitle>
+              <CardDescription>Podatki o vaši trenutni naročnini</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="bg-muted/30 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground mb-1">Trenutni paket</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold text-foreground">
                     {planNames[currentPlan] || 'Basic'}
                   </span>
-                  <Badge variant="secondary" className="bg-primary/20 text-primary">
-                    Aktiven
-                  </Badge>
+                  {isActive ? (
+                    <Badge className="bg-green-500/20 text-green-500 border border-green-500/30">
+                      Aktiven
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                      Neaktiven
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="bg-muted/30 rounded-lg p-4">
@@ -176,83 +184,61 @@ export default function DashboardSubscription() {
                   {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
                 </span>
               </div>
-              <div className="bg-muted/30 rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-1">Skupna cena</p>
-                <div>
-                  <span className="text-xl font-bold text-foreground">
-                    €{totalPrice.toFixed(2)}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
-                    <span className="text-sm font-normal text-muted-foreground">
-                      /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
-                    </span>
-                  </span>
-                  {hasAddons && (
-                    <p className="text-xs text-muted-foreground mt-1">(paket + dodatki)</p>
-                  )}
-                </div>
-              </div>
-              <div className="bg-muted/30 rounded-lg p-4">
-                <p className="text-sm text-muted-foreground mb-1">Naslednje plačilo</p>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xl font-bold text-foreground">{getNextPaymentDate()}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Aktivni dodatki */}
-            <div className="mt-6">
-              <p className="text-sm text-muted-foreground mb-3">Aktivni dodatki</p>
-              {activeAddonIds.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {activeAddonIds.map(addonId => (
-                    <Badge 
-                      key={addonId} 
-                      variant="secondary" 
-                      className="bg-primary/10 text-primary border border-primary/30 px-3 py-1"
-                    >
-                      {addonNames[addonId] || addonId}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground/70">Ni aktivnih dodatkov</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* PLAČILNA METODA */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
-              Plačilna metoda in zgodovina plačil
-            </CardTitle>
-            <CardDescription>
-              Upravljajte plačilno metodo in preglejte zgodovino plačil
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-muted/30 rounded-lg p-6">
-              <p className="text-muted-foreground mb-4">
-                Upravljajte plačilno metodo, preglejte račune ali prekličite naročnino.
-              </p>
-              <Button 
-                onClick={handleManagePayment}
-                disabled={portalLoading}
-                className="gap-2"
-              >
-                {portalLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+              {/* Aktivni dodatki */}
+              <div className="bg-muted/30 rounded-lg p-4">
+                <p className="text-sm text-muted-foreground mb-3">Aktivni dodatki</p>
+                {activeAddonIds.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {activeAddonIds.map(addonId => (
+                      <Badge 
+                        key={addonId} 
+                        variant="secondary" 
+                        className="bg-green-500/10 text-green-500 border border-green-500/30 px-3 py-1"
+                      >
+                        {addonNames[addonId] || addonId}
+                      </Badge>
+                    ))}
+                  </div>
                 ) : (
-                  <ExternalLink className="h-4 w-4" />
+                  <p className="text-sm text-muted-foreground/70">Ni aktivnih dodatkov</p>
                 )}
-                Odpri Stripe portal
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* PLAČILNA METODA IN ZGODOVINA - enaka širina */}
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                Plačilna metoda in zgodovina
+              </CardTitle>
+              <CardDescription>
+                Upravljajte plačilno metodo in preglejte zgodovino plačil
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/30 rounded-lg p-6 h-full flex flex-col justify-between">
+                <p className="text-muted-foreground mb-4">
+                  Upravljajte plačilno metodo, preglejte račune ali prekličite naročnino.
+                </p>
+                <Button 
+                  onClick={handleManagePayment}
+                  disabled={portalLoading}
+                  className="gap-2 w-full sm:w-auto"
+                >
+                  {portalLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4" />
+                  )}
+                  Odpri Stripe portal
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
