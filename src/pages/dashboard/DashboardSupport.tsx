@@ -31,7 +31,6 @@ import {
   Phone,
   User,
   CalendarIcon,
-  Clock,
   MessageSquare,
   CheckCircle2,
   Circle,
@@ -354,16 +353,31 @@ export default function DashboardSupport() {
                   <p className="text-muted-foreground">Izberi ticket za prikaz podrobnosti</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {/* Header */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">#{selectedTicket.ticket_id}</h3>
+                <div className="space-y-6">
+                  {/* Header with Ticket ID and Status */}
+                  <div className="flex items-center justify-between pb-4 border-b border-border">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Ticket className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-foreground">#{selectedTicket.ticket_id}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(selectedTicket.created_at), "d. MMMM yyyy 'ob' HH:mm", { locale: sl })}
+                        </p>
+                      </div>
+                    </div>
                     <Select
                       value={selectedTicket.status}
                       onValueChange={(v) => handleStatusChange(v as 'open' | 'closed')}
                       disabled={updatingStatus}
                     >
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className={cn(
+                        "w-[140px]",
+                        selectedTicket.status === 'open' 
+                          ? "border-green-500/50 text-green-500" 
+                          : "border-muted-foreground/30"
+                      )}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -383,53 +397,65 @@ export default function DashboardSupport() {
                     </Select>
                   </div>
 
-                  {/* Contact Info */}
-                  <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{selectedTicket.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href={`mailto:${selectedTicket.email}`}
-                        className="text-sm text-primary hover:underline"
-                      >
-                        {selectedTicket.email}
-                      </a>
-                    </div>
-                    {selectedTicket.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <a
-                          href={`tel:${selectedTicket.phone}`}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {selectedTicket.phone}
-                        </a>
+                  {/* Contact Info Card */}
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Kontaktni podatki</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <User className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Ime</p>
+                          <p className="text-sm font-medium text-foreground truncate">{selectedTicket.name}</p>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {format(new Date(selectedTicket.created_at), 'dd.MM.yyyy HH:mm', { locale: sl })}
-                      </span>
+                      <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <Mail className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">Email</p>
+                          <a
+                            href={`mailto:${selectedTicket.email}`}
+                            className="text-sm font-medium text-primary hover:underline truncate block"
+                          >
+                            {selectedTicket.email}
+                          </a>
+                        </div>
+                      </div>
+                      {selectedTicket.phone && (
+                        <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Phone className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs text-muted-foreground">Telefon</p>
+                            <a
+                              href={`tel:${selectedTicket.phone}`}
+                              className="text-sm font-medium text-primary hover:underline"
+                            >
+                              {selectedTicket.phone}
+                            </a>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Message */}
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Sporočilo</h4>
-                    <div className="p-4 bg-muted/30 rounded-lg">
-                      <p className="text-sm whitespace-pre-wrap">{selectedTicket.message}</p>
+                  <div className="rounded-xl border border-border bg-card p-4">
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Sporočilo</h4>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{selectedTicket.message}</p>
                     </div>
                   </div>
 
                   {/* Chat History */}
                   {selectedTicket.chat_history && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Pogovor</h4>
-                      <div className="space-y-1">
+                    <div className="rounded-xl border border-border bg-card p-4">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Pogovor</h4>
+                      <div className="space-y-2 max-h-[250px] overflow-y-auto">
                         {formatChatHistory(selectedTicket.chat_history)}
                       </div>
                     </div>
