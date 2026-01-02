@@ -21,6 +21,8 @@ import {
   HelpCircle,
   TicketCheck,
   Sparkles,
+  Clock,
+  Lock,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -323,6 +325,21 @@ export default function DashboardOverview() {
           </div>
         )}
 
+        {/* Setup Pending Banner */}
+        {widget?.status === 'setup_paid' && (
+          <div className="glass rounded-2xl p-6 animate-slide-up border border-amber-500/30 bg-amber-500/5">
+            <div className="flex items-center gap-4">
+              <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <Clock className="h-7 w-7 text-amber-500" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-foreground">Vaš chatbot se pripravlja</h3>
+                <p className="text-muted-foreground mt-1">To lahko traja do 72 ur. Obvestili vas bomo, ko bo pripravljen.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stats Grid - 4 cards in a row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="glass rounded-2xl p-5 animate-slide-up">
@@ -366,18 +383,6 @@ export default function DashboardOverview() {
           </div>
         </div>
 
-        {/* Leads card - separate row if addon is active */}
-        {hasContactsAddon && (
-          <div className="glass rounded-2xl p-5 animate-slide-up max-w-xs" style={{ animationDelay: '200ms' }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg bg-primary/20 flex items-center justify-center">
-                <BarChart3 className="h-4 w-4 text-primary" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{stats.leadsCount}</p>
-            <p className="text-xs text-muted-foreground mt-1">Leads</p>
-          </div>
-        )}
 
         {/* Quick Shortcuts - Responsive Grid */}
         <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
@@ -385,7 +390,7 @@ export default function DashboardOverview() {
             <Zap className="h-5 w-5 text-amber-500" />
             <h3 className="font-semibold text-foreground">Hitri dostop</h3>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Pogovori */}
             <button
               onClick={() => navigate('/dashboard/conversations')}
@@ -488,26 +493,41 @@ export default function DashboardOverview() {
         </div>
 
         {/* Embed Code Card */}
-        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up max-w-2xl">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Code className="h-5 w-5 text-primary" />
               <h3 className="font-semibold text-foreground">Embed koda</h3>
             </div>
-            <Button variant="outline" size="sm" onClick={copyEmbedCode} className="w-full sm:w-auto">
-              {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-              {copied ? 'Kopirano' : 'Kopiraj'}
-            </Button>
+            {widget?.status !== 'setup_paid' && (
+              <Button variant="outline" size="sm" onClick={copyEmbedCode}>
+                {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
+                {copied ? 'Kopirano' : 'Kopiraj'}
+              </Button>
+            )}
           </div>
-          <textarea
-            readOnly
-            value={embedCode}
-            className="w-full p-3 rounded-lg bg-muted/50 text-xs sm:text-sm font-mono text-foreground border border-border/50 resize-none"
-            rows={3}
-          />
-          <p className="text-xs text-muted-foreground mt-2">
-            <strong>Prilepite to kodo na vašo spletno stran pred zaključni &lt;/body&gt; tag</strong>
-          </p>
+          
+          {widget?.status === 'setup_paid' ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">
+                Embed koda bo na voljo, ko bo vaš chatbot aktiven.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="bg-muted/50 rounded-lg p-3 border border-border/50">
+                <code className="text-xs sm:text-sm font-mono text-foreground break-all">
+                  {embedCode}
+                </code>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Prilepite to kodo na vašo spletno stran pred zaključni &lt;/body&gt; tag
+              </p>
+            </>
+          )}
         </div>
       </div>
     </DashboardLayout>
