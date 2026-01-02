@@ -29,14 +29,14 @@ export function LockedFeature({ feature, description, addon }: LockedFeatureProp
         <div className="flex gap-4">
           <Button 
             onClick={() => setShowUpgradeModal(true)}
-            className="bg-primary hover:bg-primary/90"
+            className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25"
           >
             Nadgradi paket
           </Button>
           {addon && (
             <Button 
-              variant="outline"
               onClick={() => setShowAddonModal(true)}
+              className="bg-primary hover:bg-primary/90"
             >
               Kupi addon
             </Button>
