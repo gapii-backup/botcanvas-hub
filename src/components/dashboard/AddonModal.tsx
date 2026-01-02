@@ -197,23 +197,23 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Potrditev nakupa funkcije</AlertDialogTitle>
+            <AlertDialogTitle>Potrditev nakupa</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4" asChild>
               <div>
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <div className="bg-muted/80 rounded-lg p-4">
                   <div className="font-semibold text-foreground text-lg">{addonData.name}</div>
-                  <div className="text-2xl font-bold text-primary mt-1">
+                  <div className="text-2xl font-bold text-amber-500 mt-1">
                     €{addonData.price}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
-                    <span className="text-sm text-muted-foreground font-normal">
-                      /{addonData.period}
-                    </span>
+                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{addonData.period}</span>
                   </div>
                 </div>
 
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-amber-200">
-                  <p className="font-medium text-amber-300 mb-2">⚡ Takojšnje plačilo</p>
-                  <p className="text-sm">
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                  <p className="font-medium text-amber-500 mb-2 flex items-center gap-2">
+                    <span>⚡</span>
+                    Takojšnje plačilo
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     Sorazmerni del cene za obdobje do vašega naslednjega plačila bo zaračunan takoj iz vaše shranjene plačilne metode.
                   </p>
                 </div>
@@ -222,26 +222,37 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                   <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
                   <ul className="space-y-2 text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
+                      <span className="text-amber-500 mt-0.5">•</span>
                       <span><strong className="text-foreground">Danes:</strong> Zaračuna se sorazmerni del cene (npr. če je do naslednjega plačila še pol obdobja, plačate pol cene)</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary mt-0.5">•</span>
+                      <span className="text-amber-500 mt-0.5">•</span>
                       <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
                     </li>
                   </ul>
                 </div>
 
-                <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/5 rounded-lg p-3">
-                  <span>⏱️</span>
-                  <span>Funkcija bo aktivirana v roku <strong>72 ur</strong> po potrditvi nakupa.</span>
-                </div>
+                {addon?.startsWith('capacity_') ? (
+                  <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                    <span>⚡</span>
+                    <span>Kapaciteta bo aktivirana <strong>TAKOJ</strong> po potrditvi nakupa.</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                    <span>⚡</span>
+                    <span>Funkcija bo aktivirana v roku <strong>72 ur</strong> po potrditvi nakupa.</span>
+                  </div>
+                )}
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel disabled={isProcessing}>Prekliči</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAddon} disabled={isProcessing}>
+            <AlertDialogAction 
+              onClick={handleConfirmAddon} 
+              disabled={isProcessing}
+              className="bg-amber-500 hover:bg-amber-600 text-black"
+            >
               {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Potrjujem nakup
             </AlertDialogAction>
