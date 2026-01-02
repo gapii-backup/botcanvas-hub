@@ -121,13 +121,27 @@ export default function DashboardSubscription() {
   };
 
   const getNextPaymentDate = () => {
+    const startDate = widget?.billing_period_start ? new Date(widget.billing_period_start) : new Date();
     const today = new Date();
-    const daysToAdd = billingPeriod === 'monthly' ? 30 : 365;
-    const nextDate = new Date(today.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-    // Use UTC to avoid timezone offset issues
-    const day = nextDate.getUTCDate();
-    const month = nextDate.getUTCMonth() + 1;
-    const year = nextDate.getUTCFullYear();
+    
+    // Calculate next payment date based on billing_period_start
+    let nextDate = new Date(startDate);
+    
+    if (billingPeriod === 'monthly') {
+      // For monthly, keep incrementing by 1 month until we're past today
+      while (nextDate <= today) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+    } else {
+      // For yearly, keep incrementing by 1 year until we're past today
+      while (nextDate <= today) {
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+      }
+    }
+    
+    const day = nextDate.getDate();
+    const month = nextDate.getMonth() + 1;
+    const year = nextDate.getFullYear();
     return `${day}. ${month}. ${year}`;
   };
 
