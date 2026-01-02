@@ -21,6 +21,7 @@ import {
   LineChart,
   Calendar,
   Lightbulb,
+  AlertTriangle,
   LucideIcon
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
@@ -549,12 +550,27 @@ export default function DashboardUpgrade() {
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
-                  <p className="text-amber-500 font-semibold mb-1">⚠️ Pomembno:</p>
-                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Vaša trenutna naročnina bo preklicana</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
-                    <li>Nov paket bo aktiviran v roku 72 ur</li>
-                    <li>Vaš chatbot bo med pripravljalnim obdobjem ostal AKTIVEN</li>
+                  <p className="text-amber-500 font-semibold mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Pomembno:
+                  </p>
+                  <ul className="text-muted-foreground space-y-1.5">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vaša trenutna naročnina bo preklicana</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Nov paket bo aktiviran v roku 72 ur</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vaš chatbot bo med pripravljalnim obdobjem ostal AKTIVEN</span>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -599,12 +615,27 @@ export default function DashboardUpgrade() {
                   </div>
                 </div>
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
-                  <p className="text-destructive font-semibold mb-1">⚠️ Opozorilo:</p>
-                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
-                    <li>Sprememba bo aktivirana v roku 72 ur</li>
-                    <li>Sredstev ne vračamo</li>
+                  <p className="text-destructive font-semibold mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Opozorilo:
+                  </p>
+                  <ul className="text-muted-foreground space-y-1.5">
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Izgubili boste dostop do funkcionalnosti višjega paketa</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Sprememba bo aktivirana v roku 72 ur</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Sredstev ne vračamo</span>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -640,7 +671,10 @@ export default function DashboardUpgrade() {
                 </p>
 
                 <div className="bg-amber-900/30 border border-amber-600 rounded-lg p-3 text-sm">
-                  <p className="text-amber-400 font-semibold">⚠️ Pomembno:</p>
+                  <p className="text-amber-400 font-semibold flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Pomembno:
+                  </p>
                   <p className="text-amber-200 mt-1">
                     Addon bo takoj odstranjen. Sredstev ne vračamo.
                   </p>
