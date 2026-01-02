@@ -72,6 +72,7 @@ export default function DashboardOverview() {
     : `<script src="https://cdn.botmotion.ai/widget.js" data-key="YOUR_API_KEY"></script>`;
   const isActive = widget?.is_active === true;
   const subscriptionStatus = widget?.subscription_status || 'none';
+  const isCanceling = subscriptionStatus === 'canceling';
   const plan = widget?.plan || 'basic';
   const hasContactsAddon = Array.isArray(widget?.addons) && widget.addons.includes('contacts');
 
@@ -234,15 +235,19 @@ export default function DashboardOverview() {
                   <h2 className="text-xl font-semibold text-foreground">{widget?.bot_name || 'Moj Chatbot'}</h2>
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-xs font-medium",
-                    subscriptionStatus === 'active' 
-                      ? "bg-success/20 text-success" 
-                      : "bg-muted text-muted-foreground"
+                    isCanceling 
+                      ? "bg-red-500/20 text-red-500"
+                      : subscriptionStatus === 'active' 
+                        ? "bg-success/20 text-success" 
+                        : "bg-muted text-muted-foreground"
                   )}>
                     <span className={cn(
                       "inline-block w-1.5 h-1.5 rounded-full mr-1",
-                      subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
+                      isCanceling 
+                        ? "bg-red-500"
+                        : subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
                     )} />
-                    {subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
+                    {isCanceling ? 'Preklicano' : subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
