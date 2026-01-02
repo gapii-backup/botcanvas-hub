@@ -247,7 +247,7 @@ export default function DashboardOverview() {
                         ? "bg-red-500"
                         : subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
                     )} />
-                    {isCanceling ? 'Preklicano' : subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
+                    {isCanceling ? 'V preklicu' : widget?.is_active === false ? 'Neaktiven' : subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
