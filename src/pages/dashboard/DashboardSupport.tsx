@@ -171,7 +171,7 @@ export default function DashboardSupport() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Skupaj ticketov</CardTitle>
@@ -284,9 +284,9 @@ export default function DashboardSupport() {
         </div>
 
         {/* Main Content - Split View */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Panel - Ticket List */}
-          <Card className="h-[600px] flex flex-col">
+          <Card className="min-h-[400px] max-h-[600px] flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Seznam ticketov</CardTitle>
             </CardHeader>
@@ -343,7 +343,7 @@ export default function DashboardSupport() {
           </Card>
 
           {/* Right Panel - Ticket Details */}
-          <Card className="h-[600px] flex flex-col">
+          <Card className="min-h-[400px] max-h-[600px] flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Podrobnosti ticketa</CardTitle>
             </CardHeader>

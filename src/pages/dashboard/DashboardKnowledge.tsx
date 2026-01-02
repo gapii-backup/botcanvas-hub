@@ -245,7 +245,7 @@ export default function DashboardKnowledge() {
   return (
     <DashboardLayout title="Baza znanja" subtitle="Upravljajte Q&A pare in dokumente za treniranje vašega bota">
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Skupaj Q&A parov</CardTitle>
@@ -267,16 +267,16 @@ export default function DashboardKnowledge() {
       </div>
 
       {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-fade-in">
         {/* Q&A Column */}
         <Card className="flex flex-col">
           <CardHeader className="space-y-4 pb-4">
-            <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-primary" />
-                <CardTitle>Q&A</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Q&A</CardTitle>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button onClick={() => handleOpenQaModal()} size="sm" variant="outline">
                   <Plus className="h-4 w-4 mr-1" />
                   Dodaj

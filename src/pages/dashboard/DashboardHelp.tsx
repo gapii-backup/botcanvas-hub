@@ -319,9 +319,9 @@ export default function DashboardHelp() {
 
   return (
     <DashboardLayout title="Pomoč" subtitle="Kontaktne informacije in podpora">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-slide-up">
         {/* New Ticket Form */}
-        <div className="glass rounded-2xl p-6 h-[600px] flex flex-col">
+        <div className="glass rounded-2xl p-4 sm:p-6 min-h-[400px] max-h-[600px] flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <Mail className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Nov ticket</h2>
@@ -416,7 +416,7 @@ export default function DashboardHelp() {
         </div>
 
         {/* Tickets List / Detail */}
-        <div className="glass rounded-2xl p-6 h-[600px] flex flex-col">
+        <div className="glass rounded-2xl p-4 sm:p-6 min-h-[400px] max-h-[600px] flex flex-col">
           {selectedTicket ? (
             <div className="flex flex-col h-full">
               {/* Ticket Detail Header */}

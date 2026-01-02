@@ -188,11 +188,34 @@ export default function DashboardOverview() {
     <DashboardLayout title="Dashboard" subtitle="Upravljajte in spremljajte vašega AI chatbota">
       <div className="space-y-8">
         {/* Chatbot Status Card */}
-        <div className="glass rounded-2xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Bot className="h-7 w-7 text-primary" />
+              <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center overflow-hidden">
+                {widget?.bot_avatar ? (
+                  <img 
+                    src={widget.bot_avatar} 
+                    alt="Bot avatar" 
+                    className="h-full w-full object-cover"
+                  />
+                ) : widget?.bot_icon && typeof widget.bot_icon === 'object' && (widget.bot_icon as any).paths ? (
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke={widget.bot_icon_color || 'currentColor'}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-7 w-7"
+                    style={{ color: widget.bot_icon_color || 'hsl(var(--primary))' }}
+                  >
+                    {((widget.bot_icon as any).paths as string[]).map((path: string, i: number) => (
+                      <path key={i} d={path} />
+                    ))}
+                  </svg>
+                ) : (
+                  <Bot className="h-7 w-7 text-primary" />
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -216,16 +239,16 @@ export default function DashboardOverview() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button 
                 size="sm" 
                 onClick={() => navigate('/dashboard/upgrade')}
-                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25"
+                className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25"
               >
                 <Zap className="h-4 w-4 mr-1" />
                 Nadgradi
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/settings')}>
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/settings')} className="flex-1 sm:flex-none">
                 <Settings className="h-4 w-4 mr-1" />
                 Uredi
               </Button>
@@ -336,122 +359,122 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Quick Shortcuts - 3x3 Grid */}
-        <div className="glass rounded-2xl p-6 animate-slide-up">
-          <div className="flex items-center gap-2 mb-6">
+        {/* Quick Shortcuts - Responsive Grid */}
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
+          <div className="flex items-center gap-2 mb-4 sm:mb-6">
             <Zap className="h-5 w-5 text-amber-500" />
             <h3 className="font-semibold text-foreground">Hitri dostop</h3>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Pogovori */}
             <button
               onClick={() => navigate('/dashboard/conversations')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-primary/10 hover:border-primary/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-primary/20 group-hover:bg-primary/30 flex items-center justify-center transition-colors">
-                <MessageSquare className="h-6 w-6 text-primary" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/20 group-hover:bg-primary/30 flex items-center justify-center transition-colors">
+                <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
-              <span className="text-sm font-medium text-foreground">Pogovori</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Pogovori</span>
             </button>
             
             {/* Baza znanja */}
             <button
               onClick={() => navigate('/dashboard/knowledge')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-warning/10 hover:border-warning/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-warning/10 hover:border-warning/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-warning/20 group-hover:bg-warning/30 flex items-center justify-center transition-colors">
-                <BookOpen className="h-6 w-6 text-warning" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-warning/20 group-hover:bg-warning/30 flex items-center justify-center transition-colors">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
               </div>
-              <span className="text-sm font-medium text-foreground">Baza znanja</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Baza znanja</span>
             </button>
             
             {/* Analiza */}
             <button
               onClick={() => navigate('/dashboard/analytics')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-success/10 hover:border-success/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-success/10 hover:border-success/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-success/20 group-hover:bg-success/30 flex items-center justify-center transition-colors">
-                <BarChart3 className="h-6 w-6 text-success" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-success/20 group-hover:bg-success/30 flex items-center justify-center transition-colors">
+                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
               </div>
-              <span className="text-sm font-medium text-foreground">Analiza</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Analiza</span>
             </button>
             
             {/* Kontakti */}
             <button
               onClick={() => navigate('/dashboard/contacts')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-accent/10 hover:border-accent/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-accent/10 hover:border-accent/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-accent/20 group-hover:bg-accent/30 flex items-center justify-center transition-colors">
-                <Users className="h-6 w-6 text-accent" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent/20 group-hover:bg-accent/30 flex items-center justify-center transition-colors">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
               </div>
-              <span className="text-sm font-medium text-foreground">Kontakti</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Kontakti</span>
             </button>
             
             {/* Support Ticketi */}
             <button
               onClick={() => navigate('/dashboard/support')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-blue-500/10 hover:border-blue-500/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-blue-500/10 hover:border-blue-500/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 flex items-center justify-center transition-colors">
-                <TicketCheck className="h-6 w-6 text-blue-500" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-blue-500/20 group-hover:bg-blue-500/30 flex items-center justify-center transition-colors">
+                <TicketCheck className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
-              <span className="text-sm font-medium text-foreground">Support Ticketi</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Support</span>
             </button>
             
             {/* Nadgradi */}
             <button
               onClick={() => navigate('/dashboard/upgrade')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-amber-500/10 hover:border-amber-500/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-amber-500/20 group-hover:bg-amber-500/30 flex items-center justify-center transition-colors">
-                <Sparkles className="h-6 w-6 text-amber-500" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-amber-500/20 group-hover:bg-amber-500/30 flex items-center justify-center transition-colors">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
               </div>
-              <span className="text-sm font-medium text-foreground">Nadgradi</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Nadgradi</span>
             </button>
             
             {/* Naročnina */}
             <button
               onClick={() => navigate('/dashboard/subscription')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-emerald-500/10 hover:border-emerald-500/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-emerald-500/10 hover:border-emerald-500/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-emerald-500/20 group-hover:bg-emerald-500/30 flex items-center justify-center transition-colors">
-                <CreditCard className="h-6 w-6 text-emerald-500" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-emerald-500/20 group-hover:bg-emerald-500/30 flex items-center justify-center transition-colors">
+                <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
-              <span className="text-sm font-medium text-foreground">Naročnina</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Naročnina</span>
             </button>
             
             {/* Nastavitve */}
             <button
               onClick={() => navigate('/dashboard/settings')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-muted/50 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-muted group-hover:bg-muted/80 flex items-center justify-center transition-colors">
-                <Settings className="h-6 w-6 text-muted-foreground" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-muted group-hover:bg-muted/80 flex items-center justify-center transition-colors">
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
               </div>
-              <span className="text-sm font-medium text-foreground">Nastavitve</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Nastavitve</span>
             </button>
             
             {/* Pomoč */}
             <button
               onClick={() => navigate('/dashboard/help')}
-              className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-muted/30 hover:bg-violet-500/10 hover:border-violet-500/30 border border-transparent transition-all"
+              className="group flex flex-col items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl bg-muted/30 hover:bg-violet-500/10 hover:border-violet-500/30 border border-transparent transition-all"
             >
-              <div className="h-12 w-12 rounded-xl bg-violet-500/20 group-hover:bg-violet-500/30 flex items-center justify-center transition-colors">
-                <HelpCircle className="h-6 w-6 text-violet-500" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-violet-500/20 group-hover:bg-violet-500/30 flex items-center justify-center transition-colors">
+                <HelpCircle className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
               </div>
-              <span className="text-sm font-medium text-foreground">Pomoč</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground text-center">Pomoč</span>
             </button>
           </div>
         </div>
 
         {/* Embed Code Card */}
-        <div className="glass rounded-2xl p-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-4">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4">
             <div className="flex items-center gap-2">
               <Code className="h-5 w-5 text-primary" />
               <h3 className="font-semibold text-foreground">Embed koda</h3>
             </div>
-            <Button variant="outline" size="sm" onClick={copyEmbedCode}>
+            <Button variant="outline" size="sm" onClick={copyEmbedCode} className="w-full sm:w-auto">
               {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
               {copied ? 'Kopirano' : 'Kopiraj'}
             </Button>
@@ -459,11 +482,11 @@ export default function DashboardOverview() {
           <textarea
             readOnly
             value={embedCode}
-            className="w-full p-3 rounded-lg bg-muted/50 text-sm font-mono text-foreground border border-border/50 resize-none"
-            rows={2}
+            className="w-full p-3 rounded-lg bg-muted/50 text-xs sm:text-sm font-mono text-foreground border border-border/50 resize-none"
+            rows={3}
           />
           <p className="text-xs text-muted-foreground mt-2">
-            Prilepite to kodo na vašo spletno stran
+            <strong>Prilepite to kodo na vašo spletno stran pred zaključni &lt;/body&gt; tag</strong>
           </p>
         </div>
       </div>

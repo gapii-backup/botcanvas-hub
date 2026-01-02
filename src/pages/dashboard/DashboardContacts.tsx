@@ -311,7 +311,7 @@ export default function DashboardContacts() {
     <DashboardLayout title="Kontakti" subtitle="Zbrani kontakti iz pogovorov">
       <div className="space-y-6 animate-slide-up">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div className="glass rounded-xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -350,8 +350,8 @@ export default function DashboardContacts() {
         </div>
 
         {/* Date Filter Buttons */}
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2">
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
             <Button
               variant={dateFilter === 'all' ? 'default' : 'outline'}
               size="sm"
@@ -443,9 +443,9 @@ export default function DashboardContacts() {
 
         {/* Main Content - Two Panel Layout */}
         <div className="glass rounded-2xl overflow-hidden">
-          <div className="flex h-[600px]">
+          <div className="flex flex-col lg:flex-row" style={{ minHeight: '500px', maxHeight: 'calc(100vh - 380px)' }}>
             {/* Left Panel - Contacts List */}
-            <div className="w-full md:w-1/3 border-r border-border flex flex-col">
+            <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-border flex flex-col" style={{ maxHeight: '400px' }}>
               {/* Search */}
               <div className="p-4 border-b border-border">
                 <div className="relative">

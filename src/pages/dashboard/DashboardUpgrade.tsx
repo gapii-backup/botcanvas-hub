@@ -221,7 +221,7 @@ export default function DashboardUpgrade() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(planPrices).map(([planId, planData]) => {
                 const isExactCurrentPlan = currentPlan === planId && billingPeriod === displayBillingPeriod;
                 const planIndex = planOrder.indexOf(planId);
