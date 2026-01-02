@@ -119,17 +119,30 @@ const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem => {
 
 const getFilteredAddons = (billingPeriod: string, plan: string, activeAddonIds: string[]): AddonItem[] => {
   const periodAddons = allAddons[billingPeriod] || allAddons.monthly;
-  const showBooking = plan === 'pro' || plan === 'enterprise';
   const isPro = plan === 'pro';
+  const isEnterprise = plan === 'enterprise';
   
-  // Functions that Pro users already have included in their plan
-  const proIncludedAddons = ['multilanguage', 'contacts', 'tickets'];
+  // Pro plan: can add capacities, booking, product_ai
+  // Enterprise plan: can add only capacities (everything else is included)
   
   return periodAddons.filter(addon => {
+    // Already active - hide
     if (activeAddonIds.includes(addon.id)) return false;
-    if (addon.proOnly && !showBooking) return false;
-    // Hide multilanguage, contacts, tickets for Pro users (already included)
-    if (isPro && proIncludedAddons.includes(addon.id)) return false;
+    
+    // Enterprise: only capacities available
+    if (isEnterprise) {
+      return addon.id.startsWith('capacity_');
+    }
+    
+    // Pro: capacities, booking, product_ai available
+    if (isPro) {
+      const proAvailableAddons = ['booking', 'product_ai'];
+      return addon.id.startsWith('capacity_') || proAvailableAddons.includes(addon.id);
+    }
+    
+    // Basic: hide booking (proOnly), show everything else
+    if (addon.proOnly) return false;
+    
     return true;
   });
 };
@@ -444,10 +457,23 @@ export default function DashboardUpgrade() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {(allAddons[billingPeriod] || allAddons.monthly)
                   .filter(addon => {
-                    // Skrij booking za Basic plan
-                    if (addon.proOnly && currentPlan !== 'pro' && currentPlan !== 'enterprise') {
-                      return false;
+                    const isPro = currentPlan === 'pro';
+                    const isEnterprise = currentPlan === 'enterprise';
+                    
+                    // Enterprise: only capacities
+                    if (isEnterprise) {
+                      return addon.id.startsWith('capacity_');
                     }
+                    
+                    // Pro: capacities, booking, product_ai
+                    if (isPro) {
+                      const proAvailableAddons = ['booking', 'product_ai'];
+                      return addon.id.startsWith('capacity_') || proAvailableAddons.includes(addon.id);
+                    }
+                    
+                    // Basic: hide booking (proOnly), show everything else
+                    if (addon.proOnly) return false;
+                    
                     return true;
                   })
                   .map(addon => {
