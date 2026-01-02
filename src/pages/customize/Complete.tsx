@@ -46,11 +46,9 @@ const getTriggerIconPath = (iconName: string): string => {
 type AddonItem = {
   id: string;
   label: string;
-  yearlyLabel?: string;
   monthlyPrice: number | null;
   yearlyPrice?: number | null;
   proOnly?: boolean;
-  monthlyOnly?: boolean;
 };
 
 type AddonCategory = {
@@ -88,10 +86,10 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_1000', label: '+1.000 pogovorov', yearlyLabel: '+12.000 pogovorov', monthlyPrice: 12, yearlyPrice: 99, monthlyOnly: true },
-      { id: 'capacity_2000', label: '+2.000 pogovorov', yearlyLabel: '+24.000 pogovorov', monthlyPrice: 22, yearlyPrice: 99, monthlyOnly: true },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', yearlyLabel: '+60.000 pogovorov', monthlyPrice: 52, yearlyPrice: 99, monthlyOnly: true },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', yearlyLabel: '+10.000 pogovorov', monthlyPrice: 99, yearlyPrice: 99 },
+      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 12 },
+      { id: 'capacity_2000', label: '+2.000 pogovorov', monthlyPrice: 22 },
+      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 52 },
+      { id: 'capacity_10000', label: '+10.000 pogovorov', monthlyPrice: 99 },
     ],
   },
 };
@@ -110,7 +108,13 @@ const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; 
 };
 
 // Calculate price based on billing period
-function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, isYearly: boolean): string {
+// Capacity addons are ALWAYS monthly, regardless of billing period
+function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, isYearly: boolean, isCapacityAddon: boolean = false): string {
+  // Capacity addons are always monthly
+  if (isCapacityAddon) {
+    if (monthlyPrice === null) return 'po dogovoru';
+    return `€${monthlyPrice} +DDV/mesec`;
+  }
   if (isYearly) {
     if (yearlyPrice === null) return 'po dogovoru';
     return `€${yearlyPrice} +DDV/leto`;
@@ -120,6 +124,7 @@ function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, is
 }
 
 // Get available add-ons based on plan and billing period
+// Capacity addons are always available regardless of billing period (they're always monthly)
 function getAvailableAddons(plan: string | null, isYearly: boolean): Record<string, AddonCategory> {
   const excluded: Record<string, string[]> = {
     basic: [], // Show all add-ons for basic
@@ -140,9 +145,6 @@ function getAvailableAddons(plan: string | null, isYearly: boolean): Record<stri
       
       // Booking only for pro/enterprise
       if (item.proOnly && !showBooking) return false;
-      
-      // For yearly billing, exclude monthly-only capacity items
-      if (isYearly && item.monthlyOnly) return false;
       
       return true;
     });
@@ -204,10 +206,17 @@ export default function Complete() {
   const subscriptionPrice = isYearly ? planPricing.yearlyPrice : planPricing.monthlyPrice;
   
   // Calculate add-ons total
+  // Capacity addons are ALWAYS monthly, other addons follow billing period
   const getAddonPrice = (addonId: string): number => {
+    const isCapacityAddon = addonId.startsWith('capacity_');
     for (const category of Object.values(ALL_ADDONS)) {
       const addon = category.items.find(item => item.id === addonId);
       if (addon) {
+        // Capacity addons are always monthly
+        if (isCapacityAddon) {
+          return addon.monthlyPrice || 0;
+        }
+        // Other addons follow billing period
         if (isYearly && addon.yearlyPrice) {
           return addon.yearlyPrice;
         }
@@ -398,9 +407,7 @@ export default function Complete() {
                       </CardHeader>
                       <CardContent className="space-y-1">
                         {category.items.map((item) => {
-                          const displayLabel = isYearly && 'yearlyLabel' in item && item.yearlyLabel 
-                            ? item.yearlyLabel 
-                            : item.label;
+                          const isCapacityAddon = item.id.startsWith('capacity_');
                           const isSelected = selectedAddons.includes(item.id);
                           return (
                             <div 
@@ -421,11 +428,11 @@ export default function Complete() {
                                   {isSelected && <Check className="h-3.5 w-3.5" />}
                                 </div>
                                 <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                                  {displayLabel}
+                                  {item.label}
                                 </span>
                               </div>
                               <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly)}
+                                {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
                               </span>
                             </div>
                           );
