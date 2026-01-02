@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { z } from 'zod';
 import logo from '@/assets/logo.png';
 import logoInline from '@/assets/logo-inline-dark.png';
@@ -29,6 +29,11 @@ const registerSchema = z.object({
   path: ['confirmPassword'],
 });
 
+const loginSchema = z.object({
+  email: z.string().email('Neveljaven email naslov'),
+  password: z.string().min(1, 'Geslo je obvezno'),
+});
+
 type FieldErrors = {
   name?: string;
   email?: string;
@@ -38,7 +43,15 @@ type FieldErrors = {
   general?: string;
 };
 
+const ErrorMessage = ({ message }: { message: string }) => (
+  <div className="flex items-center gap-2 mt-1.5">
+    <AlertCircle className="h-4 w-4 text-warning shrink-0" />
+    <span className="text-xs text-warning">{message}</span>
+  </div>
+);
+
 export default function Register() {
+  const [isLoginMode, setIsLoginMode] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -47,7 +60,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [shake, setShake] = useState(false);
-  const { signUp, user } = useAuth();
+  const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
 
   const passwordStrength = useMemo(() => {
@@ -61,7 +74,6 @@ export default function Register() {
     };
   }, [password]);
 
-  // Only show unfulfilled requirements
   const unfulfilledRequirements = useMemo(() => {
     return passwordRequirements.filter(req => !req.test(password));
   }, [password]);
@@ -75,7 +87,21 @@ export default function Register() {
     setTimeout(() => setShake(false), 500);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const clearForm = () => {
+    setName('');
+    setEmail('');
+    setPhone('');
+    setPassword('');
+    setConfirmPassword('');
+    setErrors({});
+  };
+
+  const switchMode = (toLogin: boolean) => {
+    setIsLoginMode(toLogin);
+    clearForm();
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     
@@ -112,6 +138,39 @@ export default function Register() {
     setIsLoading(false);
   };
 
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+    
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const newErrors: FieldErrors = {};
+      validation.error.errors.forEach(err => {
+        const field = err.path[0] as keyof FieldErrors;
+        if (field) {
+          newErrors[field] = err.message;
+        }
+      });
+      setErrors(newErrors);
+      triggerShake();
+      return;
+    }
+
+    setIsLoading(true);
+
+    const { error } = await signIn(email, password);
+
+    if (error) {
+      setErrors({ general: 'Napačen email ali geslo.' });
+      triggerShake();
+      setIsLoading(false);
+      return;
+    }
+
+    navigate('/');
+    setIsLoading(false);
+  };
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Form */}
@@ -122,12 +181,14 @@ export default function Register() {
               <img 
                 src={logoInline} 
                 alt="BotMotion.ai" 
-                className="h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                className="h-14 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
               />
             </a>
-            <h1 className="text-3xl font-bold text-foreground">Ustvarite račun</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              {isLoginMode ? 'Dobrodošli nazaj' : 'Ustvarite račun'}
+            </h1>
             <p className="mt-2 text-muted-foreground">
-              Začnite graditi svoje AI chatbota
+              {isLoginMode ? 'Prijavite se v svoj račun' : 'Začnite graditi svoje AI chatbota'}
             </p>
           </div>
 
@@ -137,137 +198,193 @@ export default function Register() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="name">Ime</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Janez Novak"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className={errors.name ? 'border-destructive' : ''}
-              />
-              {errors.name && (
-                <p className="text-xs text-destructive">{errors.name}</p>
-              )}
-            </div>
+          {isLoginMode ? (
+            // Login Form
+            <form onSubmit={handleLoginSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="ime@podjetje.si"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className={errors.email ? 'border-destructive' : ''}
+                />
+                {errors.email && <ErrorMessage message={errors.email} />}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="ime@podjetje.si"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className={errors.email ? 'border-destructive' : ''}
-              />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Geslo</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className={errors.password ? 'border-destructive' : ''}
+                />
+                {errors.password && <ErrorMessage message={errors.password} />}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Telefonska številka</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+386 40 123 456"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                className={errors.phone ? 'border-destructive' : ''}
-              />
-              {errors.phone && (
-                <p className="text-xs text-destructive">{errors.phone}</p>
-              )}
-            </div>
+              <Button
+                type="submit"
+                className={`w-full ${shake ? 'animate-shake' : ''}`}
+                variant="glow"
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Prijava'
+                )}
+              </Button>
+            </form>
+          ) : (
+            // Register Form
+            <form onSubmit={handleRegisterSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">Ime</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Janez Novak"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className={errors.name ? 'border-destructive' : ''}
+                />
+                {errors.name && <ErrorMessage message={errors.name} />}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Geslo</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className={errors.password ? 'border-destructive' : ''}
-              />
-              {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
-              )}
-              
-              {/* Password strength indicator - only show unfulfilled requirements */}
-              {password && unfulfilledRequirements.length > 0 && (
-                <div className="space-y-2 mt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                        style={{ width: `${passwordStrength.percentage}%` }}
-                      />
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="ime@podjetje.si"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className={errors.email ? 'border-destructive' : ''}
+                />
+                {errors.email && <ErrorMessage message={errors.email} />}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Telefonska številka</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+386 40 123 456"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className={errors.phone ? 'border-destructive' : ''}
+                />
+                {errors.phone && <ErrorMessage message={errors.phone} />}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Geslo</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className={errors.password ? 'border-destructive' : ''}
+                />
+                {errors.password && <ErrorMessage message={errors.password} />}
+                
+                {password && unfulfilledRequirements.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                          style={{ width: `${passwordStrength.percentage}%` }}
+                        />
+                      </div>
+                      {passwordStrength.label && (
+                        <span className={`text-xs font-medium ${
+                          passwordStrength.passed === 1 ? 'text-destructive' : 
+                          passwordStrength.passed === 2 ? 'text-warning' : 'text-success'
+                        }`}>
+                          {passwordStrength.label}
+                        </span>
+                      )}
                     </div>
-                    {passwordStrength.label && (
-                      <span className={`text-xs font-medium ${
-                        passwordStrength.passed === 1 ? 'text-destructive' : 
-                        passwordStrength.passed === 2 ? 'text-warning' : 'text-success'
-                      }`}>
-                        {passwordStrength.label}
-                      </span>
-                    )}
+                    <ul className="space-y-1">
+                      {unfulfilledRequirements.map((req, index) => (
+                        <li key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="h-1 w-1 rounded-full bg-muted-foreground" />
+                          {req.label}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-1">
-                    {unfulfilledRequirements.map((req, index) => (
-                      <li key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                        {req.label}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Potrdi geslo</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className={errors.confirmPassword ? 'border-destructive' : ''}
-              />
-              {errors.confirmPassword && (
-                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Potrdi geslo</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className={errors.confirmPassword ? 'border-destructive' : ''}
+                />
+                {errors.confirmPassword && <ErrorMessage message={errors.confirmPassword} />}
+              </div>
 
-            <Button
-              type="submit"
-              className={`w-full ${shake ? 'animate-shake' : ''}`}
-              variant="glow"
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                'Registriraj se'
-              )}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                className={`w-full ${shake ? 'animate-shake' : ''}`}
+                variant="glow"
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  'Registriraj se'
+                )}
+              </Button>
+            </form>
+          )}
 
           <p className="text-center text-sm text-muted-foreground">
-            Že imate račun?{' '}
-            <Link to="/login" className="text-primary hover:underline font-medium">
-              Prijavite se
-            </Link>
+            {isLoginMode ? (
+              <>
+                Nimate računa?{' '}
+                <button
+                  type="button"
+                  onClick={() => switchMode(false)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Registrirajte se
+                </button>
+              </>
+            ) : (
+              <>
+                Že imate račun?{' '}
+                <button
+                  type="button"
+                  onClick={() => switchMode(true)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Prijavite se
+                </button>
+              </>
+            )}
           </p>
         </div>
       </div>
