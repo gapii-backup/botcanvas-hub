@@ -10,6 +10,7 @@ import {
   History,
   Calendar,
   Lightbulb,
+  AlertTriangle,
   LucideIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -283,8 +284,12 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   </ul>
                   
                   <Button
-                    className="w-full mt-auto"
-                    variant={buttonState.variant}
+                    className={`w-full mt-auto ${
+                      buttonState.variant === 'default' 
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25' 
+                        : ''
+                    }`}
+                    variant={buttonState.variant === 'default' ? undefined : buttonState.variant}
                     onClick={() => handleSelectPlan(plan.id)}
                     disabled={loading || buttonState.disabled}
                   >
@@ -324,12 +329,27 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
-                  <p className="text-amber-500 font-semibold mb-1">⚠️ Pomembno:</p>
-                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Vaša trenutna naročnina bo preklicana</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
-                    <li>Nov paket bo aktiviran v roku 72 ur</li>
-                    <li>Zaračunavanje se začne ob naslednjem plačilnem obdobju</li>
+                  <p className="text-amber-500 font-semibold mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Pomembno:
+                  </p>
+                  <ul className="text-muted-foreground space-y-1.5">
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vaša trenutna naročnina bo preklicana</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Nov paket bo aktiviran v roku 72 ur</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">•</span>
+                      <span>Vaš chatbot bo med pripravljalnim obdobjem ostal AKTIVEN</span>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -340,10 +360,10 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
             <AlertDialogAction 
               onClick={handleConfirmChange}
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Potrjujem nadgradnjo
+              Potrjujem upgrade
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -373,12 +393,27 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   </div>
                 </div>
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
-                  <p className="text-destructive font-semibold mb-1">⚠️ Opozorilo:</p>
-                  <ul className="text-muted-foreground space-y-1 list-disc list-inside">
-                    <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
-                    <li>Sprememba bo aktivirana v roku 72 ur</li>
-                    <li>Sredstev ne vračamo</li>
+                  <p className="text-destructive font-semibold mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    Opozorilo:
+                  </p>
+                  <ul className="text-muted-foreground space-y-1.5">
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Izgubili boste dostop do funkcionalnosti višjega paketa</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Sprememba bo aktivirana v roku 72 ur</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-destructive mt-0.5">•</span>
+                      <span>Sredstev ne vračamo</span>
+                    </li>
                   </ul>
                 </div>
               </div>
