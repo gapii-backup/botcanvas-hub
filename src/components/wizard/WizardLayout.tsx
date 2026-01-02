@@ -42,33 +42,33 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
             </a>
           </div>
           
-          {/* Steps */}
-          <div className="flex items-center justify-center gap-2">
+          {/* Steps - minimal */}
+          <div className="flex items-center justify-center">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <div
                     className={cn(
-                      'h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300',
+                      'h-5 w-5 rounded-full flex items-center justify-center transition-all duration-300',
                       currentStep > step.number
                         ? 'bg-primary text-primary-foreground'
                         : currentStep === step.number
-                        ? 'bg-primary text-primary-foreground scale-110'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {currentStep > step.number ? (
-                      <Check className="h-4 w-4" />
+                      <Check className="h-3 w-3" />
                     ) : (
-                      step.number
+                      <span className="text-xs font-medium">{step.number}</span>
                     )}
                   </div>
                   <span
                     className={cn(
-                      'text-sm font-medium hidden sm:block transition-colors duration-300',
+                      'text-xs font-medium hidden sm:block transition-colors duration-300',
                       currentStep >= step.number
-                        ? 'text-foreground'
-                        : 'text-muted-foreground'
+                        ? 'text-muted-foreground'
+                        : 'text-muted-foreground/60'
                     )}
                   >
                     {step.label}
@@ -77,8 +77,8 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      'w-12 sm:w-24 h-0.5 mx-2 transition-colors duration-500',
-                      currentStep > step.number ? 'bg-primary' : 'bg-muted'
+                      'w-8 sm:w-12 h-px mx-2 transition-colors duration-500',
+                      currentStep > step.number ? 'bg-primary/50' : 'bg-muted'
                     )}
                   />
                 )}
