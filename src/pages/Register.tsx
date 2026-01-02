@@ -4,10 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Check, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 import logo from '@/assets/logo.png';
+import logoInline from '@/assets/logo-inline-dark.png';
 
 const passwordRequirements = [
   { label: 'Vsaj 8 znakov', test: (pw: string) => pw.length >= 8 },
@@ -29,6 +29,15 @@ const registerSchema = z.object({
   path: ['confirmPassword'],
 });
 
+type FieldErrors = {
+  name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  confirmPassword?: string;
+  general?: string;
+};
+
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -36,9 +45,10 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [shake, setShake] = useState(false);
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const passwordStrength = useMemo(() => {
     const passed = passwordRequirements.filter(req => req.test(password)).length;
@@ -51,20 +61,35 @@ export default function Register() {
     };
   }, [password]);
 
+  // Only show unfulfilled requirements
+  const unfulfilledRequirements = useMemo(() => {
+    return passwordRequirements.filter(req => !req.test(password));
+  }, [password]);
+
   if (user) {
     return <Navigate to="/" replace />;
   }
 
+  const triggerShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     
     const validation = registerSchema.safeParse({ name, email, phone, password, confirmPassword });
     if (!validation.success) {
-      toast({
-        title: 'Napaka pri validaciji',
-        description: validation.error.errors[0].message,
-        variant: 'destructive',
+      const newErrors: FieldErrors = {};
+      validation.error.errors.forEach(err => {
+        const field = err.path[0] as keyof FieldErrors;
+        if (field) {
+          newErrors[field] = err.message;
+        }
       });
+      setErrors(newErrors);
+      triggerShake();
       return;
     }
 
@@ -77,19 +102,12 @@ export default function Register() {
       if (error.message.includes('already registered')) {
         message = 'Ta email naslov je že registriran.';
       }
-      toast({
-        title: 'Napaka',
-        description: message,
-        variant: 'destructive',
-      });
+      setErrors({ general: message });
+      triggerShake();
       setIsLoading(false);
       return;
     }
 
-    toast({
-      title: 'Uspešna registracija!',
-      description: 'Dobrodošli v BotMotion.ai',
-    });
     navigate('/pricing');
     setIsLoading(false);
   };
@@ -100,18 +118,24 @@ export default function Register() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8 animate-fade-in">
           <div className="text-center">
-            <Link to="/" className="inline-flex items-center gap-2 mb-8">
+            <a href="https://botmotion.ai/" className="inline-flex items-center gap-2 mb-8">
               <img 
-                src={logo} 
+                src={logoInline} 
                 alt="BotMotion.ai" 
-                className="h-12 w-12 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                className="h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
               />
-            </Link>
+            </a>
             <h1 className="text-3xl font-bold text-foreground">Ustvarite račun</h1>
             <p className="mt-2 text-muted-foreground">
-              Začnite graditi svoje AI chatbote
+              Začnite graditi svoje AI chatbota
             </p>
           </div>
+
+          {errors.general && (
+            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive rounded-md">
+              {errors.general}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
@@ -123,7 +147,11 @@ export default function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className={errors.name ? 'border-destructive' : ''}
               />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -135,7 +163,11 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className={errors.email ? 'border-destructive' : ''}
               />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -147,7 +179,11 @@ export default function Register() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
+                className={errors.phone ? 'border-destructive' : ''}
               />
+              {errors.phone && (
+                <p className="text-xs text-destructive">{errors.phone}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -159,10 +195,14 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className={errors.password ? 'border-destructive' : ''}
               />
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password}</p>
+              )}
               
-              {/* Password strength indicator */}
-              {password && (
+              {/* Password strength indicator - only show unfulfilled requirements */}
+              {password && unfulfilledRequirements.length > 0 && (
                 <div className="space-y-2 mt-2">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
@@ -181,16 +221,10 @@ export default function Register() {
                     )}
                   </div>
                   <ul className="space-y-1">
-                    {passwordRequirements.map((req, index) => (
-                      <li key={index} className="flex items-center gap-2 text-xs">
-                        {req.test(password) ? (
-                          <Check className="h-3 w-3 text-success" />
-                        ) : (
-                          <X className="h-3 w-3 text-muted-foreground" />
-                        )}
-                        <span className={req.test(password) ? 'text-success' : 'text-muted-foreground'}>
-                          {req.label}
-                        </span>
+                    {unfulfilledRequirements.map((req, index) => (
+                      <li key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className="h-1 w-1 rounded-full bg-muted-foreground" />
+                        {req.label}
                       </li>
                     ))}
                   </ul>
@@ -207,12 +241,16 @@ export default function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                className={errors.confirmPassword ? 'border-destructive' : ''}
               />
+              {errors.confirmPassword && (
+                <p className="text-xs text-destructive">{errors.confirmPassword}</p>
+              )}
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className={`w-full ${shake ? 'animate-shake' : ''}`}
               variant="glow"
               size="lg"
               disabled={isLoading}
