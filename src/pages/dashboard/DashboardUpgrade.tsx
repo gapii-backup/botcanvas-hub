@@ -366,11 +366,11 @@ export default function DashboardUpgrade() {
                     )}
                     
                     {/* Features list */}
-                    <ul className="space-y-1.5 mb-4 flex-grow">
+                    <ul className="space-y-2.5 mb-6 flex-grow">
                       {planData.features.map(f => (
-                        <li key={f} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-xs text-foreground">{f}</span>
+                        <li key={f} className="flex items-start gap-3">
+                          <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-foreground leading-relaxed">{f}</span>
                         </li>
                       ))}
                     </ul>
@@ -535,7 +535,7 @@ export default function DashboardUpgrade() {
                     <li>Vaša trenutna naročnina bo preklicana</li>
                     <li>Vsi aktivni addoni bodo odstranjeni</li>
                     <li>Nov paket bo aktiviran v roku 72 ur</li>
-                    <li>Zaračunavanje se začne ob naslednjem plačilnem obdobju</li>
+                    <li>Vaš chatbot bo med pripravljalnim obdobjem ostal AKTIVEN</li>
                   </ul>
                 </div>
               </div>
@@ -546,7 +546,7 @@ export default function DashboardUpgrade() {
             <AlertDialogAction 
               onClick={handleConfirmChange}
               disabled={upgradeLoading}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
             >
               {upgradeLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Potrjujem upgrade
