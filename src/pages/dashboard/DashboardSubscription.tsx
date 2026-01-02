@@ -4,7 +4,10 @@ import {
   Package, 
   Calendar,
   ExternalLink,
-  Loader2
+  Loader2,
+  FileText,
+  Shield,
+  RefreshCw
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -106,7 +109,9 @@ export default function DashboardSubscription() {
       const result = await response.json();
 
       if (result.portalUrl) {
-        window.location.href = result.portalUrl;
+        // Open in new tab
+        window.open(result.portalUrl, '_blank');
+        setPortalLoading(false);
       } else {
         throw new Error(result.error || 'Napaka pri odpiranju portala');
       }
@@ -145,7 +150,9 @@ export default function DashboardSubscription() {
     return `${day}. ${month}. ${year}`;
   };
 
-  const isActive = widget?.is_active !== false && widget?.subscription_status === 'active';
+  const subscriptionStatus = widget?.subscription_status || 'active';
+  const isCanceling = subscriptionStatus === 'canceling';
+  const isActive = widget?.is_active !== false && subscriptionStatus === 'active';
 
   return (
     <DashboardLayout title="Naročnina" subtitle="Upravljajte svojo naročnino">
@@ -167,7 +174,11 @@ export default function DashboardSubscription() {
                   <span className="text-xl font-bold text-foreground">
                     {planNames[currentPlan] || 'Basic'}
                   </span>
-                  {isActive ? (
+                  {isCanceling ? (
+                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                      Preklicano
+                    </Badge>
+                  ) : isActive ? (
                     <Badge className="bg-green-500/20 text-green-500 border border-green-500/30">
                       Aktiven
                     </Badge>
@@ -218,24 +229,44 @@ export default function DashboardSubscription() {
                 Upravljajte plačilno metodo in preglejte zgodovino plačil
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="bg-muted/30 rounded-lg p-6 h-full flex flex-col justify-between">
-                <p className="text-muted-foreground mb-4">
-                  Upravljajte plačilno metodo, preglejte račune ali prekličite naročnino.
-                </p>
-                <Button 
-                  onClick={handleManagePayment}
-                  disabled={portalLoading}
-                  className="gap-2 w-full sm:w-auto"
-                >
-                  {portalLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ExternalLink className="h-4 w-4" />
-                  )}
-                  Odpri Stripe portal
-                </Button>
+            <CardContent className="space-y-4">
+              {/* Portal features */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                  <CreditCard className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground text-sm">Plačilna metoda</p>
+                    <p className="text-xs text-muted-foreground">Posodobite ali zamenjajte plačilno kartico</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                  <FileText className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground text-sm">Računi in fakture</p>
+                    <p className="text-xs text-muted-foreground">Preglejte in prenesite vse pretekle račune</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                  <RefreshCw className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-foreground text-sm">Upravljanje naročnine</p>
+                    <p className="text-xs text-muted-foreground">Prekličite ali ponovno aktivirajte naročnino</p>
+                  </div>
+                </div>
               </div>
+
+              <Button 
+                onClick={handleManagePayment}
+                disabled={portalLoading}
+                className="gap-2 w-full"
+              >
+                {portalLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ExternalLink className="h-4 w-4" />
+                )}
+                Odpri Stripe portal
+              </Button>
             </CardContent>
           </Card>
         </div>
