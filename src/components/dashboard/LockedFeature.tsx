@@ -38,7 +38,7 @@ export function LockedFeature({ feature, description, addon }: LockedFeatureProp
               onClick={() => setShowAddonModal(true)}
               className="bg-primary hover:bg-primary/90"
             >
-              Kupi addon
+              Dodaj funkcijo
             </Button>
           )}
         </div>
