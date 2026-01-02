@@ -196,15 +196,6 @@ export function DashboardSidebar({
                 {user?.email}
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
-                <User className="mr-2 h-4 w-4" />
-                Profil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                Nastavitve
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 Odjava
@@ -300,15 +291,6 @@ export function DashboardSidebar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
-                <User className="mr-2 h-4 w-4" />
-                Profil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick('/dashboard/settings')}>
-                <Settings className="mr-2 h-4 w-4" />
-                Nastavitve
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                 <LogOut className="mr-2 h-4 w-4" />
                 Odjava
