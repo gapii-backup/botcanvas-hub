@@ -4,7 +4,6 @@ import { useConversationTopics } from '@/hooks/useConversationTopics';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LockedFeature } from '@/components/dashboard/LockedFeature';
-import { PendingSetup } from '@/components/dashboard/PendingSetup';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Calendar } from '@/components/ui/calendar';
@@ -537,14 +536,6 @@ export default function DashboardAnalytics() {
           </div>
           <Skeleton className="h-96" />
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (widget?.status === 'sub_paid') {
-    return (
-      <DashboardLayout title="Analiza" subtitle="Teme in kategorije pogovorov">
-        <PendingSetup />
       </DashboardLayout>
     );
   }

@@ -25,7 +25,6 @@ import { useConversations, type Message } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
-import { PendingSetup } from '@/components/dashboard/PendingSetup';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import { DateRange } from 'react-day-picker';
@@ -288,14 +287,6 @@ export default function DashboardConversations() {
     return (
       <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
         <Skeleton className="h-64 w-full" />
-      </DashboardLayout>
-    );
-  }
-
-  if (widget?.status === 'sub_paid') {
-    return (
-      <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
-        <PendingSetup />
       </DashboardLayout>
     );
   }

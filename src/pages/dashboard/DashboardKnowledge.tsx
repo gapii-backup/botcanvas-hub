@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { PendingSetup } from '@/components/dashboard/PendingSetup';
 import { useWidget } from '@/hooks/useWidget';
 import { useKnowledgeQA, KnowledgeQA } from '@/hooks/useKnowledgeQA';
 import { useKnowledgeDocuments } from '@/hooks/useKnowledgeDocuments';
@@ -242,14 +241,6 @@ export default function DashboardKnowledge() {
     
     return <Badge variant={variant}>{label}</Badge>;
   };
-
-  if (widget?.status === 'sub_paid') {
-    return (
-      <DashboardLayout title="Baza znanja" subtitle="Upravljajte Q&A pare in dokumente za treniranje vašega bota">
-        <PendingSetup />
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout title="Baza znanja" subtitle="Upravljajte Q&A pare in dokumente za treniranje vašega bota">

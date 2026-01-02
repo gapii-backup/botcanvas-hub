@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { PendingSetup } from '@/components/dashboard/PendingSetup';
 import { useToast } from '@/hooks/use-toast';
 import { AddonModal } from '@/components/dashboard/AddonModal';
 import {
@@ -180,14 +179,6 @@ export default function DashboardUpgrade() {
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (widget?.status === 'sub_paid') {
-    return (
-      <DashboardLayout title="Nadgradi" subtitle="Spremenite paket ali dodajte dodatke">
-        <PendingSetup />
       </DashboardLayout>
     );
   }
