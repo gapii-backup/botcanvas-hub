@@ -181,8 +181,8 @@ export function DashboardSidebar({
     <div className="min-h-screen flex w-full bg-background">
       {/* Mobile Header */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:hidden z-50">
-        <a href="https://botmotion.ai/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
-          <img src={logoInline} alt="BotMotion.ai" className="h-8" />
+        <a href="https://botmotion.ai/" className="flex items-center gap-2">
+          <img src={logoInline} alt="BotMotion.ai" className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
         </a>
         <div className="flex items-center gap-2">
           <DropdownMenu>
@@ -253,8 +253,8 @@ export function DashboardSidebar({
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-border">
-          <a href="https://botmotion.ai/" target="_blank" rel="noopener noreferrer">
-            <img src={logoInline} alt="BotMotion.ai" className="h-8" />
+          <a href="https://botmotion.ai/">
+            <img src={logoInline} alt="BotMotion.ai" className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
           </a>
         </div>
 
