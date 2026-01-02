@@ -121,25 +121,8 @@ export default function DashboardSettings() {
     setGlobalUnsavedChanges(hasUnsavedChanges);
   }, [hasUnsavedChanges, setGlobalUnsavedChanges]);
 
-  // Register save and discard handlers for sidebar navigation
-  useEffect(() => {
-    setOnSave(async () => {
-      await handleSaveForNavigation();
-    });
-    setOnDiscard(() => {
-      handleCancelForNavigation();
-    });
-    
-    // Cleanup on unmount
-    return () => {
-      setOnSave(null);
-      setOnDiscard(null);
-      setGlobalUnsavedChanges(false);
-    };
-  }, [config, setOnSave, setOnDiscard, setGlobalUnsavedChanges]);
-
   // Save function for navigation (doesn't show toast - sidebar will navigate)
-  const handleSaveForNavigation = async () => {
+  const handleSaveForNavigation = useCallback(async () => {
     setIsSaving(true);
     try {
       await upsertWidget({
@@ -170,16 +153,28 @@ export default function DashboardSettings() {
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [config, upsertWidget]);
 
   // Cancel function for navigation
-  const handleCancelForNavigation = () => {
+  const handleCancelForNavigation = useCallback(() => {
     if (initialConfigRef.current) {
       setConfig(initialConfigRef.current);
     }
     setHasUnsavedChanges(false);
-  };
+  }, [setConfig]);
 
+  // Register save and discard handlers for sidebar navigation
+  useEffect(() => {
+    setOnSave(handleSaveForNavigation);
+    setOnDiscard(handleCancelForNavigation);
+    
+    // Cleanup on unmount
+    return () => {
+      setOnSave(null);
+      setOnDiscard(null);
+      setGlobalUnsavedChanges(false);
+    };
+  }, [handleSaveForNavigation, handleCancelForNavigation, setOnSave, setOnDiscard, setGlobalUnsavedChanges]);
 
   // Sync active tab with preview
   useEffect(() => {
@@ -201,6 +196,7 @@ export default function DashboardSettings() {
   const handleTabChange = (newTab: string) => {
     setActiveTab(newTab);
   };
+
   // Warn on page leave (browser close/refresh)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
