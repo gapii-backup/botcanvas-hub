@@ -176,7 +176,11 @@ export default function DashboardSubscription() {
                   </span>
                   {isCanceling ? (
                     <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
-                      Preklicano
+                      V preklicu
+                    </Badge>
+                  ) : widget?.is_active === false ? (
+                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                      Neaktiven
                     </Badge>
                   ) : isActive ? (
                     <Badge className="bg-green-500/20 text-green-500 border border-green-500/30">
