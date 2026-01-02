@@ -52,7 +52,12 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
   ],
   yearly: [
-    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'leto' },
+    // Capacity addoni - VEDNO mesečni
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
+    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
+    // Ostali addoni - letni
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto' },
