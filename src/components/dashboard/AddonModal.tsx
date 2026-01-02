@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -63,7 +63,7 @@ interface AddonModalProps {
 }
 
 export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
-  const [loading, setLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { widget, fetchWidget } = useWidget();
   const { user } = useAuth();
@@ -90,8 +90,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
       return;
     }
 
-    setLoading(true);
     setShowConfirmDialog(false);
+    setIsProcessing(true);
     
     try {
       const response = await fetch('https://hub.botmotion.ai/webhook/create-addon-checkout', {
@@ -125,10 +125,38 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
         description: error.message || 'Nekaj je šlo narobe',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
+
+  // Show processing overlay when addon is being added
+  if (isProcessing) {
+    return (
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogContent className="max-w-sm [&>button]:hidden">
+          <div className="flex flex-col items-center justify-center py-8 space-y-6">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 animate-pulse flex items-center justify-center">
+                <Sparkles className="h-10 w-10 text-black animate-bounce" />
+              </div>
+              <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-amber-500/30 animate-ping" />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Dodajanje funkcije...</h3>
+              <p className="text-sm text-muted-foreground">
+                {addonData?.name}
+              </p>
+              <div className="flex items-center justify-center gap-1 pt-2">
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
@@ -160,8 +188,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
             </div>
           </div>
 
-          <Button className="w-full" onClick={handleAddonClick} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+          <Button className="w-full" onClick={handleAddonClick}>
             Dodaj funkcijo
           </Button>
         </DialogContent>
@@ -213,9 +240,9 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAddon} disabled={loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+            <AlertDialogCancel disabled={isProcessing}>Prekliči</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAddon} disabled={isProcessing}>
+              {isProcessing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
               Potrjujem nakup
             </AlertDialogAction>
           </AlertDialogFooter>

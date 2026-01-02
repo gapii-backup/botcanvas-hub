@@ -435,24 +435,29 @@ export default function DashboardUpgrade() {
             {/* Vse funkcije - gumbi */}
             <div>
               <h4 className="text-sm font-semibold text-foreground mb-4">Razpoložljive funkcije</h4>
-              <div className="flex flex-wrap gap-3">
-                {(allAddons[billingPeriod] || allAddons.monthly).map(addon => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {(allAddons[billingPeriod] || allAddons.monthly)
+                  .filter(addon => {
+                    // Skrij booking za Basic plan
+                    if (addon.proOnly && currentPlan !== 'pro' && currentPlan !== 'enterprise') {
+                      return false;
+                    }
+                    return true;
+                  })
+                  .map(addon => {
                   const isActive = activeAddonIds.includes(addon.id);
-                  const isProOnly = addon.proOnly && currentPlan !== 'pro' && currentPlan !== 'enterprise';
                   const IconComponent = addon.icon;
                   
                   return (
                     <button
                       key={addon.id}
-                      onClick={() => !isActive && !isProOnly && openAddonModal(addon.id)}
-                      disabled={isActive || isProOnly}
+                      onClick={() => !isActive && openAddonModal(addon.id)}
+                      disabled={isActive}
                       className={`
-                        flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 min-w-[120px]
+                        flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 w-full
                         ${isActive 
                           ? 'border-green-500 bg-green-500/10 cursor-default' 
-                          : isProOnly
-                            ? 'border-border bg-muted/20 opacity-50 cursor-not-allowed'
-                            : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
+                          : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
                         }
                       `}
                     >
@@ -469,9 +474,6 @@ export default function DashboardUpgrade() {
                       <span className="text-xs text-muted-foreground">
                         €{addon.price}/{addon.period}
                       </span>
-                      {isProOnly && (
-                        <Badge variant="secondary" className="text-xs">Pro+</Badge>
-                      )}
                     </button>
                   );
                 })}
@@ -659,11 +661,11 @@ export default function DashboardUpgrade() {
       <AlertDialog open={!!cancelAddonDialog} onOpenChange={() => setCancelAddonDialog(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Preklic addona</AlertDialogTitle>
+            <AlertDialogTitle>Preklic funkcije</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3" asChild>
               <div>
                 <p>
-                  Ali ste prepričani da želite preklicati addon{' '}
+                  Ali ste prepričani da želite preklicati funkcijo{' '}
                   <strong className="text-foreground">
                     {cancelAddonDialog ? getAddonDetails(cancelAddonDialog, billingPeriod).name : ''}
                   </strong>
@@ -676,7 +678,7 @@ export default function DashboardUpgrade() {
                     Pomembno:
                   </p>
                   <p className="text-amber-200 mt-1">
-                    Addon bo takoj odstranjen. Sredstev ne vračamo.
+                    Funkcija bo takoj odstranjena. Sredstev ne vračamo.
                   </p>
                 </div>
               </div>
@@ -692,7 +694,7 @@ export default function DashboardUpgrade() {
               {cancelLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Prekliči addon
+              Prekliči funkcijo
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
