@@ -350,58 +350,58 @@ export default function DashboardContacts() {
         </div>
 
         {/* Date Filter Buttons */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2">
-          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <Button
-              variant={dateFilter === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setDateFilter('all');
-                setCustomDateRange(undefined);
-              }}
-            >
-              Vsi kontakti
-            </Button>
-            <Button
-              variant={dateFilter === '7days' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setDateFilter('7days');
-                setCustomDateRange(undefined);
-              }}
-            >
-              Zadnjih 7 dni
-            </Button>
-            <Button
-              variant={dateFilter === '30days' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => {
-                setDateFilter('30days');
-                setCustomDateRange(undefined);
-              }}
-            >
-              Zadnjih 30 dni
-            </Button>
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
+          <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
+            {[
+              { key: 'all', label: 'Vsi kontakti' },
+              { key: '7days', label: 'Zadnjih 7 dni' },
+              { key: '30days', label: 'Zadnjih 30 dni' },
+            ].map((filter) => (
+              <Button 
+                key={filter.key}
+                variant={dateFilter === filter.key ? 'default' : 'outline'} 
+                size="sm"
+                className="transition-all"
+                onClick={() => {
+                  setDateFilter(filter.key as DateFilter);
+                  setCustomDateRange(undefined);
+                }}
+              >
+                {filter.label}
+              </Button>
+            ))}
+            
+            {/* Custom Date Range Picker */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={dateFilter === 'custom' ? 'default' : 'outline'}
                   size="sm"
-                  className="gap-2"
+                  className={cn(
+                    "transition-all min-w-[200px] justify-start text-left font-normal",
+                    !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
+                  )}
+                  onClick={() => setDateFilter('custom')}
                 >
-                  <CalendarIcon className="h-4 w-4" />
-                  {dateFilter === 'custom' && customDateRange?.from
-                    ? customDateRange.to
-                      ? `${format(customDateRange.from, 'd. MMM', { locale: sl })} - ${format(customDateRange.to, 'd. MMM', { locale: sl })}`
-                      : format(customDateRange.from, 'd. MMM yyyy', { locale: sl })
-                    : 'Izberi obdobje'}
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {customDateRange?.from ? (
+                    customDateRange.to ? (
+                      <>
+                        {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
+                      </>
+                    ) : (
+                      format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
+                    )
+                  ) : (
+                    "Izberi obdobje"
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   initialFocus
                   mode="range"
-                  defaultMonth={customDateRange?.from}
+                  defaultMonth={new Date()}
                   selected={customDateRange}
                   onSelect={(range) => {
                     setCustomDateRange(range);
@@ -410,6 +410,7 @@ export default function DashboardContacts() {
                     }
                   }}
                   numberOfMonths={2}
+                  locale={sl}
                   className="pointer-events-auto"
                 />
               </PopoverContent>
@@ -419,148 +420,156 @@ export default function DashboardContacts() {
           {/* Export Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button size="sm" className="gap-2" disabled={exporting || filteredLeads.length === 0}>
-                {exporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
+              <Button 
+                variant="default" 
+                size="sm"
+                disabled={exporting || filteredLeads.length === 0}
+              >
+                {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                 Prenesi kontakte
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={exportCSV} className="gap-2 cursor-pointer">
-                <FileSpreadsheet className="h-4 w-4" />
-                Prenesi CSV
+              <DropdownMenuItem onClick={exportCSV} className="cursor-pointer">
+                <Download className="h-4 w-4 mr-2" />
+                CSV
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportPDF} className="gap-2 cursor-pointer">
-                <FileText className="h-4 w-4" />
-                Prenesi PDF
+              <DropdownMenuItem onClick={exportPDF} className="cursor-pointer">
+                <FileText className="h-4 w-4 mr-2" />
+                PDF
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         {/* Main Content - Two Panel Layout */}
-        <div className="glass rounded-2xl overflow-hidden">
-          <div className="flex flex-col lg:flex-row" style={{ minHeight: '500px', maxHeight: 'calc(100vh - 380px)' }}>
-            {/* Left Panel - Contacts List */}
-            <div className="w-full lg:w-1/3 border-b lg:border-b-0 lg:border-r border-border flex flex-col" style={{ maxHeight: '400px' }}>
-              {/* Search */}
-              <div className="p-4 border-b border-border">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Išči po emailu..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              {/* Contacts List */}
-              <div className="flex-1 overflow-y-auto">
-                {displayLeads.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                    <Mail className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                    <p className="text-muted-foreground">
-                      {searchQuery 
-                        ? 'Ni rezultatov za iskanje'
-                        : 'Še ni zbranih kontaktov. Ko bo uporabnik pustil email v chatbotu, se bo prikazal tukaj.'
-                      }
-                    </p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-border">
-                    {displayLeads.map((lead) => (
-                      <button
-                        key={lead.id}
-                        onClick={() => handleSelectLead(lead.session_id)}
-                        className={cn(
-                          "w-full p-4 text-left hover:bg-muted/50 transition-colors",
-                          selectedLead === lead.session_id && "bg-primary/10"
-                        )}
-                      >
-                        <p className="font-medium text-foreground truncate">
-                          {lead.email || 'Brez emaila'}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {format(new Date(lead.created_at), "d. MMM yyyy, HH:mm", { locale: sl })}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left Panel - Contacts List */}
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col h-[550px]">
+            <div className="p-3 sm:p-4 border-b border-border bg-muted/50">
+              <h3 className="font-medium text-foreground text-sm sm:text-base">Kontakti ({displayLeads.length})</h3>
+            </div>
+            
+            {/* Search */}
+            <div className="p-3 sm:p-4 border-b border-border">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Išči po emailu..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
               </div>
             </div>
 
-            {/* Right Panel - Conversation */}
-            <div className="hidden md:flex md:w-2/3 flex-col">
-              {!selectedLead ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      Izberite kontakt za prikaz pogovora
-                    </p>
-                  </div>
-                </div>
-              ) : messagesLoading ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">
-                      Ni sporočil za ta pogovor
-                    </p>
-                  </div>
+            {/* Contacts List */}
+            <div className="flex-1 overflow-y-auto">
+              {displayLeads.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                  <Mail className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">
+                    {searchQuery 
+                      ? 'Ni rezultatov za iskanje'
+                      : 'Še ni zbranih kontaktov. Ko bo uporabnik pustil email v chatbotu, se bo prikazal tukaj.'
+                    }
+                  </p>
                 </div>
               ) : (
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((msg) => {
-                    const content = getMessageContent(msg.message);
-                    const type = getMessageType(msg.message);
-                    const isHuman = type === 'human';
-
-                    return (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex",
-                          isHuman ? "justify-end" : "justify-start"
-                        )}
-                      >
-                        <div
-                          className={cn(
-                            "max-w-[80%] rounded-2xl px-4 py-3",
-                            isHuman
-                              ? "bg-primary text-primary-foreground rounded-br-md"
-                              : "bg-muted text-foreground rounded-bl-md"
-                          )}
-                        >
-                          <p className="text-sm whitespace-pre-wrap break-words">
-                            {content}
-                          </p>
-                          <p
-                            className={cn(
-                              "text-xs mt-2",
-                              isHuman ? "text-primary-foreground/70" : "text-muted-foreground"
-                            )}
-                          >
-                            {format(new Date(msg.created_at), "HH:mm", { locale: sl })}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
+                <div className="divide-y divide-border">
+                  {displayLeads.map((lead) => (
+                    <button
+                      key={lead.id}
+                      onClick={() => handleSelectLead(lead.session_id)}
+                      className={cn(
+                        "w-full p-4 text-left transition-all duration-200 cursor-pointer",
+                        selectedLead === lead.session_id 
+                          ? "bg-primary/10 border-l-4 border-l-primary" 
+                          : "hover:bg-muted/50"
+                      )}
+                    >
+                      <p className="font-medium text-foreground truncate">
+                        {lead.email || 'Brez emaila'}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {format(new Date(lead.created_at), "d. MMM yyyy, HH:mm", { locale: sl })}
+                      </p>
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Right Panel - Conversation */}
+          <div className="bg-card border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col h-[550px]">
+            <div className="p-3 sm:p-4 border-b border-border bg-muted/50">
+              <h3 className="font-medium text-foreground text-sm sm:text-base">Pogovor</h3>
+            </div>
+            
+            {!selectedLead ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Izberite kontakt za prikaz pogovora
+                  </p>
+                </div>
+              </div>
+            ) : messagesLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                  <p className="text-muted-foreground">
+                    Ni sporočil za ta pogovor
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((msg) => {
+                  const content = getMessageContent(msg.message);
+                  const type = getMessageType(msg.message);
+                  const isHuman = type === 'human';
+
+                  return (
+                    <div
+                      key={msg.id}
+                      className={cn(
+                        "flex",
+                        isHuman ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-3",
+                          isHuman
+                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            : "bg-muted text-foreground rounded-bl-md"
+                        )}
+                      >
+                        <p className="text-sm whitespace-pre-wrap break-words">
+                          {content}
+                        </p>
+                        <p
+                          className={cn(
+                            "text-xs mt-2",
+                            isHuman ? "text-primary-foreground/70" : "text-muted-foreground"
+                          )}
+                        >
+                          {format(new Date(msg.created_at), "HH:mm", { locale: sl })}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
           </div>
         </div>
       </div>
