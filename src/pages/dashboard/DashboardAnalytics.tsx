@@ -649,10 +649,9 @@ export default function DashboardAnalytics() {
                     "transition-all min-w-[200px] justify-start text-left font-normal",
                     !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
                   )}
-                  onClick={() => setDateFilter('custom')}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {customDateRange?.from ? (
+                  {dateFilter === 'custom' && customDateRange?.from ? (
                     customDateRange.to ? (
                       <>
                         {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
@@ -674,6 +673,7 @@ export default function DashboardAnalytics() {
                   onSelect={(range) => {
                     setCustomDateRange(range);
                     if (range?.from && range?.to) {
+                      setDateFilter('custom');
                       setCalendarOpen(false);
                     }
                   }}
