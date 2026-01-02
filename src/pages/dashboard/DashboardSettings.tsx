@@ -21,16 +21,6 @@ import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview
 import { ImageUpload } from '@/components/ImageUpload';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { cn } from '@/lib/utils';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 type PreviewType = 'home' | 'chat' | 'trigger';
 
@@ -81,8 +71,6 @@ export default function DashboardSettings() {
   const [editValue, setEditValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingTab, setPendingTab] = useState<string | null>(null);
   
   // Store initial config when component mounts
   const initialConfigRef = useRef<BotConfig | null>(null);
@@ -209,37 +197,9 @@ export default function DashboardSettings() {
     setHasUnsavedChanges(true);
   }, [setConfig]);
 
-  // Handle tab change with unsaved changes check
+  // Handle tab change - allow free switching between tabs
   const handleTabChange = (newTab: string) => {
-    if (hasUnsavedChanges) {
-      setPendingTab(newTab);
-      setShowUnsavedDialog(true);
-    } else {
-      setActiveTab(newTab);
-    }
-  };
-
-  // Save and continue to new tab
-  const handleSaveAndContinue = async () => {
-    await handleSave();
-    if (pendingTab) {
-      setActiveTab(pendingTab);
-      setPendingTab(null);
-    }
-    setShowUnsavedDialog(false);
-  };
-
-  // Discard changes and continue to new tab
-  const handleDiscardAndContinue = () => {
-    if (initialConfigRef.current) {
-      setConfig(initialConfigRef.current);
-    }
-    setHasUnsavedChanges(false);
-    if (pendingTab) {
-      setActiveTab(pendingTab);
-      setPendingTab(null);
-    }
-    setShowUnsavedDialog(false);
+    setActiveTab(newTab);
   };
   // Warn on page leave (browser close/refresh)
   useEffect(() => {
@@ -931,36 +891,6 @@ export default function DashboardSettings() {
         </div>
       </div>
 
-      {/* Unsaved changes dialog */}
-      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Neshranjene spremembe</AlertDialogTitle>
-            <AlertDialogDescription>
-              Imate neshranjene spremembe. Kaj želite narediti?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel onClick={() => {
-              setPendingTab(null);
-              setShowUnsavedDialog(false);
-            }}>
-              Ostani tukaj
-            </AlertDialogCancel>
-            <Button
-              variant="outline"
-              onClick={handleDiscardAndContinue}
-            >
-              <Undo2 className="h-4 w-4 mr-2" />
-              Prekliči spremembe
-            </Button>
-            <AlertDialogAction onClick={handleSaveAndContinue} disabled={isSaving}>
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Shranjujem...' : 'Shrani'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </DashboardSidebar>
   );
 }
