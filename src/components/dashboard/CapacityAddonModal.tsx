@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Loader2, MessageCirclePlus, Phone, Mail, Sparkles } from 'lucide-react';
+import { Loader2, MessageCirclePlus, Phone, Mail, Sparkles, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -24,15 +24,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 type CapacityOption = { id: string; name: string; price: number; period: string };
 
-const monthlyCapacityOptions: CapacityOption[] = [
+// Capacity addoni so VEDNO mesečni - tudi za letne naročnine
+const capacityOptionsAll: CapacityOption[] = [
   { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
   { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
   { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
   { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
-];
-
-const yearlyCapacityOptions: CapacityOption[] = [
-  { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'leto' },
 ];
 
 interface CapacityAddonModalProps {
@@ -54,9 +51,8 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
   // Get current addons from widget
   const currentAddons = (widget?.addons as string[] | null) || [];
   
-  // Filter out already purchased addons
-  const baseOptions = isYearly ? yearlyCapacityOptions : monthlyCapacityOptions;
-  const capacityOptions = baseOptions.filter(option => !currentAddons.includes(option.id));
+  // Filter out already purchased addons - vsi capacity addoni so mesečni
+  const capacityOptions = capacityOptionsAll.filter(option => !currentAddons.includes(option.id));
 
   const handleOptionClick = (option: CapacityOption) => {
     setSelectedOption(option);
@@ -151,6 +147,14 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
             </DialogTitle>
             <DialogDescription>Izberite paket dodatnih sporočil</DialogDescription>
           </DialogHeader>
+
+          {/* Opozorilo za mesečno zaračunavanje */}
+          <div className="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <Info className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-muted-foreground">
+              Dodatni pogovori se <strong className="text-foreground">vedno zaračunavajo mesečno</strong>, ne glede na vaše obračunsko obdobje.
+            </p>
+          </div>
 
           <div className="space-y-3 my-4">
             {capacityOptions.length > 0 ? (
