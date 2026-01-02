@@ -608,106 +608,88 @@ export default function DashboardAnalytics() {
           </div>
         </div>
 
-        {/* Date Range Picker - exact style like reference */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-          {/* First button - pill shape */}
-          <button 
-            className={cn(
-              "px-5 py-2.5 text-sm font-medium transition-all duration-200 rounded-full",
-              dateFilter === 'all' 
-                ? "bg-primary text-primary-foreground shadow-md" 
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-            )}
-            onClick={() => {
-              setDateFilter('all');
-              setCustomDateRange(undefined);
-            }}
-          >
-            Vsi pogovori
-          </button>
-
-          {/* Middle buttons - flat/angular */}
-          <button 
-            className={cn(
-              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
-              dateFilter === '7days' 
-                ? "bg-primary text-primary-foreground shadow-md rounded-full" 
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => {
-              setDateFilter('7days');
-              setCustomDateRange(undefined);
-            }}
-          >
-            Zadnjih 7 dni
-          </button>
-
-          <button 
-            className={cn(
-              "px-4 py-2.5 text-sm font-medium transition-all duration-200",
-              dateFilter === '30days' 
-                ? "bg-primary text-primary-foreground shadow-md rounded-full" 
-                : "text-muted-foreground hover:text-foreground"
-            )}
-            onClick={() => {
-              setDateFilter('30days');
-              setCustomDateRange(undefined);
-            }}
-          >
-            Zadnjih 30 dni
-          </button>
-          
-          {/* Custom Date Range Picker */}
-          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-            <PopoverTrigger asChild>
-              <button
-                className={cn(
-                  "flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200",
-                  dateFilter === 'custom' 
-                    ? "bg-primary text-primary-foreground shadow-md rounded-full" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                onClick={() => setDateFilter('custom')}
-              >
-                <CalendarIcon className="h-4 w-4" />
-                {customDateRange?.from ? (
-                  customDateRange.to ? (
-                    <>
-                      {format(customDateRange.from, "d. MMM", { locale: sl })} - {format(customDateRange.to, "d. MMM", { locale: sl })}
-                    </>
-                  ) : (
-                    format(customDateRange.from, "d. MMM yyyy", { locale: sl })
-                  )
-                ) : (
-                  "Izberi obdobje"
-                )}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={customDateRange?.from}
-                selected={customDateRange}
-                onSelect={(range) => {
-                  setCustomDateRange(range);
-                  if (range?.from && range?.to) {
-                    setCalendarOpen(false);
-                  }
+        {/* Date Range Picker - style like conversations */}
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
+          <div className="flex flex-wrap gap-2 items-center w-full sm:w-auto">
+            {[
+              { key: 'all', label: 'Vsi pogovori' },
+              { key: '7days', label: 'Zadnjih 7 dni' },
+              { key: '30days', label: 'Zadnjih 30 dni' },
+            ].map((filter) => (
+              <Button 
+                key={filter.key}
+                variant={dateFilter === filter.key ? 'default' : 'outline'} 
+                size="sm"
+                className="transition-all"
+                onClick={() => {
+                  setDateFilter(filter.key as any);
+                  setCustomDateRange(undefined);
                 }}
-                numberOfMonths={2}
-                locale={sl}
-                className="pointer-events-auto"
-              />
-            </PopoverContent>
-          </Popover>
+              >
+                {filter.label}
+              </Button>
+            ))}
+            
+            {/* Custom Date Range Picker */}
+            <Popover 
+              open={calendarOpen} 
+              onOpenChange={(open) => {
+                setCalendarOpen(open);
+                // Reset selection when opening calendar for fresh start
+                if (open) {
+                  setCustomDateRange(undefined);
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant={dateFilter === 'custom' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn(
+                    "transition-all min-w-[200px] justify-start text-left font-normal",
+                    !customDateRange && dateFilter !== 'custom' && "text-muted-foreground"
+                  )}
+                  onClick={() => setDateFilter('custom')}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {customDateRange?.from ? (
+                    customDateRange.to ? (
+                      <>
+                        {format(customDateRange.from, "dd. MM. yyyy", { locale: sl })} - {format(customDateRange.to, "dd. MM. yyyy", { locale: sl })}
+                      </>
+                    ) : (
+                      format(customDateRange.from, "dd. MM. yyyy", { locale: sl })
+                    )
+                  ) : (
+                    "Izberi obdobje"
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={new Date()}
+                  selected={customDateRange}
+                  onSelect={(range) => {
+                    setCustomDateRange(range);
+                    if (range?.from && range?.to) {
+                      setCalendarOpen(false);
+                    }
+                  }}
+                  numberOfMonths={2}
+                  locale={sl}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* PDF Download Button */}
           <Button
             onClick={generatePDF}
             disabled={isGeneratingPdf}
+            size="sm"
             className="gap-2"
           >
             {isGeneratingPdf ? (
