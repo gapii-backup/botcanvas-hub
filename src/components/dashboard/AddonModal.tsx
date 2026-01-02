@@ -70,6 +70,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   const { toast } = useToast();
 
   const billingPeriod = widget?.billing_period || 'monthly';
+  const isYearly = billingPeriod === 'yearly';
+  const isCapacity = addon?.startsWith('capacity_');
   const addonData = addon ? getAddonDetails(addon, billingPeriod) : null;
 
   if (!addon || !addonData) {
@@ -168,24 +170,45 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
           </DialogHeader>
 
           <div className="my-6">
-            <div className="border border-primary rounded-xl p-4 bg-primary/5">
-              <div className="font-bold text-foreground">
-                {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
-                {billingPeriod === 'yearly' && (
-                  <span className="text-success text-sm font-normal ml-2">20% popust</span>
-                )}
+            {/* Za kapacitete pri letni naročnini - posebna kartica */}
+            {isCapacity && isYearly ? (
+              <div className="border border-amber-500/50 rounded-xl p-4 bg-amber-500/5">
+                <div className="font-bold text-amber-500">
+                  Mesečno
+                  <span className="text-muted-foreground text-sm font-normal ml-2">brez popusta</span>
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  €{addonData.price}
+                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                  <span className="text-sm text-muted-foreground font-normal">
+                    /{addonData.period}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-500/80 mt-2">
+                  Kapacitete se vedno zaračunavajo mesečno, ne glede na vaše obračunsko obdobje.
+                </p>
               </div>
-              <div className="text-2xl font-bold text-foreground">
-                €{addonData.price}
-                <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
-                <span className="text-sm text-muted-foreground font-normal">
-                  /{addonData.period}
-                </span>
+            ) : (
+              /* Za ostale addone - standardna kartica */
+              <div className="border border-primary rounded-xl p-4 bg-primary/5">
+                <div className="font-bold text-foreground">
+                  {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
+                  {billingPeriod === 'yearly' && (
+                    <span className="text-success text-sm font-normal ml-2">20% popust</span>
+                  )}
+                </div>
+                <div className="text-2xl font-bold text-foreground">
+                  €{addonData.price}
+                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                  <span className="text-sm text-muted-foreground font-normal">
+                    /{addonData.period}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Billing period se ujema z vašo obstoječo naročnino
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Billing period se ujema z vašo obstoječo naročnino
-              </p>
-            </div>
+            )}
           </div>
 
           <Button className="w-full" onClick={handleAddonClick}>
@@ -208,29 +231,49 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                   </div>
                 </div>
 
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-                  <p className="font-medium text-amber-500 mb-2 flex items-center gap-2">
-                    <span>⚡</span>
-                    Takojšnje plačilo
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Sorazmerni del cene za obdobje do vašega naslednjega plačila bo zaračunan takoj iz vaše shranjene plačilne metode.
-                  </p>
-                </div>
+                {/* Za kapacitete pri letni naročnini - poenostavljena vsebina */}
+                {isCapacity && isYearly ? (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+                    <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span>Kapacitete se <strong className="text-foreground">vedno zaračunavajo MESEČNO</strong> (ne letno), saj se dodatni pogovori obračunavajo mesečno.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span>Cena: <strong className="text-foreground">€{addonData.price} +DDV/mesec</strong></span>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  /* Za ostale addone - standardna vsebina */
+                  <>
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+                      <p className="font-medium text-amber-500 mb-2 flex items-center gap-2">
+                        <span>⚡</span>
+                        Takojšnje plačilo
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Sorazmerni del cene za obdobje do vašega naslednjega plačila bo zaračunan takoj iz vaše shranjene plačilne metode.
+                      </p>
+                    </div>
 
-                <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
-                  <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
-                  <ul className="space-y-2 text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span><strong className="text-foreground">Danes:</strong> Zaračuna se sorazmerni del cene (npr. če je do naslednjega plačila še pol obdobja, plačate pol cene)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
-                    </li>
-                  </ul>
-                </div>
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+                      <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-0.5">•</span>
+                          <span><strong className="text-foreground">Danes:</strong> Zaračuna se sorazmerni del cene (npr. če je do naslednjega plačila še pol obdobja, plačate pol cene)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-0.5">•</span>
+                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </>
+                )}
 
                 {addon?.startsWith('capacity_') ? (
                   <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
