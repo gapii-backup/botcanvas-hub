@@ -8,7 +8,14 @@ import {
   Loader2,
   Sparkles,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  Languages,
+  Calendar,
+  Users,
+  Ticket,
+  Lightbulb,
+  MessageSquare,
+  CheckCircle
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -72,32 +79,30 @@ const planPrices = {
 
 const planOrder = ['basic', 'pro', 'enterprise'];
 
-type AddonItem = { id: string; name: string; price: number; period: string; proOnly?: boolean };
+type AddonItem = { id: string; name: string; price: number; period: string; proOnly?: boolean; icon: typeof Languages };
 
 const allAddons: Record<string, AddonItem[]> = {
   monthly: [
-    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
-    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
-    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
-    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
-    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec' },
-    { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec' },
-    { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec', icon: MessageSquare },
+    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec', icon: Languages },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true, icon: Calendar },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec', icon: Users },
+    { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec', icon: Lightbulb },
+    { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec', icon: Ticket }
   ],
   yearly: [
-    // Capacity addoni - VEDNO mesečni
-    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
-    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
-    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
-    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
-    // Ostali addoni - letni
-    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto' },
-    { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto' },
-    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec', icon: MessageSquare },
+    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto', icon: Languages },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true, icon: Calendar },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto', icon: Users },
+    { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto', icon: Lightbulb },
+    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto', icon: Ticket }
   ]
 };
 
@@ -107,7 +112,8 @@ const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem => {
     id: addonId, 
     name: addonId, 
     price: 0, 
-    period: billingPeriod === 'yearly' ? 'leto' : 'mesec' 
+    period: billingPeriod === 'yearly' ? 'leto' : 'mesec',
+    icon: MessageSquare
   };
 };
 
@@ -416,91 +422,102 @@ export default function DashboardUpgrade() {
           </CardContent>
         </Card>
 
-        {/* DODATKI */}
+        {/* DODATNE FUNKCIJE */}
         <Card className="glass">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-primary" />
-              Dodatki
+              Dodatne funkcije
             </CardTitle>
-            <CardDescription>Upravljajte dodatne funkcionalnosti</CardDescription>
+            <CardDescription>Dodajte dodatne funkcionalnosti vašemu chatbotu</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Aktivni dodatki */}
+          <CardContent className="space-y-6">
+            {/* Vse funkcije - gumbi */}
+            <div>
+              <h4 className="text-sm font-semibold text-foreground mb-4">Razpoložljive funkcije</h4>
+              <div className="flex flex-wrap gap-3">
+                {(allAddons[billingPeriod] || allAddons.monthly).map(addon => {
+                  const isActive = activeAddonIds.includes(addon.id);
+                  const isProOnly = addon.proOnly && currentPlan !== 'pro' && currentPlan !== 'enterprise';
+                  const IconComponent = addon.icon;
+                  
+                  return (
+                    <button
+                      key={addon.id}
+                      onClick={() => !isActive && !isProOnly && openAddonModal(addon.id)}
+                      disabled={isActive || isProOnly}
+                      className={`
+                        flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 min-w-[120px]
+                        ${isActive 
+                          ? 'border-green-500 bg-green-500/10 cursor-default' 
+                          : isProOnly
+                            ? 'border-border bg-muted/20 opacity-50 cursor-not-allowed'
+                            : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
+                        }
+                      `}
+                    >
+                      <div className={`p-2 rounded-lg ${isActive ? 'bg-green-500/20' : 'bg-muted'}`}>
+                        {isActive ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <IconComponent className="w-5 h-5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <span className={`text-sm font-medium text-center ${isActive ? 'text-green-500' : 'text-foreground'}`}>
+                        {addon.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        €{addon.price}/{addon.period}
+                      </span>
+                      {isProOnly && (
+                        <Badge variant="secondary" className="text-xs">Pro+</Badge>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Aktivne funkcije */}
+            {activeAddons.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Aktivni dodatki</h4>
-                {activeAddons.length > 0 ? (
-                  <div className="space-y-2">
-                    {activeAddons.map(addon => (
+                <h4 className="text-sm font-semibold text-foreground mb-3">Aktivne funkcije</h4>
+                <div className="space-y-2">
+                  {activeAddons.map(addon => {
+                    const IconComponent = addon.icon;
+                    return (
                       <div
                         key={addon.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5"
+                        className="flex items-center justify-between p-3 rounded-lg border border-green-500/30 bg-green-500/5"
                       >
-                        <div>
-                          <span className="font-medium text-foreground">{addon.name}</span>
-                          <div className="text-sm text-muted-foreground">
-                            €{addon.price}
-                            <span className="text-xs ml-1">+DDV</span>
-                            /{addon.period}
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-green-500/20">
+                            <IconComponent className="w-4 h-4 text-green-500" />
+                          </div>
+                          <div>
+                            <span className="font-medium text-foreground">{addon.name}</span>
+                            <div className="text-sm text-muted-foreground">
+                              €{addon.price}
+                              <span className="text-xs ml-1">+DDV</span>
+                              /{addon.period}
+                            </div>
                           </div>
                         </div>
                         <Button
                           onClick={() => setCancelAddonDialog(addon.id)}
                           size="sm"
-                          variant="destructive"
-                          className="gap-1"
+                          variant="ghost"
+                          className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <X className="h-3 w-3" />
-                          Prekliči
+                          Odstrani
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-lg border border-border bg-muted/20 text-center">
-                    <p className="text-muted-foreground text-sm">Ni aktivnih dodatkov</p>
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
-
-              {/* Razpoložljivi dodatki */}
-              <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Razpoložljivi dodatki</h4>
-                {availableAddons.length > 0 ? (
-                  <div className="space-y-2">
-                    {availableAddons.map(addon => (
-                      <div
-                        key={addon.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30"
-                      >
-                        <div>
-                          <span className="font-medium text-foreground">{addon.name}</span>
-                          <div className="text-sm text-muted-foreground">
-                            €{addon.price}
-                            <span className="text-xs ml-1">+DDV</span>
-                            /{addon.period}
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => openAddonModal(addon.id)}
-                          size="sm"
-                          variant="outline"
-                          className="gap-1"
-                        >
-                          <Plus className="h-3 w-3" />
-                          Dodaj
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 rounded-lg border border-border bg-muted/20 text-center">
-                    <p className="text-muted-foreground text-sm">Vsi dodatki so že aktivni</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -544,7 +561,7 @@ export default function DashboardUpgrade() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                      <span>Vse aktivne funkcije bodo odstranjene</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
@@ -609,7 +626,7 @@ export default function DashboardUpgrade() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>
-                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                      <span>Vse aktivne funkcije bodo odstranjene</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>

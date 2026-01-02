@@ -110,14 +110,14 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
 
       if (result.success) {
         toast({
-          title: 'Addon dodan!',
-          description: result.message || 'Addon je bil uspešno dodan k vaši naročnini.'
+          title: 'Funkcija dodana!',
+          description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
         });
         onOpenChange(false);
         // Refresh the page to reload all data
         window.location.reload();
       } else {
-        throw new Error(result.error || 'Napaka pri dodajanju addona');
+        throw new Error(result.error || 'Napaka pri dodajanju funkcije');
       }
     } catch (error: any) {
       toast({
@@ -200,14 +200,14 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary mt-0.5">•</span>
-                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
+                      <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
                     </li>
                   </ul>
                 </div>
 
                 <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/5 rounded-lg p-3">
                   <span>⏱️</span>
-                  <span>Addon bo aktiviran v roku <strong>72 ur</strong> po potrditvi nakupa.</span>
+                  <span>Funkcija bo aktivirana v roku <strong>72 ur</strong> po potrditvi nakupa.</span>
                 </div>
               </div>
             </AlertDialogDescription>
