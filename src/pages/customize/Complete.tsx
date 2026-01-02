@@ -366,40 +366,40 @@ export default function Complete() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left side - Add-ons */}
           <div className="space-y-6">
-            {hasAddons && (
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Dodatne možnosti</h2>
+              <p className="text-muted-foreground">
+                Izboljšajte svojega AI asistenta z dodatnimi funkcijami.
+              </p>
+            </div>
+
+            {/* Plan info - always visible */}
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Paket:</span>
+                <span className="text-sm font-bold text-foreground">
+                  {PLAN_NAMES[userPlan] || 'BASIC'}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  ({isYearly ? 'letna naročnina' : 'mesečna naročnina'})
+                </span>
+                {isYearly && (
+                  <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                    -20%
+                  </span>
+                )}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/pricing?returnTo=complete')}
+              >
+                Zamenjaj paket
+              </Button>
+            </div>
+
+            {hasAddons ? (
               <>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Dodatne možnosti</h2>
-                  <p className="text-muted-foreground">
-                    Izboljšajte svojega AI asistenta z dodatnimi funkcijami.
-                  </p>
-                </div>
-
-                {/* Plan info */}
-                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-muted-foreground">Paket:</span>
-                    <span className="text-sm font-bold text-foreground">
-                      {PLAN_NAMES[userPlan] || 'BASIC'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      ({isYearly ? 'letna naročnina' : 'mesečna naročnina'})
-                    </span>
-                    {isYearly && (
-                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                        -20%
-                      </span>
-                    )}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate('/pricing?returnTo=complete')}
-                  >
-                    Zamenjaj paket
-                  </Button>
-                </div>
-
                 <div className="space-y-4">
                   {Object.entries(availableAddons).map(([key, category]) => (
                     <Card key={key} className="border-border bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
@@ -473,16 +473,18 @@ export default function Complete() {
                   </div>
                 )}
               </>
-            )}
-
-            {!hasAddons && (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center py-12">
-                  <Check className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Vse je pripravljeno!</h2>
-                  <p className="text-muted-foreground">
-                    Vaš paket že vključuje vse funkcije.
-                  </p>
+            ) : (
+              <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Vse je pripravljeno!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vaš paket že vključuje vse funkcije.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
