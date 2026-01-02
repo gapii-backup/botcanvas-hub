@@ -56,12 +56,20 @@ export function useDashboardStats(tableName: string | null | undefined) {
         if (msgError) console.error('Messages today (human) error:', msgError);
         console.log('Messages today (human):', messagesTodayData);
 
-        // Get sessions this month using RPC
+        // Calculate 30 days ago
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+        // Get sessions in last 30 days using RPC
         const { data: sessionsData, error: sessError } = await supabase
-          .rpc('get_sessions_this_month', { p_table_name: tableName });
+          .rpc('get_sessions_count', { 
+            p_table_name: tableName,
+            p_start_date: thirtyDaysAgo.toISOString(),
+          });
         
-        if (sessError) console.error('Sessions error:', sessError);
-        console.log('Sessions this month:', sessionsData);
+        if (sessError) console.error('Sessions last 30 days error:', sessError);
+        console.log('Sessions last 30 days:', sessionsData);
 
         // Get sessions today (unique users today)
         const { data: sessionsTodayData, error: sessionsTodayError } = await supabase
@@ -90,12 +98,15 @@ export function useDashboardStats(tableName: string | null | undefined) {
         if (leadsError) console.error('Leads error:', leadsError);
         console.log('Leads count:', leadsCount);
 
-        // Get human messages count for this table
+        // Get human messages count for last 30 days
         const { data: humanMessagesData, error: humanError } = await supabase
-          .rpc('get_human_messages_count', { p_table_name: tableName });
+          .rpc('get_human_messages_count_range', { 
+            p_table_name: tableName,
+            p_start_date: thirtyDaysAgo.toISOString(),
+          });
         
-        if (humanError) console.error('Human messages error:', humanError);
-        console.log('Human messages count:', humanMessagesData);
+        if (humanError) console.error('Human messages last 30 days error:', humanError);
+        console.log('Human messages last 30 days:', humanMessagesData);
 
         const totalLeads = leadsCount || 0;
         const totalSessions = sessionsData || 0;

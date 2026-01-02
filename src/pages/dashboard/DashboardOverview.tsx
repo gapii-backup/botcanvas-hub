@@ -344,7 +344,7 @@ export default function DashboardOverview() {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground">{stats.humanMessagesCount}</p>
-            <p className="text-xs text-muted-foreground mt-1">Sporočila ta mesec</p>
+            <p className="text-xs text-muted-foreground mt-1">Sporočila v zadnjem mesecu</p>
           </div>
 
           <div className="glass rounded-2xl p-5 animate-slide-up" style={{ animationDelay: '150ms' }}>
@@ -354,7 +354,7 @@ export default function DashboardOverview() {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground">{stats.conversationsThisMonth}</p>
-            <p className="text-xs text-muted-foreground mt-1">Uporabniki ta mesec</p>
+            <p className="text-xs text-muted-foreground mt-1">Uporabniki v zadnjem mesecu</p>
           </div>
         </div>
 
