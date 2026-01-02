@@ -301,6 +301,7 @@ export type Database = {
           lead_webhook_url: string | null
           messages_limit: number | null
           mode: string
+          phone: string | null
           plan: string | null
           position: string
           primary_color: string | null
@@ -367,6 +368,7 @@ export type Database = {
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
+          phone?: string | null
           plan?: string | null
           position?: string
           primary_color?: string | null
@@ -433,6 +435,7 @@ export type Database = {
           lead_webhook_url?: string | null
           messages_limit?: number | null
           mode?: string
+          phone?: string | null
           plan?: string | null
           position?: string
           primary_color?: string | null

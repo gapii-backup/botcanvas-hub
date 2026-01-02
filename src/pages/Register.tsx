@@ -121,7 +121,7 @@ export default function Register() {
 
     setIsLoading(true);
 
-    const { error } = await signUp(email, password, name);
+    const { error } = await signUp(email, password, name, phone);
 
     if (error) {
       let message = 'Prišlo je do napake pri registraciji.';
