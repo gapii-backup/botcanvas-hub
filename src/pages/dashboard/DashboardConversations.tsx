@@ -335,7 +335,16 @@ export default function DashboardConversations() {
             ))}
             
             {/* Custom Date Range Picker */}
-            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <Popover 
+              open={calendarOpen} 
+              onOpenChange={(open) => {
+                setCalendarOpen(open);
+                // Reset selection when opening calendar for fresh start
+                if (open) {
+                  setCustomDateRange(undefined);
+                }
+              }}
+            >
               <PopoverTrigger asChild>
                 <Button
                   variant={dateFilter === 'custom' ? 'default' : 'outline'}
@@ -364,7 +373,7 @@ export default function DashboardConversations() {
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={customDateRange?.from}
+                  defaultMonth={new Date()}
                   selected={customDateRange}
                   onSelect={(range) => {
                     setCustomDateRange(range);
