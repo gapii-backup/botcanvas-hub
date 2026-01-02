@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useWidget } from '@/hooks/useWidget';
 import { Loader2 } from 'lucide-react';
 
@@ -8,6 +8,8 @@ interface PricingGuardProps {
 
 export function PricingGuard({ children }: PricingGuardProps) {
   const { widget, loading } = useWidget();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
 
   if (loading) {
     return (
@@ -30,6 +32,11 @@ export function PricingGuard({ children }: PricingGuardProps) {
   // If widget is already active, setup_paid, sub_paid, or cancelling, redirect to dashboard
   if (widget?.status && ['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
     return <Navigate to="/dashboard" replace />;
+  }
+
+  // If payment is pending BUT user wants to change plan (returnTo=complete), allow access
+  if (widget?.status === 'pending_payment' && returnTo === 'complete') {
+    return <>{children}</>;
   }
 
   // If payment is pending, continue the flow on the Complete step
