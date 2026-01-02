@@ -191,14 +191,17 @@ export default function DashboardOverview() {
         <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-14 w-14 rounded-xl bg-primary/20 flex items-center justify-center overflow-hidden">
+              <div 
+                className="h-14 w-14 rounded-xl flex items-center justify-center overflow-hidden"
+                style={{ backgroundColor: widget?.bot_icon_background || 'hsl(var(--primary) / 0.2)' }}
+              >
                 {widget?.bot_avatar ? (
                   <img 
                     src={widget.bot_avatar} 
                     alt="Bot avatar" 
                     className="h-full w-full object-cover"
                   />
-                ) : widget?.bot_icon && typeof widget.bot_icon === 'object' && (widget.bot_icon as any).paths ? (
+                ) : widget?.bot_icon && Array.isArray(widget.bot_icon) && widget.bot_icon.length > 0 ? (
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -209,9 +212,18 @@ export default function DashboardOverview() {
                     className="h-7 w-7"
                     style={{ color: widget.bot_icon_color || 'hsl(var(--primary))' }}
                   >
-                    {((widget.bot_icon as any).paths as string[]).map((path: string, i: number) => (
-                      <path key={i} d={path} />
-                    ))}
+                    {(widget.bot_icon as string[]).map((pathData: string, i: number) => {
+                      // Handle rect elements
+                      if (pathData.startsWith('rect ')) {
+                        const props: Record<string, string> = {};
+                        pathData.replace('rect ', '').split(' ').forEach(attr => {
+                          const [key, value] = attr.split('=');
+                          if (key && value) props[key] = value.replace(/"/g, '');
+                        });
+                        return <rect key={i} {...props} />;
+                      }
+                      return <path key={i} d={pathData} />;
+                    })}
                   </svg>
                 ) : (
                   <Bot className="h-7 w-7 text-primary" />
