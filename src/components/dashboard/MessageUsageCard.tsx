@@ -62,11 +62,15 @@ export function MessageUsageCard({
   const percentage = limit ? (messagesUsed / limit) * 100 : 0;
   const isHighUsage = percentage > 80;
 
-  // Calculate next billing date
+  // Calculate next billing date - VEDNO 1 mesec naprej (tudi za letne naročnine)
   const startDate = new Date(billingPeriodStart);
-  const nextBillingDate = billingPeriod === 'yearly' 
-    ? addYears(startDate, 1) 
-    : addMonths(startDate, 1);
+  const today = new Date();
+  let nextBillingDate = new Date(startDate);
+  
+  // Keep adding months until we're past today
+  while (nextBillingDate <= today) {
+    nextBillingDate = addMonths(nextBillingDate, 1);
+  }
 
   const getProgressColor = () => {
     if (percentage > 95) return 'bg-destructive';
