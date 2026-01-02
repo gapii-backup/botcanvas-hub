@@ -7,7 +7,21 @@ import {
   ArrowDownCircle,
   Loader2,
   Sparkles,
-  Check
+  MessageSquare,
+  Globe,
+  HelpCircle,
+  FileText,
+  Globe2,
+  Code,
+  BarChart3,
+  History,
+  Languages,
+  Users,
+  Ticket,
+  LineChart,
+  Calendar,
+  Lightbulb,
+  LucideIcon
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,41 +43,43 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+type FeatureItem = { text: string; icon: LucideIcon };
+
 const planPrices = {
   basic: { 
     monthly: 49.99, yearly: 479.99, name: 'Basic',
     features: [
-      '2.000 pogovorov na mesec',
-      'Podpora za 1 jezik',
-      'Dodajanje Q&A vprašanj',
-      'Nalaganje PDF/Word dokumentov',
-      'Učenje iz vaše spletne strani',
-      'Widget za vgradnjo na vašo spletno stran',
-      'Osnovni pregled statistike pogovorov',
-      'Zgodovina pogovorov – 30 dni'
-    ]
+      { text: '2.000 pogovorov na mesec', icon: MessageSquare },
+      { text: 'Podpora za 1 jezik', icon: Globe },
+      { text: 'Dodajanje Q&A vprašanj', icon: HelpCircle },
+      { text: 'Nalaganje PDF/Word dokumentov', icon: FileText },
+      { text: 'Učenje iz vaše spletne strani', icon: Globe2 },
+      { text: 'Widget za vgradnjo na vašo spletno stran', icon: Code },
+      { text: 'Osnovni pregled statistike pogovorov', icon: BarChart3 },
+      { text: 'Zgodovina pogovorov – 30 dni', icon: History }
+    ] as FeatureItem[]
   },
   pro: { 
     monthly: 119.99, yearly: 1149.99, name: 'Pro',
     features: [
-      'Vse iz BASIC paketa, plus:',
-      '5.000 pogovorov na mesec',
-      'Podpora za več jezikov',
-      'Zbiranje kontaktov (leadov) neposredno v pogovoru',
-      'Kreiranje support ticketov neposredno preko chatbota',
-      'Napredni pregled statistike in analitike',
-      'Zgodovina pogovorov – 60 dni'
-    ]
+      { text: 'Vse iz BASIC paketa, plus:', icon: Sparkles },
+      { text: '5.000 pogovorov na mesec', icon: MessageSquare },
+      { text: 'Podpora za več jezikov', icon: Languages },
+      { text: 'Zbiranje kontaktov (leadov) neposredno v pogovoru', icon: Users },
+      { text: 'Kreiranje support ticketov neposredno preko chatbota', icon: Ticket },
+      { text: 'Napredni pregled statistike in analitike', icon: LineChart },
+      { text: 'Zgodovina pogovorov – 60 dni', icon: History }
+    ] as FeatureItem[]
   },
   enterprise: { 
     monthly: 299.99, yearly: 2879.99, name: 'Enterprise',
     features: [
-      'Vse iz PRO paketa, plus:',
-      '10.000 pogovorov na mesec',
-      'Rezervacija sestankov neposredno preko chatbota',
-      'Pametna priporočila izdelkov (AI)',
-      'Zgodovina pogovorov – 180 dni'
-    ]
+      { text: 'Vse iz PRO paketa, plus:', icon: Sparkles },
+      { text: '10.000 pogovorov na mesec', icon: MessageSquare },
+      { text: 'Rezervacija sestankov neposredno preko chatbota', icon: Calendar },
+      { text: 'Pametna priporočila izdelkov (AI)', icon: Lightbulb },
+      { text: 'Zgodovina pogovorov – 180 dni', icon: History }
+    ] as FeatureItem[]
   }
 };
 
@@ -367,12 +383,15 @@ export default function DashboardUpgrade() {
                     
                     {/* Features list */}
                     <ul className="space-y-2.5 mb-6 flex-grow">
-                      {planData.features.map(f => (
-                        <li key={f} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-foreground leading-relaxed">{f}</span>
-                        </li>
-                      ))}
+                      {planData.features.map((feature) => {
+                        const IconComponent = feature.icon;
+                        return (
+                          <li key={feature.text} className="flex items-start gap-3">
+                            <IconComponent className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-foreground leading-relaxed">{feature.text}</span>
+                          </li>
+                        );
+                      })}
                     </ul>
                     
                     {isExactCurrentPlan && (
