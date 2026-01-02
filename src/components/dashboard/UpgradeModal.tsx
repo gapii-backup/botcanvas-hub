@@ -432,7 +432,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   <p className="text-amber-500 font-semibold mb-1">⚠️ Pomembno:</p>
                   <ul className="text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Vaša trenutna naročnina bo preklicana</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
+                    <li>Vse aktivne funkcije bodo odstranjene</li>
                     <li>Nov paket bo aktiviran v roku 72 ur</li>
                     <li>Zaračunavanje se začne ob naslednjem plačilnem obdobju</li>
                   </ul>
@@ -482,7 +482,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   <p className="text-destructive font-semibold mb-1">⚠️ Opozorilo:</p>
                   <ul className="text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
-                    <li>Vsi aktivni addoni bodo odstranjeni</li>
+                    <li>Vse aktivne funkcije bodo odstranjene</li>
                     <li>Sprememba bo aktivirana v roku 72 ur</li>
                     <li>Sredstev ne vračamo</li>
                   </ul>

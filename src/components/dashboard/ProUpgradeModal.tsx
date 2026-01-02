@@ -326,7 +326,7 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                      <span>Vse aktivne funkcije bodo odstranjene</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
@@ -390,7 +390,7 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>
-                      <span>Vsi aktivni addoni bodo odstranjeni</span>
+                      <span>Vse aktivne funkcije bodo odstranjene</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>

@@ -89,12 +89,12 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
 
       if (result.success) {
         toast({
-          title: 'Addon dodan!',
-          description: result.message || 'Addon je bil uspešno dodan k vaši naročnini.'
+          title: 'Funkcija dodana!',
+          description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
         });
         window.location.reload();
       } else {
-        throw new Error(result.error || 'Napaka pri dodajanju addona');
+        throw new Error(result.error || 'Napaka pri dodajanju funkcije');
       }
     } catch (error: any) {
       toast({
@@ -120,7 +120,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
               <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-amber-500/30 animate-ping" />
             </div>
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">Dodajanje addona...</h3>
+              <h3 className="text-lg font-semibold text-foreground">Dodajanje funkcije...</h3>
               <p className="text-sm text-muted-foreground">
                 {selectedOption?.name}
               </p>
@@ -182,7 +182,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
               ))
             ) : (
               <div className="p-4 rounded-xl border border-green-500/30 bg-green-500/10 text-center">
-                <p className="text-green-400 font-medium">✓ Že imate vse standardne addone</p>
+                <p className="text-green-400 font-medium">✓ Že imate vse standardne funkcije</p>
               </div>
             )}
 
@@ -239,7 +239,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                     <ul className="space-y-2 text-muted-foreground">
                       <li className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">•</span>
-                        <span>Addon se zaračuna mesečno saj se dodatni pogovori zaračunavajo mesečno (€{selectedOption?.price} +DDV/mesec)</span>
+                        <span>Funkcija se zaračuna mesečno saj se dodatni pogovori zaračunavajo mesečno (€{selectedOption?.price} +DDV/mesec)</span>
                       </li>
                     </ul>
                   </div>
@@ -262,7 +262,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-500 mt-0.5">•</span>
-                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Addon se zaračuna skupaj z naročnino po polni ceni (€{selectedOption?.price} +DDV/mesec)</span>
+                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{selectedOption?.price} +DDV/mesec)</span>
                         </li>
                       </ul>
                     </div>
