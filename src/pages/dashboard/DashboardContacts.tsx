@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LockedFeature } from '@/components/dashboard/LockedFeature';
+import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
 import { useWidget } from '@/hooks/useWidget';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversations, type Message } from '@/hooks/useConversations';
@@ -291,6 +292,14 @@ export default function DashboardContacts() {
           </div>
           <Skeleton className="h-[600px]" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.status === 'setup_paid') {
+    return (
+      <DashboardLayout title="Kontakti" subtitle="Zbrani kontakti iz pogovorov">
+        <SetupPendingLock />
       </DashboardLayout>
     );
   }
