@@ -374,8 +374,8 @@ export default function DashboardKnowledge() {
           <CardHeader className="space-y-4 pb-4">
             <div className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                <CardTitle>Dokumenti</CardTitle>
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle className="text-base sm:text-lg">Dokumenti</CardTitle>
               </div>
             </div>
             {/* Upload Area - FIKSIRAN v headerju */}
