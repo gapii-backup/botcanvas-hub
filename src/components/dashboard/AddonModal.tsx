@@ -211,7 +211,10 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
             )}
           </div>
 
-          <Button className="w-full" onClick={handleAddonClick}>
+          <Button 
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black border-0 shadow-lg shadow-amber-500/25" 
+            onClick={handleAddonClick}
+          >
             Dodaj funkcijo
           </Button>
         </DialogContent>
