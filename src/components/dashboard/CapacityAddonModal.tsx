@@ -233,7 +233,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                 )}
 
                 {isYearly ? (
-                  /* Letna naročnina */
+                  /* Letna naročnina - kapacitete so vedno mesečne */
                   <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
                     <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
                     <ul className="space-y-2 text-muted-foreground">

@@ -120,10 +120,16 @@ const getAddonDetails = (addonId: string, billingPeriod: string): AddonItem => {
 const getFilteredAddons = (billingPeriod: string, plan: string, activeAddonIds: string[]): AddonItem[] => {
   const periodAddons = allAddons[billingPeriod] || allAddons.monthly;
   const showBooking = plan === 'pro' || plan === 'enterprise';
+  const isPro = plan === 'pro';
+  
+  // Functions that Pro users already have included in their plan
+  const proIncludedAddons = ['multilanguage', 'contacts', 'tickets'];
   
   return periodAddons.filter(addon => {
     if (activeAddonIds.includes(addon.id)) return false;
     if (addon.proOnly && !showBooking) return false;
+    // Hide multilanguage, contacts, tickets for Pro users (already included)
+    if (isPro && proIncludedAddons.includes(addon.id)) return false;
     return true;
   });
 };
