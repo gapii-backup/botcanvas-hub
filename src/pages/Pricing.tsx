@@ -134,7 +134,11 @@ export default function Pricing() {
         {/* Logo */}
         <div className="flex justify-center mb-10">
           <a href="https://botmotion.ai/" className="block">
-            <img src={logoInline} alt="BotMotion.AI" className="h-10" />
+            <img 
+              src={logoInline} 
+              alt="BotMotion.AI" 
+              className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+            />
           </a>
         </div>
 
