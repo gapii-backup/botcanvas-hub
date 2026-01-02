@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface UpgradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialBillingPeriod?: 'monthly' | 'yearly';
 }
 
 const planPrices = {
@@ -95,7 +96,7 @@ const plans = [
   }
 ];
 
-export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
+export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -105,12 +106,16 @@ export function UpgradeModal({ open, onOpenChange }: UpgradeModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Set initial billing period based on user's current subscription
+  // Set billing period from initialBillingPeriod prop when modal opens, fallback to widget setting
   useEffect(() => {
-    if (widget?.billing_period) {
-      setBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+    if (open) {
+      if (initialBillingPeriod) {
+        setBillingPeriod(initialBillingPeriod);
+      } else if (widget?.billing_period) {
+        setBillingPeriod(widget.billing_period as 'monthly' | 'yearly');
+      }
     }
-  }, [widget?.billing_period]);
+  }, [open, initialBillingPeriod, widget?.billing_period]);
 
   const currentPlanName = widget?.plan ? planPrices[widget.plan as keyof typeof planPrices]?.name || widget.plan : 'Brez paketa';
   const currentPlanIndex = widget?.plan ? planOrder.indexOf(widget.plan) : -1;
