@@ -80,15 +80,6 @@ export function useDashboardStats(tableName: string | null | undefined) {
         if (dayError) console.error('Messages by day error:', dayError);
         console.log('Messages by day:', msgByDayData);
 
-        // Get message limits for this table
-        const { data: limitsData, error: limitsError } = await supabase
-          .from('message_limits')
-          .select('monthly_limit')
-          .eq('table_name', tableName)
-          .maybeSingle();
-
-        if (limitsError) console.error('Limits error:', limitsError);
-        console.log('Limits data:', limitsData);
 
         // Get leads count for this table
         const { count: leadsCount, error: leadsError } = await supabase
@@ -118,7 +109,7 @@ export function useDashboardStats(tableName: string | null | undefined) {
           leadsCount: totalLeads,
           conversionRate,
           monthlyCount: humanMessagesData || 0,
-          monthlyLimit: limitsData?.monthly_limit || 1000,
+          monthlyLimit: 1000,
           humanMessagesCount: humanMessagesData || 0,
           sessionsToday: sessionsTodayData || 0,
         });
