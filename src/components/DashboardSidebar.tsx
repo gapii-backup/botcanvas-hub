@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
+import logoInline from '@/assets/logo-inline.png';
 
 interface DashboardSidebarProps {
   children: React.ReactNode;
@@ -53,19 +54,21 @@ type NavItem = {
   href: string;
   requiresPro?: boolean;
   blockedForPartner?: boolean;
+  iconColor?: string;
+  bgColor?: string;
 };
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations' },
-  { label: 'Baza znanja', icon: BookOpen, href: '/dashboard/knowledge' },
-  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
-  { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
-  { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
-  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true },
-  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true },
-  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
-  { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard', iconColor: 'text-primary', bgColor: 'bg-primary/20' },
+  { label: 'Pogovori', icon: MessageSquare, href: '/dashboard/conversations', iconColor: 'text-primary', bgColor: 'bg-primary/20' },
+  { label: 'Baza znanja', icon: BookOpen, href: '/dashboard/knowledge', iconColor: 'text-warning', bgColor: 'bg-warning/20' },
+  { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true, iconColor: 'text-success', bgColor: 'bg-success/20' },
+  { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true, iconColor: 'text-accent', bgColor: 'bg-accent/20' },
+  { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true, iconColor: 'text-blue-500', bgColor: 'bg-blue-500/20' },
+  { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true, iconColor: 'text-amber-500', bgColor: 'bg-amber-500/20' },
+  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true, iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/20' },
+  { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings', iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
+  { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help', iconColor: 'text-violet-500', bgColor: 'bg-violet-500/20' },
 ];
 
 export function DashboardSidebar({ 
@@ -178,9 +181,9 @@ export function DashboardSidebar({
     <div className="min-h-screen flex w-full bg-background">
       {/* Mobile Header */}
       <div className="fixed top-0 left-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:hidden z-50">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-foreground">BotMotion.ai</span>
-        </div>
+        <a href="https://botmotion.ai/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+          <img src={logoInline} alt="BotMotion.ai" className="h-8" />
+        </a>
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -236,7 +239,9 @@ export function DashboardSidebar({
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", item.bgColor)}>
+                  <Icon className={cn("h-4 w-4", item.iconColor)} />
+                </div>
                 <span>{item.label}</span>
               </button>
             );
@@ -248,7 +253,9 @@ export function DashboardSidebar({
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-card border-r border-border">
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-border">
-          <span className="text-lg font-bold text-foreground">BotMotion.ai</span>
+          <a href="https://botmotion.ai/" target="_blank" rel="noopener noreferrer">
+            <img src={logoInline} alt="BotMotion.ai" className="h-8" />
+          </a>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -269,7 +276,9 @@ export function DashboardSidebar({
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", item.bgColor)}>
+                  <Icon className={cn("h-4 w-4", item.iconColor)} />
+                </div>
                 <span>{item.label}</span>
               </button>
             );
