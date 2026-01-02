@@ -62,8 +62,8 @@ const navItems: NavItem[] = [
   { label: 'Analiza', icon: BarChart3, href: '/dashboard/analytics', requiresPro: true },
   { label: 'Kontakti', icon: Users, href: '/dashboard/contacts', requiresPro: true },
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true },
-  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true },
   { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true },
+  { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help' },
 ];
