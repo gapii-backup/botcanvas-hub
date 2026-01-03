@@ -938,7 +938,7 @@ export default function DashboardAnalytics() {
                           <ArrowUpDown className="h-3 w-3" />
                         </button>
                       </TableHead>
-                      <TableHead className="w-24 text-right">
+                      <TableHead className="w-24 text-right hidden sm:table-cell">
                         <button
                           onClick={() => handleSort('count')}
                           className="flex items-center gap-1 justify-end hover:text-foreground ml-auto"
@@ -965,7 +965,7 @@ export default function DashboardAnalytics() {
                           </span>
                         </TableCell>
                         <TableCell className="font-medium">{item.specific}</TableCell>
-                        <TableCell className="text-right">{item.count}</TableCell>
+                        <TableCell className="text-right hidden sm:table-cell">{item.count}</TableCell>
                         <TableCell className="text-right">
                           {((item.count / totalForPercent) * 100).toFixed(1)}%
                         </TableCell>
