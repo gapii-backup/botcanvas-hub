@@ -110,9 +110,10 @@ export function MessageUsageCard({
           />
         </div>
         
-        <div className="flex items-center justify-between mt-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-3">
           <p className="text-sm text-muted-foreground">
-            Obdobje se ponastavi: {format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}
+            <span className="block sm:inline">Obdobje se ponastavi:</span>
+            <span className="block sm:inline sm:ml-1 font-medium text-foreground">{format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}</span>
           </p>
           <Button
             onClick={() => setCapacityModalOpen(true)}
