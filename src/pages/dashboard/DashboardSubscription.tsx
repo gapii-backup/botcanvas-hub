@@ -109,8 +109,13 @@ export default function DashboardSubscription() {
       const result = await response.json();
 
       if (result.portalUrl) {
-        // Open in new tab
-        window.open(result.portalUrl, '_blank');
+        // On mobile open in same tab, on desktop open in new tab
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          window.location.href = result.portalUrl;
+        } else {
+          window.open(result.portalUrl, '_blank');
+        }
         setPortalLoading(false);
       } else {
         throw new Error(result.error || 'Napaka pri odpiranju portala');

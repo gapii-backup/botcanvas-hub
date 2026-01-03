@@ -290,36 +290,36 @@ export default function DashboardOverview() {
 
         {/* Subscription Activation Section */}
         {isActive && subscriptionStatus === 'none' && (
-          <div className="bg-gradient-to-r from-success/10 to-primary/10 border border-success/20 rounded-xl p-6 animate-slide-up">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-success" />
+          <div className="glass rounded-2xl p-6 md:p-8 animate-slide-up border border-success/30">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-success" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-foreground">Vaš chatbot je pripravljen!</h3>
-                <p className="text-muted-foreground">Za aktivacijo izberite naročniški paket</p>
+                <h3 className="text-xl md:text-2xl font-bold text-foreground">Vaš chatbot je pripravljen!</h3>
+                <p className="text-muted-foreground text-sm md:text-base">Za aktivacijo izberite naročniški paket</p>
               </div>
             </div>
             
-            <div className="flex gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                className="flex-1"
+                className="w-full h-14 text-base font-bold bg-[#3b82f6] hover:bg-[#2563eb] text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
                 size="lg"
                 onClick={() => handleSubscribe('monthly')}
                 disabled={subscribing !== null}
               >
-                {subscribing === 'monthly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
                 Mesečna naročnina
               </Button>
               <Button 
-                className="flex-1 bg-gradient-to-r from-success to-emerald-600 hover:from-success/90 hover:to-emerald-700 text-primary-foreground"
+                className="w-full h-14 text-base font-bold bg-gradient-to-r from-success to-emerald-500 hover:from-success/90 hover:to-emerald-600 text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/25"
                 size="lg"
                 onClick={() => handleSubscribe('yearly')}
                 disabled={subscribing !== null}
               >
-                {subscribing === 'yearly' && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                Letna naročnina
-                <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-sm">-20%</span>
+                {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
+                <span className="font-bold">Letna naročnina</span>
+                <span className="ml-3 bg-amber-400/90 text-amber-950 px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
               </Button>
             </div>
           </div>
