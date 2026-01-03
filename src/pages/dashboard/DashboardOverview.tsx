@@ -30,6 +30,8 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
+import { SubscriptionPopup } from '@/components/dashboard/SubscriptionPopup';
+import { EmbedCodePopup } from '@/components/dashboard/EmbedCodePopup';
 
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +64,8 @@ export default function DashboardOverview() {
   const { user } = useAuth();
   const { widget, loading, fetchWidget } = useWidget();
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
+  const [showEmbedCodePopup, setShowEmbedCodePopup] = useState(false);
 
   const tableName = widget?.table_name;
   const { stats, loading: statsLoading } = useDashboardStats(tableName);
@@ -109,6 +113,8 @@ export default function DashboardOverview() {
       });
       fetchWidget();
       setSearchParams({});
+      // Show embed code popup after successful subscription
+      setShowEmbedCodePopup(true);
     } else if (subscriptionResult === 'cancelled') {
       toast({
         title: 'Naročnina preklicana',
@@ -118,6 +124,17 @@ export default function DashboardOverview() {
       setSearchParams({});
     }
   }, [searchParams]);
+
+  // Show subscription popup when user lands on dashboard with active bot but no subscription
+  useEffect(() => {
+    if (!loading && widget?.is_active === true && (widget?.subscription_status === 'none' || !widget?.subscription_status)) {
+      // Small delay to let page load first
+      const timer = setTimeout(() => {
+        setShowSubscriptionPopup(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, widget?.is_active, widget?.subscription_status]);
 
   const handleSubscribe = async (billingPeriod: 'monthly' | 'yearly') => {
     if (!widget?.plan || !user?.email) {
@@ -290,36 +307,36 @@ export default function DashboardOverview() {
 
         {/* Subscription Activation Section */}
         {isActive && subscriptionStatus === 'none' && (
-          <div className="glass rounded-2xl p-6 md:p-8 animate-slide-up border border-success/30">
+          <div className="rounded-2xl p-6 md:p-8 animate-slide-up border-2 border-amber-400/50 bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-yellow-500/10 shadow-lg shadow-amber-500/10">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 md:w-14 md:h-14 bg-success/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-success" />
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
+                <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-amber-950" />
               </div>
               <div>
-                <h3 className="text-xl md:text-2xl font-bold text-foreground">Vaš chatbot je pripravljen!</h3>
-                <p className="text-muted-foreground text-sm md:text-base">Za aktivacijo izberite naročniški paket</p>
+                <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">Vaš chatbot je pripravljen!</h3>
+                <p className="text-amber-200/80 text-sm md:text-base">Za aktivacijo izberite naročniški paket</p>
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                className="w-full h-14 text-base font-bold bg-[#3b82f6] hover:bg-[#2563eb] text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+                className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
                 size="lg"
                 onClick={() => handleSubscribe('monthly')}
                 disabled={subscribing !== null}
               >
                 {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-                Mesečna naročnina
+                <span className="font-bold text-white">Mesečna naročnina</span>
               </Button>
               <Button 
-                className="w-full h-14 text-base font-bold bg-gradient-to-r from-success to-emerald-500 hover:from-success/90 hover:to-emerald-600 text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-emerald-500/25"
+                className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30"
                 size="lg"
                 onClick={() => handleSubscribe('yearly')}
                 disabled={subscribing !== null}
               >
-                {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-                <span className="font-bold">Letna naročnina</span>
-                <span className="ml-3 bg-amber-400/90 text-amber-950 px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
+                {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
+                <span className="font-bold text-amber-950">Letna naročnina</span>
+                <span className="ml-3 bg-blue-500 text-white px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
               </Button>
             </div>
           </div>
@@ -532,6 +549,21 @@ export default function DashboardOverview() {
           </div>
         </div>
       </div>
+
+      {/* Subscription Popup */}
+      <SubscriptionPopup
+        open={showSubscriptionPopup}
+        onOpenChange={setShowSubscriptionPopup}
+        onSubscribe={handleSubscribe}
+        subscribing={subscribing}
+      />
+
+      {/* Embed Code Popup after subscription */}
+      <EmbedCodePopup
+        open={showEmbedCodePopup}
+        onOpenChange={setShowEmbedCodePopup}
+        embedCode={embedCode}
+      />
     </DashboardLayout>
   );
 }
