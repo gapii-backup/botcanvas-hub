@@ -163,7 +163,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Dodaj funkcijo: {addonData.name}</DialogTitle>
             <DialogDescription>Dodajte funkcionalnost svoji naročnini</DialogDescription>
@@ -221,7 +221,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
       </Dialog>
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Potrditev nakupa</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4" asChild>

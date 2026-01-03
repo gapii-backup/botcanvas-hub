@@ -139,7 +139,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageCirclePlus className="h-5 w-5 text-amber-500" />
@@ -214,7 +214,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
       </Dialog>
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle>Potrditev nakupa</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4" asChild>
