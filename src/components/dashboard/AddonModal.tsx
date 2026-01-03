@@ -164,7 +164,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[70vh] sm:max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Dodaj funkcijo: {addonData.name}</DialogTitle>
             <DialogDescription>Dodajte funkcionalnost svoji naročnini</DialogDescription>
