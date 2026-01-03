@@ -216,54 +216,76 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
 
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
-          <AlertDialogHeader className="space-y-1">
-            <AlertDialogTitle className="text-base">Potrditev nakupa</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2" asChild>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Potrditev nakupa</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4" asChild>
               <div>
                 {selectedOption && (
-                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-                    <div className="font-semibold text-foreground">{selectedOption.name}</div>
-                    <div className="text-xl font-bold text-amber-500">
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+                    <div className="font-semibold text-foreground text-lg">{selectedOption.name}</div>
+                    <div className="text-2xl font-bold text-amber-500 mt-1">
                       €{selectedOption.price}
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{selectedOption.period}</span>
+                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                      <span className="text-sm text-muted-foreground font-normal">
+                        /{selectedOption.period}
+                      </span>
                     </div>
                   </div>
                 )}
 
                 {isYearly ? (
-                  <div className="bg-muted/50 rounded-lg p-3 text-xs">
-                    <p className="font-medium text-foreground mb-1">Zaračunavanje:</p>
-                    <p className="text-muted-foreground">Kapacitete se <strong className="text-foreground">vedno zaračunavajo MESEČNO</strong>.</p>
+                  /* Letna naročnina - kapacitete so vedno mesečne */
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+                    <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span>Kapacitete se <strong className="text-foreground">vedno zaračunavajo MESEČNO</strong> (ne letno), saj se dodatni pogovori obračunavajo mesečno.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">•</span>
+                        <span>Cena: <strong className="text-foreground">€{selectedOption?.price} +DDV/mesec</strong></span>
+                      </li>
+                    </ul>
                   </div>
                 ) : (
+                  /* Mesečna naročnina */
                   <>
-                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2.5 text-amber-200">
-                      <p className="font-medium text-amber-300 text-xs mb-1">⚡ Takojšnje plačilo</p>
-                      <p className="text-xs">Sorazmerni del cene bo zaračunan takoj iz vaše shranjene plačilne metode.</p>
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-amber-200">
+                      <p className="font-medium text-amber-300 mb-2">⚡ Takojšnje plačilo</p>
+                      <p className="text-sm">
+                        Sorazmerni del cene za obdobje do vašega naslednjega plačila bo zaračunan takoj iz vaše shranjene plačilne metode.
+                      </p>
                     </div>
 
-                    <div className="bg-muted/50 rounded-lg p-2.5 text-xs">
-                      <p className="font-medium text-foreground mb-1">Zaračunavanje:</p>
-                      <ul className="space-y-1 text-muted-foreground">
-                        <li>• <strong className="text-foreground">Danes:</strong> Sorazmerni del cene</li>
-                        <li>• <strong className="text-foreground">Naprej:</strong> €{selectedOption?.price} +DDV/mesec</li>
+                    <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
+                      <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
+                      <ul className="space-y-2 text-muted-foreground">
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-0.5">•</span>
+                          <span><strong className="text-foreground">Danes:</strong> Zaračuna se sorazmerni del cene (npr. če je do naslednjega plačila še pol obdobja, plačate pol cene)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-0.5">•</span>
+                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{selectedOption?.price} +DDV/mesec)</span>
+                        </li>
                       </ul>
                     </div>
                   </>
                 )}
 
-                <div className="flex items-center gap-2 text-amber-400 text-xs bg-amber-500/5 rounded-lg p-2">
+                <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/5 rounded-lg p-3">
                   <span>⚡</span>
-                  <span>Aktivacija <strong>TAKOJ</strong> po potrditvi.</span>
+                  <span>Kapaciteta bo aktivirana <strong>TAKOJ</strong> po potrditvi nakupa.</span>
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel className="h-9 text-sm">Prekliči</AlertDialogCancel>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel>Prekliči</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmAddon} 
-              className="bg-amber-500 hover:bg-amber-600 text-black h-9 text-sm"
+              className="bg-amber-500 hover:bg-amber-600 text-black"
             >
               Potrjujem nakup
             </AlertDialogAction>
