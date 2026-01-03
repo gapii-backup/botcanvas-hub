@@ -36,57 +36,57 @@ export function EmbedCodePopup({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
-            <Code className="w-8 h-8 text-white" />
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg mx-auto">
+        <DialogHeader className="text-center space-y-4 flex flex-col items-center">
+          <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <Code className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
           </div>
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-foreground">
+          <DialogTitle className="text-lg sm:text-2xl font-bold text-foreground text-center w-full">
             Naročnina aktivirana! 🎉
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm sm:text-base">
+          <DialogDescription className="text-muted-foreground text-xs sm:text-base text-center w-full">
             Kopirajte embed kodo in jo prilepite na vašo spletno stran
           </DialogDescription>
         </DialogHeader>
         
-        <div className="mt-4 space-y-4">
-          <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
-            <code className="text-xs sm:text-sm font-mono text-foreground break-all">
+        <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+          <div className="bg-muted/50 rounded-lg p-3 sm:p-4 border border-border/50">
+            <code className="text-[10px] sm:text-sm font-mono text-foreground break-all leading-relaxed">
               {embedCode}
             </code>
           </div>
           
           <div className="flex justify-center">
-            <Button onClick={copyEmbedCode} className="w-full sm:w-auto">
+            <Button onClick={copyEmbedCode} className="w-full sm:w-auto h-10 sm:h-11 text-sm">
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied ? 'Kopirano!' : 'Kopiraj kodo'}
             </Button>
           </div>
           
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 text-sm">
-            <p className="font-medium text-amber-500 mb-2">📍 Kam prilepiti kodo?</p>
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 sm:p-4 text-xs sm:text-sm">
+            <p className="font-medium text-amber-500 mb-1 sm:mb-2">📍 Kam prilepiti kodo?</p>
             <p className="text-muted-foreground">
               Kodo prilepite pred zaključni <code className="bg-muted px-1 rounded">&lt;/body&gt;</code> tag na vaši spletni strani.
             </p>
           </div>
           
-          <div className="bg-muted/30 rounded-lg p-4 text-sm">
-            <p className="text-muted-foreground mb-3">
+          <div className="bg-muted/30 rounded-lg p-3 sm:p-4 text-xs sm:text-sm">
+            <p className="text-muted-foreground mb-2 sm:mb-3">
               Embed koda bo vedno prikazana na dashboardu. Če potrebujete pomoč pri nastavitvi:
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
               <a 
                 href="mailto:info@botmotion.ai" 
-                className="flex items-center gap-2 text-primary hover:underline"
+                className="flex items-center gap-2 text-primary hover:underline text-xs sm:text-sm"
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 info@botmotion.ai
               </a>
               <a 
                 href="tel:+38641353600" 
-                className="flex items-center gap-2 text-primary hover:underline"
+                className="flex items-center gap-2 text-primary hover:underline text-xs sm:text-sm"
               >
-                <Phone className="h-4 w-4" />
+                <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 +386 41 353 600
               </a>
             </div>
