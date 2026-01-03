@@ -25,6 +25,7 @@ import { useConversations, type Message } from '@/hooks/useConversations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
+import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
@@ -296,6 +297,14 @@ export default function DashboardConversations() {
     return (
       <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
         <SetupPendingLock />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.subscription_status === 'cancelled') {
+    return (
+      <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
+        <AccountDeactivatedLock />
       </DashboardLayout>
     );
   }

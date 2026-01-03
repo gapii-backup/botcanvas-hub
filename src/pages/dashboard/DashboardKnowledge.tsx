@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
+import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { useWidget } from '@/hooks/useWidget';
 import { useKnowledgeQA, KnowledgeQA } from '@/hooks/useKnowledgeQA';
 import { useKnowledgeDocuments } from '@/hooks/useKnowledgeDocuments';
@@ -247,6 +248,14 @@ export default function DashboardKnowledge() {
     return (
       <DashboardLayout title="Baza znanja" subtitle="Upravljajte Q&A pare in dokumente za treniranje vašega bota">
         <SetupPendingLock />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.subscription_status === 'cancelled') {
+    return (
+      <DashboardLayout title="Baza znanja" subtitle="Upravljajte Q&A pare in dokumente za treniranje vašega bota">
+        <AccountDeactivatedLock />
       </DashboardLayout>
     );
   }

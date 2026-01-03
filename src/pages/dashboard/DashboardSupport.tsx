@@ -5,6 +5,7 @@ import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LockedFeature } from '@/components/dashboard/LockedFeature';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
+import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { useWidget } from '@/hooks/useWidget';
 import { useSupportTickets, SupportTicket } from '@/hooks/useSupportTickets';
 import { Button } from '@/components/ui/button';
@@ -154,6 +155,14 @@ export default function DashboardSupport() {
     return (
       <DashboardLayout title="Support Ticketi" subtitle="Pregled in upravljanje support zahtevkov">
         <SetupPendingLock />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.subscription_status === 'cancelled') {
+    return (
+      <DashboardLayout title="Support Ticketi" subtitle="Pregled in upravljanje support zahtevkov">
+        <AccountDeactivatedLock />
       </DashboardLayout>
     );
   }
