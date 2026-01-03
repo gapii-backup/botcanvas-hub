@@ -493,7 +493,8 @@ export default function DashboardOverview() {
         </div>
 
         {/* Embed Code Card */}
-        <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up max-w-2xl">
+        <div className="flex justify-center">
+          <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up w-full max-w-2xl">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Code className="h-5 w-5 text-primary" />
@@ -528,6 +529,7 @@ export default function DashboardOverview() {
               </p>
             </>
           )}
+          </div>
         </div>
       </div>
     </DashboardLayout>
