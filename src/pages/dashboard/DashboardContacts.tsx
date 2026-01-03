@@ -14,6 +14,7 @@ import {
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { LockedFeature } from '@/components/dashboard/LockedFeature';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
+import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { useWidget } from '@/hooks/useWidget';
 import { useLeads } from '@/hooks/useLeads';
 import { useConversations, type Message } from '@/hooks/useConversations';
@@ -300,6 +301,14 @@ export default function DashboardContacts() {
     return (
       <DashboardLayout title="Kontakti" subtitle="Zbrani kontakti iz pogovorov">
         <SetupPendingLock />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.subscription_status === 'cancelled') {
+    return (
+      <DashboardLayout title="Kontakti" subtitle="Zbrani kontakti iz pogovorov">
+        <AccountDeactivatedLock />
       </DashboardLayout>
     );
   }
