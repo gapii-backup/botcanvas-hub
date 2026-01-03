@@ -196,8 +196,9 @@ export function ImageUpload({
           onClick={() => setShowIconPicker(!showIconPicker)}
           className="flex-1"
         >
-          <Bot className="h-4 w-4 mr-2" />
-          Izberi ikono
+          <Bot className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Izberi ikono</span>
+          <span className="sm:hidden">Ikona</span>
         </Button>
         <Button
           type="button"
