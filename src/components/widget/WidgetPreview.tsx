@@ -74,9 +74,8 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
 
   return (
     <div 
-      className="rounded-2xl overflow-hidden w-full sm:w-[380px] h-[500px] sm:h-[640px]"
+      className="rounded-2xl overflow-hidden w-full max-w-[380px] h-[580px] sm:h-[640px]"
       style={{ 
-        maxWidth: '380px',
         backgroundColor: bgColor,
         boxShadow: '0 10px 60px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1)',
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
