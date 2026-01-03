@@ -74,7 +74,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
 
   return (
     <div 
-      className="rounded-2xl overflow-hidden w-full max-w-[300px] sm:max-w-[380px] h-[620px] sm:h-[640px]"
+      className="rounded-2xl overflow-hidden w-full max-w-[300px] sm:max-w-[380px] h-[650px] sm:h-[640px]"
       style={{ 
         backgroundColor: bgColor,
         boxShadow: '0 10px 60px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1)',
