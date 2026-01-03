@@ -24,28 +24,28 @@ export function SubscriptionPopup({
 }: SubscriptionPopupProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-2 border-amber-400/50 bg-gradient-to-br from-background via-background to-amber-500/5">
-        <DialogHeader className="text-center space-y-4">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md mx-auto rounded-2xl border-2 border-amber-400/50 bg-gradient-to-br from-background via-background to-amber-500/5">
+        <DialogHeader className="text-center space-y-4 flex flex-col items-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
             <Sparkles className="w-8 h-8 text-amber-950" />
           </div>
-          <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-white text-center w-full">
             Vaš chatbot je pripravljen!
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm sm:text-base">
+          <DialogDescription className="text-muted-foreground text-sm sm:text-base text-center w-full">
             Za aktivacijo izberite naročniški paket
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid grid-cols-1 gap-4 mt-6">
           <Button 
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
             size="lg"
             onClick={() => onSubscribe('monthly')}
             disabled={subscribing !== null}
           >
-            {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-            <span className="font-bold text-white">Mesečna naročnina</span>
+            {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
+            <span className="font-bold text-amber-950">Mesečna naročnina</span>
           </Button>
           <Button 
             className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30"
@@ -55,7 +55,7 @@ export function SubscriptionPopup({
           >
             {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
             <span className="font-bold text-amber-950">Letna naročnina</span>
-            <span className="ml-3 bg-blue-500 text-white px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
+            <span className="ml-3 bg-amber-600 text-amber-100 px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
           </Button>
         </div>
       </DialogContent>
