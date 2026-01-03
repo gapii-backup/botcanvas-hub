@@ -320,13 +320,13 @@ export default function DashboardOverview() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+                className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
                 size="lg"
                 onClick={() => handleSubscribe('monthly')}
                 disabled={subscribing !== null}
               >
-                {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
-                <span className="font-bold text-white">Mesečna naročnina</span>
+                {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
+                <span className="font-bold text-amber-950">Mesečna naročnina</span>
               </Button>
               <Button 
                 className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30"
@@ -336,7 +336,7 @@ export default function DashboardOverview() {
               >
                 {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
                 <span className="font-bold text-amber-950">Letna naročnina</span>
-                <span className="ml-3 bg-blue-500 text-white px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
+                <span className="ml-3 bg-amber-600 text-amber-100 px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
               </Button>
             </div>
           </div>
