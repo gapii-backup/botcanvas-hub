@@ -365,16 +365,18 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
 
             {/* Header Info */}
             <div style={{ flex: 1, textAlign: 'left' }}>
-              <h3 style={{ color: 'white', fontSize: '16px', fontWeight: 600, margin: 0 }}>
+              <h3 className="text-[13px] sm:text-[16px]" style={{ color: 'white', fontWeight: 600, margin: 0 }}>
                 {config.name || 'AI Asistent'}
               </h3>
-              <span style={{ 
-                color: 'rgba(255, 255, 255, 0.9)', 
-                fontSize: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
+              <span 
+                className="text-[10px] sm:text-[12px]"
+                style={{ 
+                  color: 'rgba(255, 255, 255, 0.9)', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
                 <span style={{ 
                   width: '8px', 
                   height: '8px', 
@@ -432,11 +434,11 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 </div>
                 <div style={{ maxWidth: '80%' }}>
                   <div 
+                    className="text-[11px] sm:text-[14px]"
                     style={{ 
-                      padding: '12px 16px',
+                      padding: '10px 14px',
                       borderRadius: '18px',
                       borderBottomLeftRadius: '6px',
-                      fontSize: '14px',
                       lineHeight: 1.5,
                       background: bgSecondary,
                       color: textColor
@@ -444,7 +446,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                   >
                     Zdravo! Kako vam lahko pomagam?
                   </div>
-                  <div style={{ fontSize: '11px', color: textMuted, marginTop: '4px' }}>
+                  <div className="text-[9px] sm:text-[11px]" style={{ color: textMuted, marginTop: '4px' }}>
                     14:32
                   </div>
                 </div>
@@ -454,11 +456,11 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <div style={{ maxWidth: '80%', textAlign: 'right' }}>
                   <div 
+                    className="text-[11px] sm:text-[14px]"
                     style={{ 
-                      padding: '12px 16px',
+                      padding: '10px 14px',
                       borderRadius: '18px',
                       borderBottomRightRadius: '6px',
-                      fontSize: '14px',
                       lineHeight: 1.5,
                       background: config.primaryColor,
                       color: 'white'
@@ -466,7 +468,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                   >
                     Kaj ponujate?
                   </div>
-                  <div style={{ fontSize: '11px', color: textMuted, marginTop: '4px' }}>
+                  <div className="text-[9px] sm:text-[11px]" style={{ color: textMuted, marginTop: '4px' }}>
                     14:32
                   </div>
                 </div>
@@ -484,15 +486,17 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
             flexShrink: 0,
             alignItems: 'center'
           }}>
-            <div style={{ 
-              flex: 1,
-              padding: '12px 18px',
-              background: bgSecondary,
-              border: `1px solid ${borderColor}`,
-              borderRadius: '24px',
-              color: textMuted,
-              fontSize: '14px'
-            }}>
+            <div 
+              className="text-[11px] sm:text-[14px]"
+              style={{ 
+                flex: 1,
+                padding: '10px 14px',
+                background: bgSecondary,
+                border: `1px solid ${borderColor}`,
+                borderRadius: '24px',
+                color: textMuted
+              }}
+            >
               Napišite vprašanje...
             </div>
             <div 
