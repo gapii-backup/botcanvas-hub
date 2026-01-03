@@ -183,7 +183,7 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl max-h-[70vh] sm:max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nadgradi na Pro ali Enterprise</DialogTitle>
             <DialogDescription>Ta funkcionalnost je na voljo v Pro in Enterprise paketu</DialogDescription>
