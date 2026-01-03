@@ -180,38 +180,42 @@ export default function DashboardSubscription() {
                 <p className="text-sm text-muted-foreground mb-1">Trenutni paket</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold text-foreground">
-                    {planNames[currentPlan] || 'Basic'}
+                    {normalizedSubscriptionStatus === 'cancelled' ? 'Neaktivno' : (planNames[currentPlan] || 'Basic')}
                   </span>
-                  {isCanceling ? (
-                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
-                      V preklicu
-                    </Badge>
-                  ) : widget?.is_active === false ? (
-                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
-                      Neaktiven
-                    </Badge>
-                  ) : isActive ? (
-                    <Badge className="bg-green-500/20 text-green-500 border border-green-500/30">
-                      Aktiven
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
-                      Neaktiven
-                    </Badge>
+                  {normalizedSubscriptionStatus !== 'cancelled' && (
+                    isCanceling ? (
+                      <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                        V preklicu
+                      </Badge>
+                    ) : widget?.is_active === false ? (
+                      <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                        Neaktiven
+                      </Badge>
+                    ) : isActive ? (
+                      <Badge className="bg-green-500/20 text-green-500 border border-green-500/30">
+                        Aktiven
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-red-500/20 text-red-500 border border-red-500/30">
+                        Neaktiven
+                      </Badge>
+                    )
                   )}
                 </div>
               </div>
               <div className="bg-muted/30 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground mb-1">Billing period</p>
                 <span className="text-xl font-bold text-foreground">
-                  {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
+                  {normalizedSubscriptionStatus === 'cancelled' ? '—' : (billingPeriod === 'monthly' ? 'Mesečno' : 'Letno')}
                 </span>
               </div>
 
               {/* Aktivni dodatki */}
               <div className="bg-muted/30 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground mb-3">Aktivni dodatki</p>
-                {activeAddonIds.length > 0 ? (
+                {normalizedSubscriptionStatus === 'cancelled' ? (
+                  <p className="text-sm text-muted-foreground/70">—</p>
+                ) : activeAddonIds.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {activeAddonIds.map(addonId => (
                       <Badge 
