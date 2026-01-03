@@ -56,7 +56,8 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
 
   const handleOptionClick = (option: CapacityOption) => {
     setSelectedOption(option);
-    setShowConfirmDialog(true);
+    onOpenChange(false); // Close main dialog first
+    setTimeout(() => setShowConfirmDialog(true), 150); // Then open confirmation
   };
 
   const handleConfirmAddon = async () => {
