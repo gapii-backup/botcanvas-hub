@@ -24,7 +24,7 @@ export function SubscriptionPopup({
 }: SubscriptionPopupProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md mx-auto rounded-2xl border-2 border-amber-400/50 bg-gradient-to-br from-background via-background to-amber-500/5">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md mx-auto border-2 border-amber-400/50 bg-gradient-to-br from-background via-background to-amber-500/5">
         <DialogHeader className="text-center space-y-4 flex flex-col items-center">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
             <Sparkles className="w-8 h-8 text-amber-950" />

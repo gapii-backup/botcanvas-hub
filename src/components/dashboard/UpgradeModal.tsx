@@ -173,7 +173,8 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
     
     setSelectedPlan(planId);
     setIsDowngrade(isDowngrading);
-    setShowConfirmDialog(true);
+    onOpenChange(false); // Close main dialog first
+    setTimeout(() => setShowConfirmDialog(true), 150); // Then open confirmation
   };
 
   const handleConfirmChange = async () => {
