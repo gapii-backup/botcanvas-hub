@@ -184,20 +184,20 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Nadgradi na Pro ali Enterprise</DialogTitle>
-            <DialogDescription>Ta funkcionalnost je na voljo v Pro in Enterprise paketu</DialogDescription>
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-base sm:text-lg">Nadgradi na Pro ali Enterprise</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">Ta funkcionalnost je na voljo v Pro in Enterprise paketu</DialogDescription>
           </DialogHeader>
 
-          <div className="bg-muted/50 border border-border rounded-lg p-3 text-sm text-muted-foreground">
-            Ob spremembi paketa boste preusmerjeni na varno Stripe plačilno stran. Trenutna naročnina bo preklicana in nova aktivirana po uspešnem plačilu.
+          <div className="bg-muted/50 border border-border rounded-lg p-2.5 text-xs text-muted-foreground">
+            Ob spremembi paketa boste preusmerjeni na varno Stripe plačilno stran.
           </div>
 
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4">
             <div className="inline-flex rounded-lg bg-muted p-1">
               <button
                 onClick={() => setBillingPeriod('monthly')}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                   billingPeriod === 'monthly'
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -207,21 +207,21 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
               </button>
               <button
                 onClick={() => setBillingPeriod('yearly')}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 ${
                   billingPeriod === 'yearly'
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Letno
-                <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
+                <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-[10px] px-1.5 py-0">
                   -20%
                 </Badge>
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {plans.map(plan => {
               const prices = planPrices[plan.id as keyof typeof planPrices];
               const price = billingPeriod === 'monthly' ? prices.monthly : prices.yearly;
@@ -235,43 +235,43 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
               return (
                 <div
                   key={plan.id}
-                  className={`border rounded-xl p-5 bg-card relative flex flex-col ${
+                  className={`border rounded-xl p-4 bg-card relative flex flex-col ${
                     isExact ? 'border-primary ring-2 ring-primary/20' : 'border-border'
                   }`}
                 >
                   {isExact && (
-                    <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
+                    <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-2 py-0.5">
                       Trenutni paket
                     </Badge>
                   )}
                   
-                  <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
-                  <div className="text-2xl font-bold my-2 text-foreground">
+                  <h3 className="text-base font-bold text-foreground">{plan.name}</h3>
+                  <div className="text-xl font-bold my-1.5 text-foreground">
                     €{price}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
-                    <span className="text-sm text-muted-foreground font-normal">
+                    <span className="text-[10px] text-muted-foreground/70 ml-1">+DDV</span>
+                    <span className="text-xs text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
                   </div>
                   {billingPeriod === 'yearly' ? (
-                    <div className="text-xs text-green-500 font-medium mb-3">
+                    <div className="text-[10px] text-green-500 font-medium mb-2">
                       Prihranite €{savings}/leto
                     </div>
                   ) : (
-                    <div className="mb-3 h-4" />
+                    <div className="mb-2 h-3" />
                   )}
                   
-                  <ul className="space-y-2.5 mb-4 flex-grow">
+                  <ul className="space-y-1.5 mb-3 flex-grow">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-foreground leading-relaxed">{feature}</span>
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-xs text-foreground leading-relaxed">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   
                   <Button
-                    className={`w-full mt-auto ${
+                    className={`w-full mt-auto h-9 text-sm ${
                       buttonState.variant === 'default' 
                         ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25' 
                         : ''
@@ -294,16 +294,13 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
 
       <AlertDialog open={showConfirmDialog && !isDowngrade} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Potrditev nadgradnje paketa</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3" asChild>
+          <AlertDialogHeader className="space-y-1">
+            <AlertDialogTitle className="text-base">Potrditev nadgradnje</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2" asChild>
               <div>
-                <p>
-                  Želite nadgraditi na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
-                </p>
-                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                <div className="bg-muted rounded-lg p-3 space-y-1.5 text-xs">
                   <div className="flex justify-between">
-                    <span>Trenutni paket:</span>
+                    <span>Trenutni:</span>
                     <span>{currentPlanName}</span>
                   </div>
                   <div className="flex justify-between">
@@ -311,46 +308,33 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                     <span className="font-semibold text-green-500">{getSelectedPlanName()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span>Cena:</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mes' : 'leto'}</span>
                   </div>
                 </div>
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
-                  <p className="text-amber-500 font-semibold mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2.5 text-xs">
+                  <p className="text-amber-500 font-semibold mb-1 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
                     Pomembno:
                   </p>
-                  <ul className="text-muted-foreground space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Vaša trenutna naročnina bo preklicana</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Vse aktivne funkcije bodo odstranjene</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Nov paket bo aktiviran v roku 72 ur</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Vaš chatbot bo med pripravljalnim obdobjem ostal AKTIVEN</span>
-                    </li>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    <li>• Trenutna naročnina bo preklicana</li>
+                    <li>• Nov paket aktiviran v 72 urah</li>
+                    <li>• Chatbot ostane aktiven</li>
                   </ul>
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
+          <AlertDialogFooter className="mt-2">
+            <AlertDialogCancel disabled={loading} className="h-9 text-sm">Prekliči</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmChange}
               disabled={loading}
-              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25"
+              className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 h-9 text-sm"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Potrjujem upgrade
+              Potrjujem
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -358,16 +342,13 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
 
       <AlertDialog open={showConfirmDialog && isDowngrade} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Potrditev downgrada paketa</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3" asChild>
+          <AlertDialogHeader className="space-y-1">
+            <AlertDialogTitle className="text-base">Potrditev downgrada</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2" asChild>
               <div>
-                <p>
-                  Želite downgradi na <strong className="text-foreground">{getSelectedPlanName()}</strong> paket?
-                </p>
-                <div className="bg-muted rounded-lg p-4 space-y-2 text-sm">
+                <div className="bg-muted rounded-lg p-3 space-y-1.5 text-xs">
                   <div className="flex justify-between">
-                    <span>Trenutni paket:</span>
+                    <span>Trenutni:</span>
                     <span>{currentPlanName}</span>
                   </div>
                   <div className="flex justify-between">
@@ -375,46 +356,33 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                     <span className="font-semibold text-orange-500">{getSelectedPlanName()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span>Cena:</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mes' : 'leto'}</span>
                   </div>
                 </div>
-                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
-                  <p className="text-destructive font-semibold mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-2.5 text-xs">
+                  <p className="text-destructive font-semibold mb-1 flex items-center gap-1.5">
+                    <AlertTriangle className="w-3.5 h-3.5" />
                     Opozorilo:
                   </p>
-                  <ul className="text-muted-foreground space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-destructive mt-0.5">•</span>
-                      <span>Izgubili boste dostop do funkcionalnosti višjega paketa</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-destructive mt-0.5">•</span>
-                      <span>Vse aktivne funkcije bodo odstranjene</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-destructive mt-0.5">•</span>
-                      <span>Sprememba bo aktivirana v roku 72 ur</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-destructive mt-0.5">•</span>
-                      <span>Sredstev ne vračamo</span>
-                    </li>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    <li>• Izgubite višje funkcionalnosti</li>
+                    <li>• Aktivacija v 72 urah</li>
+                    <li>• Sredstev ne vračamo</li>
                   </ul>
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={loading}>Prekliči</AlertDialogCancel>
+          <AlertDialogFooter className="mt-2">
+            <AlertDialogCancel disabled={loading} className="h-9 text-sm">Prekliči</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmChange}
               disabled={loading}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-orange-600 hover:bg-orange-700 h-9 text-sm"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-              Potrjujem downgrade
+              Potrjujem
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
