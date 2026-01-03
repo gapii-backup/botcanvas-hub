@@ -257,24 +257,28 @@ export default function DashboardOverview() {
                   <h2 className="text-xl font-semibold text-foreground">{widget?.bot_name || 'Moj Chatbot'}</h2>
                   <span className={cn(
                     "px-2 py-0.5 rounded-full text-xs font-medium",
-                    isCanceling 
+                    normalizedSubscriptionStatus === 'cancelled'
                       ? "bg-red-500/20 text-red-500"
-                      : subscriptionStatus === 'active' 
-                        ? "bg-success/20 text-success" 
-                        : "bg-muted text-muted-foreground"
+                      : isCanceling 
+                        ? "bg-red-500/20 text-red-500"
+                        : subscriptionStatus === 'active' 
+                          ? "bg-success/20 text-success" 
+                          : "bg-muted text-muted-foreground"
                   )}>
                     <span className={cn(
                       "inline-block w-1.5 h-1.5 rounded-full mr-1",
-                      isCanceling 
+                      normalizedSubscriptionStatus === 'cancelled'
                         ? "bg-red-500"
-                        : subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
+                        : isCanceling 
+                          ? "bg-red-500"
+                          : subscriptionStatus === 'active' ? "bg-success" : "bg-muted-foreground"
                     )} />
-                    {isCanceling ? 'V preklicu' : widget?.is_active === false ? 'Neaktiven' : subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
+                    {normalizedSubscriptionStatus === 'cancelled' ? 'Neaktivno' : isCanceling ? 'V preklicu' : widget?.is_active === false ? 'Neaktiven' : subscriptionStatus === 'active' ? 'Aktiven' : 'Neaktiven'}
                   </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {plan ? `${planNames[plan]} paket` : 'Brez paketa'} 
-                  {widget?.billing_period && ` • ${widget.billing_period === 'yearly' ? 'Letno' : 'Mesečno'}`}
+                  {normalizedSubscriptionStatus === 'cancelled' ? '' : plan ? `${planNames[plan]} paket` : 'Brez paketa'} 
+                  {normalizedSubscriptionStatus !== 'cancelled' && widget?.billing_period && ` • ${widget.billing_period === 'yearly' ? 'Letno' : 'Mesečno'}`}
                 </p>
               </div>
             </div>

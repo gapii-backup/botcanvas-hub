@@ -192,6 +192,10 @@ export default function DashboardUpgrade() {
     );
   }
 
+  const subscriptionStatus = widget?.subscription_status || 'none';
+  const normalizedSubscriptionStatus = String(subscriptionStatus).toLowerCase();
+  const isCancelled = normalizedSubscriptionStatus === 'cancelled';
+
   const currentPlan = widget?.plan || 'basic';
   const billingPeriod = widget?.billing_period || 'monthly';
   const activeAddonIds = (widget?.addons as string[]) || [];
@@ -412,36 +416,48 @@ export default function DashboardUpgrade() {
                       ))}
                     </ul>
                     
-                    {isExactCurrentPlan && (
-                      <Button
-                        className="w-full border-amber-500/30 text-amber-500 mt-auto"
-                        size="sm"
-                        variant="outline"
-                        disabled
-                      >
-                        Trenutni paket
-                      </Button>
-                    )}
-                    {!isExactCurrentPlan && isUpgrade && (
+                    {isCancelled ? (
                       <Button
                         onClick={() => openConfirmDialog(planId, false)}
                         className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25 mt-auto"
                         size="sm"
                       >
-                        <ArrowUpCircle className="h-4 w-4" />
-                        Upgrade
+                        Kupi
                       </Button>
-                    )}
-                    {!isExactCurrentPlan && isDowngrade && (
-                      <Button
-                        onClick={() => openConfirmDialog(planId, true)}
-                        className="w-full gap-2 mt-auto"
-                        size="sm"
-                        variant="secondary"
-                      >
-                        <ArrowDownCircle className="h-4 w-4" />
-                        Downgrade
-                      </Button>
+                    ) : (
+                      <>
+                        {isExactCurrentPlan && (
+                          <Button
+                            className="w-full border-amber-500/30 text-amber-500 mt-auto"
+                            size="sm"
+                            variant="outline"
+                            disabled
+                          >
+                            Trenutni paket
+                          </Button>
+                        )}
+                        {!isExactCurrentPlan && isUpgrade && (
+                          <Button
+                            onClick={() => openConfirmDialog(planId, false)}
+                            className="w-full gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 shadow-lg shadow-amber-500/25 mt-auto"
+                            size="sm"
+                          >
+                            <ArrowUpCircle className="h-4 w-4" />
+                            Upgrade
+                          </Button>
+                        )}
+                        {!isExactCurrentPlan && isDowngrade && (
+                          <Button
+                            onClick={() => openConfirmDialog(planId, true)}
+                            className="w-full gap-2 mt-auto"
+                            size="sm"
+                            variant="secondary"
+                          >
+                            <ArrowDownCircle className="h-4 w-4" />
+                            Downgrade
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 );
@@ -450,119 +466,121 @@ export default function DashboardUpgrade() {
           </CardContent>
         </Card>
 
-        {/* DODATNE FUNKCIJE */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-primary" />
-              Dodatne funkcije
-            </CardTitle>
-            <CardDescription>Dodajte dodatne funkcionalnosti vašemu chatbotu</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Vse funkcije - gumbi */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-4">Razpoložljive funkcije</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {(allAddons[billingPeriod] || allAddons.monthly)
-                  .filter(addon => {
-                    const isPro = currentPlan === 'pro';
-                    const isEnterprise = currentPlan === 'enterprise';
-                    
-                    // Enterprise: only capacities
-                    if (isEnterprise) {
-                      return addon.id.startsWith('capacity_');
-                    }
-                    
-                    // Pro: capacities, booking, product_ai
-                    if (isPro) {
-                      const proAvailableAddons = ['booking', 'product_ai'];
-                      return addon.id.startsWith('capacity_') || proAvailableAddons.includes(addon.id);
-                    }
-                    
-                    // Basic: hide booking (proOnly), show everything else
-                    if (addon.proOnly) return false;
-                    
-                    return true;
-                  })
-                  .map(addon => {
-                  const isActive = activeAddonIds.includes(addon.id);
-                  const IconComponent = addon.icon;
-                  
-                  return (
-                    <button
-                      key={addon.id}
-                      onClick={() => !isActive && openAddonModal(addon.id)}
-                      disabled={isActive}
-                      className={`
-                        flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 w-full
-                        ${isActive 
-                          ? 'border-green-500 bg-green-500/10 cursor-default' 
-                          : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
-                        }
-                      `}
-                    >
-                      <div className={`p-2 rounded-lg ${isActive ? 'bg-green-500/20' : 'bg-muted'}`}>
-                        {isActive ? (
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                        ) : (
-                          <IconComponent className="w-5 h-5 text-muted-foreground" />
-                        )}
-                      </div>
-                      <span className={`text-sm font-medium text-center ${isActive ? 'text-green-500' : 'text-foreground'}`}>
-                        {addon.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        €{addon.price}/{addon.period}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Aktivne funkcije */}
-            {activeAddons.length > 0 && (
+        {/* DODATNE FUNKCIJE - skrito ko je cancelled */}
+        {!isCancelled && (
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />
+                Dodatne funkcije
+              </CardTitle>
+              <CardDescription>Dodajte dodatne funkcionalnosti vašemu chatbotu</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Vse funkcije - gumbi */}
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Aktivne funkcije</h4>
-                <div className="space-y-2">
-                  {activeAddons.map(addon => {
+                <h4 className="text-sm font-semibold text-foreground mb-4">Razpoložljive funkcije</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {(allAddons[billingPeriod] || allAddons.monthly)
+                    .filter(addon => {
+                      const isPro = currentPlan === 'pro';
+                      const isEnterprise = currentPlan === 'enterprise';
+                      
+                      // Enterprise: only capacities
+                      if (isEnterprise) {
+                        return addon.id.startsWith('capacity_');
+                      }
+                      
+                      // Pro: capacities, booking, product_ai
+                      if (isPro) {
+                        const proAvailableAddons = ['booking', 'product_ai'];
+                        return addon.id.startsWith('capacity_') || proAvailableAddons.includes(addon.id);
+                      }
+                      
+                      // Basic: hide booking (proOnly), show everything else
+                      if (addon.proOnly) return false;
+                      
+                      return true;
+                    })
+                    .map(addon => {
+                    const isActive = activeAddonIds.includes(addon.id);
                     const IconComponent = addon.icon;
+                    
                     return (
-                      <div
+                      <button
                         key={addon.id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-green-500/30 bg-green-500/5"
+                        onClick={() => !isActive && openAddonModal(addon.id)}
+                        disabled={isActive}
+                        className={`
+                          flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 w-full
+                          ${isActive 
+                            ? 'border-green-500 bg-green-500/10 cursor-default' 
+                            : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
+                          }
+                        `}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-green-500/20">
-                            <IconComponent className="w-4 h-4 text-green-500" />
-                          </div>
-                          <div>
-                            <span className="font-medium text-foreground">{addon.name}</span>
-                            <div className="text-sm text-muted-foreground">
-                              €{addon.price}
-                              <span className="text-xs ml-1">+DDV</span>
-                              /{addon.period}
-                            </div>
-                          </div>
+                        <div className={`p-2 rounded-lg ${isActive ? 'bg-green-500/20' : 'bg-muted'}`}>
+                          {isActive ? (
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <IconComponent className="w-5 h-5 text-muted-foreground" />
+                          )}
                         </div>
-                        <Button
-                          onClick={() => setCancelAddonDialog(addon.id)}
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <X className="h-3 w-3" />
-                          Odstrani
-                        </Button>
-                      </div>
+                        <span className={`text-sm font-medium text-center ${isActive ? 'text-green-500' : 'text-foreground'}`}>
+                          {addon.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          €{addon.price}/{addon.period}
+                        </span>
+                      </button>
                     );
                   })}
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Aktivne funkcije */}
+              {activeAddons.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-semibold text-foreground mb-3">Aktivne funkcije</h4>
+                  <div className="space-y-2">
+                    {activeAddons.map(addon => {
+                      const IconComponent = addon.icon;
+                      return (
+                        <div
+                          key={addon.id}
+                          className="flex items-center justify-between p-3 rounded-lg border border-green-500/30 bg-green-500/5"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-green-500/20">
+                              <IconComponent className="w-4 h-4 text-green-500" />
+                            </div>
+                            <div>
+                              <span className="font-medium text-foreground">{addon.name}</span>
+                              <div className="text-sm text-muted-foreground">
+                                €{addon.price}
+                                <span className="text-xs ml-1">+DDV</span>
+                                /{addon.period}
+                              </div>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => setCancelAddonDialog(addon.id)}
+                            size="sm"
+                            variant="ghost"
+                            className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <X className="h-3 w-3" />
+                            Odstrani
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Addon Modal */}
