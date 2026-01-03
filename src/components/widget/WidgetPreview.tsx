@@ -72,15 +72,26 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
 
   const headerTextColor = config.headerStyle === 'solid' ? '#ffffff' : textColor;
 
+  // Mobile text scale factor (80% = 20% smaller)
+  const mobileScale = 0.8;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+  
+  // Helper function for responsive font sizes
+  const getFontSize = (desktopSize: number) => {
+    return isMobile ? Math.round(desktopSize * mobileScale) : desktopSize;
+  };
+
   return (
     <div 
-      className="rounded-2xl overflow-hidden w-full max-w-[300px] sm:max-w-[380px] h-[650px] sm:h-[640px]"
+      className="rounded-2xl overflow-hidden w-full max-w-[300px] sm:max-w-[380px] h-[650px] sm:h-[640px] widget-preview-container"
       style={{ 
         backgroundColor: bgColor,
         boxShadow: '0 10px 60px rgba(0, 0, 0, 0.15), 0 4px 20px rgba(0, 0, 0, 0.1)',
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         display: 'flex',
         flexDirection: 'column',
+        // CSS custom property for mobile scaling
+        ['--mobile-scale' as string]: mobileScale,
       }}
     >
       {/* Home View */}
@@ -147,19 +158,21 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
             </div>
 
             {/* Title */}
-            <h2 style={{ 
-              color: headerTextColor,
-              fontSize: '28px',
-              fontWeight: 700,
-              margin: 0,
-              lineHeight: 1.25,
-              letterSpacing: '-0.5px',
-              textShadow: config.headerStyle === 'solid' ? '0 2px 4px rgba(0, 0, 0, 0.15)' : 'none'
-            }}>
-              <span style={{ display: 'block', fontSize: '32px', marginBottom: '4px' }}>
+            <h2 
+              className="text-[22px] sm:text-[28px]"
+              style={{ 
+                color: headerTextColor,
+                fontWeight: 700,
+                margin: 0,
+                lineHeight: 1.25,
+                letterSpacing: '-0.5px',
+                textShadow: config.headerStyle === 'solid' ? '0 2px 4px rgba(0, 0, 0, 0.15)' : 'none'
+              }}
+            >
+              <span className="block text-[26px] sm:text-[32px] mb-1">
                 {config.homeTitle || 'Pozdravljeni!'}
               </span>
-              <span style={{ display: 'block', fontWeight: 600, opacity: 0.95 }}>
+              <span className="block font-semibold opacity-95">
                 {config.homeSubtitle || 'Kako vam lahko pomagam?'}
               </span>
             </h2>
@@ -174,18 +187,20 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
             alignItems: 'center'
           }}>
             {/* Quick Label */}
-            <div style={{ 
-              fontSize: '11px',
-              fontWeight: 600,
-              color: textMuted,
-              textTransform: 'uppercase',
-              letterSpacing: '1.5px',
-              marginBottom: '12px',
-              textAlign: 'center',
-              background: bgColor,
-              padding: '8px 16px',
-              borderRadius: '20px'
-            }}>
+            <div 
+              className="text-[9px] sm:text-[11px]"
+              style={{ 
+                fontWeight: 600,
+                color: textMuted,
+                textTransform: 'uppercase',
+                letterSpacing: '1.5px',
+                marginBottom: '12px',
+                textAlign: 'center',
+                background: bgColor,
+                padding: '8px 16px',
+                borderRadius: '20px'
+              }}
+            >
               Pogosta vprašanja
             </div>
 
@@ -194,17 +209,17 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
               {config.quickQuestions.slice(0, 4).map((q, i) => (
                 <button
                   key={i}
+                  className="text-[11px] sm:text-[14px]"
                   style={{ 
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     width: '100%',
-                    padding: '14px 16px',
+                    padding: '12px 14px',
                     background: bgSecondary,
                     border: `1px solid ${borderColor}`,
                     borderRadius: '12px',
                     color: textColor,
-                    fontSize: '14px',
                     fontWeight: 500,
                     cursor: 'pointer',
                     textAlign: 'left'
@@ -219,7 +234,7 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                     }} />
                     <span>{q}</span>
                   </div>
-                  <ChevronRight size={16} color={textMuted} />
+                  <ChevronRight size={14} className="sm:w-4 sm:h-4" color={textMuted} />
                 </button>
               ))}
             </div>
@@ -237,18 +252,18 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 padding: '0 20px 8px',
                 background: config.headerStyle === 'solid' ? config.primaryColor : 'transparent'
               }}>
-                <input
+              <input
                   type="email"
                   placeholder="Email (opcijsko)"
                   readOnly
+                  className="text-[11px] sm:text-[14px]"
                   style={{ 
                     width: '100%',
-                    padding: '14px 16px',
+                    padding: '12px 14px',
                     background: bgSecondary,
                     border: `1px solid ${borderColor}`,
                     borderRadius: '12px',
-                    color: textColor,
-                    fontSize: '14px'
+                    color: textColor
                   }}
                 />
               </div>
@@ -265,15 +280,17 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 background: bgColor,
                 border: `2px solid ${config.primaryColor}`,
                 borderRadius: '24px',
-                padding: '6px 6px 6px 20px',
+                padding: '6px 6px 6px 16px',
                 boxShadow: `0 4px 20px ${hexToRgba(config.primaryColor, 0.25)}`
               }}>
-                <span style={{ 
-                  flex: 1, 
-                  fontSize: '15px', 
-                  color: config.darkMode ? '#666666' : '#555555',
-                  padding: '10px 0'
-                }}>
+                <span 
+                  className="text-[12px] sm:text-[15px]"
+                  style={{ 
+                    flex: 1, 
+                    color: config.darkMode ? '#666666' : '#555555',
+                    padding: '8px 0'
+                  }}
+                >
                   Napišite vprašanje...
                 </span>
                 <div 
