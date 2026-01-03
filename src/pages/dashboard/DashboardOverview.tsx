@@ -326,7 +326,7 @@ export default function DashboardOverview() {
         )}
 
         {/* Setup Pending Banner */}
-        {widget?.status === 'setup_paid' && (
+        {widget?.status === 'setup_paid' && widget?.is_active === false && (
           <div className="glass rounded-2xl p-6 animate-slide-up border border-amber-500/30 bg-amber-500/5">
             <div className="flex items-center gap-4">
               <div className="h-14 w-14 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
