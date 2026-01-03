@@ -79,7 +79,8 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
   }
 
   const handleAddonClick = () => {
-    setShowConfirmDialog(true);
+    onOpenChange(false); // Close main dialog first
+    setTimeout(() => setShowConfirmDialog(true), 150); // Then open confirmation
   };
 
   const handleConfirmAddon = async () => {
