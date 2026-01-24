@@ -230,7 +230,17 @@ export default function Login() {
   `;
 
   return (
-    <div className="min-h-screen flex bg-[#050505]">
+    <div className="min-h-screen flex bg-[#050505] relative">
+      {/* Desktop: Logo in top-left corner of page */}
+      <a href="https://botmotion.ai/" className="hidden md:block absolute top-6 left-6 z-50">
+        <img 
+          src={logoInline}
+          alt="BotMotion.ai" 
+          className="h-10" 
+          style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
+        />
+      </a>
+      
       {/* Left side - Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div 
@@ -238,16 +248,6 @@ export default function Login() {
         >
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
-          
-          {/* Desktop: Logo in top-left corner */}
-          <a href="https://botmotion.ai/" className="hidden md:block absolute top-6 left-6 z-20">
-            <img 
-              src={logoInline}
-              alt="BotMotion.ai" 
-              className="h-10" 
-              style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
-            />
-          </a>
           
           <div className="relative z-10 space-y-6 md:space-y-8">
             <div className="text-center">
