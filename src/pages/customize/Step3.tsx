@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+
 import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessageSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
 import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
@@ -42,14 +42,14 @@ export default function Step3() {
     }>
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Bubble & pozicija</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Gumb za odpiranje</h2>
           <p className="text-muted-foreground">Prilagodite gumb za odpiranje chata.</p>
         </div>
 
         {/* Show bubble */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label>Prikaži welcome bubble</Label>
+            <Label>Prikaži mehurček</Label>
             <p className="text-xs text-muted-foreground">
               Pokaži mehurček z dobrodošlico
             </p>
@@ -170,24 +170,6 @@ export default function Step3() {
             />
           </div>
         )}
-
-        {/* Vertical offset */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Odmik od spodaj</Label>
-              <p className="text-xs text-muted-foreground">Priporočeno 24px</p>
-            </div>
-            <span className="text-sm text-muted-foreground">{config.verticalOffset}px</span>
-          </div>
-          <Slider
-            value={[config.verticalOffset]}
-            onValueChange={([value]) => setConfig({ verticalOffset: value })}
-            min={0}
-            max={100}
-            step={4}
-          />
-        </div>
 
         {/* Navigation */}
         <div className="pt-4 flex justify-between">
