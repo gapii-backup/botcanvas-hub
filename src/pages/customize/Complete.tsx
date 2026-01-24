@@ -72,8 +72,8 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     icon: Users,
     items: [
       { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336, proOnly: true },
-      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 15, yearlyPrice: 144 },
-      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 50, yearlyPrice: 480 },
+      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 20, yearlyPrice: 192 },
+      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 80, yearlyPrice: 768 },
     ],
   },
   support: {
@@ -104,7 +104,7 @@ const PLAN_NAMES: Record<string, string> = {
 // Plan pricing data
 const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; setupFee: number }> = {
   basic: { monthlyPrice: 49.99, yearlyPrice: 479.99, setupFee: 80 },
-  pro: { monthlyPrice: 119.99, yearlyPrice: 1149.99, setupFee: 140 },
+  pro: { monthlyPrice: 129.99, yearlyPrice: 1249.99, setupFee: 140 },
   enterprise: { monthlyPrice: 299.99, yearlyPrice: 2879.99, setupFee: 320 },
 };
 

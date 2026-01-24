@@ -31,7 +31,7 @@ interface UpgradeModalProps {
 
 const planPrices = {
   basic: { monthly: 49.99, yearly: 479.99, name: 'Basic' },
-  pro: { monthly: 119.99, yearly: 1149.99, name: 'Pro' },
+  pro: { monthly: 129.99, yearly: 1249.99, name: 'Pro' },
   enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
 };
 
