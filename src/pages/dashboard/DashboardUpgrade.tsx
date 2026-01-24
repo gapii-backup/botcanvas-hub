@@ -626,7 +626,7 @@ export default function DashboardUpgrade() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
-                      <span>Nov paket bo aktiviran v roku 72 ur</span>
+                      <span>Nov paket bo aktiviran v roku 24 ur</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-amber-500 mt-0.5">•</span>
@@ -691,7 +691,7 @@ export default function DashboardUpgrade() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>
-                      <span>Sprememba bo aktivirana v roku 72 ur</span>
+                      <span>Sprememba bo aktivirana v roku 24 ur</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-destructive mt-0.5">•</span>

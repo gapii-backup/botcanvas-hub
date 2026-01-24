@@ -434,7 +434,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   <ul className="text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Vaša trenutna naročnina bo preklicana</li>
                     <li>Vse aktivne funkcije bodo odstranjene</li>
-                    <li>Nov paket bo aktiviran v roku 72 ur</li>
+                    <li>Nov paket bo aktiviran v roku 24 ur</li>
                     <li>Zaračunavanje se začne ob naslednjem plačilnem obdobju</li>
                   </ul>
                 </div>
@@ -484,7 +484,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   <ul className="text-muted-foreground space-y-1 list-disc list-inside">
                     <li>Izgubili boste dostop do funkcionalnosti višjega paketa</li>
                     <li>Vse aktivne funkcije bodo odstranjene</li>
-                    <li>Sprememba bo aktivirana v roku 72 ur</li>
+                    <li>Sprememba bo aktivirana v roku 24 ur</li>
                     <li>Sredstev ne vračamo</li>
                   </ul>
                 </div>
