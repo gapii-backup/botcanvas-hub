@@ -494,7 +494,7 @@ export default function Login() {
           <p className="text-slate-400">
             {isRegisterMode 
               ? 'Ustvarite AI chatbota v minuti. Brez programiranja.'
-              : 'Prijavite se in upravljajte svojega AI chatbota.'
+              : 'Prijavite se in upravljajte svoje AI asistente.'
             }
           </p>
         </div>

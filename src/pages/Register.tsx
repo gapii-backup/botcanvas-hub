@@ -457,7 +457,7 @@ export default function Register() {
           </h2>
           <p className="text-slate-400">
             {isLoginMode 
-              ? 'Prijavite se in upravljajte svojega AI chatbota.'
+              ? 'Prijavite se in upravljajte svoje AI asistente.'
               : 'Ustvarite AI chatbota v minuti. Brez programiranja.'
             }
           </p>
