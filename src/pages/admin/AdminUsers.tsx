@@ -187,7 +187,7 @@ export default function AdminUsers() {
             status: 'partner',
             is_active: true,
             plan: selectedPlan,
-            messages_limit: selectedPlan === 'enterprise' ? 8000 : selectedPlan === 'pro' ? 2500 : 1000,
+            messages_limit: selectedPlan === 'enterprise' ? 8000 : selectedPlan === 'pro' ? 3000 : 1000,
             retention_days: selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30,
             billing_period: 'monthly',
             support_tickets: [],
@@ -287,7 +287,7 @@ export default function AdminUsers() {
             updateData.retention_days = 180;
             break;
           case 'pro':
-            updateData.messages_limit = 2500;
+            updateData.messages_limit = 3000;
             updateData.retention_days = 60;
             break;
           case 'basic':
@@ -487,7 +487,7 @@ export default function AdminUsers() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="basic">Basic (1000 sporočil, 30 dni)</SelectItem>
-                        <SelectItem value="pro">Pro (2500 sporočil, 60 dni)</SelectItem>
+                        <SelectItem value="pro">Pro (3000 sporočil, 60 dni)</SelectItem>
                         <SelectItem value="enterprise">Enterprise (8000 sporočil, 180 dni)</SelectItem>
                       </SelectContent>
                     </Select>
@@ -609,7 +609,7 @@ export default function AdminUsers() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="basic">Basic (1000 sporočil, 30 dni)</SelectItem>
-                    <SelectItem value="pro">Pro (2500 sporočil, 60 dni)</SelectItem>
+                    <SelectItem value="pro">Pro (3000 sporočil, 60 dni)</SelectItem>
                     <SelectItem value="enterprise">Enterprise (8000 sporočil, 180 dni)</SelectItem>
                   </SelectContent>
                 </Select>

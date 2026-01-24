@@ -58,7 +58,7 @@ const planPrices = {
     monthly: 119.99, yearly: 1149.99, name: 'Pro',
     features: [
       'Vse iz BASIC paketa, plus:',
-      '2.500 pogovorov na mesec',
+      '3.000 pogovorov na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov (leadov) neposredno v pogovoru',
       'Kreiranje support ticketov neposredno preko chatbota',
