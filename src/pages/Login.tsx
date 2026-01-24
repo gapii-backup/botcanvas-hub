@@ -223,7 +223,7 @@ export default function Login() {
       {/* Left side - Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div 
-          className="w-full max-w-md space-y-8 bg-[#171717] border border-white/10 rounded-2xl p-6 sm:p-8 relative overflow-hidden animate-fade-in"
+          className="w-full max-w-md space-y-8 bg-[#171717] border border-white/10 rounded-2xl px-6 pt-4 pb-6 sm:px-8 sm:pt-5 sm:pb-8 relative overflow-hidden animate-fade-in"
         >
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
