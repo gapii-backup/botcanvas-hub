@@ -360,7 +360,7 @@ export default function DashboardUpgrade() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(planPrices).map(([planId, planData]) => {
-                const isExactCurrentPlan = currentPlan === planId && billingPeriod === displayBillingPeriod;
+                const isExactCurrentPlan = !isCancelled && currentPlan === planId && billingPeriod === displayBillingPeriod;
                 const planIndex = planOrder.indexOf(planId);
                 const isHigherPlan = planIndex > currentPlanIndex;
                 const isLowerPlan = planIndex < currentPlanIndex;

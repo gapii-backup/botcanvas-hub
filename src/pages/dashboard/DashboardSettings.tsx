@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -324,6 +325,14 @@ export default function DashboardSettings() {
     return (
       <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
         <Skeleton className="h-64 w-full" />
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.subscription_status === 'cancelled') {
+    return (
+      <DashboardLayout title="Nastavitve" subtitle="Upravljajte nastavitve vašega chatbota">
+        <AccountDeactivatedLock />
       </DashboardLayout>
     );
   }
