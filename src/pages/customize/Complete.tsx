@@ -684,21 +684,25 @@ export default function Complete() {
                 </p>
               </div>
             </div>
-          </div>
 
-          {/* Sticky footer - vedno na dnu */}
-          <div className="border-t border-border bg-background p-4 flex flex-col sm:flex-row gap-2 mt-auto">
-            <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
-              Prekliči
-            </Button>
-            <button
-              onClick={handleContinueToCheckout}
-              disabled={isSaving}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 sm:shadow-lg sm:shadow-amber-500/25 flex items-center justify-center gap-2 sm:ml-auto"
-            >
-              <CreditCard className="h-4 w-4" />
-              {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
-            </button>
+            {/* Gumbi na dnu vsebine */}
+            <div className="border-t border-border pt-4 mt-4 flex flex-col gap-2">
+              <button
+                onClick={handleContinueToCheckout}
+                disabled={isSaving}
+                className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 flex items-center justify-center gap-2"
+              >
+                <CreditCard className="h-4 w-4" />
+                {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
+              </button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPaymentDialog(false)} 
+                className="w-full"
+              >
+                Prekliči
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
