@@ -70,7 +70,7 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
     };
   }, [isOpen, closeLightbox, zoomIn, zoomOut, handleWheel]);
 
-  // Lightbox modal content - rendered via Portal
+  // Lightbox modal content - rendered via Portal to document.body
   const lightboxContent = isOpen ? (
     <div
       className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center animate-fade-in"
@@ -79,14 +79,14 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
       {/* Close Button */}
       <button
         onClick={closeLightbox}
-        className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-[10000]"
+        className="absolute top-3 right-3 md:top-4 md:right-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-[10000]"
         aria-label="Zapri"
       >
-        <X className="h-6 w-6" />
+        <X className="h-5 w-5 md:h-6 md:w-6" />
       </button>
 
       {/* Zoom Controls */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-full px-3 py-2 z-[10000]">
+      <div className="absolute bottom-3 md:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-full px-3 py-2 z-[10000]">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -95,9 +95,9 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
           className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
           aria-label="Pomanjšaj"
         >
-          <ZoomOut className="h-5 w-5" />
+          <ZoomOut className="h-4 w-4 md:h-5 md:w-5" />
         </button>
-        <span className="text-white text-sm min-w-[3rem] text-center">
+        <span className="text-white text-xs md:text-sm min-w-[2.5rem] md:min-w-[3rem] text-center">
           {Math.round(scale * 100)}%
         </span>
         <button
@@ -108,25 +108,25 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
           className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
           aria-label="Povečaj"
         >
-          <ZoomIn className="h-5 w-5" />
+          <ZoomIn className="h-4 w-4 md:h-5 md:w-5" />
         </button>
       </div>
 
-      {/* Hint text */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm z-[10000]">
+      {/* Hint text - hidden on mobile */}
+      <div className="hidden md:block absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm z-[10000]">
         Uporabite scroll za povečavo
       </div>
 
       {/* Image with zoom */}
       <div
-        className="overflow-auto max-w-[90vw] max-h-[85vh] animate-scale-in"
+        className="overflow-auto max-w-[95vw] max-h-[90vh] md:max-w-[90vw] md:max-h-[85vh] animate-scale-in p-2 md:p-0"
         onClick={(e) => e.stopPropagation()}
       >
         <img
           src={src}
           alt={alt}
           style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
-          className="transition-transform duration-150 ease-out"
+          className="transition-transform duration-150 ease-out max-w-full h-auto"
         />
       </div>
     </div>
@@ -134,19 +134,19 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
 
   return (
     <>
-      {/* Thumbnail Image - 80% width, centered */}
+      {/* Thumbnail Image - responsive: full width on mobile, 80% on desktop */}
       <img
         src={src}
         alt={alt}
         onClick={openLightbox}
         className={cn(
-          "w-[80%] mx-auto rounded-lg border border-border shadow-sm cursor-pointer",
-          "hover:opacity-90 hover:shadow-md transition-all mt-4",
+          "w-full md:w-[80%] mx-auto rounded-lg border border-border shadow-sm cursor-pointer",
+          "hover:opacity-90 hover:shadow-md transition-all mt-3 md:mt-4",
           className
         )}
       />
 
-      {/* Render lightbox via Portal to document.body */}
+      {/* Render lightbox via Portal to document.body for fullscreen overlay */}
       {lightboxContent && createPortal(lightboxContent, document.body)}
     </>
   );
