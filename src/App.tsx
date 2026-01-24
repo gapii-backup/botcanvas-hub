@@ -52,8 +52,8 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register key="register" />} />
+            <Route path="/login" element={<Login key="login" />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/pricing"
