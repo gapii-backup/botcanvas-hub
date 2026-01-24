@@ -201,27 +201,13 @@
   }
 
   .shiny-button {
-    background: linear-gradient(#1d1d1d, #1d1d1d) padding-box,
-                conic-gradient(from var(--gradient-angle), transparent 0%, #1d4ed8 10%, #60a5fa 20%, #1d4ed8 30%, transparent 40%) border-box;
+    background: #242424;
     border: 2px solid transparent;
     border-radius: 9999px;
-    animation: border-spin 2.5s linear infinite;
   }
 
-  @keyframes border-spin {
-    to {
-      --gradient-angle: 360deg;
-    }
-  }
-
-  /* Mobile fallback for shiny button */
-  @media (max-width: 768px) {
-    .shiny-button {
-      animation: none;
-      background: #1d1d1d;
-      border: 2px solid #3b82f6;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    }
+  .shiny-button:hover {
+    background: #2a2a2a;
   }
 
   /* Grid pattern for login page */
