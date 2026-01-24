@@ -28,10 +28,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Image paths
-const WORDPRESS_IMAGES = ['/docs/wordpress-hfcm.png', '/docs/wordpress-manual.png'];
-const SHOPIFY_IMAGES = ['/docs/shopify-1.png', '/docs/shopify-2.png'];
-const ALL_IMAGES = [...WORDPRESS_IMAGES, ...SHOPIFY_IMAGES];
 
 export default function DashboardDocs() {
   const { widget, loading } = useWidget();
@@ -217,7 +213,6 @@ export default function DashboardDocs() {
             <LightboxImage 
               src="/docs/wordpress-hfcm.png" 
               alt="WordPress HFCM vtičnik nastavitve"
-              allImages={ALL_IMAGES}
             />
           </div>
 
@@ -237,7 +232,6 @@ export default function DashboardDocs() {
               <LightboxImage 
                 src="/docs/wordpress-manual.png" 
                 alt="WordPress ročno urejanje teme"
-                allImages={ALL_IMAGES}
               />
             </CollapsibleContent>
           </Collapsible>
@@ -260,7 +254,6 @@ export default function DashboardDocs() {
           <LightboxImage 
             src="/docs/shopify-1.png" 
             alt="Shopify Themes nastavitve"
-            allImages={ALL_IMAGES}
           />
 
           <ol start={3} className="list-decimal list-inside space-y-2 text-muted-foreground">
@@ -271,7 +264,6 @@ export default function DashboardDocs() {
           <LightboxImage 
             src="/docs/shopify-2.png" 
             alt="Shopify theme.liquid urejanje"
-            allImages={ALL_IMAGES}
           />
         </div>
       ),

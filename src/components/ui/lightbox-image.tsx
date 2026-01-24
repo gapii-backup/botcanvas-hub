@@ -1,97 +1,79 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface LightboxImageProps {
   src: string;
   alt: string;
-  allImages?: string[];
   className?: string;
 }
 
-export function LightboxImage({ src, alt, allImages = [], className }: LightboxImageProps) {
+export function LightboxImage({ src, alt, className }: LightboxImageProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [scale, setScale] = useState(1);
 
-  // Use allImages if provided, otherwise just the single image
-  const images = allImages.length > 0 ? allImages : [src];
-  const hasMultipleImages = images.length > 1;
+  const minScale = 0.5;
+  const maxScale = 4;
+  const scaleStep = 0.2;
 
-  // Find initial index when opening
   const openLightbox = () => {
-    const index = images.indexOf(src);
-    setCurrentIndex(index >= 0 ? index : 0);
+    setScale(1);
     setIsOpen(true);
   };
 
   const closeLightbox = useCallback(() => {
     setIsOpen(false);
+    setScale(1);
   }, []);
 
-  const goToPrevious = useCallback(() => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  }, [images.length]);
+  const zoomIn = useCallback(() => {
+    setScale((prev) => Math.min(prev + scaleStep, maxScale));
+  }, []);
 
-  const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  }, [images.length]);
+  const zoomOut = useCallback(() => {
+    setScale((prev) => Math.max(prev - scaleStep, minScale));
+  }, []);
 
-  // Keyboard navigation
+  // Handle scroll wheel zoom
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      // Scroll up - zoom in
+      setScale((prev) => Math.min(prev + scaleStep, maxScale));
+    } else {
+      // Scroll down - zoom out
+      setScale((prev) => Math.max(prev - scaleStep, minScale));
+    }
+  }, []);
+
+  // Keyboard and scroll handling
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         closeLightbox();
-      } else if (e.key === 'ArrowLeft' && hasMultipleImages) {
-        goToPrevious();
-      } else if (e.key === 'ArrowRight' && hasMultipleImages) {
-        goToNext();
+      } else if (e.key === '+' || e.key === '=') {
+        zoomIn();
+      } else if (e.key === '-') {
+        zoomOut();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('wheel', handleWheel, { passive: false });
     document.body.style.overflow = 'hidden';
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('wheel', handleWheel);
       document.body.style.overflow = '';
     };
-  }, [isOpen, hasMultipleImages, closeLightbox, goToPrevious, goToNext]);
-
-  // Touch/swipe handling
-  const minSwipeDistance = 50;
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-
-    if (hasMultipleImages) {
-      if (isLeftSwipe) {
-        goToNext();
-      } else if (isRightSwipe) {
-        goToPrevious();
-      }
-    }
-  };
+  }, [isOpen, closeLightbox, zoomIn, zoomOut, handleWheel]);
 
   return (
     <>
-      {/* Thumbnail Image */}
+      {/* Thumbnail Image - 80% width, centered */}
       <img
         src={src}
         alt={alt}
@@ -118,55 +100,50 @@ export function LightboxImage({ src, alt, allImages = [], className }: LightboxI
             <X className="h-6 w-6" />
           </button>
 
-          {/* Previous Button */}
-          {hasMultipleImages && (
+          {/* Zoom Controls */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-full px-3 py-2 z-10">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                goToPrevious();
+                zoomOut();
               }}
-              className="absolute left-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-10"
-              aria-label="Prejšnja slika"
+              className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+              aria-label="Pomanjšaj"
             >
-              <ChevronLeft className="h-8 w-8" />
+              <ZoomOut className="h-5 w-5" />
             </button>
-          )}
-
-          {/* Image */}
-          <div
-            className="animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
-            <img
-              src={images[currentIndex]}
-              alt={alt}
-              className="object-contain max-w-[90vw] max-h-[90vh]"
-            />
+            <span className="text-white text-sm min-w-[3rem] text-center">
+              {Math.round(scale * 100)}%
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                zoomIn();
+              }}
+              className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+              aria-label="Povečaj"
+            >
+              <ZoomIn className="h-5 w-5" />
+            </button>
           </div>
 
-          {/* Next Button */}
-          {hasMultipleImages && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNext();
-              }}
-              className="absolute right-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-10"
-              aria-label="Naslednja slika"
-            >
-              <ChevronRight className="h-8 w-8" />
-            </button>
-          )}
+          {/* Hint text */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm z-10">
+            Uporabite scroll za povečavo
+          </div>
 
-          {/* Image Counter */}
-          {hasMultipleImages && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full">
-              {currentIndex + 1} / {images.length}
-            </div>
-          )}
+          {/* Image with zoom */}
+          <div
+            className="overflow-auto max-w-[90vw] max-h-[85vh] animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={src}
+              alt={alt}
+              style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
+              className="transition-transform duration-150 ease-out"
+            />
+          </div>
         </div>
       )}
     </>
