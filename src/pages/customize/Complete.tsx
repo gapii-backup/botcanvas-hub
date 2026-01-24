@@ -87,10 +87,10 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 12 },
-      { id: 'capacity_2000', label: '+2.000 pogovorov', monthlyPrice: 22 },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 52 },
-      { id: 'capacity_10000', label: '+10.000 pogovorov', monthlyPrice: 99 },
+      { id: 'capacity_500', label: '+500 pogovorov', monthlyPrice: 18 },
+      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 32 },
+      { id: 'capacity_2500', label: '+2.500 pogovorov', monthlyPrice: 70 },
+      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 120 },
     ],
   },
 };
