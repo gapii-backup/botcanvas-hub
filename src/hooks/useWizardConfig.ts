@@ -85,7 +85,7 @@ const defaultConfig: BotConfig = {
   darkMode: true,
   headerStyle: 'gradient',
   botAvatar: '',
-  botIcon: 'Robot', // Default icon name
+  botIcon: 'Bot', // Default icon name
   iconBgColor: '#3B82F6',
   iconColor: '#FFFFFF',
   
