@@ -75,10 +75,10 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_500', label: '+500 pogovorov', monthlyPrice: 18 },
-      { id: 'capacity_1000', label: '+1.000 pogovorov', monthlyPrice: 32 },
-      { id: 'capacity_2500', label: '+2.500 pogovorov', monthlyPrice: 70 },
-      { id: 'capacity_5000', label: '+5.000 pogovorov', monthlyPrice: 120 },
+      { id: 'capacity_500', label: '+500 sporočil', monthlyPrice: 18 },
+      { id: 'capacity_1000', label: '+1.000 sporočil', monthlyPrice: 32 },
+      { id: 'capacity_2500', label: '+2.500 sporočil', monthlyPrice: 70 },
+      { id: 'capacity_5000', label: '+5.000 sporočil', monthlyPrice: 120 },
     ],
   },
 };
@@ -472,9 +472,9 @@ export default function Complete() {
                       <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                         <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
                         <div className="text-sm">
-                          <p className="font-medium text-foreground mb-1">Dodatne kapacitete pogovorov</p>
+                          <p className="font-medium text-foreground mb-1">Dodatna sporočila</p>
                           <p className="text-muted-foreground">
-                            Pri letni naročnini lahko dodatne pogovore dodate <strong>po aktivaciji</strong> v sekciji 
+                            Pri letni naročnini lahko dodatna sporočila dodate <strong>po aktivaciji</strong> v sekciji 
                             <strong> Nadgradi </strong> v vašem dashboardu. Zaračunavajo se mesečno.
                           </p>
                         </div>
@@ -571,8 +571,7 @@ export default function Complete() {
             <Button 
               onClick={handleOpenPaymentDialog} 
               size="lg" 
-              variant="glow" 
-              className="text-lg px-8 py-6 h-auto [&]:shadow-none sm:[&]:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+              className="text-lg px-8 py-6 h-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:shadow-lg sm:shadow-amber-500/30"
             >
               <CreditCard className="h-5 w-5 mr-2" />
               Nadaljuj na plačilo
