@@ -686,7 +686,7 @@ export default function Complete() {
             </div>
 
             {/* Gumbi na dnu vsebine */}
-            <div className="border-t border-border pt-4 mt-4 flex flex-col gap-2">
+            <div className="border-t border-border pt-4 mt-4 flex flex-col gap-2 pb-4">
               <button
                 onClick={handleContinueToCheckout}
                 disabled={isSaving}
