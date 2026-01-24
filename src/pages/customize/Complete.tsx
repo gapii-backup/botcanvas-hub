@@ -706,7 +706,7 @@ export default function Complete() {
             <Button 
               onClick={handleContinueToCheckout} 
               disabled={isSaving}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:ml-auto"
+              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:ml-auto shadow-none sm:shadow-lg sm:shadow-amber-500/25"
             >
               <CreditCard className="h-4 w-4 mr-2" />
               {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
