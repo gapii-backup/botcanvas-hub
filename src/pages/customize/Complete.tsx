@@ -680,7 +680,7 @@ export default function Complete() {
               <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
                 <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
                 <p className="text-sm text-amber-500">
-                  Vaš AI asistent bo aktiviran <strong>TAKOJ</strong> po potrditvi nakupa.
+                  Vaš AI asistent bo aktiviran <strong>v roku 24 ur</strong>, po potrditvi nakupa.
                 </p>
               </div>
             </div>
