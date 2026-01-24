@@ -201,11 +201,12 @@
   }
 
   .shiny-button {
+    position: relative;
     background: linear-gradient(#282828, #282828) padding-box,
-                conic-gradient(from var(--gradient-angle), transparent 0%, #1d4ed8 10%, #60a5fa 20%, #1d4ed8 30%, transparent 40%) border-box;
+                conic-gradient(from var(--gradient-angle), rgba(59, 130, 246, 0.4) 0%, #60a5fa 10%, #93c5fd 20%, #60a5fa 30%, rgba(59, 130, 246, 0.4) 40%, rgba(59, 130, 246, 0.1) 60%, rgba(59, 130, 246, 0.4) 100%) border-box;
     border: 2px solid transparent;
-    border-radius: 9999px;
-    animation: border-spin 2.5s linear infinite;
+    border-radius: 12px;
+    animation: border-spin 3s linear infinite;
   }
 
   @keyframes border-spin {
@@ -215,12 +216,11 @@
   }
 
   /* Mobile fallback for shiny button */
-  @media (max-width: 768px) {
+  @media (max-width: 640px) {
     .shiny-button {
       animation: none;
       background: #282828;
-      border: 2px solid #3b82f6;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+      border: 2px solid rgba(59, 130, 246, 0.3);
     }
   }
 

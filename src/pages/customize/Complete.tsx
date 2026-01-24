@@ -568,14 +568,14 @@ export default function Complete() {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nazaj
             </Button>
-            <Button 
-              onClick={handleOpenPaymentDialog} 
-              size="lg" 
-              className="text-lg px-8 py-6 h-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:shadow-lg sm:shadow-amber-500/30"
+            <button
+              onClick={handleOpenPaymentDialog}
+              disabled={isSaving}
+              className="shiny-button text-lg px-8 py-4 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <CreditCard className="h-5 w-5 mr-2" />
+              <CreditCard className="h-5 w-5" />
               Nadaljuj na plačilo
-            </Button>
+            </button>
           </div>
         </div>
       </div>
@@ -690,14 +690,14 @@ export default function Complete() {
             <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
               Prekliči
             </Button>
-            <Button 
-              onClick={handleContinueToCheckout} 
+            <button
+              onClick={handleContinueToCheckout}
               disabled={isSaving}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:ml-auto shadow-none sm:shadow-lg sm:shadow-amber-500/25"
+              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 sm:shadow-lg sm:shadow-amber-500/25 flex items-center justify-center gap-2 sm:ml-auto"
             >
-              <CreditCard className="h-4 w-4 mr-2" />
+              <CreditCard className="h-4 w-4" />
               {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
-            </Button>
+            </button>
           </div>
         </DialogContent>
       </Dialog>
