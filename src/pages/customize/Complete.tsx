@@ -583,9 +583,9 @@ export default function Complete() {
 
       {/* Payment Summary Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="p-0 gap-0 border-0 sm:border max-w-none sm:max-w-lg w-screen h-screen sm:w-auto sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-lg flex flex-col">
+        <DialogContent className="p-0 gap-0 w-screen h-screen max-w-none max-h-none sm:w-auto sm:h-auto sm:max-w-lg sm:max-h-[90vh] rounded-none sm:rounded-lg flex flex-col border-0 sm:border">
           {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             <DialogHeader>
               <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
               <DialogDescription>
@@ -687,7 +687,7 @@ export default function Complete() {
           </div>
 
           {/* Sticky footer - vedno na dnu */}
-          <div className="sticky bottom-0 border-t border-border bg-background p-4 flex flex-col sm:flex-row gap-2">
+          <div className="border-t border-border bg-background p-4 flex flex-col sm:flex-row gap-2 mt-auto">
             <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
               Prekliči
             </Button>
