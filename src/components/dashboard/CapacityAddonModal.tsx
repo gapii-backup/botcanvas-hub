@@ -26,10 +26,10 @@ type CapacityOption = { id: string; name: string; price: number; period: string 
 
 // Capacity addoni so VEDNO mesečni - tudi za letne naročnine
 const capacityOptionsAll: CapacityOption[] = [
-  { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec' },
-  { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec' },
-  { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec' },
-  { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec' },
+  { id: 'capacity_500', name: '+500 pogovorov', price: 18, period: 'mesec' },
+  { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec' },
+  { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec' },
+  { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec' },
 ];
 
 interface CapacityAddonModalProps {
