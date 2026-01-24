@@ -60,26 +60,14 @@ type AddonCategory = {
 
 // Define all add-ons with monthly prices in euros (removed CRM & INTEGRACIJE)
 const ALL_ADDONS: Record<string, AddonCategory> = {
-  languages: {
-    title: '🌍 JEZIKI',
-    icon: Globe,
+  features: {
+    title: '✨ DODATNE FUNKCIJE',
+    icon: Sparkles,
     items: [
       { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30, yearlyPrice: 288 },
-    ],
-  },
-  sales: {
-    title: '💼 SALES & LEAD GENERATION',
-    icon: Users,
-    items: [
       { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336, proOnly: true },
       { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 20, yearlyPrice: 192 },
       { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 80, yearlyPrice: 768 },
-    ],
-  },
-  support: {
-    title: '🎧 SUPPORT & CUSTOMER SERVICE',
-    icon: Headphones,
-    items: [
       { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35, yearlyPrice: 336 },
     ],
   },
@@ -584,7 +572,7 @@ export default function Complete() {
               onClick={handleOpenPaymentDialog} 
               size="lg" 
               variant="glow" 
-              className="text-lg px-8 py-6 h-auto"
+              className="text-lg px-8 py-6 h-auto [&]:shadow-none sm:[&]:shadow-[0_0_20px_rgba(59,130,246,0.5)]"
             >
               <CreditCard className="h-5 w-5 mr-2" />
               Nadaljuj na plačilo
