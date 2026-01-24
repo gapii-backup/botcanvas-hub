@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,10 +39,8 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
   const handleWheel = useCallback((e: WheelEvent) => {
     e.preventDefault();
     if (e.deltaY < 0) {
-      // Scroll up - zoom in
       setScale((prev) => Math.min(prev + scaleStep, maxScale));
     } else {
-      // Scroll down - zoom out
       setScale((prev) => Math.max(prev - scaleStep, minScale));
     }
   }, []);
@@ -71,6 +70,68 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
     };
   }, [isOpen, closeLightbox, zoomIn, zoomOut, handleWheel]);
 
+  // Lightbox modal content - rendered via Portal
+  const lightboxContent = isOpen ? (
+    <div
+      className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center animate-fade-in"
+      onClick={closeLightbox}
+    >
+      {/* Close Button */}
+      <button
+        onClick={closeLightbox}
+        className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-[10000]"
+        aria-label="Zapri"
+      >
+        <X className="h-6 w-6" />
+      </button>
+
+      {/* Zoom Controls */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-full px-3 py-2 z-[10000]">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomOut();
+          }}
+          className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+          aria-label="Pomanjšaj"
+        >
+          <ZoomOut className="h-5 w-5" />
+        </button>
+        <span className="text-white text-sm min-w-[3rem] text-center">
+          {Math.round(scale * 100)}%
+        </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            zoomIn();
+          }}
+          className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
+          aria-label="Povečaj"
+        >
+          <ZoomIn className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Hint text */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm z-[10000]">
+        Uporabite scroll za povečavo
+      </div>
+
+      {/* Image with zoom */}
+      <div
+        className="overflow-auto max-w-[90vw] max-h-[85vh] animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={src}
+          alt={alt}
+          style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
+          className="transition-transform duration-150 ease-out"
+        />
+      </div>
+    </div>
+  ) : null;
+
   return (
     <>
       {/* Thumbnail Image - 80% width, centered */}
@@ -85,67 +146,8 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
         )}
       />
 
-      {/* Lightbox Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center animate-fade-in"
-          onClick={closeLightbox}
-        >
-          {/* Close Button */}
-          <button
-            onClick={closeLightbox}
-            className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full p-2 transition-colors z-10"
-            aria-label="Zapri"
-          >
-            <X className="h-6 w-6" />
-          </button>
-
-          {/* Zoom Controls */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/50 rounded-full px-3 py-2 z-10">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                zoomOut();
-              }}
-              className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
-              aria-label="Pomanjšaj"
-            >
-              <ZoomOut className="h-5 w-5" />
-            </button>
-            <span className="text-white text-sm min-w-[3rem] text-center">
-              {Math.round(scale * 100)}%
-            </span>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                zoomIn();
-              }}
-              className="text-white hover:bg-white/10 rounded-full p-1 transition-colors"
-              aria-label="Povečaj"
-            >
-              <ZoomIn className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Hint text */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/60 text-sm z-10">
-            Uporabite scroll za povečavo
-          </div>
-
-          {/* Image with zoom */}
-          <div
-            className="overflow-auto max-w-[90vw] max-h-[85vh] animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={src}
-              alt={alt}
-              style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}
-              className="transition-transform duration-150 ease-out"
-            />
-          </div>
-        </div>
-      )}
+      {/* Render lightbox via Portal to document.body */}
+      {lightboxContent && createPortal(lightboxContent, document.body)}
     </>
   );
 }
