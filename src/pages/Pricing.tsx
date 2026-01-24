@@ -181,17 +181,17 @@ export default function Pricing() {
               <div
                 key={plan.id}
                 className={cn(
-                  'relative rounded-2xl p-8 transition-all duration-300 animate-slide-up flex flex-col',
+                  'relative p-8 transition-all duration-300 animate-slide-up flex flex-col',
                   plan.popular
-                    ? 'glass-strong border-primary/50 scale-105 z-10 glow-primary'
-                    : 'glass hover:border-primary/30'
+                    ? 'pro-card-shiny scale-105 z-10'
+                    : 'bg-[#0f0f0f] border border-white/10 rounded-[20px] md:hover:scale-[1.02]'
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="gradient-primary text-primary-foreground text-sm font-medium px-4 py-1 rounded-full">
-                      Najpopularnejši
+                    <span className="bg-blue-600 border border-blue-400 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
+                      Najboljša izbira
                     </span>
                   </div>
                 )}

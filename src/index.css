@@ -224,6 +224,24 @@
     }
   }
 
+  /* Pro card shiny animated border */
+  .pro-card-shiny {
+    background: linear-gradient(#171717, #171717) padding-box,
+                conic-gradient(from var(--gradient-angle), rgba(59, 130, 246, 0.5) 0%, #60a5fa 10%, #93c5fd 20%, #60a5fa 30%, rgba(59, 130, 246, 0.5) 40%) border-box;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    animation: border-spin 2.5s linear infinite;
+  }
+
+  /* Mobile fallback for pro card */
+  @media (max-width: 767px) {
+    .pro-card-shiny {
+      animation: none;
+      background: #171717;
+      border: 2px solid rgba(59, 130, 246, 0.5);
+    }
+  }
+
   /* Grid pattern for login page */
   .grid-pattern {
     background-image: 
