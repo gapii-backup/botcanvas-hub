@@ -90,12 +90,12 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
+      <div className="max-w-6xl mx-auto px-4 py-8 lg:py-8 min-h-[calc(100vh-120px)] flex items-center lg:items-start">
+        <div className="grid lg:grid-cols-2 gap-8 items-start w-full">
           {/* Settings panel with animation */}
           <div 
             className={cn(
-              "bg-background rounded-2xl border border-border shadow-sm p-6 md:p-8 transition-all duration-500 ease-out",
+              "bg-background rounded-2xl border border-border shadow-sm p-6 md:p-8 transition-all duration-500 ease-out w-full max-w-md mx-auto lg:max-w-none",
               isVisible 
                 ? "opacity-100 translate-y-0" 
                 : "opacity-0 translate-y-4"
@@ -105,7 +105,7 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
           </div>
 
           {/* Preview panel with dotted pattern */}
-          <div className="lg:sticky lg:top-8">
+          <div className="hidden lg:block lg:sticky lg:top-8">
             <div 
               className={cn(
                 "rounded-2xl border border-border overflow-hidden relative transition-all duration-500 ease-out delay-100",
