@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useUnsavedChanges } from '@/contexts/UnsavedChangesContext';
@@ -127,7 +127,7 @@ export default function DashboardSettings() {
     try {
       await upsertWidget({
         bot_name: config.name || '',
-        welcome_message: config.welcomeMessage || '',
+        welcome_message: config.bubbleText || '',
         home_title: config.homeTitle || '',
         home_subtitle_line2: config.homeSubtitle || '',
         primary_color: config.primaryColor || '#6366f1',
@@ -576,45 +576,47 @@ export default function DashboardSettings() {
               />
             </div>
 
-            {/* Icon colors - only show when no avatar uploaded */}
-            {!config.botAvatar && (
-              <div className="space-y-4 p-4 rounded-lg border border-border bg-muted/30 animate-fade-in">
-                <div className="flex items-center justify-between">
-                  <Label>Barve ikone</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={resetIconColors}
-                    className="h-8 text-xs"
-                  >
-                    <RotateCcw className="h-3 w-3 mr-1" />
-                    Ponastavi
-                  </Button>
-                </div>
-                
-                {/* Icon background color */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Ozadje ikone</Label>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <input
-                        type="color"
-                        value={config.iconBgColor}
-                        onChange={(e) => handleConfigChange({ iconBgColor: e.target.value })}
-                        className="h-10 w-10 rounded-lg cursor-pointer border-0"
-                      />
-                    </div>
-                    <Input
+            {/* Icon colors - always show, used for icon background even with avatar */}
+            <div className="space-y-4 p-4 rounded-lg border border-border bg-muted/30 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <Label>{config.botAvatar ? 'Barva ozadja slike' : 'Barve ikone'}</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetIconColors}
+                  className="h-8 text-xs"
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" />
+                  Ponastavi
+                </Button>
+              </div>
+              
+              {/* Icon background color - always visible */}
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  {config.botAvatar ? 'Ozadje slike' : 'Ozadje ikone'}
+                </Label>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input
+                      type="color"
                       value={config.iconBgColor}
                       onChange={(e) => handleConfigChange({ iconBgColor: e.target.value })}
-                      className="flex-1 font-mono text-sm"
-                      placeholder="#3B82F6"
+                      className="h-10 w-10 rounded-lg cursor-pointer border-0"
                     />
                   </div>
+                  <Input
+                    value={config.iconBgColor}
+                    onChange={(e) => handleConfigChange({ iconBgColor: e.target.value })}
+                    className="flex-1 font-mono text-sm"
+                    placeholder="#3B82F6"
+                  />
                 </div>
+              </div>
 
-                {/* Icon color */}
+              {/* Icon color - only when no avatar */}
+              {!config.botAvatar && (
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Barva ikone</Label>
                   <div className="flex items-center gap-3">
@@ -634,8 +636,8 @@ export default function DashboardSettings() {
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </TabsContent>
 
           {/* Tab 3: Gumb */}
@@ -643,7 +645,7 @@ export default function DashboardSettings() {
             {/* Show bubble */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Prikaži welcome bubble</Label>
+                <Label>Prikaži mehurček</Label>
                 <p className="text-xs text-muted-foreground">Pokaži mehurček z dobrodošlico</p>
               </div>
               <Switch
@@ -763,23 +765,6 @@ export default function DashboardSettings() {
               </div>
             )}
 
-            {/* Vertical offset */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Odmik od spodaj</Label>
-                  <p className="text-xs text-muted-foreground">Priporočeno 24px</p>
-                </div>
-                <span className="text-sm text-muted-foreground">{config.verticalOffset}px</span>
-              </div>
-              <Slider
-                value={[config.verticalOffset]}
-                onValueChange={([value]) => handleConfigChange({ verticalOffset: value })}
-                min={0}
-                max={100}
-                step={4}
-              />
-            </div>
           </TabsContent>
         </Tabs>
 
