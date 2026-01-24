@@ -301,14 +301,6 @@ export default function DashboardConversations() {
     );
   }
 
-  if (widget?.subscription_status === 'cancelled') {
-    return (
-      <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
-        <AccountDeactivatedLock />
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout title="Pogovori" subtitle="Preglejte vse pogovore z vašim chatbotom">
       {/* Export loading overlay */}
