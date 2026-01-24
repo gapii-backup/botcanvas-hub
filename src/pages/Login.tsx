@@ -395,7 +395,16 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white font-medium">Geslo</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="text-white font-medium">Geslo</Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    >
+                      Pozabljeno geslo?
+                    </button>
+                  </div>
                   <input
                     id="password"
                     type="password"
@@ -423,15 +432,6 @@ export default function Login() {
             )}
 
             <div className="text-center space-y-3 pt-2">
-              {!isRegisterMode && (
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-blue-400 hover:text-blue-300 font-medium block w-full transition-colors py-1"
-                >
-                  Pozabljeno geslo?
-                </button>
-              )}
               <p className="text-sm text-slate-500">
                 {isRegisterMode ? (
                   <>
