@@ -276,7 +276,7 @@ export default function Complete() {
         status: 'pending_payment',
         is_active: false,
         bot_name: config.name || '',
-        welcome_message: config.welcomeMessage || '',
+        welcome_message: config.bubbleText || '',
         home_title: config.homeTitle || '',
         home_subtitle_line2: config.homeSubtitle || '',
         primary_color: config.primaryColor || '#6366f1',
