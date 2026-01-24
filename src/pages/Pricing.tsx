@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Check, Bot, Sparkles, Building2, Loader2, Minus, Settings } from 'lucide-react';
+import { Check, Bot, Sparkles, Building2, Loader2, Minus, Settings, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -82,6 +82,33 @@ const comparisonFeatures = [
   { name: 'Rezervacija sestankov preko chatbota', basic: false, pro: false, enterprise: true },
   { name: 'Pametna priporočila izdelkov (AI)', basic: false, pro: false, enterprise: true },
   { name: 'Setup fee (enkratno)', basic: '€80 +DDV', pro: '€140 +DDV', enterprise: '€320 +DDV' },
+];
+
+const faqItems = [
+  {
+    question: "Kaj je setup fee?",
+    answer: "Setup fee je enkratno plačilo za vzpostavitev vašega AI chatbota. Vključuje konfiguracijo chatbota, učenje iz vaše spletne strani, nastavitev widgeta in testiranje. Setup je končan v 24 urah od naročila."
+  },
+  {
+    question: "Ali lahko kadarkoli prekinem naročnino?",
+    answer: "Da, brez dolgoročne vezave. Naročnino lahko prekličete kadarkoli, chatbot bo deloval do konca obračunskega obdobja."
+  },
+  {
+    question: "Kaj se zgodi ko porabim vsa sporočila?",
+    answer: "Ko dosežete mesečno omejitev sporočil, vas obvestimo. Če do konca obračunskega obdobja ne dokupite dodatnih sporočil, se chatbot začasno deaktivira. Ko se začne novo obdobje, se kvota ponastavi in chatbot se samodejno ponovno aktivira."
+  },
+  {
+    question: "Ali lahko kasneje nadgradim paket?",
+    answer: "Da, paket lahko kadarkoli nadgradite. Prav tako lahko dokupite posamezne funkcije iz višjih paketov brez menjave celotnega paketa."
+  },
+  {
+    question: "Kaj pomeni \"učenje iz spletne strani\"?",
+    answer: "AI chatbot prebere vsebino vaše spletne strani in se nauči o vaših izdelkih, storitvah in podjetju. Tako lahko odgovarja na vprašanja obiskovalcev brez ročnega vnašanja podatkov."
+  },
+  {
+    question: "Ali cene vključujejo DDV?",
+    answer: "Ne, vse cene so navedene brez DDV. DDV se obračuna po veljavni stopnji ob plačilu."
+  }
 ];
 
 export default function Pricing() {
@@ -311,6 +338,29 @@ export default function Pricing() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-20 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">
+            Pogosta vprašanja
+          </h2>
+          <div className="space-y-4">
+            {faqItems.map((item, index) => (
+              <details
+                key={index}
+                className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors">
+                  <span className="font-medium text-white pr-4">{item.question}</span>
+                  <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform shrink-0" />
+                </summary>
+                <div className="px-6 pb-6 pt-0 text-slate-400 text-sm leading-relaxed">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </div>
