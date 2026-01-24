@@ -496,14 +496,14 @@ export default function Complete() {
                 )}
               </>
             ) : (
-              <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                    <Check className="h-6 w-6 text-primary" />
+              <div className="p-4 sm:p-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground">Vse je pripravljeno!</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground">Vse je pripravljeno!</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       Vaš paket že vključuje vse funkcije.
                     </p>
                   </div>
