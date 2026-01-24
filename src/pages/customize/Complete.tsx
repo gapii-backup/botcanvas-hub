@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
@@ -597,7 +597,7 @@ export default function Complete() {
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl">Povzetek plačila</DialogTitle>
+            <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
             <DialogDescription>
               Preglejte stroške pred nadaljevanjem na plačilo.
             </DialogDescription>
@@ -605,8 +605,8 @@ export default function Complete() {
           
           <div className="space-y-6 py-4">
             {/* Info box */}
-            <div className="flex gap-3 p-4 bg-primary/10 rounded-lg border border-primary/20">
-              <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div className="flex gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+              <Zap className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="font-medium text-foreground mb-1">Kako poteka plačilo?</p>
                 <p className="text-muted-foreground">
@@ -624,7 +624,7 @@ export default function Complete() {
                   <span className="font-medium">Setup fee</span>
                   <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
                 </div>
-                <span className="text-lg font-bold text-primary">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                <span className="text-lg font-bold text-amber-500">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
               </div>
             </div>
 
@@ -669,9 +669,9 @@ export default function Complete() {
                 )}
 
                 {/* Total subscription */}
-                <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg border border-primary/20 mt-3">
+                <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mt-3">
                   <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
-                  <span className="text-lg font-bold text-primary">
+                  <span className="text-lg font-bold text-amber-500">
                     €{totalSubscription.toFixed(2).replace('.', ',')}
                     <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
@@ -684,6 +684,14 @@ export default function Complete() {
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* Activation info */}
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+              <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
+              <p className="text-sm text-amber-500">
+                Vaš AI asistent bo aktiviran <strong>TAKOJ</strong> po potrditvi nakupa.
+              </p>
             </div>
           </div>
 
