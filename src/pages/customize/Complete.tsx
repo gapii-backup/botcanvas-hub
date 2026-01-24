@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 // Helper function to get bot icon SVG paths from icon name
 const getBotIconPaths = (iconName: string): string[] => {
   const icon = BOT_ICONS.find(i => i.name === iconName);
-  return icon?.paths || ['M12 8V4H8', 'M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z', 'M9 16h0', 'M15 16h0'];
+  return icon?.paths || ['M12 8V4H8', 'M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z', 'M2 14h2m16 0h2m-7-1v2m-6-2v2'];
 };
 
 // Helper function to get trigger icon SVG path from icon name
@@ -35,7 +35,7 @@ const getTriggerIconPath = (iconName: string): string => {
   const paths: Record<string, string> = {
     'MessageCircle': 'M7.9 20A9 9 0 1 0 4 16.1L2 22Z',
     'MessageSquare': 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
-    'Bot': 'M12 8V4H8',
+    'Bot': 'M12 8V4H8 M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z M2 14h2m16 0h2m-7-1v2m-6-2v2',
     'Sparkles': 'M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z',
     'Headphones': 'M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3',
     'Zap': 'M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z',
