@@ -368,7 +368,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`shiny-button w-full py-3.5 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
+                  className={`shiny-button w-full py-3.5 bg-[#242424] text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
                 >
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin mx-auto" />
@@ -420,7 +420,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`shiny-button w-full py-3.5 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
+                  className={`shiny-button w-full py-3.5 bg-[#242424] text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
                 >
                   {isLoading ? (
                     <Loader2 className="h-5 w-5 animate-spin mx-auto" />
