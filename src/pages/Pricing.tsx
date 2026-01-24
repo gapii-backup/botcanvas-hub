@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Check, Bot, Sparkles, Building2, Loader2, X, Minus } from 'lucide-react';
+import { Check, Bot, Sparkles, Building2, Loader2, Minus, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -259,6 +259,16 @@ export default function Pricing() {
               </div>
             );
           })}
+        </div>
+
+        {/* Flexibility notice */}
+        <div className="text-center mt-12 p-6 bg-white/5 border border-white/10 rounded-2xl max-w-2xl mx-auto backdrop-blur-sm transition-all hover:border-white/20">
+          <div className="flex items-center justify-center flex-col sm:flex-row gap-3">
+            <Settings className="w-5 h-5 text-blue-400 shrink-0" />
+            <p className="text-xs sm:text-sm text-slate-400">
+              Fleksibilna nadgradnja: ob koncu naročila ali kadarkoli kasneje dodajte katerokoli funkcijo iz višjih paketov k vašemu paketu.
+            </p>
+          </div>
         </div>
 
         {/* Comparison Table */}
