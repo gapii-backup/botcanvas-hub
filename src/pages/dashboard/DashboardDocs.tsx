@@ -54,7 +54,7 @@ export default function DashboardDocs() {
   if (loading) {
     return (
       <DashboardSidebar>
-        <div className="p-6 lg:p-8 space-y-6">
+        <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-64" />
           <div className="space-y-4">
@@ -70,10 +70,10 @@ export default function DashboardDocs() {
   if (widget?.status === 'pending') {
     return (
       <DashboardSidebar>
-        <div className="p-6 lg:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">Dokumentacija</h1>
-            <p className="text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
+            <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
           </div>
           <SetupPendingLock />
         </div>
@@ -84,10 +84,10 @@ export default function DashboardDocs() {
   if (widget?.subscription_status === 'cancelled') {
     return (
       <DashboardSidebar>
-        <div className="p-6 lg:p-8">
+        <div className="p-4 md:p-6 lg:p-8">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">Dokumentacija</h1>
-            <p className="text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
+            <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
           </div>
           <AccountDeactivatedLock />
         </div>
@@ -103,38 +103,38 @@ export default function DashboardDocs() {
       iconColor: 'text-primary',
       bgColor: 'bg-primary/20',
       content: (
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
+        <div className="space-y-3 md:space-y-4">
+          <p className="text-sm md:text-base text-muted-foreground">
             Kopirajte spodnjo kodo in jo dodajte na vašo spletno stran:
           </p>
           
           {widget?.api_key ? (
             <div className="relative">
-              <pre className="bg-muted/50 rounded-lg p-4 overflow-x-auto font-mono text-sm border border-border">
+              <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border">
                 <code>{embedCode}</code>
               </pre>
               <Button
                 size="sm"
                 variant="outline"
-                className="absolute top-2 right-2"
+                className="absolute top-2 right-2 text-xs md:text-sm"
                 onClick={() => copyToClipboard(embedCode)}
               >
                 {copiedEmbed ? (
                   <>
-                    <Check className="h-4 w-4 mr-1" />
-                    Kopirano
+                    <Check className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    <span className="hidden sm:inline">Kopirano</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="h-4 w-4 mr-1" />
-                    Kopiraj kodo
+                    <Copy className="h-3 w-3 md:h-4 md:w-4 mr-1" />
+                    <span className="hidden sm:inline">Kopiraj kodo</span>
                   </>
                 )}
               </Button>
             </div>
           ) : (
-            <div className="bg-warning/10 border border-warning/30 rounded-lg p-4">
-              <p className="text-warning text-sm">
+            <div className="bg-warning/10 border border-warning/30 rounded-lg p-3 md:p-4">
+              <p className="text-warning text-xs md:text-sm">
                 ⚠️ Če je vaš chatbot še v pripravi, embed koda še ni na voljo.
               </p>
             </div>
@@ -144,17 +144,17 @@ export default function DashboardDocs() {
     },
     {
       id: 'placement',
-      title: '2. Kam prilepiti kodo?',
+      title: '2. HTML',
       icon: FileCode,
       iconColor: 'text-success',
       bgColor: 'bg-success/20',
       content: (
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
-            Kodo prilepite pred zaključni <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">&lt;/body&gt;</code> tag na vaši spletni strani.
+        <div className="space-y-3 md:space-y-4">
+          <p className="text-sm md:text-base text-muted-foreground">
+            Kodo prilepite pred zaključni <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag na vaši spletni strani.
           </p>
           
-          <pre className="bg-muted/50 rounded-lg p-4 overflow-x-auto font-mono text-sm border border-border">
+          <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border">
             <code>{`<!DOCTYPE html>
 <html>
 <head>
@@ -179,17 +179,17 @@ export default function DashboardDocs() {
       iconColor: 'text-blue-500',
       bgColor: 'bg-blue-500/20',
       content: (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {/* Option 1 - HFCM Plugin */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium">Opcija 1 - HFCM vtičnik</h3>
-              <Badge className="bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500/30 border-emerald-500/30">
+          <div className="space-y-3 md:space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-sm md:text-base font-medium">Opcija 1 - HFCM vtičnik</h3>
+              <Badge className="bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500/30 border-emerald-500/30 text-xs">
                 Priporočeno
               </Badge>
             </div>
             
-            <p className="text-muted-foreground">
+            <p className="text-sm md:text-base text-muted-foreground">
               Namestite brezplačni vtičnik Header Footer Code Manager:
             </p>
             
@@ -197,13 +197,13 @@ export default function DashboardDocs() {
               href="https://wordpress.org/plugins/header-footer-code-manager/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg transition-colors font-medium"
+              className="inline-flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-lg transition-colors font-medium text-sm md:text-base w-full sm:w-auto"
             >
               <ExternalLink className="h-4 w-4" />
               Prenesi HFCM vtičnik
             </a>
             
-            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+            <ol className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
               <li>V stranskem meniju kliknite <strong className="text-foreground">HFCM → Add New</strong></li>
               <li>Pri "Snippet Name" vpišite poljubno ime (npr. "Chatbot")</li>
               <li>Pri "Location" izberite <strong className="text-foreground">"Footer"</strong></li>
@@ -218,15 +218,15 @@ export default function DashboardDocs() {
 
           {/* Option 2 - Manual editing */}
           <Collapsible open={isManualOpen} onOpenChange={setIsManualOpen}>
-            <CollapsibleTrigger className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full">
-              <ChevronDown className={cn("h-4 w-4 transition-transform", isManualOpen && "rotate-180")} />
-              <span className="font-medium">Alternativa: Ročno urejanje teme (za napredne)</span>
+            <CollapsibleTrigger className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full text-sm md:text-base">
+              <ChevronDown className={cn("h-4 w-4 transition-transform shrink-0", isManualOpen && "rotate-180")} />
+              <span className="font-medium">Opcija 2: Ročno urejanje teme</span>
             </CollapsibleTrigger>
-            <CollapsibleContent className="mt-4 space-y-4 pl-6 border-l-2 border-border">
-              <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+            <CollapsibleContent className="mt-3 md:mt-4 space-y-3 md:space-y-4 pl-4 md:pl-6 border-l-2 border-border">
+              <ol className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
                 <li>Pojdite na <strong className="text-foreground">Videz → Urejevalnik datotek tem</strong></li>
                 <li>V desnem stolpcu izberite <strong className="text-foreground">"Noga teme" (footer.php)</strong></li>
-                <li>Prilepite embed kodo pred <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">&lt;/body&gt;</code> tag in shranite</li>
+                <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag in shranite</li>
               </ol>
               
               <LightboxImage 
@@ -245,8 +245,8 @@ export default function DashboardDocs() {
       iconColor: 'text-emerald-500',
       bgColor: 'bg-emerald-500/20',
       content: (
-        <div className="space-y-4">
-          <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+        <div className="space-y-3 md:space-y-4">
+          <ol className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
             <li>Pojdite na <strong className="text-foreground">Online Store → Themes</strong></li>
             <li>Pri vaši aktivni temi kliknite na tri pikice (⋯) in izberite <strong className="text-foreground">"Edit code"</strong></li>
           </ol>
@@ -256,9 +256,9 @@ export default function DashboardDocs() {
             alt="Shopify Themes nastavitve"
           />
 
-          <ol start={3} className="list-decimal list-inside space-y-2 text-muted-foreground">
+          <ol start={3} className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
             <li>V levem meniju odprite mapo <strong className="text-foreground">"Layout"</strong> in kliknite na <strong className="text-foreground">"theme.liquid"</strong></li>
-            <li>Prilepite embed kodo pred <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">&lt;/body&gt;</code> tag in kliknite <strong className="text-foreground">"Save"</strong></li>
+            <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag in kliknite <strong className="text-foreground">"Save"</strong></li>
           </ol>
           
           <LightboxImage 
@@ -275,22 +275,22 @@ export default function DashboardDocs() {
       iconColor: 'text-rose-500',
       bgColor: 'bg-rose-500/20',
       content: (
-        <div className="space-y-4">
-          <p className="text-muted-foreground">
+        <div className="space-y-3 md:space-y-4">
+          <p className="text-sm md:text-base text-muted-foreground">
             Če imate težave z namestitvijo ali uporabljate drugo platformo (Wix, Squarespace, ipd.), nas kontaktirajte:
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-3 md:gap-4">
             <a
               href="mailto:info@botmotion.ai"
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center justify-center sm:justify-start gap-2 text-primary hover:underline bg-primary/5 hover:bg-primary/10 px-4 py-2.5 rounded-lg transition-colors text-sm md:text-base"
             >
               <Mail className="h-4 w-4" />
               info@botmotion.ai
             </a>
             <a
               href="tel:+38641353600"
-              className="flex items-center gap-2 text-primary hover:underline"
+              className="flex items-center justify-center sm:justify-start gap-2 text-primary hover:underline bg-primary/5 hover:bg-primary/10 px-4 py-2.5 rounded-lg transition-colors text-sm md:text-base"
             >
               <Phone className="h-4 w-4" />
               +386 41 353 600
@@ -303,36 +303,36 @@ export default function DashboardDocs() {
 
   return (
     <DashboardSidebar>
-      <div className="p-6 lg:p-8">
+      <div className="p-4 md:p-6 lg:p-8">
         {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <h1 className="text-2xl font-bold">Dokumentacija</h1>
-          <p className="text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
+        <div className="mb-6 md:mb-8 animate-fade-in">
+          <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
         </div>
 
         {/* Sections */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           {sections.map((section, index) => {
             const Icon = section.icon;
             return (
               <Card
                 key={section.id}
                 className={cn(
-                  "glass p-6 animate-slide-up",
+                  "glass p-4 md:p-6 animate-slide-up",
                   `delay-${(index + 1) * 100}`
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex items-start gap-4">
-                  <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center shrink-0", section.bgColor)}>
-                    <Icon className={cn("h-5 w-5", section.iconColor)} />
+                <div className="flex items-start gap-3 md:gap-4">
+                  <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center shrink-0", section.bgColor)}>
+                    <Icon className={cn("h-4 w-4 md:h-5 md:w-5", section.iconColor)} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-semibold mb-1">{section.title}</h2>
+                    <h2 className="text-base md:text-lg font-semibold mb-1">{section.title}</h2>
                     {'subtitle' in section && section.subtitle && (
-                      <p className="text-sm text-muted-foreground mb-4">{section.subtitle}</p>
+                      <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">{section.subtitle}</p>
                     )}
-                    {!('subtitle' in section) && <div className="mb-4" />}
+                    {!('subtitle' in section) && <div className="mb-3 md:mb-4" />}
                     {section.content}
                   </div>
                 </div>
