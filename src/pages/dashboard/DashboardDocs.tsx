@@ -8,11 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AccountDeactivatedLock } from '@/components/dashboard/AccountDeactivatedLock';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogClose,
-} from '@/components/ui/dialog';
+import { LightboxImage } from '@/components/ui/lightbox-image';
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,40 +25,13 @@ import {
   FileCode,
   ExternalLink,
   ChevronDown,
-  X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Reusable component for clickable images with zoom modal
-function ImageWithZoom({ src, alt }: { src: string; alt: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
-      <img
-        src={src}
-        alt={alt}
-        className="w-full rounded-lg border border-border shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-        onClick={() => setIsOpen(true)}
-      />
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-background/95 backdrop-blur-sm border-none overflow-hidden">
-          <DialogClose className="absolute right-4 top-4 z-50 rounded-full bg-background/80 p-2 hover:bg-background transition-colors">
-            <X className="h-5 w-5" />
-            <span className="sr-only">Zapri</span>
-          </DialogClose>
-          <div className="overflow-auto max-h-[90vh] p-4">
-            <img
-              src={src}
-              alt={alt}
-              className="w-full max-w-4xl mx-auto rounded-lg"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
+// Image paths
+const WORDPRESS_IMAGES = ['/docs/wordpress-hfcm.png', '/docs/wordpress-manual.png'];
+const SHOPIFY_IMAGES = ['/docs/shopify-1.png', '/docs/shopify-2.png'];
+const ALL_IMAGES = [...WORDPRESS_IMAGES, ...SHOPIFY_IMAGES];
 
 export default function DashboardDocs() {
   const { widget, loading } = useWidget();
@@ -245,7 +214,11 @@ export default function DashboardDocs() {
               <li>V polje "Snippet / Code" prilepite vašo embed kodo in kliknite <strong className="text-foreground">Save</strong></li>
             </ol>
             
-            <ImageWithZoom src="/docs/wordpress-hfcm.png" alt="WordPress HFCM vtičnik nastavitve" />
+            <LightboxImage 
+              src="/docs/wordpress-hfcm.png" 
+              alt="WordPress HFCM vtičnik nastavitve"
+              allImages={ALL_IMAGES}
+            />
           </div>
 
           {/* Option 2 - Manual editing */}
@@ -261,7 +234,11 @@ export default function DashboardDocs() {
                 <li>Prilepite embed kodo pred <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">&lt;/body&gt;</code> tag in shranite</li>
               </ol>
               
-              <ImageWithZoom src="/docs/wordpress-manual.png" alt="WordPress ročno urejanje teme" />
+              <LightboxImage 
+                src="/docs/wordpress-manual.png" 
+                alt="WordPress ročno urejanje teme"
+                allImages={ALL_IMAGES}
+              />
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -280,14 +257,22 @@ export default function DashboardDocs() {
             <li>Pri vaši aktivni temi kliknite na tri pikice (⋯) in izberite <strong className="text-foreground">"Edit code"</strong></li>
           </ol>
           
-          <ImageWithZoom src="/docs/shopify-1.png" alt="Shopify Themes nastavitve" />
+          <LightboxImage 
+            src="/docs/shopify-1.png" 
+            alt="Shopify Themes nastavitve"
+            allImages={ALL_IMAGES}
+          />
 
           <ol start={3} className="list-decimal list-inside space-y-2 text-muted-foreground">
             <li>V levem meniju odprite mapo <strong className="text-foreground">"Layout"</strong> in kliknite na <strong className="text-foreground">"theme.liquid"</strong></li>
             <li>Prilepite embed kodo pred <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">&lt;/body&gt;</code> tag in kliknite <strong className="text-foreground">"Save"</strong></li>
           </ol>
           
-          <ImageWithZoom src="/docs/shopify-2.png" alt="Shopify theme.liquid urejanje" />
+          <LightboxImage 
+            src="/docs/shopify-2.png" 
+            alt="Shopify theme.liquid urejanje"
+            allImages={ALL_IMAGES}
+          />
         </div>
       ),
     },
