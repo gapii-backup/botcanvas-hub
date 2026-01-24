@@ -234,7 +234,7 @@ export default function Login() {
                 <img 
                   src={logoInline}
                   alt="BotMotion.ai" 
-                  className="h-14" 
+                  className="h-11" 
                   style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
                 />
               </a>
