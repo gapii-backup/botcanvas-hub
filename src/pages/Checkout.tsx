@@ -7,9 +7,9 @@ import { ArrowLeft, CreditCard, Lock, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const planDetails: Record<string, { name: string; price: string; priceDisplay: string }> = {
-  basic: { name: 'Basic', price: '€49/mesec', priceDisplay: '€49' },
-  pro: { name: 'Pro', price: '€119/mesec', priceDisplay: '€119' },
-  enterprise: { name: 'Enterprise', price: '€299/mesec', priceDisplay: '€299' },
+  basic: { name: 'Basic', price: '€49.99/mesec', priceDisplay: '€49.99' },
+  pro: { name: 'Pro', price: '€129.99/mesec', priceDisplay: '€129.99' },
+  enterprise: { name: 'Enterprise', price: '€299.99/mesec', priceDisplay: '€299.99' },
 };
 
 export default function Checkout() {
