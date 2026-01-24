@@ -352,12 +352,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 height: '36px', 
                 minWidth: '36px',
                 borderRadius: '10px',
-                background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
+                background: config.iconBgColor || config.primaryColor,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
-                boxShadow: `0 2px 8px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.3)}`
+                boxShadow: `0 2px 8px ${hexToRgba(config.iconBgColor || config.primaryColor, 0.3)}`
               }}
             >
               <BotIconOrAvatar config={config} size={20} />
