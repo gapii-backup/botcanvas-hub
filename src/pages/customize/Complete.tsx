@@ -695,14 +695,14 @@ export default function Complete() {
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2 sticky bottom-0 bg-background pt-4 pb-2 -mb-6 -mx-6 px-6 border-t border-border sm:relative sm:border-0 sm:bg-transparent sm:p-0 sm:m-0">
-            <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto order-2 sm:order-1">
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-border mt-4">
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
               Prekliči
             </Button>
             <Button 
               onClick={handleContinueToCheckout} 
               disabled={isSaving}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 order-1 sm:order-2"
+              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
             >
               <CreditCard className="h-4 w-4 mr-2" />
               {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
