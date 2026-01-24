@@ -55,7 +55,7 @@ const planPrices = {
     ] as FeatureItem[]
   },
   pro: { 
-    monthly: 119.99, yearly: 1149.99, name: 'Pro',
+    monthly: 129.99, yearly: 1249.99, name: 'Pro',
     features: [
       'Vse iz BASIC paketa, plus:',
       '3.000 pogovorov na mesec',
@@ -90,8 +90,8 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true, icon: Calendar },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 50, period: 'mesec', icon: Lightbulb },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 20, period: 'mesec', icon: Users },
+    { id: 'product_ai', name: 'Product AI', price: 80, period: 'mesec', icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec', icon: Ticket }
   ],
   yearly: [
@@ -101,8 +101,8 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true, icon: Calendar },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 480, period: 'leto', icon: Lightbulb },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto', icon: Users },
+    { id: 'product_ai', name: 'Product AI', price: 768, period: 'leto', icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto', icon: Ticket }
   ]
 };

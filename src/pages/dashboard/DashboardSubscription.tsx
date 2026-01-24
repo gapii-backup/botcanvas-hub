@@ -18,20 +18,20 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
 
 const planPrices = {
-  monthly: { basic: 49.99, pro: 119.99, enterprise: 299.99 },
-  yearly: { basic: 479.99, pro: 1149.99, enterprise: 2879.99 }
+  monthly: { basic: 49.99, pro: 129.99, enterprise: 299.99 },
+  yearly: { basic: 479.99, pro: 1249.99, enterprise: 2879.99 }
 };
 
 const addonPrices = {
   monthly: {
     capacity_500: 18, capacity_1000: 32, capacity_2500: 70, capacity_5000: 120,
-    multilanguage: 30, booking: 35, contacts: 15, product_ai: 50, tickets: 35
+    multilanguage: 30, booking: 35, contacts: 20, product_ai: 80, tickets: 35
   },
   yearly: {
     // Capacity - mesečne cene (vedno mesečni)
     capacity_500: 18, capacity_1000: 32, capacity_2500: 70, capacity_5000: 120,
     // Ostalo - letne cene
-    multilanguage: 288, booking: 336, contacts: 144, product_ai: 480, tickets: 336
+    multilanguage: 288, booking: 336, contacts: 192, product_ai: 768, tickets: 336
   }
 };
 

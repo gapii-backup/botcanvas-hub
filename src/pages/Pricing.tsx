@@ -33,8 +33,8 @@ const plans = [
   {
     id: 'pro',
     name: 'PRO',
-    monthlyPrice: 119.99,
-    yearlyPrice: 1149.99,
+    monthlyPrice: 129.99,
+    yearlyPrice: 1249.99,
     setupFee: 140,
     description: 'Za rastoča podjetja',
     icon: Sparkles,
