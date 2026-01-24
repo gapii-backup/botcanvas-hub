@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWidget } from '@/hooks/useWidget';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, X } from 'lucide-react';
 import { z } from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import logo from '@/assets/logo.png';
 import logoInline from '@/assets/logo-inline-dark.png';
 
@@ -54,8 +46,8 @@ type FieldErrors = {
 
 const ErrorMessage = ({ message }: { message: string }) => (
   <div className="flex items-center gap-2 mt-1.5">
-    <AlertCircle className="h-4 w-4 text-warning shrink-0" />
-    <span className="text-xs text-warning">{message}</span>
+    <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+    <span className="text-xs text-red-400">{message}</span>
   </div>
 );
 
@@ -83,7 +75,7 @@ export default function Login() {
       passed,
       total: passwordRequirements.length,
       percentage: (passed / passwordRequirements.length) * 100,
-      color: passed === 0 ? 'bg-muted' : passed === 1 ? 'bg-destructive' : passed === 2 ? 'bg-warning' : 'bg-success',
+      color: passed === 0 ? 'bg-white/5' : passed === 1 ? 'bg-red-500' : passed === 2 ? 'bg-yellow-500' : 'bg-emerald-500',
       label: passed === 0 ? '' : passed === 1 ? 'Šibko' : passed === 2 ? 'Srednje' : 'Močno',
     };
   })();
@@ -137,8 +129,8 @@ export default function Login() {
 
   if (user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#3B82F6]" />
       </div>
     );
   }
@@ -229,26 +221,268 @@ export default function Login() {
     setIsLoading(false);
   };
 
+  const inputClassName = (hasError: boolean) => `
+    w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3.5 
+    text-white placeholder:text-slate-600 
+    focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 
+    transition-all
+    ${hasError ? 'border-red-500' : ''}
+  `;
+
   return (
-    <div className="min-h-screen flex">
-      {/* Left side - Visual */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 gradient-dark relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float delay-300" />
+    <div className="min-h-screen flex bg-[#050505]">
+      {/* Left side - Form */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+        <div 
+          className="w-full max-w-md space-y-8 bg-[#171717] border border-white/10 rounded-2xl p-6 sm:p-8 relative overflow-hidden animate-fade-in"
+        >
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
+          
+          <div className="relative z-10 space-y-8">
+            <div className="text-center">
+              <a href="https://botmotion.ai/" className="inline-flex items-center gap-2 mb-8">
+                <img 
+                  src={logoInline}
+                  alt="BotMotion.ai" 
+                  className="h-14" 
+                  style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
+                />
+              </a>
+              <h1 className="text-3xl font-bold text-white">
+                {isRegisterMode ? 'Ustvarite račun' : 'Dobrodošli nazaj'}
+              </h1>
+              <p className="mt-2 text-slate-400">
+                {isRegisterMode ? 'Začnite graditi svoje AI chatbota' : 'Prijavite se v svoj račun'}
+              </p>
+            </div>
+
+            {errors.general && (
+              <div className="p-3 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl">
+                {errors.general}
+              </div>
+            )}
+
+            {isRegisterMode ? (
+              // Register Form
+              <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-white font-medium">Ime</Label>
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Janez Novak"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.name)}
+                  />
+                  {errors.name && <ErrorMessage message={errors.name} />}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white font-medium">Email</Label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="ime@podjetje.si"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.email)}
+                  />
+                  {errors.email && <ErrorMessage message={errors.email} />}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-white font-medium">Telefonska številka</Label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    placeholder="+386 40 123 456"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.phone)}
+                  />
+                  {errors.phone && <ErrorMessage message={errors.phone} />}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-white font-medium">Geslo</Label>
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.password)}
+                  />
+                  {errors.password && <ErrorMessage message={errors.password} />}
+                  
+                  {password && unfulfilledRequirements.length > 0 && (
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 ${passwordStrength.color}`}
+                            style={{ width: `${passwordStrength.percentage}%` }}
+                          />
+                        </div>
+                        {passwordStrength.label && (
+                          <span className={`text-xs font-medium ${
+                            passwordStrength.passed === 1 ? 'text-red-400' : 
+                            passwordStrength.passed === 2 ? 'text-yellow-400' : 'text-emerald-400'
+                          }`}>
+                            {passwordStrength.label}
+                          </span>
+                        )}
+                      </div>
+                      <ul className="space-y-1">
+                        {unfulfilledRequirements.map((req, index) => (
+                          <li key={index} className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="h-1 w-1 rounded-full bg-slate-500" />
+                            {req.label}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-white font-medium">Potrdi geslo</Label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.confirmPassword)}
+                  />
+                  {errors.confirmPassword && <ErrorMessage message={errors.confirmPassword} />}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`shiny-button w-full py-3.5 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                  ) : (
+                    'Registriraj se'
+                  )}
+                </button>
+              </form>
+            ) : (
+              // Login Form
+              <form onSubmit={handleLoginSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-white font-medium">Email</Label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="ime@podjetje.si"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.email)}
+                  />
+                  {errors.email && <ErrorMessage message={errors.email} />}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-white font-medium">Geslo</Label>
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={inputClassName(!!errors.password)}
+                  />
+                  {errors.password && <ErrorMessage message={errors.password} />}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`shiny-button w-full py-3.5 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${shake ? 'animate-shake' : ''}`}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                  ) : (
+                    'Prijava'
+                  )}
+                </button>
+              </form>
+            )}
+
+            <div className="text-center space-y-3 pt-2">
+              {!isRegisterMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-blue-400 hover:text-blue-300 font-medium block w-full transition-colors py-1"
+                >
+                  Pozabljeno geslo?
+                </button>
+              )}
+              <p className="text-sm text-slate-500">
+                {isRegisterMode ? (
+                  <>
+                    Že imate račun?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode(false)}
+                      className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    >
+                      Prijavite se
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Nimate računa?{' '}
+                    <button
+                      type="button"
+                      onClick={() => switchMode(true)}
+                      className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    >
+                      Registrirajte se
+                    </button>
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Right side - Visual */}
+      <div className="hidden lg:flex flex-1 items-center justify-center p-8 relative overflow-hidden">
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 grid-pattern" />
+        
+        {/* Blue blur glow effect */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]" />
+        
         <div className="relative z-10 text-center max-w-md">
-          <div className="h-24 w-24 rounded-2xl bg-card/50 backdrop-blur-sm flex items-center justify-center mx-auto mb-8 animate-float glow-primary-lg p-2">
+          <div className="h-24 w-24 rounded-2xl bg-[#171717] border border-white/10 flex items-center justify-center mx-auto mb-8 animate-float p-2">
             <img 
               src={logo} 
               alt="BotMotion.ai" 
-              className="h-full w-full object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]" 
+              className="h-full w-full object-contain" 
+              style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
             />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             {isRegisterMode ? 'Inteligentni chatboti za vaše podjetje' : 'Vaš chatbot vas čaka'}
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-slate-400">
             {isRegisterMode 
               ? 'Ustvarite prilagojene AI chatbote v minutah. Brez programiranja.'
               : 'Prijavite se in upravljajte svoje AI asistente.'
@@ -257,295 +491,92 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right side - Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8 animate-fade-in">
-          <div className="text-center">
-            <a href="https://botmotion.ai/" className="inline-flex items-center gap-2 mb-8">
-              <img 
-                src={logoInline} 
-                alt="BotMotion.ai" 
-                className="h-14 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
-              />
-            </a>
-            <h1 className="text-3xl font-bold text-foreground">
-              {isRegisterMode ? 'Ustvarite račun' : 'Dobrodošli nazaj'}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {isRegisterMode ? 'Začnite graditi svoje AI chatbota' : 'Prijavite se v svoj račun'}
-            </p>
-          </div>
-
-          {errors.general && (
-            <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive rounded-md">
-              {errors.general}
-            </div>
-          )}
-
-          {isRegisterMode ? (
-            // Register Form
-            <form onSubmit={handleRegisterSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="name">Ime</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Janez Novak"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className={errors.name ? 'border-destructive' : ''}
-                />
-                {errors.name && <ErrorMessage message={errors.name} />}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="ime@podjetje.si"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && <ErrorMessage message={errors.email} />}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefonska številka</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+386 40 123 456"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  className={errors.phone ? 'border-destructive' : ''}
-                />
-                {errors.phone && <ErrorMessage message={errors.phone} />}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Geslo</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={errors.password ? 'border-destructive' : ''}
-                />
-                {errors.password && <ErrorMessage message={errors.password} />}
-                
-                {password && unfulfilledRequirements.length > 0 && (
-                  <div className="space-y-2 mt-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                          style={{ width: `${passwordStrength.percentage}%` }}
-                        />
-                      </div>
-                      {passwordStrength.label && (
-                        <span className={`text-xs font-medium ${
-                          passwordStrength.passed === 1 ? 'text-destructive' : 
-                          passwordStrength.passed === 2 ? 'text-warning' : 'text-success'
-                        }`}>
-                          {passwordStrength.label}
-                        </span>
-                      )}
-                    </div>
-                    <ul className="space-y-1">
-                      {unfulfilledRequirements.map((req, index) => (
-                        <li key={index} className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="h-1 w-1 rounded-full bg-muted-foreground" />
-                          {req.label}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Potrdi geslo</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className={errors.confirmPassword ? 'border-destructive' : ''}
-                />
-                {errors.confirmPassword && <ErrorMessage message={errors.confirmPassword} />}
-              </div>
-
-              <Button
-                type="submit"
-                className={`w-full ${shake ? 'animate-shake' : ''}`}
-                variant="glow"
-                size="lg"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Registriraj se'
-                )}
-              </Button>
-            </form>
-          ) : (
-            // Login Form
-            <form onSubmit={handleLoginSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="ime@podjetje.si"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className={errors.email ? 'border-destructive' : ''}
-                />
-                {errors.email && <ErrorMessage message={errors.email} />}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Geslo</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={errors.password ? 'border-destructive' : ''}
-                />
-                {errors.password && <ErrorMessage message={errors.password} />}
-              </div>
-
-              <Button
-                type="submit"
-                className={`w-full ${shake ? 'animate-shake' : ''}`}
-                variant="glow"
-                size="lg"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Prijava'
-                )}
-              </Button>
-            </form>
-          )}
-
-          <div className="text-center space-y-2">
-            {!isRegisterMode && (
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={closeForgotPasswordModal}
+          />
+          
+          {/* Blue blur glow behind modal */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
+          
+          {/* Modal */}
+          <div className="relative z-10 w-full max-w-md bg-[#171717] border border-white/10 rounded-2xl p-6 overflow-hidden animate-fade-in">
+            {/* Subtle gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
+            
+            <div className="relative z-10">
+              {/* Close button */}
               <button
-                type="button"
-                onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-primary hover:underline font-medium block w-full"
+                onClick={closeForgotPasswordModal}
+                className="absolute top-0 right-0 p-2 text-slate-400 hover:text-white transition-colors"
               >
-                Pozabljeno geslo?
+                <X className="h-5 w-5" />
               </button>
-            )}
-            <p className="text-sm text-muted-foreground">
-              {isRegisterMode ? (
-                <>
-                  Že imate račun?{' '}
-                  <button
-                    type="button"
-                    onClick={() => switchMode(false)}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Prijavite se
-                  </button>
-                </>
-              ) : (
-                <>
-                  Nimate računa?{' '}
-                  <button
-                    type="button"
-                    onClick={() => switchMode(true)}
-                    className="text-primary hover:underline font-medium"
-                  >
-                    Registrirajte se
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
-
-          {/* Forgot Password Modal */}
-          <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Ponastavitev gesla</DialogTitle>
-                <DialogDescription>
+              
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-white mb-2">Ponastavitev gesla</h2>
+                <p className="text-sm text-slate-400">
                   Vnesite svoj email naslov in poslali vam bomo povezavo za ponastavitev gesla.
-                </DialogDescription>
-              </DialogHeader>
+                </p>
+              </div>
+              
               {!resetSent ? (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="resetEmail">Email</Label>
-                    <Input
+                    <Label htmlFor="resetEmail" className="text-white font-medium">Email</Label>
+                    <input
                       id="resetEmail"
                       type="email"
                       placeholder="ime@podjetje.si"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       required
+                      className={inputClassName(false)}
                     />
                   </div>
-                  <div className="flex gap-2">
-                    <Button
+                  <div className="flex gap-3">
+                    <button
                       type="button"
-                      variant="outline"
                       onClick={closeForgotPasswordModal}
-                      className="flex-1"
+                      className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-colors"
                     >
                       Zapri
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       type="submit"
-                      variant="glow"
                       disabled={isResetting}
-                      className="flex-1"
+                      className="shiny-button flex-1 py-3 text-white font-semibold transition-all disabled:opacity-50"
                     >
                       {isResetting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                       ) : (
                         'Pošlji povezavo'
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </form>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-slate-400">
                     Če email obstaja v našem sistemu, smo poslali povezavo za ponastavitev gesla.
                   </p>
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
                     onClick={closeForgotPasswordModal}
-                    className="w-full"
+                    className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-colors"
                   >
                     Zapri
-                  </Button>
+                  </button>
                 </div>
               )}
-            </DialogContent>
-          </Dialog>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
