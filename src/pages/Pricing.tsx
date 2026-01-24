@@ -40,7 +40,7 @@ const plans = [
     icon: Sparkles,
     highlight: 'Vse iz BASIC paketa, plus:',
     features: [
-      '2.500 pogovorov na mesec',
+      '3.000 pogovorov na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov (leadov) neposredno v pogovoru',
       'Kreiranje support ticketov neposredno preko chatbota',
@@ -69,7 +69,7 @@ const plans = [
 ];
 
 const comparisonFeatures = [
-  { name: 'Pogovori na mesec', basic: '1.000', pro: '2.500', enterprise: '8.000' },
+  { name: 'Pogovori na mesec', basic: '1.000', pro: '3.000', enterprise: '8.000' },
   { name: 'Podpora za jezike', basic: '1 jezik', pro: 'Več jezikov', enterprise: 'Več jezikov' },
   { name: 'Dodajanje Q&A vprašanj', basic: true, pro: true, enterprise: true },
   { name: 'Nalaganje PDF dokumentov', basic: true, pro: true, enterprise: true },
