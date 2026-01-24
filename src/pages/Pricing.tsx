@@ -19,7 +19,7 @@ const plans = [
     description: 'Za manjša podjetja',
     icon: Bot,
     features: [
-      '2.000 pogovorov na mesec',
+      '1.000 pogovorov na mesec',
       'Podpora za 1 jezik',
       'Dodajanje Q&A vprašanj',
       'Nalaganje PDF dokumentov',
@@ -40,7 +40,7 @@ const plans = [
     icon: Sparkles,
     highlight: 'Vse iz BASIC paketa, plus:',
     features: [
-      '5.000 pogovorov na mesec',
+      '2.500 pogovorov na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov (leadov) neposredno v pogovoru',
       'Kreiranje support ticketov neposredno preko chatbota',
@@ -59,7 +59,7 @@ const plans = [
     icon: Building2,
     highlight: 'Vse iz PRO paketa, plus:',
     features: [
-      '10.000 pogovorov na mesec',
+      '8.000 pogovorov na mesec',
       'Rezervacija sestankov neposredno preko chatbota',
       'Pametna priporočila izdelkov (AI)',
       'Zgodovina pogovorov – 180 dni',
@@ -69,7 +69,7 @@ const plans = [
 ];
 
 const comparisonFeatures = [
-  { name: 'Pogovori na mesec', basic: '2.000', pro: '5.000', enterprise: '10.000' },
+  { name: 'Pogovori na mesec', basic: '1.000', pro: '2.500', enterprise: '8.000' },
   { name: 'Podpora za jezike', basic: '1 jezik', pro: 'Več jezikov', enterprise: 'Več jezikov' },
   { name: 'Dodajanje Q&A vprašanj', basic: true, pro: true, enterprise: true },
   { name: 'Nalaganje PDF dokumentov', basic: true, pro: true, enterprise: true },
