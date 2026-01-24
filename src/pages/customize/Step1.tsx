@@ -61,7 +61,7 @@ export default function Step1() {
       preview={<WidgetPreview config={config} showChat={false} showHome={true} />}
     >
       <div className="space-y-8">
-        <div>
+        <div className="hidden lg:block">
           <h2 className="text-2xl font-bold text-foreground mb-2">Chat nastavitve</h2>
           <p className="text-muted-foreground">Prilagodite sporočila in hitra vprašanja.</p>
         </div>
