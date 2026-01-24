@@ -44,7 +44,7 @@ const planPrices = {
   basic: { 
     monthly: 49.99, yearly: 479.99, name: 'Basic',
     features: [
-      '2.000 pogovorov na mesec',
+      '1.000 pogovorov na mesec',
       'Podpora za 1 jezik',
       'Dodajanje Q&A vprašanj',
       'Nalaganje PDF/Word dokumentov',
@@ -58,7 +58,7 @@ const planPrices = {
     monthly: 119.99, yearly: 1149.99, name: 'Pro',
     features: [
       'Vse iz BASIC paketa, plus:',
-      '5.000 pogovorov na mesec',
+      '2.500 pogovorov na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov (leadov) neposredno v pogovoru',
       'Kreiranje support ticketov neposredno preko chatbota',
@@ -70,7 +70,7 @@ const planPrices = {
     monthly: 299.99, yearly: 2879.99, name: 'Enterprise',
     features: [
       'Vse iz PRO paketa, plus:',
-      '10.000 pogovorov na mesec',
+      '8.000 pogovorov na mesec',
       'Rezervacija sestankov neposredno preko chatbota',
       'Pametna priporočila izdelkov (AI)',
       'Zgodovina pogovorov – 180 dni'
@@ -84,10 +84,10 @@ type AddonItem = { id: string; name: string; price: number; period: string; proO
 
 const allAddons: Record<string, AddonItem[]> = {
   monthly: [
-    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_500', name: '+500 pogovorov', price: 18, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true, icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 15, period: 'mesec', icon: Users },
@@ -95,10 +95,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec', icon: Ticket }
   ],
   yearly: [
-    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 12, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_2000', name: '+2.000 pogovorov', price: 22, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 52, period: 'mesec', icon: MessageSquare },
-    { id: 'capacity_10000', name: '+10.000 pogovorov', price: 99, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_500', name: '+500 pogovorov', price: 18, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
+    { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true, icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 144, period: 'leto', icon: Users },
