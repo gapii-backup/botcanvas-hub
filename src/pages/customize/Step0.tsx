@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Globe, Sparkles, ArrowRight } from 'lucide-react';
+import { Globe, ArrowRight } from 'lucide-react';
+import logo from '@/assets/logo.png';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -120,8 +121,12 @@ export default function Step0() {
 
   const rightPanel = (
     <div className="text-center flex flex-col items-center justify-center h-full">
-      <div className="h-24 w-24 rounded-3xl gradient-primary flex items-center justify-center mx-auto mb-6 shadow-lg">
-        <Sparkles className="h-12 w-12 text-primary-foreground" />
+      <div className="mb-6 animate-float">
+        <img 
+          src={logo} 
+          alt="BotMotion.ai" 
+          className="h-24 w-24 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]"
+        />
       </div>
       <h3 className="text-xl font-semibold text-foreground mb-3">
         Ustvarite AI asistenta
