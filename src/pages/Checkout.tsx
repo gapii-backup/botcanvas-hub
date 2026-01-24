@@ -120,7 +120,7 @@ export default function Checkout() {
 
               <div className="space-y-2">
                 <Label>Ime na kartici</Label>
-                <Input placeholder="Janez Novak" />
+                <Input placeholder="Ime in Priimek" />
               </div>
 
               <Button
