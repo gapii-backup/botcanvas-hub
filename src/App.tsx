@@ -38,6 +38,7 @@ import DashboardSubscription from "./pages/dashboard/DashboardSubscription";
 import DashboardUpgrade from "./pages/dashboard/DashboardUpgrade";
 import DashboardHelp from "./pages/dashboard/DashboardHelp";
 import DashboardKnowledge from "./pages/dashboard/DashboardKnowledge";
+import DashboardDocs from "./pages/dashboard/DashboardDocs";
 
 const queryClient = new QueryClient();
 
@@ -184,6 +185,16 @@ const App = () => (
                 <ProtectedRoute>
                   <DashboardGuard>
                     <DashboardHelp />
+                  </DashboardGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/docs"
+              element={
+                <ProtectedRoute>
+                  <DashboardGuard>
+                    <DashboardDocs />
                   </DashboardGuard>
                 </ProtectedRoute>
               }

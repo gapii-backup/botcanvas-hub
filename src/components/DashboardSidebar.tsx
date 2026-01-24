@@ -39,6 +39,7 @@ import {
   Undo2,
   Sparkles,
   BookOpen,
+  FileText,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
@@ -68,6 +69,7 @@ const navItems: NavItem[] = [
   { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true, iconColor: 'text-amber-500', bgColor: 'bg-amber-500/20' },
   { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true, iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/20' },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings', iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
+  { label: 'Dokumentacija', icon: FileText, href: '/dashboard/docs', iconColor: 'text-cyan-500', bgColor: 'bg-cyan-500/20' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help', iconColor: 'text-violet-500', bgColor: 'bg-violet-500/20' },
 ];
 
