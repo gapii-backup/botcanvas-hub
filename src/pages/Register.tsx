@@ -3,9 +3,8 @@ import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
-import { Loader2, AlertCircle, X } from 'lucide-react';
+import { Loader2, AlertCircle, X, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
-import logo from '@/assets/logo.png';
 import logoInline from '@/assets/logo-inline-dark.png';
 
 const passwordRequirements = [
@@ -17,15 +16,10 @@ const passwordRequirements = [
 const registerSchema = z.object({
   name: z.string().min(2, 'Ime mora imeti vsaj 2 znaka'),
   email: z.string().email('Neveljaven email naslov'),
-  phone: z.string().optional(),
   password: z.string()
     .min(8, 'Geslo mora imeti vsaj 8 znakov')
     .regex(/[A-Z]/, 'Geslo mora vsebovati vsaj 1 veliko črko')
     .regex(/[0-9]/, 'Geslo mora vsebovati vsaj 1 številko'),
-  confirmPassword: z.string().min(8, 'Geslo mora imeti vsaj 8 znakov'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Gesli se ne ujemata',
-  path: ['confirmPassword'],
 });
 
 const loginSchema = z.object({
@@ -36,9 +30,7 @@ const loginSchema = z.object({
 type FieldErrors = {
   name?: string;
   email?: string;
-  phone?: string;
   password?: string;
-  confirmPassword?: string;
   general?: string;
 };
 
@@ -53,9 +45,8 @@ export default function Register() {
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [shake, setShake] = useState(false);
@@ -113,9 +104,7 @@ export default function Register() {
   const clearForm = () => {
     setName('');
     setEmail('');
-    setPhone('');
     setPassword('');
-    setConfirmPassword('');
     setErrors({});
   };
 
@@ -128,7 +117,7 @@ export default function Register() {
     e.preventDefault();
     setErrors({});
     
-    const validation = registerSchema.safeParse({ name, email, phone, password, confirmPassword });
+    const validation = registerSchema.safeParse({ name, email, password });
     if (!validation.success) {
       const newErrors: FieldErrors = {};
       validation.error.errors.forEach(err => {
@@ -144,7 +133,7 @@ export default function Register() {
 
     setIsLoading(true);
 
-    const { error } = await signUp(email, password, name, phone);
+    const { error } = await signUp(email, password, name);
 
     if (error) {
       let message = 'Prišlo je do napake pri registraciji.';
@@ -286,15 +275,24 @@ export default function Register() {
                       Pozabljeno geslo?
                     </button>
                   </div>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className={inputClassName(!!errors.password)}
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className={`${inputClassName(!!errors.password)} pr-12`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                   {errors.password && <ErrorMessage message={errors.password} />}
                 </div>
 
@@ -342,30 +340,25 @@ export default function Register() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-white font-medium">Telefonska številka</Label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    placeholder="+386 40 123 456"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                    className={inputClassName(!!errors.phone)}
-                  />
-                  {errors.phone && <ErrorMessage message={errors.phone} />}
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="password" className="text-white font-medium">Geslo</Label>
-                  <input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className={inputClassName(!!errors.password)}
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className={`${inputClassName(!!errors.password)} pr-12`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                   {errors.password && <ErrorMessage message={errors.password} />}
                   
                   {password && unfulfilledRequirements.length > 0 && (
@@ -396,20 +389,6 @@ export default function Register() {
                       </ul>
                     </div>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-white font-medium">Potrdi geslo</Label>
-                  <input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    className={inputClassName(!!errors.confirmPassword)}
-                  />
-                  {errors.confirmPassword && <ErrorMessage message={errors.confirmPassword} />}
                 </div>
 
                 <button
@@ -462,25 +441,21 @@ export default function Register() {
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 grid-pattern" />
         
-        {/* Blue blur glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px]" />
+        {/* Blue glow effects */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500/15 rounded-full blur-[96px]" />
         
-        <div className="relative z-10 text-center max-w-md">
-          <div className="h-24 w-24 rounded-2xl bg-[#171717] border border-white/10 flex items-center justify-center mx-auto mb-8 animate-float p-2">
-            <img 
-              src={logo} 
-              alt="BotMotion.ai" 
-              className="h-full w-full object-contain" 
-              style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
-            />
-          </div>
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {isLoginMode ? 'Vaš chatbot vas čaka' : 'Inteligentni chatboti za vaše podjetje'}
-          </h2>
-          <p className="text-slate-400">
+        <div className="relative z-10 text-center max-w-lg">
+          <h2 className="text-4xl font-bold text-white mb-4">
             {isLoginMode 
               ? 'Prijavite se in upravljajte svojega AI chatbota.'
               : 'Ustvarite AI chatbota v minuti. Brez programiranja.'
+            }
+          </h2>
+          <p className="text-slate-400 text-lg">
+            {isLoginMode 
+              ? 'Dostopajte do svoje nadzorne plošče, analizirajte pogovore in optimizirajte vašega chatbota.'
+              : 'Povečajte prodajo, zmanjšajte stroške podpore in izboljšajte izkušnjo strank.'
             }
           </p>
         </div>
@@ -488,87 +463,62 @@ export default function Register() {
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={closeForgotPasswordModal}
-          />
-          
-          {/* Blue blur glow behind modal */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
-          
-          {/* Modal */}
-          <div className="relative z-10 w-full max-w-md bg-[#171717] border border-white/10 rounded-2xl p-6 overflow-hidden animate-fade-in">
-            {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#171717] border border-white/10 rounded-2xl p-6 w-full max-w-md relative animate-fade-in">
+            <button
+              onClick={closeForgotPasswordModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
             
-            <div className="relative z-10">
-              {/* Close button */}
-              <button
-                onClick={closeForgotPasswordModal}
-                className="absolute top-0 right-0 p-2 text-slate-400 hover:text-white transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-              
-              <div className="mb-6">
-                <h2 className="text-xl font-bold text-white mb-2">Ponastavitev gesla</h2>
-                <p className="text-sm text-slate-400">
+            <h2 className="text-xl font-bold text-white mb-2">Ponastavitev gesla</h2>
+            
+            {!resetSent ? (
+              <>
+                <p className="text-slate-400 text-sm mb-6">
                   Vnesite svoj email naslov in poslali vam bomo povezavo za ponastavitev gesla.
                 </p>
-              </div>
-              
-              {!resetSent ? (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="resetEmail" className="text-white font-medium">Email</Label>
-                    <input
-                      id="resetEmail"
-                      type="email"
-                      placeholder="ime@podjetje.si"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      required
-                      className={inputClassName(false)}
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={closeForgotPasswordModal}
-                      className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-colors"
-                    >
-                      Zapri
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isResetting}
-                      className="shiny-button flex-1 py-3 text-white font-semibold transition-all disabled:opacity-50"
-                    >
-                      {isResetting ? (
-                        <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                      ) : (
-                        'Pošlji povezavo'
-                      )}
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-sm text-slate-400">
-                    Če email obstaja v našem sistemu, smo poslali povezavo za ponastavitev gesla.
-                  </p>
+                  <input
+                    type="email"
+                    placeholder="ime@podjetje.si"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    className={inputClassName(false)}
+                  />
                   <button
-                    type="button"
-                    onClick={closeForgotPasswordModal}
-                    className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-colors"
+                    type="submit"
+                    disabled={isResetting}
+                    className="shiny-button w-full py-3.5 bg-[#282828] text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Zapri
+                    {isResetting ? (
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                    ) : (
+                      'Pošlji povezavo'
+                    )}
                   </button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                 </div>
-              )}
-            </div>
+                <p className="text-slate-300">
+                  Povezava za ponastavitev gesla je bila poslana na <strong className="text-white">{resetEmail}</strong>
+                </p>
+                <button
+                  onClick={closeForgotPasswordModal}
+                  className="mt-4 text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  Zapri
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
