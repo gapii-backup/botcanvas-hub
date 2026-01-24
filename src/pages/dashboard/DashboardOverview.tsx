@@ -300,7 +300,7 @@ export default function DashboardOverview() {
         </div>
 
         {/* Message Usage Card */}
-        {(subscriptionStatus === 'active' || normalizedSubscriptionStatus === 'cancelled' || isCanceling) && (
+        {subscriptionStatus === 'active' && (
           <MessageUsageCard
             tableName={widget?.table_name}
             billingPeriodStart={widget?.billing_period_start}
