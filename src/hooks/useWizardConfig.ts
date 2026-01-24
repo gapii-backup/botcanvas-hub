@@ -35,7 +35,11 @@ export type BotConfig = {
 export const BOT_ICONS = [
   { 
     name: 'Bot', 
-    paths: ['M12 8V4H8', 'rect x="4" y="8" width="16" height="12" rx="2"', 'M9 16h0', 'M15 16h0']
+    paths: [
+      'M12 8V4H8',
+      'M4 8h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z',
+      'M2 14h2m16 0h2m-7-1v2m-6-2v2'
+    ]
   },
   { 
     name: 'MessageSquare', 
