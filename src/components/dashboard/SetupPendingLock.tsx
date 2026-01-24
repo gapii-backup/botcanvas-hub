@@ -11,10 +11,10 @@ export function SetupPendingLock() {
         <Lock className="w-10 h-10 text-muted-foreground" />
       </div>
       <h2 className="text-2xl font-bold text-foreground mb-3">
-        Prosimo počakajte
+        Chatbot je v pripravi
       </h2>
       <p className="text-muted-foreground mb-6 max-w-md">
-        Vaš chatbot se pripravlja. To lahko traja do 72 ur.
+        Vaš chatbot se pripravlja. To lahko traja do 24 ur.
       </p>
       <Button 
         onClick={() => navigate('/dashboard')}

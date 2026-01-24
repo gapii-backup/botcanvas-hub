@@ -355,7 +355,7 @@ export default function DashboardOverview() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-foreground">Vaš chatbot se pripravlja</h3>
-                <p className="text-muted-foreground mt-1">To lahko traja do 72 ur. Obvestili vas bomo, ko bo pripravljen.</p>
+                <p className="text-muted-foreground mt-1">To lahko traja do 24 ur. Obvestili vas bomo, ko bo pripravljen.</p>
               </div>
             </div>
           </div>
