@@ -299,7 +299,7 @@ export default function Pricing() {
         </div>
 
         {/* Comparison Table */}
-        <div className="mt-20 max-w-5xl mx-auto">
+        <div className="hidden lg:block mt-20 max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-foreground text-center mb-8">
             Primerjava paketov
           </h2>
