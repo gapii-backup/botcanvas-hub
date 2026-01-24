@@ -45,7 +45,7 @@ const plans = [
     id: 'pro',
     features: [
       'Vse iz BASIC paketa, plus:',
-      '5.000 pogovorov na mesec',
+      '2.500 pogovorov na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov (leadov) neposredno v pogovoru',
       'Kreiranje support ticketov neposredno preko chatbota',
@@ -58,7 +58,7 @@ const plans = [
     id: 'enterprise',
     features: [
       'Vse iz PRO paketa, plus:',
-      '10.000 pogovorov na mesec',
+      '8.000 pogovorov na mesec',
       'Rezervacija sestankov neposredno preko chatbota',
       'Pametna priporočila izdelkov (AI)',
       'Zgodovina pogovorov – 180 dni'

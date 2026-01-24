@@ -843,7 +843,7 @@ export default function AdminWidgetEdit() {
                   <Input
                     type="number"
                     id="custom-capacity-input"
-                    placeholder="npr. 5000, 10000"
+                    placeholder="npr. 2500, 5000"
                     min={0}
                   />
                 </div>
