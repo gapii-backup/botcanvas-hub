@@ -145,12 +145,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                 width: '64px', 
                 height: '64px', 
                 borderRadius: '16px',
-                background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
+                background: config.iconBgColor || config.primaryColor,
                 margin: '16px auto 20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 8px 24px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.4)}`,
+                boxShadow: `0 8px 24px ${hexToRgba(config.iconBgColor || config.primaryColor, 0.4)}`,
                 overflow: 'hidden'
               }}
             >
@@ -421,12 +421,12 @@ export function WidgetPreview({ config, showChat = true, showHome = false }: Wid
                     height: '28px', 
                     minWidth: '28px',
                     borderRadius: '50%',
-                    background: config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor),
+                    background: config.iconBgColor || config.primaryColor,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginBottom: '22px',
-                    boxShadow: `0 2px 6px ${hexToRgba(config.botAvatar ? config.primaryColor : (config.iconBgColor || config.primaryColor), 0.3)}`,
+                    boxShadow: `0 2px 6px ${hexToRgba(config.iconBgColor || config.primaryColor, 0.3)}`,
                     overflow: 'hidden'
                   }}
                 >
