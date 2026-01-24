@@ -24,22 +24,22 @@ const planPrices = {
 
 const addonPrices = {
   monthly: {
-    capacity_1000: 12, capacity_2000: 22, capacity_5000: 52, capacity_10000: 99,
+    capacity_500: 18, capacity_1000: 32, capacity_2500: 70, capacity_5000: 120,
     multilanguage: 30, booking: 35, contacts: 15, product_ai: 50, tickets: 35
   },
   yearly: {
     // Capacity - mesečne cene (vedno mesečni)
-    capacity_1000: 12, capacity_2000: 22, capacity_5000: 52, capacity_10000: 99,
+    capacity_500: 18, capacity_1000: 32, capacity_2500: 70, capacity_5000: 120,
     // Ostalo - letne cene
     multilanguage: 288, booking: 336, contacts: 144, product_ai: 480, tickets: 336
   }
 };
 
 const addonNames: Record<string, string> = {
+  capacity_500: '+500 pogovorov',
   capacity_1000: '+1.000 pogovorov',
-  capacity_2000: '+2.000 pogovorov',
+  capacity_2500: '+2.500 pogovorov',
   capacity_5000: '+5.000 pogovorov',
-  capacity_10000: '+10.000 pogovorov',
   multilanguage: 'Multilanguage',
   booking: 'Rezervacija sestankov',
   contacts: 'Zbiranje kontaktov',
