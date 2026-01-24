@@ -583,7 +583,7 @@ export default function Complete() {
 
       {/* Payment Summary Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogContent className="p-0 gap-0 border-0 sm:border max-w-none sm:max-w-lg w-screen h-screen sm:w-auto sm:h-auto sm:max-h-[90vh] rounded-none sm:rounded-lg flex flex-col">
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto p-6">
             <DialogHeader>
