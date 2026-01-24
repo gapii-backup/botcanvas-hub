@@ -361,6 +361,15 @@ export default function Register() {
             </form>
           )}
 
+          {isLoginMode && (
+            <Link
+              to="/reset-password"
+              className="block w-full text-center text-sm text-primary hover:underline font-medium"
+            >
+              Pozabljeno geslo?
+            </Link>
+          )}
+
           <p className="text-center text-sm text-muted-foreground">
             {isLoginMode ? (
               <>
