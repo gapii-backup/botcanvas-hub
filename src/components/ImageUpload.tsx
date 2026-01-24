@@ -40,6 +40,7 @@ export function ImageUpload({
   iconColor = '#FFFFFF'
 }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -119,7 +120,40 @@ export function ImageUpload({
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
+    // Če je URL iz našega Supabase storage, izbriši datoteko
+    if (value && value.includes('bot-avatars')) {
+      setIsRemoving(true);
+      try {
+        // Izvleči pot datoteke iz URL-ja
+        // URL format: https://xxx.supabase.co/storage/v1/object/public/bot-avatars/USER_ID/FILENAME
+        const urlParts = value.split('/bot-avatars/');
+        if (urlParts.length > 1) {
+          const filePath = urlParts[1];
+          
+          const { error } = await supabase.storage
+            .from('bot-avatars')
+            .remove([filePath]);
+            
+          if (error) throw error;
+          
+          toast({
+            title: 'Odstranjeno',
+            description: 'Slika je bila izbrisana.',
+          });
+        }
+      } catch (error) {
+        console.error('Error removing file:', error);
+        toast({
+          title: 'Opozorilo',
+          description: 'Slika je bila odstranjena lokalno, vendar je ni bilo mogoče izbrisati iz strežnika.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsRemoving(false);
+      }
+    }
+    
     onChange('');
     setShowUrlInput(false);
   };
@@ -163,10 +197,11 @@ export function ImageUpload({
               variant="ghost"
               size="sm"
               onClick={handleRemove}
+              disabled={isRemoving}
               className="text-destructive hover:text-destructive h-8"
             >
               <X className="h-4 w-4 mr-1" />
-              Odstrani
+              {isRemoving ? 'Odstranjujem...' : 'Odstrani'}
             </Button>
           ) : (
             <span className="text-sm text-muted-foreground">
