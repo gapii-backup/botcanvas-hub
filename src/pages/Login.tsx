@@ -219,9 +219,9 @@ export default function Login() {
   `;
 
   return (
-    <div className="min-h-screen flex bg-[#050505]">
-      {/* Left side - Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-screen flex bg-[#050505] relative">
+      {/* Form panel - full width on mobile, half on desktop */}
+      <div className="w-full lg:flex-1 flex items-center justify-center p-4 sm:p-8 bg-[#050505] relative z-10">
         <div 
           className="w-full max-w-md space-y-8 bg-[#171717] border border-white/10 rounded-2xl px-6 pt-2 pb-6 sm:px-8 sm:pt-3 sm:pb-8 relative overflow-hidden animate-fade-in"
         >
@@ -465,8 +465,8 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right side - Visual */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 relative overflow-hidden">
+      {/* Visual panel - hidden on mobile, visible on desktop */}
+      <div className="hidden lg:flex lg:flex-1 items-center justify-center p-8 relative overflow-hidden">
         {/* Grid pattern overlay */}
         <div className="absolute inset-0 grid-pattern" />
         
