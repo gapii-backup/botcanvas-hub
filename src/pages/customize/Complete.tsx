@@ -595,119 +595,123 @@ export default function Complete() {
 
       {/* Payment Summary Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
-            <DialogDescription>
-              Preglejte stroške pred nadaljevanjem na plačilo.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-6 py-4">
-            {/* Info box */}
-            <div className="flex gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
-              <Zap className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium text-foreground mb-1">Kako poteka plačilo?</p>
-                <p className="text-muted-foreground">
-                  Najprej boste plačali enkratni <strong>setup fee</strong> za pripravo vašega AI asistenta. 
-                  Ko bo bot pripravljen, se bo za aktivacijo potrebna še {isYearly ? 'letna' : 'mesečna'} naročnina.
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0 gap-0">
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <DialogHeader>
+              <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
+              <DialogDescription>
+                Preglejte stroške pred nadaljevanjem na plačilo.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6 py-4">
+              {/* Info box */}
+              <div className="flex gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                <Zap className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-foreground mb-1">Kako poteka plačilo?</p>
+                  <p className="text-muted-foreground">
+                    Najprej boste plačali enkratni <strong>setup fee</strong> za pripravo vašega AI asistenta. 
+                    Ko bo bot pripravljen, se bo za aktivacijo potrebna še {isYearly ? 'letna' : 'mesečna'} naročnina.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 1: Setup Fee */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">1. ENKRATNO PLAČILO (ZDAJ)</h4>
+                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <span className="font-medium">Setup fee</span>
+                    <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
+                  </div>
+                  <span className="text-lg font-bold text-amber-500">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Step 2: Subscription */}
+              <div>
+                <h4 className="text-sm font-semibold text-muted-foreground mb-3">
+                  2. {isYearly ? 'LETNA' : 'MESEČNA'} NAROČNINA (PO AKTIVACIJI)
+                </h4>
+                <div className="space-y-2">
+                  {/* Plan price */}
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                    <div>
+                      <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
+                    </div>
+                    <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                  </div>
+
+                  {/* Selected add-ons */}
+                  {selectedAddons.length > 0 && (
+                    <>
+                      {selectedAddons.map(addonId => {
+                        const price = getAddonPrice(addonId);
+                        let addonLabel = '';
+                        for (const category of Object.values(ALL_ADDONS)) {
+                          const addon = category.items.find(item => item.id === addonId);
+                          if (addon) {
+                            addonLabel = addon.label;
+                            break;
+                          }
+                        }
+                        if (price === 0) return null;
+                        return (
+                          <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                            <span className="text-sm">{addonLabel}</span>
+                            <span className="text-sm font-medium">€{price} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+
+                  {/* Total subscription */}
+                  <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mt-3">
+                    <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
+                    <span className="text-lg font-bold text-amber-500">
+                      €{totalSubscription.toFixed(2).replace('.', ',')}
+                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
+                      <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
+                    </span>
+                  </div>
+
+                  {isYearly && (
+                    <p className="text-xs text-center text-muted-foreground mt-2">
+                      Prihranite 20% z letno naročnino!
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Activation info */}
+              <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                <p className="text-sm text-amber-500">
+                  Vaš AI asistent bo aktiviran <strong>TAKOJ</strong> po potrditvi nakupa.
                 </p>
               </div>
             </div>
-
-            {/* Step 1: Setup Fee */}
-            <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">1. ENKRATNO PLAČILO (ZDAJ)</h4>
-              <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <span className="font-medium">Setup fee</span>
-                  <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
-                </div>
-                <span className="text-lg font-bold text-amber-500">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Step 2: Subscription */}
-            <div>
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">
-                2. {isYearly ? 'LETNA' : 'MESEČNA'} NAROČNINA (PO AKTIVACIJI)
-              </h4>
-              <div className="space-y-2">
-                {/* Plan price */}
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
-                  </div>
-                  <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
-                </div>
-
-                {/* Selected add-ons */}
-                {selectedAddons.length > 0 && (
-                  <>
-                    {selectedAddons.map(addonId => {
-                      const price = getAddonPrice(addonId);
-                      let addonLabel = '';
-                      for (const category of Object.values(ALL_ADDONS)) {
-                        const addon = category.items.find(item => item.id === addonId);
-                        if (addon) {
-                          addonLabel = addon.label;
-                          break;
-                        }
-                      }
-                      if (price === 0) return null;
-                      return (
-                        <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                          <span className="text-sm">{addonLabel}</span>
-                          <span className="text-sm font-medium">€{price} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-
-                {/* Total subscription */}
-                <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mt-3">
-                  <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
-                  <span className="text-lg font-bold text-amber-500">
-                    €{totalSubscription.toFixed(2).replace('.', ',')}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
-                    <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
-                  </span>
-                </div>
-
-                {isYearly && (
-                  <p className="text-xs text-center text-muted-foreground mt-2">
-                    Prihranite 20% z letno naročnino!
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Activation info */}
-            <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
-              <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
-              <p className="text-sm text-amber-500">
-                Vaš AI asistent bo aktiviran <strong>TAKOJ</strong> po potrditvi nakupa.
-              </p>
-            </div>
           </div>
 
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-border mt-4">
+          {/* Sticky footer - vedno na dnu */}
+          <div className="sticky bottom-0 border-t border-border bg-background p-4 flex flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={() => setShowPaymentDialog(false)} className="w-full sm:w-auto">
               Prekliči
             </Button>
             <Button 
               onClick={handleContinueToCheckout} 
               disabled={isSaving}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
+              className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0 sm:ml-auto"
             >
               <CreditCard className="h-4 w-4 mr-2" />
               {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
