@@ -47,6 +47,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [shake, setShake] = useState(false);
@@ -348,6 +349,8 @@ export default function Register() {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setPasswordFocused(true)}
+                      onBlur={() => setPasswordFocused(false)}
                       required
                       className={`${inputClassName(!!errors.password)} pr-12`}
                     />
@@ -361,7 +364,7 @@ export default function Register() {
                   </div>
                   {errors.password && <ErrorMessage message={errors.password} />}
                   
-                  {password && unfulfilledRequirements.length > 0 && (
+                  {password && (passwordFocused || unfulfilledRequirements.length > 0) && (
                     <div className="space-y-2 mt-2">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
