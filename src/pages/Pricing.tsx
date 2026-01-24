@@ -283,25 +283,31 @@ export default function Pricing() {
                   <tr className="border-b border-border">
                     <th className="text-left p-4 text-sm font-semibold text-foreground">Funkcija</th>
                     <th className="text-center p-4 text-sm font-semibold text-foreground">BASIC</th>
-                    <th className="text-center p-4 text-sm font-semibold text-primary">PRO</th>
+                    <th className="text-center p-4 text-sm font-semibold text-primary bg-blue-500/20 rounded-t-lg">PRO</th>
                     <th className="text-center p-4 text-sm font-semibold text-foreground">ENTERPRISE</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {comparisonFeatures.map((feature, index) => (
-                    <tr key={index} className={cn("border-b border-border/50", index % 2 === 0 && "bg-secondary/20")}>
-                      <td className="p-4 text-sm text-foreground">{feature.name}</td>
-                      <td className="p-4 text-center">
-                        {renderFeatureValue(feature.basic)}
-                      </td>
-                      <td className="p-4 text-center bg-primary/5">
-                        {renderFeatureValue(feature.pro)}
-                      </td>
-                      <td className="p-4 text-center">
-                        {renderFeatureValue(feature.enterprise)}
-                      </td>
-                    </tr>
-                  ))}
+                  {comparisonFeatures.map((feature, index) => {
+                    const isLastRow = index === comparisonFeatures.length - 1;
+                    return (
+                      <tr key={index} className={cn("border-b border-border/50", index % 2 === 0 && "bg-secondary/20")}>
+                        <td className="p-4 text-sm text-foreground">{feature.name}</td>
+                        <td className="p-4 text-center">
+                          {renderFeatureValue(feature.basic)}
+                        </td>
+                        <td className={cn(
+                          "p-4 text-center bg-blue-500/10 border-x border-blue-500/20",
+                          isLastRow && "rounded-b-lg"
+                        )}>
+                          {renderFeatureValue(feature.pro)}
+                        </td>
+                        <td className="p-4 text-center">
+                          {renderFeatureValue(feature.enterprise)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
