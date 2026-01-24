@@ -207,14 +207,25 @@ export default function Register() {
       {/* Left side - Form */}
       <div className="flex-1 flex items-center justify-center p-4 sm:p-8">
         <div 
-          className="w-full max-w-md space-y-8 bg-[#171717] border border-white/10 rounded-2xl p-6 sm:p-8 relative overflow-hidden animate-fade-in"
+          className="w-full max-w-md space-y-6 md:space-y-8 bg-[#171717] border border-white/10 rounded-2xl p-6 sm:p-8 relative overflow-hidden animate-fade-in"
         >
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none rounded-2xl" />
           
-          <div className="relative z-10 space-y-8">
+          {/* Desktop: Logo in top-left corner */}
+          <a href="https://botmotion.ai/" className="hidden md:block absolute top-6 left-6 z-20">
+            <img 
+              src={logoInline} 
+              alt="BotMotion.ai" 
+              className="h-10" 
+              style={{ filter: 'drop-shadow(0 0 12px rgba(59, 130, 246, 0.9))' }}
+            />
+          </a>
+          
+          <div className="relative z-10 space-y-6 md:space-y-8">
             <div className="text-center">
-              <a href="https://botmotion.ai/" className="inline-flex items-center gap-2 mb-8">
+              {/* Mobile: Centered logo */}
+              <a href="https://botmotion.ai/" className="inline-flex items-center gap-2 mb-8 md:hidden">
                 <img 
                   src={logoInline} 
                   alt="BotMotion.ai" 
