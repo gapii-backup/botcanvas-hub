@@ -315,12 +315,14 @@ export default function DashboardConversations() {
       )}
       <div className="space-y-6 animate-slide-up">
         {/* Usage Progress - same as on main page */}
-        <MessageUsageCard
-          tableName={widget?.table_name}
-          billingPeriodStart={widget?.billing_period_start}
-          messagesLimit={widget?.messages_limit}
-          billingPeriod={widget?.billing_period}
-        />
+        {widget?.subscription_status !== 'cancelled' && (
+          <MessageUsageCard
+            tableName={widget?.table_name}
+            billingPeriodStart={widget?.billing_period_start}
+            messagesLimit={widget?.messages_limit}
+            billingPeriod={widget?.billing_period}
+          />
+        )}
 
         {/* Filter gumbi in izvoz */}
         <div className="flex flex-col sm:flex-row flex-wrap gap-2 items-start sm:items-center justify-between">
