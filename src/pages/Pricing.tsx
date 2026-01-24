@@ -19,7 +19,7 @@ const plans = [
     description: 'Za manjša podjetja',
     icon: Bot,
     features: [
-      '2.000 sporočil na mesec',
+      '1.000 sporočil na mesec',
       'Podpora za 1 jezik',
       'Dodajanje Q&A vprašanj',
       'Nalaganje PDF dokumentov',
@@ -33,14 +33,14 @@ const plans = [
   {
     id: 'pro',
     name: 'Pro',
-    monthlyPrice: 119.99,
-    yearlyPrice: 1149.99,
+    monthlyPrice: 129.99,
+    yearlyPrice: 1249.99,
     setupFee: 140,
     description: 'Za rastoča podjetja',
     icon: Sparkles,
     highlight: 'Vse iz BASIC paketa, plus:',
     features: [
-      '5.000 sporočil na mesec',
+      '3.000 sporočil na mesec',
       'Podpora za več jezikov',
       'Zbiranje kontaktov neposredno v pogovoru',
       'Kreiranje support ticketov preko chatbota',
@@ -59,7 +59,7 @@ const plans = [
     icon: Building2,
     highlight: 'Vse iz PRO paketa, plus:',
     features: [
-      '10.000 sporočil na mesec',
+      '8.000 sporočil na mesec',
       'Rezervacija sestankov preko chatbota',
       'Pametna priporočila izdelkov (AI)',
       'Zgodovina pogovorov – 180 dni'
@@ -69,7 +69,7 @@ const plans = [
 ];
 
 const comparisonFeatures = [
-  { name: 'Sporočila na mesec', basic: '2.000', pro: '5.000', enterprise: '10.000' },
+  { name: 'Sporočila na mesec', basic: '1.000', pro: '3.000', enterprise: '8.000' },
   { name: 'Podpora za jezike', basic: '1 jezik', pro: 'Več jezikov', enterprise: 'Več jezikov' },
   { name: 'Dodajanje Q&A vprašanj', basic: true, pro: true, enterprise: true },
   { name: 'Nalaganje PDF dokumentov', basic: true, pro: true, enterprise: true },
