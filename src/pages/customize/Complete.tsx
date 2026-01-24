@@ -396,14 +396,14 @@ export default function Complete() {
             </div>
 
             {/* Plan info - always visible */}
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-muted/50 rounded-lg">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span className="text-sm text-muted-foreground">Paket:</span>
                 <span className="text-sm font-bold text-foreground">
                   {PLAN_NAMES[userPlan] || 'BASIC'}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  ({isYearly ? 'letna naročnina' : 'mesečna naročnina'})
+                  ({isYearly ? 'letno' : 'mesečno'})
                 </span>
                 {isYearly && (
                   <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
@@ -415,6 +415,7 @@ export default function Complete() {
                 variant="outline" 
                 size="sm"
                 onClick={() => navigate('/pricing?returnTo=complete')}
+                className="w-full sm:w-auto"
               >
                 Zamenjaj paket
               </Button>
