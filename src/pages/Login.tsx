@@ -431,7 +431,16 @@ export default function Login() {
               </form>
             )}
 
-            <div className="text-center space-y-3 pt-2">
+            <div className="text-center space-y-3 pt-4">
+              {!isRegisterMode && (
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  Pozabljeno geslo?
+                </button>
+              )}
               <p className="text-sm text-slate-500">
                 {isRegisterMode ? (
                   <>
