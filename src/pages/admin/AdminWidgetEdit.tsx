@@ -32,10 +32,10 @@ import { toast } from 'sonner';
 
 // All available addons
 const ALL_ADDONS = [
+  { id: 'capacity_500', name: '+500 pogovorov', capacityValue: 500 },
   { id: 'capacity_1000', name: '+1.000 pogovorov', capacityValue: 1000 },
-  { id: 'capacity_2000', name: '+2.000 pogovorov', capacityValue: 2000 },
+  { id: 'capacity_2500', name: '+2.500 pogovorov', capacityValue: 2500 },
   { id: 'capacity_5000', name: '+5.000 pogovorov', capacityValue: 5000 },
-  { id: 'capacity_10000', name: '+10.000 pogovorov', capacityValue: 10000 },
   { id: 'multilanguage', name: 'Multilanguage', capacityValue: 0 },
   { id: 'booking', name: 'Rezervacija sestankov', capacityValue: 0 },
   { id: 'contacts', name: 'Zbiranje kontaktov', capacityValue: 0 },
