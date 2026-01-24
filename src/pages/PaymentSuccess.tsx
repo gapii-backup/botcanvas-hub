@@ -35,7 +35,7 @@ export default function PaymentSuccess() {
         {/* Info Text */}
         <div className="glass rounded-2xl p-6 text-left space-y-4">
           <p className="text-foreground">
-            Vaš chatbot bo pripravljen v roku <strong>72 ur</strong>. Ko bo aktiviran, boste prejeli obvestilo po e-pošti.
+            Vaš chatbot bo pripravljen v roku <strong>24 ur</strong>. Ko bo aktiviran, boste prejeli obvestilo po e-pošti.
           </p>
           <p className="text-muted-foreground text-sm">
             Za dokončno aktivacijo boste morali izbrati mesečno ali letno naročnino za vaš paket.
