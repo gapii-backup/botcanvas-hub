@@ -278,13 +278,13 @@ export default function DashboardDocs() {
       iconColor: 'text-amber-500',
       bgColor: 'bg-amber-500/20',
       content: (
-        <div className="space-y-4 md:space-y-5">
+        <div className="space-y-4 md:space-y-5 text-center">
           <p className="text-sm md:text-base text-muted-foreground">
             Z veseljem vam pomagamo namestiti chatbot na vašo spletno stran.
           </p>
           
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
             <Button
               variant="outline"
               className="w-full sm:w-auto justify-center gap-2"
@@ -294,7 +294,7 @@ export default function DashboardDocs() {
               Kontaktirajte nas
             </Button>
             <Button
-              className="w-full sm:w-auto justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0"
+              className="w-full sm:w-auto justify-center gap-2 bg-primary hover:bg-primary/90 text-white border-0"
               onClick={() => window.open('https://cal.botmotion.ai/admin/nastavitev-chatbota', '_blank')}
             >
               <Calendar className="h-4 w-4" />
@@ -303,7 +303,7 @@ export default function DashboardDocs() {
           </div>
 
           {/* Info boxes */}
-          <div className="space-y-3">
+          <div className="space-y-3 max-w-xl mx-auto">
             {/* Neutral info box */}
             <div className="bg-muted/50 border border-border rounded-lg p-3 md:p-4">
               <p className="text-xs md:text-sm text-muted-foreground">
@@ -312,9 +312,9 @@ export default function DashboardDocs() {
             </div>
             
             {/* Warning info box */}
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 md:p-4 flex items-start gap-3">
-              <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-xs md:text-sm text-amber-700 dark:text-amber-400">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 md:p-4 flex items-center justify-center gap-3">
+              <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-amber-500 shrink-0" />
+              <p className="text-xs md:text-sm text-amber-700 dark:text-amber-400 text-left">
                 Pred terminom si namestite{' '}
                 <a
                   href="https://www.teamviewer.com/en/download/windows/"

@@ -134,13 +134,13 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
 
   return (
     <>
-      {/* Thumbnail Image - responsive: full width on mobile, 80% on desktop */}
+      {/* Thumbnail Image - responsive: full width on mobile, 60% on desktop */}
       <img
         src={src}
         alt={alt}
         onClick={openLightbox}
         className={cn(
-          "w-full md:w-[80%] mx-auto rounded-lg border border-border shadow-sm cursor-pointer",
+          "w-full md:w-[60%] mx-auto rounded-lg border border-border shadow-sm cursor-pointer",
           "hover:opacity-90 hover:shadow-md transition-all mt-3 md:mt-4",
           className
         )}
