@@ -139,6 +139,11 @@ export default function DashboardPartners() {
     return `€${amount.toLocaleString('sl-SI')}`;
   };
 
+  // Check if referral is a bonus row
+  const isBonusRow = (referral: typeof referrals[0]) => {
+    return referral.plan === 'bonus' || referral.customer_email === 'BONUS';
+  };
+
   // Calculate progress to next tier
   const calculateProgress = () => {
     if (!nextTierInfo) return 100;
@@ -418,34 +423,63 @@ export default function DashboardPartners() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedPendingPayouts.map((referral) => (
-                        <TableRow key={referral.id}>
-                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
-                          <TableCell>{referral.customer_email}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                                referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                                referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                      {paginatedPendingPayouts.map((referral) => {
+                        const isBonus = isBonusRow(referral);
+                        return (
+                          <TableRow 
+                            key={referral.id}
+                            className={cn(
+                              isBonus && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
+                            )}
+                          >
+                            <TableCell className="font-medium">
+                              {isBonus ? (
+                                <div className="flex items-center gap-2">
+                                  <Gift className="h-4 w-4 text-amber-500" />
+                                  <div>
+                                    <div>{referral.customer_name || 'Bonus'}</div>
+                                    <div className="text-xs text-muted-foreground">Enkratni bonus za dosežen tier</div>
+                                  </div>
+                                </div>
+                              ) : (
+                                referral.customer_name || '—'
                               )}
-                            >
-                              {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleRequestPayout(referral)}
-                            >
-                              Zahtevaj izplačilo
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>{isBonus ? '—' : referral.customer_email}</TableCell>
+                            <TableCell>
+                              {isBonus ? (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                >
+                                  🎁 Bonus
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                                    referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                    referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                                  )}
+                                >
+                                  {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRequestPayout(referral)}
+                              >
+                                Zahtevaj izplačilo
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
@@ -613,42 +647,69 @@ export default function DashboardPartners() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedReferrals.map((referral) => (
-                        <TableRow key={referral.id}>
-                          <TableCell className="font-medium">
-                            {referral.customer_name || '—'}
-                          </TableCell>
-                          <TableCell>{referral.customer_email}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                                referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                                referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                      {paginatedReferrals.map((referral) => {
+                        const isBonus = isBonusRow(referral);
+                        return (
+                          <TableRow 
+                            key={referral.id}
+                            className={cn(
+                              isBonus && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
+                            )}
+                          >
+                            <TableCell className="font-medium">
+                              {isBonus ? (
+                                <div className="flex items-center gap-2">
+                                  <Gift className="h-4 w-4 text-amber-500" />
+                                  <div>
+                                    <div>{referral.customer_name || 'Bonus'}</div>
+                                    <div className="text-xs text-muted-foreground">Enkratni bonus za dosežen tier</div>
+                                  </div>
+                                </div>
+                              ) : (
+                                referral.customer_name || '—'
                               )}
-                            >
-                              {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                referral.status === 'active'
-                                  ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                  : 'bg-red-500/10 text-red-500 border-red-500/20'
+                            </TableCell>
+                            <TableCell>{isBonus ? '—' : referral.customer_email}</TableCell>
+                            <TableCell>
+                              {isBonus ? (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                >
+                                  🎁 Bonus
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={cn(
+                                    referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                                    referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                    referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                                  )}
+                                >
+                                  {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
+                                </Badge>
                               )}
-                            >
-                              {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatDate(referral.created_at)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  referral.status === 'active'
+                                    ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                    : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                )}
+                              >
+                                {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {formatDate(referral.created_at)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
