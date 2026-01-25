@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Search, Eye, Loader2, Plus, Crown, Shuffle, Copy, EyeOff } from 'lucide-react';
+import { Search, Eye, Loader2, Plus, Shuffle, Copy, EyeOff } from 'lucide-react';
 
 // Generate random password with letters, numbers, and symbols
 const generateRandomPassword = () => {
@@ -53,8 +52,6 @@ export default function AdminPartners() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isPartner, setIsPartner] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('basic');
   const [actionLoading, setActionLoading] = useState(false);
 
   const filteredPartners = partners.filter((partner) => {
@@ -147,74 +144,29 @@ export default function AdminPartners() {
       }
 
       // Now create widget for the user (admin is authenticated again)
-      if (isPartner) {
-        const { error: widgetError } = await supabase
-          .from('widgets')
-          .insert({
-            user_id: newUserId,
-            user_email: newEmail,
-            api_key: crypto.randomUUID().replace(/-/g, '').slice(0, 16).replace(/(.{4})/g, '$1-').slice(0, -1),
-            is_partner: true,
-            subscription_status: 'active',
-            status: 'partner',
-            is_active: true,
-            plan: selectedPlan,
-            messages_limit: selectedPlan === 'enterprise' ? 8000 : selectedPlan === 'pro' ? 3000 : 1000,
-            retention_days: selectedPlan === 'enterprise' ? 180 : selectedPlan === 'pro' ? 60 : 30,
-            billing_period: 'monthly',
-            support_tickets: [],
-          });
+      // Always create as partner with pro plan
+      const { error: widgetError } = await supabase
+        .from('widgets')
+        .insert({
+          user_id: newUserId,
+          user_email: newEmail,
+          api_key: crypto.randomUUID().replace(/-/g, '').slice(0, 16).replace(/(.{4})/g, '$1-').slice(0, -1),
+          is_partner: true,
+          subscription_status: 'active',
+          status: 'partner',
+          is_active: true,
+          plan: 'pro',
+          messages_limit: 3000,
+          retention_days: 60,
+          billing_period: 'monthly',
+          support_tickets: [],
+        });
 
-        if (widgetError) {
-          console.error('Widget creation error:', widgetError);
-          toast.error('Uporabnik ustvarjen, vendar widget ni bil ustvarjen: ' + widgetError.message);
-        } else {
-          toast.success('Partner uspešno ustvarjen z widgetom');
-        }
-        
-        // DO NOT send webhook for partners - they don't get welcome email
+      if (widgetError) {
+        console.error('Widget creation error:', widgetError);
+        toast.error('Uporabnik ustvarjen, vendar widget ni bil ustvarjen: ' + widgetError.message);
       } else {
-        // For non-partner users, create basic widget entry
-        const { error: widgetError } = await supabase
-          .from('widgets')
-          .insert({
-            user_id: newUserId,
-            user_email: newEmail,
-            api_key: crypto.randomUUID().replace(/-/g, '').slice(0, 16).replace(/(.{4})/g, '$1-').slice(0, -1),
-            is_partner: false,
-            subscription_status: 'inactive',
-            status: 'new',
-            is_active: false,
-            plan: null,
-            messages_limit: 1000,
-            retention_days: 30,
-            billing_period: 'monthly',
-            support_tickets: [],
-          });
-
-        if (widgetError) {
-          console.error('Widget creation error:', widgetError);
-          // Don't fail completely - user was created
-        }
-
-        // Send webhook notification ONLY for non-partner users
-        try {
-          await fetch('https://hub.botmotion.ai/webhook/new-user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: newEmail,
-              name: newEmail.split('@')[0],
-              is_partner: false,
-            }),
-          });
-        } catch (webhookError) {
-          console.error('Webhook notification failed:', webhookError);
-        }
-
-        toast.success('Uporabnik uspešno ustvarjen');
+        toast.success('Partner uspešno ustvarjen z widgetom');
       }
 
       // Reset form and close dialog
@@ -222,8 +174,6 @@ export default function AdminPartners() {
       setNewEmail('');
       setNewPassword('');
       setShowPassword(false);
-      setIsPartner(false);
-      setSelectedPlan('basic');
       
       // Refresh partners list
       refetch();
@@ -317,32 +267,6 @@ export default function AdminPartners() {
                     </p>
                   )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="partner"
-                    checked={isPartner}
-                    onCheckedChange={(checked) => setIsPartner(checked === true)}
-                  />
-                  <Label htmlFor="partner" className="flex items-center gap-2">
-                    <Crown className="h-4 w-4 text-purple-400" />
-                    Partner
-                  </Label>
-                </div>
-                {isPartner && (
-                  <div className="space-y-2">
-                    <Label>Plan</Label>
-                    <Select value={selectedPlan} onValueChange={setSelectedPlan}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basic">Basic (1000 sporočil, 30 dni)</SelectItem>
-                        <SelectItem value="pro">Pro (3000 sporočil, 60 dni)</SelectItem>
-                        <SelectItem value="enterprise">Enterprise (8000 sporočil, 180 dni)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
                     Prekliči

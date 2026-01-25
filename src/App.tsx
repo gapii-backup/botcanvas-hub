@@ -23,7 +23,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminWidgets from "./pages/admin/AdminWidgets";
 import AdminWidgetEdit from "./pages/admin/AdminWidgetEdit";
-import AdminUsers from "./pages/admin/AdminUsers";
+
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminTickets from "./pages/admin/AdminTickets";
 import AdminPartners from "./pages/admin/AdminPartners";
@@ -246,14 +246,6 @@ const App = () => (
               element={
                 <AdminGuard>
                   <AdminWidgetEdit />
-                </AdminGuard>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <AdminGuard>
-                  <AdminUsers />
                 </AdminGuard>
               }
             />
