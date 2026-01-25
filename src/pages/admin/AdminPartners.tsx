@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminPartners } from '@/hooks/useAdminPartners';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -21,29 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Search, Eye, Loader2, Plus, Handshake } from 'lucide-react';
+import { Search, Eye, Loader2 } from 'lucide-react';
 
 export default function AdminPartners() {
-  const { partners, isLoading, updatePartnerStatus, addPartner } = useAdminPartners();
+  const { partners, isLoading, updatePartnerStatus } = useAdminPartners();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  
-  // Add partner dialog
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newCompany, setNewCompany] = useState('');
-  const [newPhone, setNewPhone] = useState('');
-  const [newWebsite, setNewWebsite] = useState('');
-  const [newPromoCode, setNewPromoCode] = useState('');
 
   const filteredPartners = partners.filter((partner) => {
     const matchesSearch =
@@ -70,127 +52,14 @@ export default function AdminPartners() {
     await updatePartnerStatus(id, !currentStatus);
   };
 
-  const handleAddPartner = async () => {
-    if (!newName || !newEmail) {
-      return;
-    }
-
-    setActionLoading(true);
-    const success = await addPartner({
-      name: newName,
-      email: newEmail,
-      company: newCompany || null,
-      phone: newPhone || null,
-      website: newWebsite || null,
-      promo_code: newPromoCode || null,
-    });
-
-    if (success) {
-      setAddDialogOpen(false);
-      setNewName('');
-      setNewEmail('');
-      setNewCompany('');
-      setNewPhone('');
-      setNewWebsite('');
-      setNewPromoCode('');
-    }
-    setActionLoading(false);
-  };
-
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Handshake className="h-8 w-8 text-primary" />
-            <div>
-              <h1 className="text-2xl font-bold">Partnerji</h1>
-              <p className="text-muted-foreground">
-                Upravljanje partnerjev in njihovih referalov
-              </p>
-            </div>
-          </div>
-          
-          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Dodaj partnerja
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Dodaj novega partnerja</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Ime *</Label>
-                  <Input
-                    id="name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Janez Novak"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="email@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="company">Podjetje</Label>
-                  <Input
-                    id="company"
-                    value={newCompany}
-                    onChange={(e) => setNewCompany(e.target.value)}
-                    placeholder="Podjetje d.o.o."
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Telefon</Label>
-                  <Input
-                    id="phone"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder="+386 XX XXX XXX"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website">Spletna stran</Label>
-                  <Input
-                    id="website"
-                    value={newWebsite}
-                    onChange={(e) => setNewWebsite(e.target.value)}
-                    placeholder="https://example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="promo_code">Promo koda</Label>
-                  <Input
-                    id="promo_code"
-                    value={newPromoCode}
-                    onChange={(e) => setNewPromoCode(e.target.value.toUpperCase())}
-                    placeholder="PARTNER20"
-                    className="font-mono uppercase"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setAddDialogOpen(false)}>
-                    Prekliči
-                  </Button>
-                  <Button onClick={handleAddPartner} disabled={actionLoading || !newName || !newEmail}>
-                    {actionLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Dodaj partnerja
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+        <div>
+          <h1 className="text-2xl font-bold">Partnerji</h1>
+          <p className="text-muted-foreground">
+            Upravljanje partnerjev in njihovih referalov
+          </p>
         </div>
 
         {/* Filters */}

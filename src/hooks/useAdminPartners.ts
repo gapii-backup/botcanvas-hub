@@ -14,15 +14,6 @@ export interface AdminPartner {
   totalEarnings: number;
 }
 
-export interface NewPartnerData {
-  name: string;
-  email: string;
-  company: string | null;
-  phone: string | null;
-  website: string | null;
-  promo_code: string | null;
-}
-
 export function useAdminPartners() {
   const [partners, setPartners] = useState<AdminPartner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,41 +106,6 @@ export function useAdminPartners() {
     }
   };
 
-  const addPartner = async (data: NewPartnerData): Promise<boolean> => {
-    try {
-      const { error } = await supabase
-        .from('partners')
-        .insert({
-          name: data.name,
-          email: data.email,
-          company: data.company,
-          phone: data.phone,
-          website: data.website,
-          promo_code: data.promo_code,
-          is_active: false,
-          terms_accepted: false,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Uspeh',
-        description: 'Partner uspešno dodan',
-      });
-
-      await fetchPartners();
-      return true;
-    } catch (error) {
-      console.error('Error adding partner:', error);
-      toast({
-        title: 'Napaka',
-        description: 'Napaka pri dodajanju partnerja',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
   const getPartnerStats = async (id: string) => {
     try {
       const { data: referrals, error } = await supabase
@@ -176,7 +132,6 @@ export function useAdminPartners() {
     isLoading,
     refetch: fetchPartners,
     updatePartnerStatus,
-    addPartner,
     getPartnerStats,
   };
 }
