@@ -20,18 +20,21 @@ import {
   Check,
   Globe,
   ShoppingBag,
-  Mail,
-  Phone,
   FileCode,
   ExternalLink,
   ChevronDown,
+  MessageSquare,
+  Calendar,
+  AlertTriangle,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 
 export default function DashboardDocs() {
   const { widget, loading } = useWidget();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [copiedEmbed, setCopiedEmbed] = useState(false);
   const [isManualOpen, setIsManualOpen] = useState(false);
 
@@ -270,31 +273,61 @@ export default function DashboardDocs() {
     },
     {
       id: 'help',
-      title: 'Potrebujete pomoč?',
-      icon: Mail,
-      iconColor: 'text-rose-500',
-      bgColor: 'bg-rose-500/20',
+      title: 'Potrebujete pomoč pri namestitvi?',
+      icon: Calendar,
+      iconColor: 'text-amber-500',
+      bgColor: 'bg-amber-500/20',
       content: (
-        <div className="space-y-3 md:space-y-4">
+        <div className="space-y-4 md:space-y-5">
           <p className="text-sm md:text-base text-muted-foreground">
-            Če imate težave z namestitvijo ali uporabljate drugo platformo (Wix, Squarespace, ipd.), nas kontaktirajte:
+            Z veseljem vam pomagamo namestiti chatbot na vašo spletno stran.
           </p>
           
-          <div className="flex flex-col gap-3 md:gap-4">
-            <a
-              href="mailto:info@botmotion.ai"
-              className="flex items-center justify-center sm:justify-start gap-2 text-primary hover:underline bg-primary/5 hover:bg-primary/10 px-4 py-2.5 rounded-lg transition-colors text-sm md:text-base"
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto justify-center gap-2"
+              onClick={() => navigate('/dashboard/help')}
             >
-              <Mail className="h-4 w-4" />
-              info@botmotion.ai
-            </a>
-            <a
-              href="tel:+38641353600"
-              className="flex items-center justify-center sm:justify-start gap-2 text-primary hover:underline bg-primary/5 hover:bg-primary/10 px-4 py-2.5 rounded-lg transition-colors text-sm md:text-base"
+              <MessageSquare className="h-4 w-4" />
+              Kontaktirajte nas
+            </Button>
+            <Button
+              className="w-full sm:w-auto justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white border-0"
+              onClick={() => window.open('https://cal.botmotion.ai/admin/nastavitev-chatbota', '_blank')}
             >
-              <Phone className="h-4 w-4" />
-              +386 41 353 600
-            </a>
+              <Calendar className="h-4 w-4" />
+              Naroči brezplačno namestitev
+            </Button>
+          </div>
+
+          {/* Info boxes */}
+          <div className="space-y-3">
+            {/* Neutral info box */}
+            <div className="bg-muted/50 border border-border rounded-lg p-3 md:p-4">
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Brezplačna pomoč pri namestitvi preko TeamViewer-ja. Termin traja približno 15 minut.
+              </p>
+            </div>
+            
+            {/* Warning info box */}
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 md:p-4 flex items-start gap-3">
+              <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-xs md:text-sm text-amber-700 dark:text-amber-400">
+                Pred terminom si namestite{' '}
+                <a
+                  href="https://www.teamviewer.com/en/download/windows/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium underline underline-offset-2 hover:text-amber-600 dark:hover:text-amber-300 inline-flex items-center gap-1"
+                >
+                  TeamViewer
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+                {' '}za oddaljeni dostop.
+              </p>
+            </div>
           </div>
         </div>
       ),
