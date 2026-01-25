@@ -319,31 +319,48 @@ export default function DashboardPartners() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Tier</TableHead>
-                    <TableHead>Stranke</TableHead>
-                    <TableHead>Bonus</TableHead>
-                    <TableHead className="text-right">Status</TableHead>
+                    <TableHead>Aktivni chatboti</TableHead>
+                    <TableHead className="text-right font-mono">Basic</TableHead>
+                    <TableHead className="text-right font-mono">Pro</TableHead>
+                    <TableHead className="text-right font-mono">Enterprise</TableHead>
+                    <TableHead className="text-right font-mono">Enkratni bonus</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {TIERS.map((tier) => {
+                  {[
+                    { name: 'Bronze', emoji: '🥉', range: '1-10', basic: 60, pro: 120, enterprise: 280, bonus: 0, bonusField: 'bonus_bronze_claimed' },
+                    { name: 'Silver', emoji: '🥈', range: '11-25', basic: 75, pro: 150, enterprise: 360, bonus: 200, bonusField: 'bonus_silver_claimed' },
+                    { name: 'Gold', emoji: '🥇', range: '26-50', basic: 90, pro: 180, enterprise: 440, bonus: 500, bonusField: 'bonus_gold_claimed' },
+                    { name: 'Platinum', emoji: '💎', range: '51-100', basic: 105, pro: 210, enterprise: 520, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
+                    { name: 'Diamond', emoji: '👑', range: '100+', basic: 120, pro: 240, enterprise: 600, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
+                  ].map((tier) => {
+                    const isCurrentTier = tier.name === currentTier.name;
                     const bonusClaimed = partner[tier.bonusField as keyof typeof partner];
-                    const rangeText = tier.max === Infinity ? `${tier.min}+` : `${tier.min}-${tier.max}`;
                     return (
-                      <TableRow key={tier.name}>
+                      <TableRow 
+                        key={tier.name}
+                        className={cn(
+                          isCurrentTier && "bg-primary/5 border-l-2 border-l-primary"
+                        )}
+                      >
                         <TableCell className="font-medium">
                           {tier.name} {tier.emoji}
                         </TableCell>
-                        <TableCell>{rangeText}</TableCell>
-                        <TableCell>
-                          {tier.bonus > 0 ? formatCurrency(tier.bonus) : '—'}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {tier.bonus > 0 && bonusClaimed && (
-                            <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                              ✓ Izplačano
-                            </Badge>
+                        <TableCell>{tier.range}</TableCell>
+                        <TableCell className="text-right font-mono">€{tier.basic}</TableCell>
+                        <TableCell className="text-right font-mono">€{tier.pro}</TableCell>
+                        <TableCell className="text-right font-mono">€{tier.enterprise}</TableCell>
+                        <TableCell className="text-right font-mono">
+                          {tier.bonus > 0 ? (
+                            bonusClaimed ? (
+                              <span className="text-green-500">✓ Izplačano</span>
+                            ) : (
+                              `€${tier.bonus.toLocaleString('sl-SI')}`
+                            )
+                          ) : (
+                            '—'
                           )}
                         </TableCell>
                       </TableRow>
