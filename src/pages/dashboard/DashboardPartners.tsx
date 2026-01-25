@@ -112,19 +112,22 @@ export default function DashboardPartners() {
   };
 
   // Sort and paginate data
-  const sortedPendingPayouts = [...pendingPayouts].sort(
+  // Sort all referrals by created_at DESC for payouts table
+  const sortedPayoutReferrals = [...referrals].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
   const sortedReferrals = [...referrals].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
   
-  const pendingPayoutsTotalPages = Math.ceil(sortedPendingPayouts.length / ITEMS_PER_PAGE);
-  const paginatedPendingPayouts = sortedPendingPayouts.slice(
+  // Payouts table pagination
+  const payoutsTotalPages = Math.ceil(sortedPayoutReferrals.length / ITEMS_PER_PAGE);
+  const paginatedPayoutReferrals = sortedPayoutReferrals.slice(
     (payoutsPage - 1) * ITEMS_PER_PAGE,
     payoutsPage * ITEMS_PER_PAGE
   );
   
+  // Customers table pagination
   const customersTotalPages = Math.ceil(sortedReferrals.length / ITEMS_PER_PAGE);
   const paginatedReferrals = sortedReferrals.slice(
     (customersPage - 1) * ITEMS_PER_PAGE,
@@ -424,12 +427,9 @@ export default function DashboardPartners() {
               </div>
             </div>
 
-            {/* Pending Payouts (can request) */}
-            {pendingPayouts.length > 0 && (
+            {/* Single Consolidated Payouts Table */}
+            {referrals.length > 0 ? (
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Na voljo za izplačilo ({sortedPendingPayouts.length})
-                </h4>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -438,11 +438,12 @@ export default function DashboardPartners() {
                         <TableHead>Email</TableHead>
                         <TableHead>Paket</TableHead>
                         <TableHead>Provizija</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead className="text-right">Akcija</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedPendingPayouts.map((referral) => {
+                      {paginatedPayoutReferrals.map((referral) => {
                         const isBonus = isBonusRow(referral);
                         return (
                           <TableRow 
@@ -487,14 +488,53 @@ export default function DashboardPartners() {
                               )}
                             </TableCell>
                             <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
+                            <TableCell>
+                              {referral.invoice_paid ? (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-green-500/10 text-green-500 border-green-500/20"
+                                >
+                                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                                  Izplačano
+                                </Badge>
+                              ) : referral.invoice_requested ? (
+                                <Badge
+                                  variant="outline"
+                                  className="bg-amber-500/10 text-amber-500 border-amber-500/20"
+                                >
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Čaka na izplačilo
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-muted text-muted-foreground">
+                                  Na voljo
+                                </Badge>
+                              )}
+                            </TableCell>
                             <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleRequestPayout(referral)}
-                              >
-                                Zahtevaj izplačilo
-                              </Button>
+                              {!referral.invoice_requested && !referral.invoice_paid && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleRequestPayout(referral)}
+                                >
+                                  Zahtevaj izplačilo
+                                </Button>
+                              )}
+                              {referral.invoice_requested && !referral.invoice_paid && (
+                                <span className="text-xs text-muted-foreground">
+                                  {referral.invoice_requested_at
+                                    ? formatDate(referral.invoice_requested_at)
+                                    : '—'}
+                                </span>
+                              )}
+                              {referral.invoice_paid && (
+                                <span className="text-xs text-muted-foreground">
+                                  {referral.invoice_paid_at
+                                    ? formatDate(referral.invoice_paid_at)
+                                    : '—'}
+                                </span>
+                              )}
                             </TableCell>
                           </TableRow>
                         );
@@ -502,10 +542,10 @@ export default function DashboardPartners() {
                     </TableBody>
                   </Table>
                 </div>
-                {pendingPayoutsTotalPages > 1 && (
+                {payoutsTotalPages > 1 && (
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-sm text-muted-foreground">
-                      Stran {payoutsPage} od {pendingPayoutsTotalPages}
+                      Stran {payoutsPage} od {payoutsTotalPages}
                     </span>
                     <div className="flex items-center gap-2">
                       <Button
@@ -521,8 +561,8 @@ export default function DashboardPartners() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPayoutsPage(p => Math.min(pendingPayoutsTotalPages, p + 1))}
-                        disabled={payoutsPage === pendingPayoutsTotalPages}
+                        onClick={() => setPayoutsPage(p => Math.min(payoutsTotalPages, p + 1))}
+                        disabled={payoutsPage === payoutsTotalPages}
                         className="gap-1"
                       >
                         Naslednja
@@ -532,103 +572,11 @@ export default function DashboardPartners() {
                   </div>
                 )}
               </div>
-            )}
-
-            {/* Requested Payouts */}
-            {requestedPayouts.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Čaka na izplačilo
-                </h4>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Stranka</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Provizija</TableHead>
-                        <TableHead>Zahtevano</TableHead>
-                        <TableHead className="text-right">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {requestedPayouts.map((referral) => (
-                        <TableRow key={referral.id}>
-                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
-                          <TableCell>{referral.customer_email}</TableCell>
-                          <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                          <TableCell>
-                            {referral.invoice_requested_at
-                              ? formatDate(referral.invoice_requested_at)
-                              : '—'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant="outline"
-                              className="bg-amber-500/10 text-amber-500 border-amber-500/20"
-                            >
-                              <Clock className="h-3 w-3 mr-1" />
-                              Čaka na izplačilo
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Še nimate provizij za izplačilo.</p>
               </div>
             )}
-
-            {/* Paid Payouts */}
-            {paidPayouts.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-muted-foreground">Izplačano</h4>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Stranka</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Provizija</TableHead>
-                        <TableHead>Izplačano</TableHead>
-                        <TableHead className="text-right">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paidPayouts.map((referral) => (
-                        <TableRow key={referral.id}>
-                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
-                          <TableCell>{referral.customer_email}</TableCell>
-                          <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                          <TableCell>
-                            {referral.invoice_paid_at
-                              ? formatDate(referral.invoice_paid_at)
-                              : '—'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant="outline"
-                              className="bg-green-500/10 text-green-500 border-green-500/20"
-                            >
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              Izplačano
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            )}
-
-            {pendingPayouts.length === 0 &&
-              requestedPayouts.length === 0 &&
-              paidPayouts.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Še nimate provizij za izplačilo.</p>
-                </div>
-              )}
           </CardContent>
         </Card>
 
