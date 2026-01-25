@@ -12,7 +12,7 @@ interface AdminLayoutProps {
 const navItems = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { label: 'Widgets', href: '/admin/widgets', icon: Package },
-  { label: 'Users', href: '/admin/users', icon: Users },
+  { label: 'Partnerji', href: '/admin/partners', icon: Users },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
   { label: 'Tickets', href: '/admin/tickets', icon: MessageSquare },
 ];
