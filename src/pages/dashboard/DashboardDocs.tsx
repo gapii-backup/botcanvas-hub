@@ -82,19 +82,6 @@ export default function DashboardDocs() {
     );
   }
 
-  if (widget?.subscription_status === 'cancelled') {
-    return (
-      <DashboardSidebar>
-        <div className="p-4 md:p-6 lg:p-8">
-          <div className="mb-6">
-            <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
-            <p className="text-sm md:text-base text-muted-foreground">Kako namestiti chatbot na vašo spletno stran</p>
-          </div>
-          <AccountDeactivatedLock />
-        </div>
-      </DashboardSidebar>
-    );
-  }
 
   const sections = [
     {
