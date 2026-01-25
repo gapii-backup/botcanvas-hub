@@ -143,6 +143,131 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_referrals: {
+        Row: {
+          commission_amount: number
+          created_at: string | null
+          customer_email: string
+          customer_name: string | null
+          id: string
+          invoice_paid: boolean | null
+          invoice_paid_at: string | null
+          invoice_requested: boolean | null
+          invoice_requested_at: string | null
+          partner_id: string
+          plan: string
+          promo_code: string
+          status: string | null
+          tier_at_purchase: string | null
+        }
+        Insert: {
+          commission_amount: number
+          created_at?: string | null
+          customer_email: string
+          customer_name?: string | null
+          id?: string
+          invoice_paid?: boolean | null
+          invoice_paid_at?: string | null
+          invoice_requested?: boolean | null
+          invoice_requested_at?: string | null
+          partner_id: string
+          plan: string
+          promo_code: string
+          status?: string | null
+          tier_at_purchase?: string | null
+        }
+        Update: {
+          commission_amount?: number
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string | null
+          id?: string
+          invoice_paid?: boolean | null
+          invoice_paid_at?: string | null
+          invoice_requested?: boolean | null
+          invoice_requested_at?: string | null
+          partner_id?: string
+          plan?: string
+          promo_code?: string
+          status?: string | null
+          tier_at_purchase?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          bonus_bronze_claimed: boolean | null
+          bonus_diamond_claimed: boolean | null
+          bonus_gold_claimed: boolean | null
+          bonus_platinum_claimed: boolean | null
+          bonus_silver_claimed: boolean | null
+          company: string | null
+          created_at: string | null
+          email: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          promo_code: string | null
+          submitted_at: string | null
+          terms_accepted: boolean | null
+          terms_version: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          bonus_bronze_claimed?: boolean | null
+          bonus_diamond_claimed?: boolean | null
+          bonus_gold_claimed?: boolean | null
+          bonus_platinum_claimed?: boolean | null
+          bonus_silver_claimed?: boolean | null
+          company?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          promo_code?: string | null
+          submitted_at?: string | null
+          terms_accepted?: boolean | null
+          terms_version?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          bonus_bronze_claimed?: boolean | null
+          bonus_diamond_claimed?: boolean | null
+          bonus_gold_claimed?: boolean | null
+          bonus_platinum_claimed?: boolean | null
+          bonus_silver_claimed?: boolean | null
+          company?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          promo_code?: string | null
+          submitted_at?: string | null
+          terms_accepted?: boolean | null
+          terms_version?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           admin_response: string | null
