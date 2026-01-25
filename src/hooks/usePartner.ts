@@ -52,11 +52,11 @@ export interface TierInfo {
 }
 
 export const TIERS: TierInfo[] = [
-  { name: 'Bronze', emoji: '🥉', min: 1, max: 10, bonus: 0, bonusField: 'bonus_bronze_claimed' },
-  { name: 'Silver', emoji: '🥈', min: 11, max: 25, bonus: 200, bonusField: 'bonus_silver_claimed' },
-  { name: 'Gold', emoji: '🥇', min: 26, max: 50, bonus: 500, bonusField: 'bonus_gold_claimed' },
-  { name: 'Platinum', emoji: '💎', min: 51, max: 100, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
-  { name: 'Diamond', emoji: '👑', min: 101, max: Infinity, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
+  { name: 'Bronze', emoji: '🟤', min: 1, max: 10, bonus: 0, bonusField: 'bonus_bronze_claimed' },
+  { name: 'Silver', emoji: '⚪', min: 11, max: 25, bonus: 200, bonusField: 'bonus_silver_claimed' },
+  { name: 'Gold', emoji: '🟡', min: 26, max: 50, bonus: 500, bonusField: 'bonus_gold_claimed' },
+  { name: 'Platinum', emoji: '💠', min: 51, max: 100, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
+  { name: 'Diamond', emoji: '💎', min: 101, max: Infinity, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
 ];
 
 export function calculateTier(activeCount: number): TierInfo {

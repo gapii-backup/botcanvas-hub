@@ -330,11 +330,11 @@ export default function DashboardPartners() {
                 </TableHeader>
                 <TableBody>
                   {[
-                    { name: 'Bronze', emoji: '🥉', range: '1-10', basic: 60, pro: 120, enterprise: 280, bonus: 0, bonusField: 'bonus_bronze_claimed' },
-                    { name: 'Silver', emoji: '🥈', range: '11-25', basic: 75, pro: 150, enterprise: 360, bonus: 200, bonusField: 'bonus_silver_claimed' },
-                    { name: 'Gold', emoji: '🥇', range: '26-50', basic: 90, pro: 180, enterprise: 440, bonus: 500, bonusField: 'bonus_gold_claimed' },
-                    { name: 'Platinum', emoji: '💎', range: '51-100', basic: 105, pro: 210, enterprise: 520, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
-                    { name: 'Diamond', emoji: '👑', range: '100+', basic: 120, pro: 240, enterprise: 600, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
+                    { name: 'Bronze', emoji: '🟤', range: '1-10', basic: 60, pro: 120, enterprise: 280, bonus: 0, bonusField: 'bonus_bronze_claimed' },
+                    { name: 'Silver', emoji: '⚪', range: '11-25', basic: 75, pro: 150, enterprise: 360, bonus: 200, bonusField: 'bonus_silver_claimed' },
+                    { name: 'Gold', emoji: '🟡', range: '26-50', basic: 90, pro: 180, enterprise: 440, bonus: 500, bonusField: 'bonus_gold_claimed' },
+                    { name: 'Platinum', emoji: '💠', range: '51-100', basic: 105, pro: 210, enterprise: 520, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
+                    { name: 'Diamond', emoji: '💎', range: '100+', basic: 120, pro: 240, enterprise: 600, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
                   ].map((tier) => {
                     const isCurrentTier = tier.name === currentTier.name;
                     const bonusClaimed = partner[tier.bonusField as keyof typeof partner];
@@ -369,82 +369,6 @@ export default function DashboardPartners() {
                 </TableBody>
               </Table>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Customers Table */}
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Vaše stranke
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {referrals.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <Users className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Še nimate strank</h3>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  Delite vašo promo kodo potencialnim strankam in začnite služiti!
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Stranka</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Paket</TableHead>
-                      <TableHead>Provizija</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Datum</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {referrals.map((referral) => (
-                      <TableRow key={referral.id}>
-                        <TableCell className="font-medium">
-                          {referral.customer_name || '—'}
-                        </TableCell>
-                        <TableCell>{referral.customer_email}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                              referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                              referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-                            )}
-                          >
-                            {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              referral.status === 'active'
-                                ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                : 'bg-red-500/10 text-red-500 border-red-500/20'
-                            )}
-                          >
-                            {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatDate(referral.created_at)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -587,6 +511,83 @@ export default function DashboardPartners() {
               )}
           </CardContent>
         </Card>
+
+        {/* Customers Table */}
+        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Vaše stranke
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {referrals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Še nimate strank</h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Delite vašo promo kodo potencialnim strankam in začnite služiti!
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Stranka</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Paket</TableHead>
+                      <TableHead>Provizija</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Datum</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {referrals.map((referral) => (
+                      <TableRow key={referral.id}>
+                        <TableCell className="font-medium">
+                          {referral.customer_name || '—'}
+                        </TableCell>
+                        <TableCell>{referral.customer_email}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                              referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                              referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                            )}
+                          >
+                            {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              referral.status === 'active'
+                                ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                : 'bg-red-500/10 text-red-500 border-red-500/20'
+                            )}
+                          >
+                            {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {formatDate(referral.created_at)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
       </div>
 
       {/* Payout Confirmation Dialog */}
