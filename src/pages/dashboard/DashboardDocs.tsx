@@ -152,13 +152,13 @@ export default function DashboardDocs() {
       iconColor: 'text-success',
       bgColor: 'bg-success/20',
       content: (
-        <div className="space-y-3 md:space-y-4 max-w-full overflow-hidden">
+        <div className="space-y-3 md:space-y-4 w-full max-w-full">
           <p className="text-sm md:text-base text-muted-foreground">
             Kodo prilepite pred zaključni <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono break-words">&lt;/body&gt;</code> tag na vaši spletni strani.
           </p>
           
-          <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border max-w-full">
-            <code className="whitespace-pre-wrap break-words">{`<!DOCTYPE html>
+          <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border w-full max-w-full">
+            <code className="block w-full whitespace-pre-wrap break-words">{`<!DOCTYPE html>
 <html>
 <head>
   <title>Vaša stran</title>
