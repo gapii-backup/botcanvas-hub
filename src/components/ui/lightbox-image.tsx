@@ -134,17 +134,23 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
 
   return (
     <>
-      {/* Thumbnail Image - responsive: full width on small screens, 80% on sm, 60% on md+ */}
-      <img
-        src={src}
-        alt={alt}
-        onClick={openLightbox}
-        className={cn(
-          "w-full max-w-full sm:w-[80%] md:w-[60%] mx-auto rounded-lg border border-border shadow-sm cursor-pointer",
-          "hover:opacity-90 hover:shadow-md transition-all mt-3 md:mt-4",
-          className
-        )}
-      />
+      {/* Thumbnail Image */}
+      <div className="w-full max-w-full">
+        <img
+          src={src}
+          alt={alt}
+          onClick={openLightbox}
+          className={cn(
+            // MUST be fully responsive on the smallest screens
+            "w-full max-w-full h-auto",
+            // Optional centering + reduced width on larger breakpoints
+            "sm:w-[80%] md:w-[60%] mx-auto",
+            "rounded-lg border border-border shadow-sm cursor-pointer",
+            "hover:opacity-90 hover:shadow-md transition-all mt-3 md:mt-4",
+            className
+          )}
+        />
+      </div>
 
       {/* Render lightbox via Portal to document.body for fullscreen overlay */}
       {lightboxContent && createPortal(lightboxContent, document.body)}
