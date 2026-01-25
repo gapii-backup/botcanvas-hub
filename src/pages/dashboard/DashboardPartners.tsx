@@ -433,13 +433,13 @@ export default function DashboardPartners() {
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Stranka</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Paket</TableHead>
-                        <TableHead>Provizija</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Akcija</TableHead>
+                      <TableRow className="grid grid-cols-[1fr_auto_auto] md:table-row">
+                        <TableHead className="order-4 md:order-none hidden md:table-cell">Stranka</TableHead>
+                        <TableHead className="order-5 md:order-none hidden md:table-cell">Email</TableHead>
+                        <TableHead className="order-3 md:order-none">Paket</TableHead>
+                        <TableHead className="order-1 md:order-none">Provizija</TableHead>
+                        <TableHead className="order-2 md:order-none hidden md:table-cell">Status</TableHead>
+                        <TableHead className="order-2 md:order-none text-right">Akcija</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -449,10 +449,12 @@ export default function DashboardPartners() {
                           <TableRow 
                             key={referral.id}
                             className={cn(
+                              "grid grid-cols-[1fr_auto_auto] md:table-row gap-2 md:gap-0 py-3 md:py-0",
                               isBonus && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
                             )}
                           >
-                            <TableCell className="font-medium">
+                            {/* Stranka - hidden on mobile */}
+                            <TableCell className="order-4 md:order-none hidden md:table-cell font-medium">
                               {isBonus ? (
                                 <div className="flex items-center gap-2">
                                   <Gift className="h-4 w-4 text-amber-500" />
@@ -465,8 +467,12 @@ export default function DashboardPartners() {
                                 referral.customer_name || '—'
                               )}
                             </TableCell>
-                            <TableCell>{isBonus ? '—' : referral.customer_email}</TableCell>
-                            <TableCell>
+                            {/* Email - hidden on mobile */}
+                            <TableCell className="order-5 md:order-none hidden md:table-cell">
+                              {isBonus ? '—' : referral.customer_email}
+                            </TableCell>
+                            {/* Paket */}
+                            <TableCell className="order-3 md:order-none">
                               {isBonus ? (
                                 <Badge
                                   variant="outline"
@@ -487,8 +493,23 @@ export default function DashboardPartners() {
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                            <TableCell>
+                            {/* Provizija - first on mobile */}
+                            <TableCell className="order-1 md:order-none font-semibold">
+                              {formatCurrency(referral.commission_amount)}
+                              {/* Show customer name on mobile */}
+                              <div className="md:hidden text-xs text-muted-foreground font-normal mt-0.5">
+                                {isBonus ? (
+                                  <span className="flex items-center gap-1">
+                                    <Gift className="h-3 w-3 text-amber-500" />
+                                    {referral.customer_name || 'Bonus'}
+                                  </span>
+                                ) : (
+                                  referral.customer_name || referral.customer_email
+                                )}
+                              </div>
+                            </TableCell>
+                            {/* Status - hidden on mobile, shown in Akcija cell */}
+                            <TableCell className="order-2 md:order-none hidden md:table-cell">
                               {referral.invoice_paid ? (
                                 <Badge
                                   variant="outline"
@@ -511,29 +532,52 @@ export default function DashboardPartners() {
                                 </Badge>
                               )}
                             </TableCell>
-                            <TableCell className="text-right">
+                            {/* Akcija - second on mobile, includes status on mobile */}
+                            <TableCell className="order-2 md:order-none text-right">
                               {!referral.invoice_requested && !referral.invoice_paid && (
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleRequestPayout(referral)}
+                                  className="text-xs md:text-sm"
                                 >
-                                  Zahtevaj izplačilo
+                                  <span className="hidden md:inline">Zahtevaj izplačilo</span>
+                                  <span className="md:hidden">Zahtevaj</span>
                                 </Button>
                               )}
                               {referral.invoice_requested && !referral.invoice_paid && (
-                                <span className="text-xs text-muted-foreground">
-                                  {referral.invoice_requested_at
-                                    ? formatDate(referral.invoice_requested_at)
-                                    : '—'}
-                                </span>
+                                <div className="flex flex-col items-end gap-1">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs"
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    <span className="hidden md:inline">Čaka</span>
+                                    <span className="md:hidden">⏳</span>
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground hidden md:block">
+                                    {referral.invoice_requested_at
+                                      ? formatDate(referral.invoice_requested_at)
+                                      : '—'}
+                                  </span>
+                                </div>
                               )}
                               {referral.invoice_paid && (
-                                <span className="text-xs text-muted-foreground">
-                                  {referral.invoice_paid_at
-                                    ? formatDate(referral.invoice_paid_at)
-                                    : '—'}
-                                </span>
+                                <div className="flex flex-col items-end gap-1">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-green-500/10 text-green-500 border-green-500/20 text-xs"
+                                  >
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    <span className="hidden md:inline">Izplačano</span>
+                                    <span className="md:hidden">✓</span>
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground hidden md:block">
+                                    {referral.invoice_paid_at
+                                      ? formatDate(referral.invoice_paid_at)
+                                      : '—'}
+                                  </span>
+                                </div>
                               )}
                             </TableCell>
                           </TableRow>
