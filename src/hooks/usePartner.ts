@@ -190,8 +190,8 @@ export function usePartner() {
   const currentTier = calculateTier(activeReferralsCount);
   const nextTierInfo = getNextTierInfo(activeReferralsCount);
 
-  // Pending payouts (not requested, active)
-  const pendingPayouts = referrals.filter(r => !r.invoice_requested && r.status === 'active');
+  // Pending payouts (not requested yet - regardless of customer status)
+  const pendingPayouts = referrals.filter(r => !r.invoice_requested);
   
   // Requested payouts (requested but not paid)
   const requestedPayouts = referrals.filter(r => r.invoice_requested && !r.invoice_paid);
