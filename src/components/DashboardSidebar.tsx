@@ -312,8 +312,8 @@ export function DashboardSidebar({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 lg:pl-64">
-        <div className="pt-16 lg:pt-0 min-h-screen">
+      <main className="flex-1 lg:pl-64 min-w-0 overflow-x-hidden">
+        <div className="pt-16 lg:pt-0 min-h-screen w-full max-w-full">
           {children}
         </div>
       </main>
