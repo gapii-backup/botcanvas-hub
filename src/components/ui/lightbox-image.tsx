@@ -134,17 +134,17 @@ export function LightboxImage({ src, alt, className }: LightboxImageProps) {
 
   return (
     <>
-      {/* Thumbnail Image */}
-      <div className="w-full max-w-full">
+      {/* Thumbnail Image - fully responsive, no min-width */}
+      <div className="w-full max-w-full box-border">
         <img
           src={src}
           alt={alt}
           onClick={openLightbox}
           className={cn(
-            // MUST be fully responsive on the smallest screens
-            "w-full max-w-full h-auto",
-            // Optional centering + reduced width on larger breakpoints
-            "sm:w-[80%] md:w-[60%] mx-auto",
+            // Mobile: 100% width, no min-width
+            "block w-full max-w-full h-auto",
+            // Desktop: centered at 50% width
+            "sm:w-[70%] md:w-[50%] sm:mx-auto",
             "rounded-lg border border-border shadow-sm cursor-pointer",
             "hover:opacity-90 hover:shadow-md transition-all mt-3 md:mt-4",
             className
