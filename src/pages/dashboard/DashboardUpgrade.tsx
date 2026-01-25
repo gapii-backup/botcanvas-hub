@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
+import { PartnerBlockedLock } from '@/components/dashboard/PartnerBlockedLock';
 import { useToast } from '@/hooks/use-toast';
 import { AddonModal } from '@/components/dashboard/AddonModal';
 import {
@@ -180,6 +181,14 @@ export default function DashboardUpgrade() {
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.is_partner === true) {
+    return (
+      <DashboardLayout title="Nadgradi" subtitle="Spremenite paket ali dodajte dodatke">
+        <PartnerBlockedLock />
       </DashboardLayout>
     );
   }

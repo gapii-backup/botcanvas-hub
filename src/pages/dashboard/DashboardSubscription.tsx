@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { PartnerBlockedLock } from '@/components/dashboard/PartnerBlockedLock';
 import { useToast } from '@/hooks/use-toast';
 
 const planPrices = {
@@ -75,6 +76,14 @@ export default function DashboardSubscription() {
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (widget?.is_partner === true) {
+    return (
+      <DashboardLayout title="Naročnina" subtitle="Upravljajte svojo naročnino">
+        <PartnerBlockedLock />
       </DashboardLayout>
     );
   }
