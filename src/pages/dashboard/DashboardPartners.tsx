@@ -39,7 +39,7 @@ import {
   Info,
   FileCheck,
 } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -67,7 +67,11 @@ export default function DashboardPartners() {
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
   const [selectedReferral, setSelectedReferral] = useState<typeof referrals[0] | null>(null);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
-  const [invoiceConfirmed, setInvoiceConfirmed] = useState(false);
+  
+  // Pagination states
+  const [payoutsPage, setPayoutsPage] = useState(1);
+  const [customersPage, setCustomersPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Redirect if not a partner
   useEffect(() => {
@@ -90,24 +94,42 @@ export default function DashboardPartners() {
 
   const handleRequestPayout = (referral: typeof referrals[0]) => {
     setSelectedReferral(referral);
-    setInvoiceConfirmed(false);
     setPayoutDialogOpen(true);
   };
 
   const confirmPayout = async () => {
-    if (!selectedReferral || !invoiceConfirmed) return;
+    if (!selectedReferral) return;
 
     setIsRequestingPayout(true);
     await requestPayout(selectedReferral.id);
     setIsRequestingPayout(false);
     setPayoutDialogOpen(false);
     setSelectedReferral(null);
-    setInvoiceConfirmed(false);
     toast({
       title: 'Zahtevek oddan!',
-      description: 'Izplačilo boste prejeli v 14 dneh.',
+      description: 'Izplačilo boste prejeli v roku 14 dneh.',
     });
   };
+
+  // Sort and paginate data
+  const sortedPendingPayouts = [...pendingPayouts].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  const sortedReferrals = [...referrals].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  
+  const pendingPayoutsTotalPages = Math.ceil(sortedPendingPayouts.length / ITEMS_PER_PAGE);
+  const paginatedPendingPayouts = sortedPendingPayouts.slice(
+    (payoutsPage - 1) * ITEMS_PER_PAGE,
+    payoutsPage * ITEMS_PER_PAGE
+  );
+  
+  const customersTotalPages = Math.ceil(sortedReferrals.length / ITEMS_PER_PAGE);
+  const paginatedReferrals = sortedReferrals.slice(
+    (customersPage - 1) * ITEMS_PER_PAGE,
+    customersPage * ITEMS_PER_PAGE
+  );
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "d. MMM yyyy", { locale: sl });
@@ -287,44 +309,6 @@ export default function DashboardPartners() {
               </p>
             </div>
 
-            {/* Tier Visual */}
-            <div className="flex items-center justify-between overflow-x-auto pb-2">
-              {TIERS.map((tier, index) => {
-                const isCurrentTier = tier.name === currentTier.name;
-                const isPastTier = TIERS.findIndex(t => t.name === currentTier.name) > index;
-                return (
-                  <div
-                    key={tier.name}
-                    className={cn(
-                      "flex flex-col items-center gap-1 px-2 min-w-[60px]",
-                      isCurrentTier && "scale-110"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "h-10 w-10 rounded-full flex items-center justify-center text-lg",
-                        isCurrentTier
-                          ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background"
-                          : isPastTier
-                          ? "bg-muted-foreground/20 text-muted-foreground"
-                          : "bg-muted text-muted-foreground/50"
-                      )}
-                    >
-                      {tier.emoji}
-                    </div>
-                    <span
-                      className={cn(
-                        "text-xs font-medium",
-                        isCurrentTier ? "text-primary" : "text-muted-foreground"
-                      )}
-                    >
-                      {tier.name}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
             {/* Bonus Table */}
             <div className="overflow-x-auto">
               <Table>
@@ -397,17 +381,20 @@ export default function DashboardPartners() {
                 <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
                 <div className="space-y-2">
                   <h4 className="font-medium text-blue-600 dark:text-blue-400">Kako poteka izplačilo?</h4>
-                  <div className="text-sm text-muted-foreground space-y-2">
+                  <div className="text-sm text-muted-foreground space-y-3">
                     <p>1. Izdajte račun za provizije na naslednje podatke:</p>
                     <div className="bg-background/50 rounded p-3 font-mono text-xs">
-                      <p className="font-semibold">BotMotion, Gašper Perko s.p.</p>
+                      <p className="font-semibold">Gašper Perko s.p.</p>
                       <p>Zalog 2, 4204 Golnik</p>
                       <p>Slovenija</p>
                       <p>Davčna št.: SI12345678</p>
                     </div>
-                    <p>2. Račun pošljite na: <span className="font-medium text-foreground">finance@botmotion.ai</span></p>
+                    <p>2. Račun pošljite na: <span className="font-medium text-foreground">info@botmotion.ai</span></p>
                     <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih strankah</p>
-                    <p>4. Izplačilo prejmete v 14 dneh</p>
+                    <p>4. Izplačilo prejmete v roku 14 dneh</p>
+                    <p className="text-amber-600 dark:text-amber-400 font-medium">
+                      ⚠️ Če ste DDV zavezanec, k proviziji prištejte 22% DDV.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -417,7 +404,7 @@ export default function DashboardPartners() {
             {pendingPayouts.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  Na voljo za izplačilo
+                  Na voljo za izplačilo ({sortedPendingPayouts.length})
                 </h4>
                 <div className="overflow-x-auto">
                   <Table>
@@ -431,7 +418,7 @@ export default function DashboardPartners() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {pendingPayouts.map((referral) => (
+                      {paginatedPendingPayouts.map((referral) => (
                         <TableRow key={referral.id}>
                           <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
                           <TableCell>{referral.customer_email}</TableCell>
@@ -462,6 +449,35 @@ export default function DashboardPartners() {
                     </TableBody>
                   </Table>
                 </div>
+                {pendingPayoutsTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-sm text-muted-foreground">
+                      Stran {payoutsPage} od {pendingPayoutsTotalPages}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPayoutsPage(p => Math.max(1, p - 1))}
+                        disabled={payoutsPage === 1}
+                        className="gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Prejšnja
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPayoutsPage(p => Math.min(pendingPayoutsTotalPages, p + 1))}
+                        disabled={payoutsPage === pendingPayoutsTotalPages}
+                        className="gap-1"
+                      >
+                        Naslednja
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -583,57 +599,88 @@ export default function DashboardPartners() {
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Stranka</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Paket</TableHead>
-                      <TableHead>Provizija</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Datum</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {referrals.map((referral) => (
-                      <TableRow key={referral.id}>
-                        <TableCell className="font-medium">
-                          {referral.customer_name || '—'}
-                        </TableCell>
-                        <TableCell>{referral.customer_email}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                              referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                              referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-                            )}
-                          >
-                            {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              referral.status === 'active'
-                                ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                : 'bg-red-500/10 text-red-500 border-red-500/20'
-                            )}
-                          >
-                            {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatDate(referral.created_at)}
-                        </TableCell>
+              <div className="space-y-3">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Stranka</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Paket</TableHead>
+                        <TableHead>Provizija</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Datum</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedReferrals.map((referral) => (
+                        <TableRow key={referral.id}>
+                          <TableCell className="font-medium">
+                            {referral.customer_name || '—'}
+                          </TableCell>
+                          <TableCell>{referral.customer_email}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                                referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                              )}
+                            >
+                              {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                referral.status === 'active'
+                                  ? 'bg-green-500/10 text-green-500 border-green-500/20'
+                                  : 'bg-red-500/10 text-red-500 border-red-500/20'
+                              )}
+                            >
+                              {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatDate(referral.created_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {customersTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-sm text-muted-foreground">
+                      Stran {customersPage} od {customersTotalPages}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCustomersPage(p => Math.max(1, p - 1))}
+                        disabled={customersPage === 1}
+                        className="gap-1"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Prejšnja
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCustomersPage(p => Math.min(customersTotalPages, p + 1))}
+                        disabled={customersPage === customersTotalPages}
+                        className="gap-1"
+                      >
+                        Naslednja
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
@@ -642,12 +689,7 @@ export default function DashboardPartners() {
       </div>
 
       {/* Payout Confirmation Dialog */}
-      <AlertDialog open={payoutDialogOpen} onOpenChange={(open) => {
-        setPayoutDialogOpen(open);
-        if (!open) {
-          setInvoiceConfirmed(false);
-        }
-      }}>
+      <AlertDialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3 mb-2">
@@ -659,7 +701,7 @@ export default function DashboardPartners() {
             <AlertDialogDescription asChild>
               <div className="space-y-4">
                 <p className="text-amber-600 dark:text-amber-400 font-medium">
-                  Zahtevek oddajte SAMO če ste že poslali račun za to provizijo na finance@botmotion.ai
+                  Zahtevek oddajte SAMO če ste že poslali račun za to provizijo na info@botmotion.ai
                 </p>
                 
                 {selectedReferral && (
@@ -669,20 +711,6 @@ export default function DashboardPartners() {
                     </p>
                   </div>
                 )}
-
-                <div className="flex items-start gap-3 pt-2">
-                  <Checkbox
-                    id="invoice-confirmed"
-                    checked={invoiceConfirmed}
-                    onCheckedChange={(checked) => setInvoiceConfirmed(checked === true)}
-                  />
-                  <label
-                    htmlFor="invoice-confirmed"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    Potrjujem, da sem že poslal/a račun za to provizijo
-                  </label>
-                </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -690,7 +718,7 @@ export default function DashboardPartners() {
             <AlertDialogCancel disabled={isRequestingPayout}>Prekliči</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmPayout} 
-              disabled={isRequestingPayout || !invoiceConfirmed}
+              disabled={isRequestingPayout}
             >
               {isRequestingPayout ? 'Pošiljam...' : 'Potrdi zahtevek'}
             </AlertDialogAction>
