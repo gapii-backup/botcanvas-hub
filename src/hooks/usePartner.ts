@@ -184,8 +184,12 @@ export function usePartner() {
     }
   };
 
-  // Calculate stats
-  const activeReferralsCount = referrals.filter(r => r.status === 'active').length;
+  // Calculate stats - exclude bonus rows from active count
+  const activeReferralsCount = referrals.filter(r => 
+    r.status === 'active' && 
+    r.plan !== 'bonus' && 
+    r.customer_email !== 'BONUS'
+  ).length;
   const totalCommission = referrals.reduce((sum, r) => sum + Number(r.commission_amount), 0);
   const currentTier = calculateTier(activeReferralsCount);
   const nextTierInfo = getNextTierInfo(activeReferralsCount);
