@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminPartners } from '@/hooks/useAdminPartners';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Search, Eye, Loader2, Plus, Shuffle, Copy, EyeOff } from 'lucide-react';
+import { Search, Eye, Loader2, Plus, Shuffle, Copy, EyeOff, FileWarning } from 'lucide-react';
 
 // Generate random password with letters, numbers, and symbols
 const generateRandomPassword = () => {
@@ -46,6 +46,7 @@ export default function AdminPartners() {
   const { partners, isLoading, updatePartnerStatus, refetch } = useAdminPartners();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [unpaidInvoiceCount, setUnpaidInvoiceCount] = useState(0);
 
   // Add user dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -53,6 +54,27 @@ export default function AdminPartners() {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Fetch unpaid invoice count
+  useEffect(() => {
+    const fetchUnpaidCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('partner_referrals')
+          .select('*', { count: 'exact', head: true })
+          .eq('invoice_requested', true)
+          .eq('invoice_paid', false);
+
+        if (!error) {
+          setUnpaidInvoiceCount(count || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching unpaid count:', error);
+      }
+    };
+
+    fetchUnpaidCount();
+  }, []);
 
   const filteredPartners = partners.filter((partner) => {
     const matchesSearch =
@@ -314,13 +336,16 @@ export default function AdminPartners() {
             <p className="text-2xl font-bold">{partners.length}</p>
           </div>
           <div className="bg-card border border-border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground">Aktivnih partnerjev</p>
-            <p className="text-2xl font-bold text-green-500">
-              {partners.filter((p) => p.is_active).length}
+            <div className="flex items-center gap-2">
+              <FileWarning className="h-4 w-4 text-orange-500" />
+              <p className="text-sm text-muted-foreground">Neplačani računi</p>
+            </div>
+            <p className="text-2xl font-bold text-orange-500">
+              {unpaidInvoiceCount}
             </p>
           </div>
           <div className="bg-card border border-border rounded-lg p-4">
-            <p className="text-sm text-muted-foreground">Skupni zaslužek</p>
+            <p className="text-sm text-muted-foreground">Skupne provizije</p>
             <p className="text-2xl font-bold">
               {formatCurrency(partners.reduce((sum, p) => sum + p.totalEarnings, 0))}
             </p>
