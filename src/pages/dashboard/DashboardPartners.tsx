@@ -36,7 +36,10 @@ import {
   FileText,
   Clock,
   CheckCircle2,
+  Info,
+  FileCheck,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -62,8 +65,9 @@ export default function DashboardPartners() {
 
   const [copied, setCopied] = useState(false);
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
-  const [selectedReferralId, setSelectedReferralId] = useState<string | null>(null);
+  const [selectedReferral, setSelectedReferral] = useState<typeof referrals[0] | null>(null);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
+  const [invoiceConfirmed, setInvoiceConfirmed] = useState(false);
 
   // Redirect if not a partner
   useEffect(() => {
@@ -84,19 +88,25 @@ export default function DashboardPartners() {
     }
   };
 
-  const handleRequestPayout = (referralId: string) => {
-    setSelectedReferralId(referralId);
+  const handleRequestPayout = (referral: typeof referrals[0]) => {
+    setSelectedReferral(referral);
+    setInvoiceConfirmed(false);
     setPayoutDialogOpen(true);
   };
 
   const confirmPayout = async () => {
-    if (!selectedReferralId) return;
+    if (!selectedReferral || !invoiceConfirmed) return;
 
     setIsRequestingPayout(true);
-    await requestPayout(selectedReferralId);
+    await requestPayout(selectedReferral.id);
     setIsRequestingPayout(false);
     setPayoutDialogOpen(false);
-    setSelectedReferralId(null);
+    setSelectedReferral(null);
+    setInvoiceConfirmed(false);
+    toast({
+      title: 'Zahtevek oddan!',
+      description: 'Izplačilo boste prejeli v 14 dneh.',
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -381,6 +391,28 @@ export default function DashboardPartners() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Info Box */}
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                <div className="space-y-2">
+                  <h4 className="font-medium text-blue-600 dark:text-blue-400">Kako poteka izplačilo?</h4>
+                  <div className="text-sm text-muted-foreground space-y-2">
+                    <p>1. Izdajte račun za provizije na naslednje podatke:</p>
+                    <div className="bg-background/50 rounded p-3 font-mono text-xs">
+                      <p className="font-semibold">BotMotion, Gašper Perko s.p.</p>
+                      <p>Zalog 2, 4204 Golnik</p>
+                      <p>Slovenija</p>
+                      <p>Davčna št.: SI12345678</p>
+                    </div>
+                    <p>2. Račun pošljite na: <span className="font-medium text-foreground">finance@botmotion.ai</span></p>
+                    <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih strankah</p>
+                    <p>4. Izplačilo prejmete v 14 dneh</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Pending Payouts (can request) */}
             {pendingPayouts.length > 0 && (
               <div className="space-y-3">
@@ -392,6 +424,8 @@ export default function DashboardPartners() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Stranka</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Paket</TableHead>
                         <TableHead>Provizija</TableHead>
                         <TableHead className="text-right">Akcija</TableHead>
                       </TableRow>
@@ -399,13 +433,26 @@ export default function DashboardPartners() {
                     <TableBody>
                       {pendingPayouts.map((referral) => (
                         <TableRow key={referral.id}>
+                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
                           <TableCell>{referral.customer_email}</TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                                referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
+                              )}
+                            >
+                              {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
+                            </Badge>
+                          </TableCell>
                           <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
                           <TableCell className="text-right">
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => handleRequestPayout(referral.id)}
+                              onClick={() => handleRequestPayout(referral)}
                             >
                               Zahtevaj izplačilo
                             </Button>
@@ -429,6 +476,7 @@ export default function DashboardPartners() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Stranka</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Provizija</TableHead>
                         <TableHead>Zahtevano</TableHead>
                         <TableHead className="text-right">Status</TableHead>
@@ -437,6 +485,7 @@ export default function DashboardPartners() {
                     <TableBody>
                       {requestedPayouts.map((referral) => (
                         <TableRow key={referral.id}>
+                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
                           <TableCell>{referral.customer_email}</TableCell>
                           <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
                           <TableCell>
@@ -470,6 +519,7 @@ export default function DashboardPartners() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Stranka</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Provizija</TableHead>
                         <TableHead>Izplačano</TableHead>
                         <TableHead className="text-right">Status</TableHead>
@@ -478,6 +528,7 @@ export default function DashboardPartners() {
                     <TableBody>
                       {paidPayouts.map((referral) => (
                         <TableRow key={referral.id}>
+                          <TableCell className="font-medium">{referral.customer_name || '—'}</TableCell>
                           <TableCell>{referral.customer_email}</TableCell>
                           <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
                           <TableCell>
@@ -591,18 +642,56 @@ export default function DashboardPartners() {
       </div>
 
       {/* Payout Confirmation Dialog */}
-      <AlertDialog open={payoutDialogOpen} onOpenChange={setPayoutDialogOpen}>
+      <AlertDialog open={payoutDialogOpen} onOpenChange={(open) => {
+        setPayoutDialogOpen(open);
+        if (!open) {
+          setInvoiceConfirmed(false);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Potrdi zahtevek za izplačilo</AlertDialogTitle>
-            <AlertDialogDescription>
-              Ali ste prepričani, da želite zahtevati izplačilo za to provizijo?
-              Po oddaji zahtevka boste prejeli e-pošto z navodili za račun.
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <FileCheck className="h-5 w-5 text-primary" />
+              </div>
+              <AlertDialogTitle className="mb-0">Potrdite zahtevek za izplačilo</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-amber-600 dark:text-amber-400 font-medium">
+                  Zahtevek oddajte SAMO če ste že poslali račun za to provizijo na finance@botmotion.ai
+                </p>
+                
+                {selectedReferral && (
+                  <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                    <p className="font-medium text-foreground">
+                      {selectedReferral.customer_name || selectedReferral.customer_email} - {selectedReferral.plan.charAt(0).toUpperCase() + selectedReferral.plan.slice(1)} paket - {formatCurrency(selectedReferral.commission_amount)}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-start gap-3 pt-2">
+                  <Checkbox
+                    id="invoice-confirmed"
+                    checked={invoiceConfirmed}
+                    onCheckedChange={(checked) => setInvoiceConfirmed(checked === true)}
+                  />
+                  <label
+                    htmlFor="invoice-confirmed"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    Potrjujem, da sem že poslal/a račun za to provizijo
+                  </label>
+                </div>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isRequestingPayout}>Prekliči</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmPayout} disabled={isRequestingPayout}>
+            <AlertDialogAction 
+              onClick={confirmPayout} 
+              disabled={isRequestingPayout || !invoiceConfirmed}
+            >
               {isRequestingPayout ? 'Pošiljam...' : 'Potrdi zahtevek'}
             </AlertDialogAction>
           </AlertDialogFooter>
