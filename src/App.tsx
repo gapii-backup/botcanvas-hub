@@ -200,6 +200,11 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Redirect /partners to /dashboard/partners */}
+            <Route
+              path="/partners"
+              element={<Navigate to="/dashboard/partners" replace />}
+            />
             <Route
               path="/dashboard/docs"
               element={
