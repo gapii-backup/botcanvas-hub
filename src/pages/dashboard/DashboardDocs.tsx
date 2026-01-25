@@ -336,7 +336,7 @@ export default function DashboardDocs() {
 
   return (
     <DashboardSidebar>
-      <div className="p-4 md:p-6 lg:p-8 overflow-x-hidden max-w-full">
+      <div className="w-full max-w-full overflow-x-hidden p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="mb-6 md:mb-8 animate-fade-in">
           <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
@@ -344,14 +344,14 @@ export default function DashboardDocs() {
         </div>
 
         {/* Sections */}
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-4 md:space-y-6 w-full max-w-full">
           {sections.map((section, index) => {
             const Icon = section.icon;
             return (
               <Card
                 key={section.id}
                 className={cn(
-                  "glass p-4 md:p-6 animate-slide-up",
+                  "glass p-4 md:p-6 animate-slide-up w-full max-w-full overflow-hidden",
                   `delay-${(index + 1) * 100}`
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
