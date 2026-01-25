@@ -68,7 +68,7 @@ export default function DashboardDocs() {
     );
   }
 
-  if (widget?.status === 'pending') {
+  if (widget?.status === 'pending' || widget?.status === 'setup_paid') {
     return (
       <DashboardSidebar>
         <div className="p-4 md:p-6 lg:p-8">
