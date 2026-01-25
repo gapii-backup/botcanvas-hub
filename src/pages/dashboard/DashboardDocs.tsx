@@ -18,8 +18,6 @@ import {
   Code,
   Copy,
   Check,
-  Globe,
-  ShoppingBag,
   FileCode,
   ExternalLink,
   ChevronDown,
@@ -178,9 +176,7 @@ export default function DashboardDocs() {
       id: 'wordpress',
       title: '3. WordPress',
       subtitle: 'Priporočamo uporabo vtičnika HFCM za lažjo namestitev',
-      icon: Globe,
-      iconColor: 'text-blue-500',
-      bgColor: 'bg-blue-500/20',
+      logoSrc: '/docs/wordpress-logo.png',
       content: (
         <div className="space-y-4 md:space-y-6">
           {/* Option 1 - HFCM Plugin */}
@@ -244,9 +240,7 @@ export default function DashboardDocs() {
     {
       id: 'shopify',
       title: '4. Shopify',
-      icon: ShoppingBag,
-      iconColor: 'text-emerald-500',
-      bgColor: 'bg-emerald-500/20',
+      logoSrc: '/docs/shopify-logo.webp',
       content: (
         <div className="space-y-3 md:space-y-4">
           <ol className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
@@ -274,9 +268,7 @@ export default function DashboardDocs() {
     {
       id: 'help',
       title: 'Potrebujete pomoč pri namestitvi?',
-      icon: Calendar,
-      iconColor: 'text-amber-500',
-      bgColor: 'bg-amber-500/20',
+      isHelpSection: true,
       content: (
         <div className="space-y-4 md:space-y-5 text-center">
           <p className="text-sm md:text-base text-muted-foreground">
@@ -346,7 +338,10 @@ export default function DashboardDocs() {
         {/* Sections */}
         <div className="space-y-4 md:space-y-6 w-full max-w-full">
           {sections.map((section, index) => {
-            const Icon = section.icon;
+            const Icon = 'icon' in section ? section.icon : null;
+            const isHelpSection = 'isHelpSection' in section && section.isHelpSection;
+            const hasLogo = 'logoSrc' in section && section.logoSrc;
+            
             return (
               <Card
                 key={section.id}
@@ -356,19 +351,40 @@ export default function DashboardDocs() {
                 )}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center shrink-0", section.bgColor)}>
-                    <Icon className={cn("h-4 w-4 md:h-5 md:w-5", section.iconColor)} />
-                  </div>
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <h2 className="text-base md:text-lg font-semibold mb-1">{section.title}</h2>
-                    {'subtitle' in section && section.subtitle && (
-                      <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">{section.subtitle}</p>
-                    )}
-                    {!('subtitle' in section) && <div className="mb-3 md:mb-4" />}
+                {isHelpSection ? (
+                  // Help section - centered layout without icon
+                  <div className="text-center">
+                    <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">{section.title}</h2>
                     {section.content}
                   </div>
-                </div>
+                ) : (
+                  // Regular sections with icon/logo
+                  <div className="flex items-start gap-3 md:gap-4">
+                    {hasLogo ? (
+                      // Logo image instead of icon
+                      <div className="h-8 w-8 md:h-10 md:w-10 shrink-0 flex items-center justify-center">
+                        <img 
+                          src={section.logoSrc} 
+                          alt={section.title}
+                          className="h-8 w-8 md:h-10 md:w-10 object-contain"
+                        />
+                      </div>
+                    ) : Icon ? (
+                      // Icon with background
+                      <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center shrink-0", 'bgColor' in section ? section.bgColor : '')}>
+                        <Icon className={cn("h-4 w-4 md:h-5 md:w-5", 'iconColor' in section ? section.iconColor : '')} />
+                      </div>
+                    ) : null}
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <h2 className="text-base md:text-lg font-semibold mb-1">{section.title}</h2>
+                      {'subtitle' in section && section.subtitle && (
+                        <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">{section.subtitle}</p>
+                      )}
+                      {!('subtitle' in section) && <div className="mb-3 md:mb-4" />}
+                      {section.content}
+                    </div>
+                  </div>
+                )}
               </Card>
             );
           })}
