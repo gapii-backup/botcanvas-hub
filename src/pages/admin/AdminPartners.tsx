@@ -30,7 +30,8 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Search, Eye, Loader2, Plus, Shuffle, Copy, EyeOff, FileWarning } from 'lucide-react';
+import { Search, Pencil, Loader2, Plus, Shuffle, Copy, EyeOff, Eye, FileWarning } from 'lucide-react';
+import type { AdminPartner } from '@/hooks/useAdminPartners';
 
 // Generate random password with letters, numbers, and symbols
 const generateRandomPassword = () => {
@@ -54,6 +55,13 @@ export default function AdminPartners() {
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Edit partner dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingPartner, setEditingPartner] = useState<AdminPartner | null>(null);
+  const [editPromoCode, setEditPromoCode] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [promoCodeError, setPromoCodeError] = useState('');
 
   // Fetch unpaid invoice count
   useEffect(() => {
@@ -99,6 +107,53 @@ export default function AdminPartners() {
 
   const handleStatusToggle = async (id: string, currentStatus: boolean | null) => {
     await updatePartnerStatus(id, !currentStatus);
+  };
+
+  const handleEditClick = (partner: AdminPartner) => {
+    setEditingPartner(partner);
+    setEditPromoCode(partner.promo_code || '');
+    setPromoCodeError('');
+    setEditDialogOpen(true);
+  };
+
+  const handleSavePromoCode = async () => {
+    if (!editingPartner) return;
+
+    // Validation
+    const trimmedCode = editPromoCode.trim();
+    if (!trimmedCode) {
+      setPromoCodeError('Promo koda ne sme biti prazna');
+      return;
+    }
+
+    // Check if promo code already exists for another partner
+    const existingPartner = partners.find(
+      (p) => p.promo_code?.toLowerCase() === trimmedCode.toLowerCase() && p.id !== editingPartner.id
+    );
+    if (existingPartner) {
+      setPromoCodeError('Ta promo koda že obstaja');
+      return;
+    }
+
+    try {
+      setEditLoading(true);
+      const { error } = await supabase
+        .from('partners')
+        .update({ promo_code: trimmedCode })
+        .eq('id', editingPartner.id);
+
+      if (error) throw error;
+
+      toast.success('Promo koda posodobljena');
+      setEditDialogOpen(false);
+      setEditingPartner(null);
+      refetch();
+    } catch (error) {
+      console.error('Error updating promo code:', error);
+      toast.error('Napaka pri posodabljanju promo kode');
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleGeneratePassword = () => {
@@ -410,8 +465,12 @@ export default function AdminPartners() {
                       />
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleEditClick(partner)}
+                      >
+                        <Pencil className="h-4 w-4" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -420,6 +479,65 @@ export default function AdminPartners() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Edit Partner Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Uredi partnerja</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Ime</Label>
+                <Input
+                  value={editingPartner?.name || ''}
+                  readOnly
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  value={editingPartner?.email || ''}
+                  readOnly
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Podjetje</Label>
+                <Input
+                  value={editingPartner?.company || '-'}
+                  readOnly
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="promo_code">Promo koda</Label>
+                <Input
+                  id="promo_code"
+                  value={editPromoCode}
+                  onChange={(e) => {
+                    setEditPromoCode(e.target.value.toUpperCase());
+                    setPromoCodeError('');
+                  }}
+                  placeholder="PROMO20"
+                />
+                {promoCodeError && (
+                  <p className="text-sm text-destructive">{promoCodeError}</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Prekliči
+                </Button>
+                <Button onClick={handleSavePromoCode} disabled={editLoading}>
+                  {editLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Shrani
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
