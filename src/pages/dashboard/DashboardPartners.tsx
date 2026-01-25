@@ -300,12 +300,31 @@ export default function DashboardPartners() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>{currentTier.name} {currentTier.emoji}</span>
-                {nextTierInfo && (
-                  <span>{nextTierInfo.tier.name} {nextTierInfo.tier.emoji}</span>
-                )}
+            <div className="space-y-3">
+              <div className="flex justify-between items-end">
+                <div>
+                  <span className="text-lg font-semibold">
+                    {currentTier.emoji} {currentTier.name}
+                  </span>
+                </div>
+                <div className="text-right">
+                  {nextTierInfo ? (
+                    <div>
+                      <span className="text-lg font-semibold">
+                        {nextTierInfo.tier.emoji} {nextTierInfo.tier.name}
+                      </span>
+                      {nextTierInfo.tier.bonus > 0 && (
+                        <span className="text-sm text-muted-foreground ml-2">
+                          · Bonus €{nextTierInfo.tier.bonus.toLocaleString('sl-SI')}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-lg font-semibold text-green-500">
+                      ✨ Maksimalni tier dosežen!
+                    </span>
+                  )}
+                </div>
               </div>
               <Progress value={calculateProgress()} className="h-3" />
               <p className="text-sm text-muted-foreground text-center">
