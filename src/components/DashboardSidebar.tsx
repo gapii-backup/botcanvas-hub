@@ -40,8 +40,10 @@ import {
   Sparkles,
   BookOpen,
   FileText,
+  Handshake,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
+import { useIsActivePartner } from '@/hooks/usePartner';
 import { useToast } from '@/hooks/use-toast';
 import logoInline from '@/assets/logo-inline.png';
 
@@ -55,6 +57,7 @@ type NavItem = {
   href: string;
   requiresPro?: boolean;
   blockedForPartner?: boolean;
+  partnerOnly?: boolean;
   iconColor?: string;
   bgColor?: string;
 };
@@ -68,6 +71,7 @@ const navItems: NavItem[] = [
   { label: 'Support Ticketi', icon: TicketCheck, href: '/dashboard/support', requiresPro: true, iconColor: 'text-blue-500', bgColor: 'bg-blue-500/20' },
   { label: 'Nadgradi', icon: Sparkles, href: '/dashboard/upgrade', blockedForPartner: true, iconColor: 'text-amber-500', bgColor: 'bg-amber-500/20' },
   { label: 'Naročnina', icon: CreditCard, href: '/dashboard/subscription', blockedForPartner: true, iconColor: 'text-emerald-500', bgColor: 'bg-emerald-500/20' },
+  { label: 'Partnerji', icon: Handshake, href: '/dashboard/partners', partnerOnly: true, iconColor: 'text-purple-500', bgColor: 'bg-purple-500/20' },
   { label: 'Nastavitve', icon: Settings, href: '/dashboard/settings', iconColor: 'text-muted-foreground', bgColor: 'bg-muted' },
   { label: 'Dokumentacija', icon: FileText, href: '/dashboard/docs', iconColor: 'text-cyan-500', bgColor: 'bg-cyan-500/20' },
   { label: 'Pomoč', icon: HelpCircle, href: '/dashboard/help', iconColor: 'text-violet-500', bgColor: 'bg-violet-500/20' },
@@ -78,6 +82,7 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const { widget } = useWidget();
   const { user, signOut } = useAuth();
+  const { isActivePartner } = useIsActivePartner();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -97,7 +102,7 @@ export function DashboardSidebar({
   // Check if user has Pro or Enterprise plan
   const hasProAccess = widget?.plan === 'pro' || widget?.plan === 'enterprise';
   
-  // Check if user is a partner
+  // Check if user is a partner (widget level)
   const isPartner = widget?.is_partner === true;
 
   // Check if a section is locked for basic users
@@ -109,6 +114,14 @@ export function DashboardSidebar({
   // Check if item is blocked for partners
   const isBlockedForPartner = (item: NavItem) => {
     return isPartner && item.blockedForPartner === true;
+  };
+
+  // Check if item should be visible (for partner-only items)
+  const isVisible = (item: NavItem) => {
+    if (item.partnerOnly) {
+      return isActivePartner === true;
+    }
+    return true;
   };
 
   const handleSignOut = async () => {
@@ -224,7 +237,7 @@ export function DashboardSidebar({
         mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
+          {navItems.filter(isVisible).map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
             const blocked = isBlockedForPartner(item);
@@ -261,7 +274,7 @@ export function DashboardSidebar({
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => {
+          {navItems.filter(isVisible).map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
             const blocked = isBlockedForPartner(item);
