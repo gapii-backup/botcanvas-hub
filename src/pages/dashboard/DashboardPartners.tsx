@@ -413,7 +413,7 @@ export default function DashboardPartners() {
                       <p>Slovenija</p>
                       <p>Davčna št.: SI12345678</p>
                     </div>
-                    <p>2. Račun pošljite na: <span className="font-medium text-foreground">info@botmotion.ai</span></p>
+                    <p>2. Račun pošljite na: <a href="mailto:info@botmotion.ai" className="font-medium text-primary hover:underline">info@botmotion.ai</a></p>
                     <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih strankah</p>
                     <p>4. Izplačilo prejmete v roku 14 dneh</p>
                     <p className="text-amber-600 dark:text-amber-400 font-medium">

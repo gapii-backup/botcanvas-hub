@@ -24,10 +24,13 @@ import {
   Shield,
   Clock,
   Lock,
+  Handshake,
+  ArrowRight,
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { usePartner } from '@/hooks/usePartner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
@@ -70,6 +73,15 @@ export default function DashboardOverview() {
 
   const tableName = widget?.table_name;
   const { stats, loading: statsLoading } = useDashboardStats(tableName);
+  
+  // Partner data - only used if user is an active partner
+  const { 
+    partner, 
+    activeReferralsCount, 
+    totalCommission, 
+    currentTier,
+    loading: partnerLoading 
+  } = usePartner();
 
 // Embed code state
   const [copied, setCopied] = useState(false);
@@ -305,6 +317,46 @@ export default function DashboardOverview() {
             </div>
           </div>
         </div>
+
+        {/* Partner Section - Only for active partners */}
+        {partner?.is_active && (
+          <div className="glass rounded-2xl p-4 sm:p-6 animate-slide-up">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <Handshake className="h-7 w-7 text-purple-500" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">Partnerski program</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">Spremljajte vaše stranke in zaslužke</p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                <div className="flex items-center gap-4 sm:gap-6 text-sm">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-foreground">{activeReferralsCount}</span>
+                    <span className="text-muted-foreground">aktivnih strank</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-muted-foreground">Tier:</span>
+                    <span className="font-semibold text-foreground">{currentTier.emoji} {currentTier.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-foreground">€{totalCommission.toLocaleString('sl-SI')}</span>
+                    <span className="text-muted-foreground">zasluženo</span>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate('/dashboard/partners')}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold shadow-lg shadow-purple-500/25"
+                >
+                  Odpri partnerski portal
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Message Usage Card */}
         {subscriptionStatus === 'active' && (
