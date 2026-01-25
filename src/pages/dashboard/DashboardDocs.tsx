@@ -112,9 +112,9 @@ export default function DashboardDocs() {
           </p>
           
           {widget?.api_key ? (
-            <div className="relative">
-              <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border">
-                <code>{embedCode}</code>
+            <div className="relative max-w-full overflow-hidden">
+              <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border max-w-full whitespace-pre-wrap break-all">
+                <code className="break-all">{embedCode}</code>
               </pre>
               <Button
                 size="sm"
@@ -152,13 +152,13 @@ export default function DashboardDocs() {
       iconColor: 'text-success',
       bgColor: 'bg-success/20',
       content: (
-        <div className="space-y-3 md:space-y-4">
+        <div className="space-y-3 md:space-y-4 max-w-full overflow-hidden">
           <p className="text-sm md:text-base text-muted-foreground">
-            Kodo prilepite pred zaključni <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag na vaši spletni strani.
+            Kodo prilepite pred zaključni <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono break-words">&lt;/body&gt;</code> tag na vaši spletni strani.
           </p>
           
-          <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border">
-            <code>{`<!DOCTYPE html>
+          <pre className="bg-muted/50 rounded-lg p-3 md:p-4 overflow-x-auto font-mono text-xs md:text-sm border border-border max-w-full">
+            <code className="whitespace-pre-wrap break-words">{`<!DOCTYPE html>
 <html>
 <head>
   <title>Vaša stran</title>
@@ -229,7 +229,7 @@ export default function DashboardDocs() {
               <ol className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
                 <li>Pojdite na <strong className="text-foreground">Videz → Urejevalnik datotek tem</strong></li>
                 <li>V desnem stolpcu izberite <strong className="text-foreground">"Noga teme" (footer.php)</strong></li>
-                <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag in shranite</li>
+                <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono break-words">&lt;/body&gt;</code> tag in shranite</li>
               </ol>
               
               <LightboxImage 
@@ -261,7 +261,7 @@ export default function DashboardDocs() {
 
           <ol start={3} className="list-decimal list-inside space-y-1.5 md:space-y-2 text-sm md:text-base text-muted-foreground">
             <li>V levem meniju odprite mapo <strong className="text-foreground">"Layout"</strong> in kliknite na <strong className="text-foreground">"theme.liquid"</strong></li>
-            <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono">&lt;/body&gt;</code> tag in kliknite <strong className="text-foreground">"Save"</strong></li>
+            <li>Prilepite embed kodo pred <code className="bg-muted px-1 md:px-1.5 py-0.5 rounded text-xs md:text-sm font-mono break-words">&lt;/body&gt;</code> tag in kliknite <strong className="text-foreground">"Save"</strong></li>
           </ol>
           
           <LightboxImage 
@@ -336,7 +336,7 @@ export default function DashboardDocs() {
 
   return (
     <DashboardSidebar>
-      <div className="p-4 md:p-6 lg:p-8">
+      <div className="p-4 md:p-6 lg:p-8 overflow-x-hidden max-w-full">
         {/* Header */}
         <div className="mb-6 md:mb-8 animate-fade-in">
           <h1 className="text-xl md:text-2xl font-bold">Dokumentacija</h1>
@@ -360,7 +360,7 @@ export default function DashboardDocs() {
                   <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center shrink-0", section.bgColor)}>
                     <Icon className={cn("h-4 w-4 md:h-5 md:w-5", section.iconColor)} />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 overflow-hidden">
                     <h2 className="text-base md:text-lg font-semibold mb-1">{section.title}</h2>
                     {'subtitle' in section && section.subtitle && (
                       <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">{section.subtitle}</p>
