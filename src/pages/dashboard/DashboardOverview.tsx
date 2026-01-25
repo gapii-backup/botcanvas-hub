@@ -534,17 +534,39 @@ export default function DashboardOverview() {
             </div>
           ) : (
             <>
-              <div className="bg-muted/50 rounded-lg p-3 border border-border/50">
-                <code className="text-xs sm:text-sm font-mono text-foreground break-all">
-                  {embedCode}
-                </code>
+              {/* Code block with copy button */}
+              <div className="relative">
+                <div className="bg-muted/50 rounded-lg p-3 pr-24 sm:pr-28 border border-border/50">
+                  <code className="text-xs sm:text-sm font-mono text-foreground break-all">
+                    {embedCode}
+                  </code>
+                </div>
+                
+                {/* Copy button - absolute positioned in top right on desktop */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="absolute top-2 right-2 hidden sm:flex gap-1"
+                  onClick={copyEmbedCode}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'Kopirano' : 'Kopiraj kodo'}
+                </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
-                Prilepite to kodo na vašo spletno stran pred zaključni &lt;/body&gt; tag
-              </p>
               
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              {/* Action buttons below code block */}
+              <div className="flex flex-col gap-2 mt-3">
+                {/* Copy button - only visible on mobile */}
+                <Button
+                  variant="outline"
+                  className="sm:hidden gap-2"
+                  onClick={copyEmbedCode}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'Kopirano' : 'Kopiraj kodo'}
+                </Button>
+                
+                {/* Help button - always visible */}
                 <Button
                   variant="outline"
                   className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0"
@@ -552,15 +574,6 @@ export default function DashboardOverview() {
                 >
                   <HelpCircle className="h-4 w-4" />
                   Potrebujete pomoč pri namestitvi?
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  onClick={copyEmbedCode}
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? 'Kopirano' : 'Kopiraj kodo'}
                 </Button>
               </div>
             </>
