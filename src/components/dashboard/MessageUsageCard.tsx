@@ -11,13 +11,15 @@ interface MessageUsageCardProps {
   billingPeriodStart: string | null | undefined;
   messagesLimit: number | null | undefined;
   billingPeriod: string | null | undefined;
+  isPartner?: boolean;
 }
 
 export function MessageUsageCard({ 
   tableName, 
   billingPeriodStart, 
   messagesLimit,
-  billingPeriod 
+  billingPeriod,
+  isPartner
 }: MessageUsageCardProps) {
   const [messagesUsed, setMessagesUsed] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -115,18 +117,22 @@ export function MessageUsageCard({
             <span className="block sm:inline">Obdobje se ponastavi:</span>
             <span className="block sm:inline sm:ml-1 font-medium text-foreground">{format(nextBillingDate, 'd. MMMM yyyy', { locale: sl })}</span>
           </p>
-          <Button
-            onClick={() => setCapacityModalOpen(true)}
-            size="sm"
-            className={`bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25 ${isHighUsage ? 'animate-pulse' : ''}`}
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Dodaj kapaciteto
-          </Button>
+          {!isPartner && (
+            <Button
+              onClick={() => setCapacityModalOpen(true)}
+              size="sm"
+              className={`bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold shadow-lg shadow-amber-500/25 ${isHighUsage ? 'animate-pulse' : ''}`}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Dodaj kapaciteto
+            </Button>
+          )}
         </div>
       </div>
 
-      <CapacityAddonModal open={capacityModalOpen} onOpenChange={setCapacityModalOpen} />
+      {!isPartner && (
+        <CapacityAddonModal open={capacityModalOpen} onOpenChange={setCapacityModalOpen} />
+      )}
     </>
   );
 }

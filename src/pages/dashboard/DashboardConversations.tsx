@@ -321,6 +321,7 @@ export default function DashboardConversations() {
             billingPeriodStart={widget?.billing_period_start}
             messagesLimit={widget?.messages_limit}
             billingPeriod={widget?.billing_period}
+            isPartner={widget?.is_partner === true}
           />
         )}
 
