@@ -521,12 +521,6 @@ export default function DashboardOverview() {
               <Code className="h-5 w-5 text-primary" />
               <h3 className="font-semibold text-foreground">Embed koda</h3>
             </div>
-            {widget?.status !== 'setup_paid' && (
-              <Button variant="outline" size="sm" onClick={copyEmbedCode}>
-                {copied ? <Check className="h-4 w-4 mr-1" /> : <Copy className="h-4 w-4 mr-1" />}
-                {copied ? 'Kopirano' : 'Kopiraj'}
-              </Button>
-            )}
           </div>
           
           {widget?.status === 'setup_paid' ? (
@@ -548,6 +542,27 @@ export default function DashboardOverview() {
               <p className="text-xs text-muted-foreground mt-3">
                 Prilepite to kodo na vašo spletno stran pred zaključni &lt;/body&gt; tag
               </p>
+              
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  className="gap-2 bg-blue-500 hover:bg-blue-600 text-white border-0"
+                  onClick={() => navigate('/dashboard/docs')}
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  Potrebujete pomoč pri namestitvi?
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={copyEmbedCode}
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? 'Kopirano' : 'Kopiraj kodo'}
+                </Button>
+              </div>
             </>
           )}
           </div>
