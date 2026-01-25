@@ -21,6 +21,7 @@ import {
   HelpCircle,
   TicketCheck,
   Sparkles,
+  Shield,
   Clock,
   Lock,
 } from 'lucide-react';
@@ -295,6 +296,12 @@ export default function DashboardOverview() {
                 <Settings className="h-4 w-4 mr-1" />
                 Uredi
               </Button>
+              {user?.email === 'gasper.perko2@gmail.com' && (
+                <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="flex-1 sm:flex-none">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Admin
+                </Button>
+              )}
             </div>
           </div>
         </div>
