@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap, Plus } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
@@ -43,13 +43,19 @@ const getTriggerIconPath = (iconName: string): string => {
   return paths[iconName] || paths['MessageCircle'];
 };
 
-// Addon item type
+// Addon item type with demo data
 type AddonItem = {
   id: string;
   label: string;
   monthlyPrice: number | null;
   yearlyPrice?: number | null;
   proOnly?: boolean;
+  // Demo popup fields
+  badge?: string;
+  videoUrl?: string | null;
+  description: string;
+  bullets: string[];
+  stat: string;
 };
 
 type AddonCategory = {
@@ -64,21 +70,92 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     title: '✨ DODATNE FUNKCIJE',
     icon: Sparkles,
     items: [
-      { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30, yearlyPrice: 288 },
-      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336 },
-      { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 20, yearlyPrice: 192 },
-      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 80, yearlyPrice: 768, proOnly: true },
-      { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35, yearlyPrice: 336 },
+      { 
+        id: 'multilanguage', 
+        label: 'Multilanguage upgrade', 
+        monthlyPrice: 30, 
+        yearlyPrice: 288,
+        badge: undefined,
+        videoUrl: null,
+        description: 'Vaš chatbot bo komuniciral v jeziku vaše stranke',
+        bullets: [
+          'Chatbot avtomatsko zazna jezik obiskovalca ob prvem sporočilu',
+          'Podpira slovenščino in +50 drugih jezikov',
+          'Naravni odgovori v jeziku stranke'
+        ],
+        stat: 'Dosežite 3x več strank v regiji'
+      },
+      { 
+        id: 'booking', 
+        label: 'Rezervacija sestankov', 
+        monthlyPrice: 35, 
+        yearlyPrice: 336,
+        badge: undefined,
+        videoUrl: '/videos/rezervacija.mp4',
+        description: 'Omogočite strankam rezervacijo terminov direktno v chatu',
+        bullets: [
+          'Stranke rezervirajo termin direktno v chatu',
+          'Sinhronizacija z Google Calendar ali Outlook',
+          'Avtomatski reminder pred sestankom'
+        ],
+        stat: 'Povprečno +60% več rezervacij'
+      },
+      { 
+        id: 'contacts', 
+        label: 'Avtomatsko zbiranje kontaktov', 
+        monthlyPrice: 20, 
+        yearlyPrice: 192,
+        badge: '💰 Najboljša vrednost',
+        videoUrl: '/videos/kontakti.mp4',
+        description: 'Avtomatsko zbirajte kontakte potencialnih strank',
+        bullets: [
+          'Chatbot naravno vpraša za email',
+          'Avtomatski export iz nadzorne plošče',
+          'GDPR skladna soglasja'
+        ],
+        stat: 'Povprečno +45% več leadov'
+      },
+      { 
+        id: 'product_ai', 
+        label: 'Product recommendations (AI)', 
+        monthlyPrice: 80, 
+        yearlyPrice: 768, 
+        proOnly: true,
+        badge: '💎 Največji ROI',
+        videoUrl: '/videos/products.mp4',
+        description: 'AI priporoča izdelke glede na pogovor s stranko',
+        bullets: [
+          'AI predlaga relevantne izdelke glede na pogovor',
+          'Prikazuje slike, cene in opise',
+          'Direktna povezava do nakupa'
+        ],
+        stat: 'Povprečno +34% večja košarica'
+      },
+      { 
+        id: 'tickets', 
+        label: 'Support ticket kreiranje', 
+        monthlyPrice: 35, 
+        yearlyPrice: 336,
+        badge: '🔥 Najbolj priljubljeno',
+        videoUrl: '/videos/support.mp4',
+        description: 'Stranke ustvarijo support ticket direktno v chatu',
+        bullets: [
+          'Stranke ustvarijo ticket direktno v chatu',
+          'Vsi podatki shranjeni na enem mestu',
+          'Obveščanje po emailu za vas in stranko'
+        ],
+        stat: '40% hitrejše reševanje zahtevkov'
+      },
     ],
   },
   capacity: {
     title: '📊 DODATNE KAPACITETE',
     icon: MessageCircle,
     items: [
-      { id: 'capacity_500', label: '+500 sporočil', monthlyPrice: 18 },
-      { id: 'capacity_1000', label: '+1.000 sporočil', monthlyPrice: 32 },
-      { id: 'capacity_2500', label: '+2.500 sporočil', monthlyPrice: 70 },
-      { id: 'capacity_5000', label: '+5.000 sporočil', monthlyPrice: 120 },
+      { id: 'capacity_500', label: '+500 sporočil', monthlyPrice: 18, description: '', bullets: [], stat: '' },
+      { id: 'capacity_1000', label: '+1.000 sporočil', monthlyPrice: 32, description: '', bullets: [], stat: '' },
+      { id: 'capacity_2500', label: '+2.500 sporočil', monthlyPrice: 70, description: '', bullets: [], stat: '' },
+      { id: 'capacity_5000', label: '+5.000 sporočil', monthlyPrice: 120, description: '', bullets: [], stat: '' },
     ],
   },
 };
@@ -171,6 +248,7 @@ export default function Complete() {
   });
   const [activePreview, setActivePreview] = useState<PreviewType>('home');
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [demoAddon, setDemoAddon] = useState<string | null>(null);
 
   const userPlan = userBot?.plan || 'basic';
   const isYearly = userBot?.billing_period === 'yearly';
@@ -434,6 +512,7 @@ export default function Complete() {
                         {category.items.map((item) => {
                           const isCapacityAddon = item.id.startsWith('capacity_');
                           const isSelected = selectedAddons.includes(item.id);
+                          const hasDemo = !isCapacityAddon && item.description;
                           return (
                             <div 
                               key={item.id}
@@ -444,21 +523,40 @@ export default function Complete() {
                                   : 'bg-muted/30 border-2 border-transparent hover:bg-muted/60 hover:border-muted-foreground/20'
                               }`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all flex-shrink-0 ${
                                   isSelected 
                                     ? 'bg-primary text-primary-foreground' 
                                     : 'bg-muted border border-border group-hover:border-muted-foreground/40'
                                 }`}>
                                   {isSelected && <Check className="h-3.5 w-3.5" />}
                                 </div>
-                                <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                <span className={`text-sm font-medium truncate ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
                                   {item.label}
                                 </span>
+                                {item.badge && (
+                                  <span className="hidden sm:inline-flex text-xs font-medium px-2 py-0.5 rounded-full bg-primary/20 text-primary whitespace-nowrap">
+                                    {item.badge}
+                                  </span>
+                                )}
                               </div>
-                              <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
-                              </span>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                                  {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
+                                </span>
+                                {hasDemo && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDemoAddon(item.id);
+                                    }}
+                                    className="text-muted-foreground hover:text-primary transition-colors p-1"
+                                    title="Poglej demo"
+                                  >
+                                    <Info className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
@@ -703,6 +801,118 @@ export default function Complete() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Demo Addon Dialog */}
+      <Dialog open={!!demoAddon} onOpenChange={() => setDemoAddon(null)}>
+        <DialogContent className="p-0 gap-0 w-screen h-screen max-w-none max-h-none sm:w-auto sm:h-auto sm:max-w-md sm:max-h-[90vh] rounded-none sm:rounded-2xl flex flex-col border-0 sm:border overflow-hidden">
+          {demoAddon && (() => {
+            const addon = Object.values(ALL_ADDONS)
+              .flatMap(cat => cat.items)
+              .find(item => item.id === demoAddon);
+            if (!addon || !addon.description) return null;
+            
+            const isCapacity = demoAddon.startsWith('capacity_');
+            const price = formatPrice(addon.monthlyPrice, addon.yearlyPrice || null, isYearly, isCapacity);
+            
+            return (
+              <>
+                {/* Video/Animacija sekcija */}
+                <div className="relative w-full aspect-[9/16] sm:aspect-video bg-black flex-shrink-0 max-h-[50vh]">
+                  {addon.videoUrl ? (
+                    <video
+                      src={addon.videoUrl}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    /* Animacija za multilanguage */
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                      <div className="text-center">
+                        <div className="text-6xl mb-4 animate-pulse">🌍</div>
+                        <div className="flex justify-center gap-2 text-3xl">
+                          <span className="animate-bounce" style={{ animationDelay: '0ms' }}>🇸🇮</span>
+                          <span className="animate-bounce" style={{ animationDelay: '100ms' }}>🇬🇧</span>
+                          <span className="animate-bounce" style={{ animationDelay: '200ms' }}>🇩🇪</span>
+                          <span className="animate-bounce" style={{ animationDelay: '300ms' }}>🇫🇷</span>
+                          <span className="animate-bounce" style={{ animationDelay: '400ms' }}>🇮🇹</span>
+                        </div>
+                        <p className="text-muted-foreground mt-4 text-lg">+50 jezikov</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                  <div className="space-y-4">
+                    {/* Title + Badge */}
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-xl font-bold">{addon.label}</h3>
+                        {addon.badge && (
+                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/20 text-primary">
+                            {addon.badge}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground mt-1">{addon.description}</p>
+                    </div>
+                    
+                    {/* Bullets */}
+                    <div className="space-y-2">
+                      {addon.bullets.map((bullet, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{bullet}</span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Stat */}
+                    <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                      <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span className="text-sm font-medium text-primary">{addon.stat}</span>
+                    </div>
+                  </div>
+                  
+                  {/* CTA */}
+                  <div className="border-t border-border pt-4 mt-6 space-y-2">
+                    <button
+                      onClick={() => {
+                        toggleAddon(demoAddon);
+                        setDemoAddon(null);
+                      }}
+                      className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                    >
+                      {selectedAddons.includes(demoAddon) ? (
+                        <>
+                          <Check className="h-4 w-4" />
+                          Odstrani iz paketa
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4" />
+                          Dodaj za {price}
+                        </>
+                      )}
+                    </button>
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => setDemoAddon(null)} 
+                      className="w-full"
+                    >
+                      Zapri
+                    </Button>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
