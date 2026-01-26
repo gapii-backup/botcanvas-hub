@@ -65,9 +65,9 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     icon: Sparkles,
     items: [
       { id: 'multilanguage', label: 'Multilanguage upgrade', monthlyPrice: 30, yearlyPrice: 288 },
-      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336, proOnly: true },
+      { id: 'booking', label: 'Rezervacija sestankov', monthlyPrice: 35, yearlyPrice: 336 },
       { id: 'contacts', label: 'Avtomatsko zbiranje kontaktov', monthlyPrice: 20, yearlyPrice: 192 },
-      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 80, yearlyPrice: 768 },
+      { id: 'product_ai', label: 'Product recommendations (AI)', monthlyPrice: 80, yearlyPrice: 768, proOnly: true },
       { id: 'tickets', label: 'Support ticket kreiranje', monthlyPrice: 35, yearlyPrice: 336 },
     ],
   },
@@ -123,7 +123,6 @@ function getAvailableAddons(plan: string | null, isYearly: boolean): Record<stri
 
   const planKey = (plan || 'basic').toLowerCase();
   const excludedIds = excluded[planKey] || [];
-  const showBooking = planKey === 'pro' || planKey === 'enterprise';
 
   const filtered: Record<string, AddonCategory> = {};
 
@@ -135,8 +134,8 @@ function getAvailableAddons(plan: string | null, isYearly: boolean): Record<stri
       // For yearly billing, exclude ALL capacity items (they are added separately after checkout)
       if (isYearly && item.id.startsWith('capacity_')) return false;
       
-      // Booking only for pro/enterprise
-      if (item.proOnly && !showBooking) return false;
+      // proOnly addons are hidden for basic plan
+      if (item.proOnly && planKey === 'basic') return false;
       
       return true;
     });

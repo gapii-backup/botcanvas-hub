@@ -90,9 +90,9 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec', icon: Languages },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true, icon: Calendar },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 20, period: 'mesec', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 80, period: 'mesec', icon: Lightbulb },
+    { id: 'product_ai', name: 'Product AI', price: 80, period: 'mesec', proOnly: true, icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec', icon: Ticket }
   ],
   yearly: [
@@ -101,9 +101,9 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto', icon: Languages },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true, icon: Calendar },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 768, period: 'leto', icon: Lightbulb },
+    { id: 'product_ai', name: 'Product AI', price: 768, period: 'leto', proOnly: true, icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto', icon: Ticket }
   ]
 };
@@ -136,9 +136,9 @@ const getFilteredAddons = (billingPeriod: string, plan: string, activeAddonIds: 
       return addon.id.startsWith('capacity_');
     }
     
-    // Pro: capacities, booking, product_ai available
+    // Pro: capacities and product_ai available
     if (isPro) {
-      const proAvailableAddons = ['booking', 'product_ai'];
+      const proAvailableAddons = ['product_ai'];
       return addon.id.startsWith('capacity_') || proAvailableAddons.includes(addon.id);
     }
     
