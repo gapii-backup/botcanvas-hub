@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap, Plus } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap, Plus, X } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
@@ -91,7 +91,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         monthlyPrice: 35, 
         yearlyPrice: 336,
         badge: undefined,
-        videoUrl: '/videos/rezervacija.mp4',
+        videoUrl: '/videos/rezervacija-termina.mp4',
         description: 'Omogočite strankam rezervacijo terminov direktno v chatu',
         bullets: [
           'Stranke rezervirajo termin direktno v chatu',
@@ -106,7 +106,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         monthlyPrice: 20, 
         yearlyPrice: 192,
         badge: '💰 Najboljša vrednost',
-        videoUrl: '/videos/kontakti.mp4',
+        videoUrl: '/videos/leadgeneration.mp4',
         description: 'Avtomatsko zbirajte kontakte potencialnih strank',
         bullets: [
           'Chatbot naravno vpraša za email',
@@ -122,7 +122,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         yearlyPrice: 768, 
         proOnly: true,
         badge: '💎 Največji ROI',
-        videoUrl: '/videos/products.mp4',
+        videoUrl: '/videos/ai-products.mp4',
         description: 'AI priporoča izdelke glede na pogovor s stranko',
         bullets: [
           'AI predlaga relevantne izdelke glede na pogovor',
@@ -137,7 +137,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         monthlyPrice: 35, 
         yearlyPrice: 336,
         badge: '🔥 Najbolj priljubljeno',
-        videoUrl: '/videos/support.mp4',
+        videoUrl: '/videos/support-ticket.mp4',
         description: 'Stranke ustvarijo support ticket direktno v chatu',
         bullets: [
           'Stranke ustvarijo ticket direktno v chatu',
@@ -806,92 +806,86 @@ export default function Complete() {
 
       {/* Demo Addon Dialog */}
       <Dialog open={!!demoAddon} onOpenChange={() => setDemoAddon(null)}>
-        <DialogContent className="p-0 gap-0 w-screen h-screen max-w-none max-h-none sm:w-auto sm:h-auto sm:max-w-md sm:max-h-[90vh] rounded-none sm:rounded-2xl flex flex-col border-0 sm:border overflow-hidden">
-          {demoAddon && (() => {
-            const addon = Object.values(ALL_ADDONS)
-              .flatMap(cat => cat.items)
-              .find(item => item.id === demoAddon);
-            if (!addon || !addon.description) return null;
-            
-            const isCapacity = demoAddon.startsWith('capacity_');
-            const price = formatPrice(addon.monthlyPrice, addon.yearlyPrice || null, isYearly, isCapacity);
-            
-            return (
-              <>
-                {/* Video/Animacija sekcija */}
-                <div className="relative w-full aspect-[9/16] sm:aspect-video bg-black flex-shrink-0 max-h-[50vh]">
-                  {addon.videoUrl ? (
-                    <video
-                      src={addon.videoUrl}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    /* Animacija za multilanguage */
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4 animate-pulse">🌍</div>
-                        <div className="flex justify-center gap-2 text-3xl">
-                          <span className="animate-bounce" style={{ animationDelay: '0ms' }}>🇸🇮</span>
-                          <span className="animate-bounce" style={{ animationDelay: '100ms' }}>🇬🇧</span>
-                          <span className="animate-bounce" style={{ animationDelay: '200ms' }}>🇩🇪</span>
-                          <span className="animate-bounce" style={{ animationDelay: '300ms' }}>🇫🇷</span>
-                          <span className="animate-bounce" style={{ animationDelay: '400ms' }}>🇮🇹</span>
+        <DialogContent className="p-0 gap-0 w-screen h-screen max-w-none max-h-none sm:w-auto sm:h-auto sm:max-w-md sm:max-h-[90vh] rounded-none sm:rounded-2xl flex flex-col border-0 sm:border">
+          {/* CELOTEN CONTENT SCROLA SKUPAJ */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            {demoAddon && (() => {
+              const addon = Object.values(ALL_ADDONS)
+                .flatMap(cat => cat.items)
+                .find(item => item.id === demoAddon);
+              if (!addon || !addon.description) return null;
+              
+              const isCapacity = demoAddon.startsWith('capacity_');
+              const price = formatPrice(addon.monthlyPrice, addon.yearlyPrice || null, isYearly, isCapacity);
+              
+              return (
+                <>
+                  {/* Video - ZNOTRAJ SCROLL CONTAINERJA */}
+                  <div className="w-full max-w-[280px] mx-auto mb-6">
+                    {addon.videoUrl ? (
+                      <video
+                        src={addon.videoUrl}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="w-full aspect-square rounded-xl object-cover"
+                      />
+                    ) : (
+                      /* Multilanguage animacija */
+                      <div className="w-full aspect-square rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/10 flex items-center justify-center border border-amber-500/30">
+                        <div className="text-center">
+                          <div className="text-5xl mb-3">🌍</div>
+                          <div className="flex justify-center gap-2 text-2xl">
+                            <span>🇸🇮</span><span>🇬🇧</span><span>🇩🇪</span><span>🇫🇷</span><span>🇮🇹</span>
+                          </div>
+                          <p className="text-amber-500 mt-3 text-sm font-medium">+50 jezikov</p>
                         </div>
-                        <p className="text-muted-foreground mt-4 text-lg">+50 jezikov</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                  <div className="space-y-4">
-                    {/* Title + Badge */}
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-xl font-bold">{addon.label}</h3>
-                        {addon.badge && (
-                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/20 text-primary">
-                            {addon.badge}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-muted-foreground mt-1">{addon.description}</p>
-                    </div>
-                    
-                    {/* Bullets */}
-                    <div className="space-y-2">
-                      {addon.bullets.map((bullet, i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm">{bullet}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Stat */}
-                    <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                      <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span className="text-sm font-medium text-primary">{addon.stat}</span>
-                    </div>
+                    )}
                   </div>
-                  
-                  {/* CTA */}
-                  <div className="border-t border-border pt-4 mt-6 space-y-2">
+
+                  {/* Title + Badge */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-xl font-bold">{addon.label}</h3>
+                      {addon.badge && (
+                        <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-500/20 text-amber-500">
+                          {addon.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-muted-foreground mt-1">{addon.description}</p>
+                  </div>
+
+                  {/* Bullets */}
+                  <div className="space-y-2 mb-4">
+                    {addon.bullets.map((bullet, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{bullet}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Stat - AMBER STIL */}
+                  <div className="flex items-center gap-2 p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mb-6">
+                    <Sparkles className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                    <span className="text-sm font-medium text-amber-500">{addon.stat}</span>
+                  </div>
+
+                  {/* CTA - AMBER GRADIENT */}
+                  <div className="border-t border-border pt-4 flex flex-col gap-2">
                     <button
                       onClick={() => {
                         toggleAddon(demoAddon);
                         setDemoAddon(null);
                       }}
-                      className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold py-3.5 px-6 rounded-xl transition-all hover:from-amber-600 hover:to-yellow-600 flex items-center justify-center gap-2"
                     >
                       {selectedAddons.includes(demoAddon) ? (
                         <>
-                          <Check className="h-4 w-4" />
+                          <X className="h-4 w-4" />
                           Odstrani iz paketa
                         </>
                       ) : (
@@ -909,10 +903,10 @@ export default function Complete() {
                       Zapri
                     </Button>
                   </div>
-                </div>
-              </>
-            );
-          })()}
+                </>
+              );
+            })()}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
