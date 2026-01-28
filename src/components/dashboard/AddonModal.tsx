@@ -30,10 +30,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec' },
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec' },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec' },
-    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
+    { id: 'multilanguage', name: 'Večjezičnost', price: 30, period: 'mesec' },
     { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 20, period: 'mesec' },
-    { id: 'product_ai', name: 'Product AI', price: 100, period: 'mesec' },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 100, period: 'mesec' },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
   ],
   yearly: [
@@ -43,10 +43,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec' },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec' },
     // Ostali addoni - letni
-    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
+    { id: 'multilanguage', name: 'Večjezičnost', price: 288, period: 'leto' },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto' },
-    { id: 'product_ai', name: 'Product AI', price: 960, period: 'leto' },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 960, period: 'leto' },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
   ]
 };

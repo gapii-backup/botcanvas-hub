@@ -41,10 +41,10 @@ const addonNames: Record<string, string> = {
   capacity_1000: '+1.000 pogovorov',
   capacity_2500: '+2.500 pogovorov',
   capacity_5000: '+5.000 pogovorov',
-  multilanguage: 'Multilanguage',
+  multilanguage: 'Večjezičnost',
   booking: 'Rezervacija sestankov',
   contacts: 'Zbiranje kontaktov',
-  product_ai: 'Product AI',
+  product_ai: 'AI priporočanje izdelkov',
   tickets: 'Support Ticketi'
 };
 

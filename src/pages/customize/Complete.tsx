@@ -74,8 +74,8 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
     items: [
       { 
         id: 'product_ai', 
-        label: 'Product recommendations (AI)', 
-        monthlyPrice: 100, 
+        label: 'AI priporočanje izdelkov', 
+        monthlyPrice: 100,
         yearlyPrice: 960, 
         proOnly: true,
         badge: '💎 Največji ROI',
@@ -120,8 +120,8 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
       },
       { 
         id: 'multilanguage', 
-        label: 'Multilanguage upgrade', 
-        monthlyPrice: 30, 
+        label: 'Večjezičnost', 
+        monthlyPrice: 30,
         yearlyPrice: 288,
         badge: undefined,
         videoUrl: null,
