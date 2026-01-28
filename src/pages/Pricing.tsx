@@ -239,7 +239,7 @@ export default function Pricing() {
                     />
                   </div>
                   <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1 mb-3">{plan.description}</p>
                 </div>
 
                 <div className="text-center mb-6">
