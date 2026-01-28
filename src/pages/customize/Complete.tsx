@@ -65,12 +65,29 @@ type AddonCategory = {
 };
 
 // Define all add-ons with monthly prices in euros (removed CRM & INTEGRACIJE)
-// Order: badges first (tickets, contacts), then others, product_ai last
+// Order: product_ai first (for Pro), then badges, then others
+// product_ai has proOnly so Basic won't see it - gradient position is based on visible items
 const ALL_ADDONS: Record<string, AddonCategory> = {
   features: {
     title: '✨ DODATNE FUNKCIJE',
     icon: Sparkles,
     items: [
+      { 
+        id: 'product_ai', 
+        label: 'Product recommendations (AI)', 
+        monthlyPrice: 80, 
+        yearlyPrice: 768, 
+        proOnly: true,
+        badge: '💎 Največji ROI',
+        videoUrl: '/videos/ai-products.mp4',
+        description: 'AI priporoča izdelke glede na pogovor s stranko',
+        bullets: [
+          'AI predlaga relevantne izdelke glede na pogovor',
+          'Prikazuje slike, cene in opise',
+          'Direktna povezava do nakupa'
+        ],
+        stat: 'Povprečno +34% večja košarica'
+      },
       { 
         id: 'tickets', 
         label: 'Support ticket kreiranje', 
@@ -130,22 +147,6 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
           'Avtomatski reminder pred sestankom'
         ],
         stat: 'Povprečno +60% več rezervacij'
-      },
-      { 
-        id: 'product_ai', 
-        label: 'Product recommendations (AI)', 
-        monthlyPrice: 80, 
-        yearlyPrice: 768, 
-        proOnly: true,
-        badge: '💎 Največji ROI',
-        videoUrl: '/videos/ai-products.mp4',
-        description: 'AI priporoča izdelke glede na pogovor s stranko',
-        bullets: [
-          'AI predlaga relevantne izdelke glede na pogovor',
-          'Prikazuje slike, cene in opise',
-          'Direktna povezava do nakupa'
-        ],
-        stat: 'Povprečno +34% večja košarica'
       },
     ],
   },
@@ -515,13 +516,14 @@ export default function Complete() {
                           const isSelected = selectedAddons.includes(item.id);
                           const hasDemo = !isCapacityAddon && item.description;
                           
-                          // Gradient colors based on position (first = best)
+                          // Gradient colors based on VISIBLE position (first = best)
+                          // index here is already the visible item index since category.items is filtered
                           const rowGradients = [
-                            'from-amber-500/5 to-transparent',    // 1st - best
-                            'from-orange-500/5 to-transparent',   // 2nd
-                            'from-transparent to-transparent',     // 3rd - neutral
-                            'from-transparent to-transparent',     // 4th - neutral
-                            'from-transparent to-transparent',     // 5th
+                            'from-amber-500/10 to-amber-500/5',   // 1st - best (strongest)
+                            'from-orange-500/8 to-orange-500/3',  // 2nd
+                            'from-yellow-500/6 to-yellow-500/2',  // 3rd
+                            'from-amber-500/5 to-transparent',    // 4th
+                            'from-orange-500/4 to-transparent',   // 5th
                           ];
                           const gradientClass = isCapacityAddon ? '' : (rowGradients[index] || rowGradients[rowGradients.length - 1]);
                           
@@ -573,7 +575,7 @@ export default function Complete() {
                                       e.stopPropagation();
                                       setDemoAddon(item.id);
                                     }}
-                                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-muted hover:bg-amber-500/20 text-muted-foreground hover:text-amber-500 transition-all"
+                                    className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 text-white hover:from-amber-600 hover:to-yellow-600 transition-all shadow-sm"
                                   >
                                     Poglej več
                                   </button>
