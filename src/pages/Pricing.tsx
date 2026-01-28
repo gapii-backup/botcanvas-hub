@@ -241,16 +241,19 @@ export default function Pricing() {
                 </div>
 
                 <div className="text-center mb-6">
+                  <div className="h-6 mb-1">
+                    <span className={cn(
+                      "text-sm line-through",
+                      isYearly ? "text-muted-foreground" : "invisible"
+                    )}>
+                      €{formatPrice(plan.monthlyPrice * 12)}
+                    </span>
+                  </div>
                   <div>
                     <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
                     <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-muted-foreground">{period}</span>
                   </div>
-                  {isYearly && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      = €{formatPrice(plan.yearlyPrice / 12)}/mesec
-                    </p>
-                  )}
                 </div>
 
                 {'highlight' in plan && plan.highlight && (
