@@ -61,6 +61,7 @@ const plans = [
       '8.000 pogovorov na mesec',
       'Rezervacija sestankov neposredno preko chatbota',
       'Pametna priporočila izdelkov (AI)',
+      'Tedensko AI poročilo o uspešnosti',
       'Zgodovina pogovorov – 180 dni'
     ]
   }
