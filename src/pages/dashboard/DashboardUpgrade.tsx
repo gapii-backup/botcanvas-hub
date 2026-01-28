@@ -43,7 +43,7 @@ type FeatureItem = string;
 
 const planPrices = {
   basic: { 
-    monthly: 49.99, yearly: 479.99, name: 'Basic',
+    monthly: 49.99, yearly: 499.99, name: 'Basic',
     features: [
       '1.000 pogovorov na mesec',
       'Podpora za 1 jezik',
@@ -56,7 +56,7 @@ const planPrices = {
     ] as FeatureItem[]
   },
   pro: { 
-    monthly: 129.99, yearly: 1249.99, name: 'Pro',
+    monthly: 129.99, yearly: 1299.99, name: 'Pro',
     features: [
       'Vse iz BASIC paketa, plus:',
       '3.000 pogovorov na mesec',
@@ -68,7 +68,7 @@ const planPrices = {
     ] as FeatureItem[]
   },
   enterprise: { 
-    monthly: 299.99, yearly: 2879.99, name: 'Enterprise',
+    monthly: 299.99, yearly: 2999.99, name: 'Enterprise',
     features: [
       'Vse iz PRO paketa, plus:',
       '8.000 pogovorov na mesec',
@@ -100,11 +100,11 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
-    { id: 'multilanguage', name: 'Večjezičnost', price: 288, period: 'leto', icon: Languages },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', icon: Calendar },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto', icon: Users },
-    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 960, period: 'leto', proOnly: true, icon: Lightbulb },
-    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto', icon: Ticket }
+    { id: 'multilanguage', name: 'Večjezičnost', price: 300, period: 'leto', icon: Languages },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 355, period: 'leto', icon: Calendar },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 200, period: 'leto', icon: Users },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 1000, period: 'leto', proOnly: true, icon: Lightbulb },
+    { id: 'tickets', name: 'Support Ticketi', price: 355, period: 'leto', icon: Ticket }
   ]
 };
 
@@ -361,7 +361,7 @@ export default function DashboardUpgrade() {
                 >
                   Letno
                   <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
-                    -20%
+                    -17%
                   </Badge>
                 </button>
               </div>

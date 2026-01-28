@@ -30,9 +30,9 @@ interface UpgradeModalProps {
 }
 
 const planPrices = {
-  basic: { monthly: 49.99, yearly: 479.99, name: 'Basic' },
-  pro: { monthly: 129.99, yearly: 1249.99, name: 'Pro' },
-  enterprise: { monthly: 299.99, yearly: 2879.99, name: 'Enterprise' }
+  basic: { monthly: 49.99, yearly: 499.99, name: 'Basic' },
+  pro: { monthly: 129.99, yearly: 1299.99, name: 'Pro' },
+  enterprise: { monthly: 299.99, yearly: 2999.99, name: 'Enterprise' }
 };
 
 const planOrder = ['basic', 'pro', 'enterprise'];
@@ -312,7 +312,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
               >
                 Letno
                 <Badge variant="secondary" className="bg-green-500/20 text-green-500 text-xs">
-                  -20%
+                  -17%
                 </Badge>
               </button>
             </div>

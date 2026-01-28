@@ -154,7 +154,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
             <div className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
               <Info className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
-                <strong className="text-amber-500">Mesečno</strong> — Dodatni pogovori se <strong className="text-foreground">vedno zaračunavajo mesečno</strong>, ne glede na vaše obračunsko obdobje. Brez 20% popusta.
+                <strong className="text-amber-500">Mesečno</strong> — Dodatni pogovori se <strong className="text-foreground">vedno zaračunavajo mesečno</strong>, ne glede na vaše obračunsko obdobje. Brez 17% popusta.
               </p>
             </div>
           )}

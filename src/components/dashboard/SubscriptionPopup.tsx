@@ -55,7 +55,7 @@ export function SubscriptionPopup({
           >
             {subscribing === 'yearly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
             <span className="font-bold text-amber-950">Letna naročnina</span>
-            <span className="ml-3 bg-amber-600 text-amber-100 px-2.5 py-1 rounded-md text-sm font-bold">-20%</span>
+            <span className="ml-3 bg-amber-600 text-amber-100 px-2.5 py-1 rounded-md text-sm font-bold">-17%</span>
           </Button>
         </div>
       </DialogContent>

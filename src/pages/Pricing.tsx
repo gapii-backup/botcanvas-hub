@@ -14,7 +14,7 @@ const plans = [
     id: 'basic',
     name: 'Basic',
     monthlyPrice: 49.99,
-    yearlyPrice: 479.99,
+    yearlyPrice: 499.99,
     setupFee: 80,
     description: 'Za manjša podjetja',
     icon: Bot,
@@ -34,7 +34,7 @@ const plans = [
     id: 'pro',
     name: 'Pro',
     monthlyPrice: 129.99,
-    yearlyPrice: 1249.99,
+    yearlyPrice: 1299.99,
     setupFee: 140,
     description: 'Za rastoča podjetja',
     icon: Sparkles,
@@ -53,7 +53,7 @@ const plans = [
     id: 'enterprise',
     name: 'Enterprise',
     monthlyPrice: 299.99,
-    yearlyPrice: 2879.99,
+    yearlyPrice: 2999.99,
     setupFee: 320,
     description: 'Za velika podjetja',
     icon: Building2,
@@ -193,7 +193,7 @@ export default function Pricing() {
               Letno
             </Label>
             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-              -20%
+              -17%
             </span>
           </div>
         </div>
