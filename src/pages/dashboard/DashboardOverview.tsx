@@ -653,7 +653,11 @@ export default function DashboardOverview() {
       <UpsellPopup
         open={showUpsellPopup}
         onOpenChange={setShowUpsellPopup}
-        onContinueWithoutAddons={() => {
+        onContinueWithoutAddons={async (addedAnyAddon: boolean) => {
+          // If user added any addon, refresh widget data first
+          if (addedAnyAddon) {
+            await fetchWidget();
+          }
           toast({
             title: 'Naročnina aktivirana!',
             description: 'Vaša naročnina je bila uspešno aktivirana.',

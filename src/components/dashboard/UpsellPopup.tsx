@@ -33,14 +33,14 @@ const allAddons: AddonConfig[] = [
   { id: 'multilanguage', name: 'Večjezičnost', icon: Languages, monthlyPrice: 30, yearlyPrice: 300 },
   { id: 'contacts', name: 'Zbiranje kontaktov', icon: Users, monthlyPrice: 20, yearlyPrice: 200 },
   { id: 'tickets', name: 'Support Ticketi', icon: Ticket, monthlyPrice: 35, yearlyPrice: 355 },
-  { id: 'booking', name: 'Rezervacija sestankov', icon: Calendar, monthlyPrice: 35, yearlyPrice: 355, proOnly: true },
+  { id: 'booking', name: 'Rezervacija terminov', icon: Calendar, monthlyPrice: 35, yearlyPrice: 355 },
   { id: 'product_ai', name: 'AI priporočanje izdelkov', icon: Lightbulb, monthlyPrice: 100, yearlyPrice: 1000, proOnly: true },
 ];
 
 interface UpsellPopupProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onContinueWithoutAddons: () => void;
+  onContinueWithoutAddons: (addedAnyAddon: boolean) => void;
   plan: string;
   billingPeriod: string;
   existingAddons: string[];
@@ -57,6 +57,7 @@ export function UpsellPopup({
   apiKey,
 }: UpsellPopupProps) {
   const [processingAddon, setProcessingAddon] = useState<string | null>(null);
+  const [addedAddons, setAddedAddons] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -70,9 +71,9 @@ export function UpsellPopup({
     let available: AddonConfig[] = [];
 
     if (plan === 'basic') {
-      // Basic: multilanguage, contacts, tickets (NO booking, NO product_ai)
+      // Basic: multilanguage, contacts, tickets, booking (NO product_ai)
       available = allAddons.filter(a => 
-        ['multilanguage', 'contacts', 'tickets'].includes(a.id)
+        ['multilanguage', 'contacts', 'tickets', 'booking'].includes(a.id)
       );
     } else if (plan === 'pro') {
       // Pro: only product_ai
@@ -116,13 +117,13 @@ export function UpsellPopup({
       const result = await response.json();
 
       if (result.success) {
+        // Mark addon as added and update button state
+        setAddedAddons(prev => new Set(prev).add(addonId));
         toast({
           title: 'Funkcija dodana!',
           description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
         });
-        onOpenChange(false);
-        // Refresh the page to reload all data
-        window.location.reload();
+        setProcessingAddon(null);
       } else {
         throw new Error(result.error || 'Napaka pri dodajanju funkcije');
       }
@@ -137,8 +138,9 @@ export function UpsellPopup({
   };
 
   const handleContinue = () => {
+    const addedAny = addedAddons.size > 0;
     onOpenChange(false);
-    onContinueWithoutAddons();
+    onContinueWithoutAddons(addedAny);
   };
 
   // Don't render if no addons available
@@ -167,6 +169,7 @@ export function UpsellPopup({
             const price = isYearly ? addon.yearlyPrice : addon.monthlyPrice;
             const period = isYearly ? 'leto' : 'mesec';
             const isProcessing = processingAddon === addon.id;
+            const isAdded = addedAddons.has(addon.id);
 
             return (
               <div 
@@ -174,8 +177,8 @@ export function UpsellPopup({
                 className="flex items-center justify-between p-4 rounded-xl bg-muted/50 border border-border hover:border-amber-500/30 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-amber-500" />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isAdded ? 'bg-green-500/10' : 'bg-amber-500/10'}`}>
+                    <Icon className={`w-5 h-5 ${isAdded ? 'text-green-500' : 'text-amber-500'}`} />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">{addon.name}</p>
@@ -184,18 +187,28 @@ export function UpsellPopup({
                     </p>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => handleAddAddon(addon.id)}
-                  disabled={processingAddon !== null}
-                  className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>Dodaj</>
-                  )}
-                </Button>
+                {isAdded ? (
+                  <Button
+                    size="sm"
+                    disabled
+                    className="bg-green-600 hover:bg-green-600 text-white font-semibold cursor-default"
+                  >
+                    Dodano ✓
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => handleAddAddon(addon.id)}
+                    disabled={processingAddon !== null}
+                    className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>Dodaj</>
+                    )}
+                  </Button>
+                )}
               </div>
             );
           })}
@@ -226,8 +239,8 @@ export function shouldShowUpsell(plan: string, existingAddons: string[]): boolea
   let availableCount = 0;
 
   if (plan === 'basic') {
-    // Basic can have: multilanguage, contacts, tickets
-    const basicAddons = ['multilanguage', 'contacts', 'tickets'];
+    // Basic can have: multilanguage, contacts, tickets, booking
+    const basicAddons = ['multilanguage', 'contacts', 'tickets', 'booking'];
     availableCount = basicAddons.filter(a => !existingAddons.includes(a)).length;
   } else if (plan === 'pro') {
     // Pro can only have: product_ai
