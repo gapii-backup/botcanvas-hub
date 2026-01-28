@@ -706,17 +706,25 @@ export default function Complete() {
           </div>
         </div>
 
-        {/* Navigation - Full width sticky bottom */}
-        <div className="mt-8 pt-6 border-t border-border">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <Button variant="outline" onClick={() => navigate('/customize/step-4')} size="lg">
+        {/* Spacer for sticky footer */}
+        <div className="h-28" />
+      </div>
+
+      {/* Sticky Footer Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-700/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
+            {/* Nazaj gumb - leva stran */}
+            <Button variant="outline" onClick={() => navigate('/customize/step-4')} size="lg" className="w-full sm:w-auto">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Nazaj
             </Button>
+            
+            {/* Nadaljuj na plačilo - desna stran */}
             <button
               onClick={handleOpenPaymentDialog}
               disabled={isSaving}
-              className="shiny-button text-lg px-8 py-4 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="shiny-button text-lg px-8 py-4 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <CreditCard className="h-5 w-5" />
               Nadaljuj na plačilo
