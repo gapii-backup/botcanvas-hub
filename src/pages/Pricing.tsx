@@ -24,7 +24,6 @@ const plans = [
       'Dodajanje Q&A vprašanj',
       'Nalaganje PDF dokumentov',
       'Učenje iz vaše spletne strani',
-      'Widget za vgradnjo na vašo spletno stran',
       'Osnovni pregled statistike pogovorov',
       'Zgodovina pogovorov – 30 dni'
     ],
@@ -75,7 +74,6 @@ const comparisonFeatures = [
   { name: 'Dodajanje Q&A vprašanj', basic: true, pro: true, enterprise: true },
   { name: 'Nalaganje PDF dokumentov', basic: true, pro: true, enterprise: true },
   { name: 'Učenje iz spletne strani', basic: true, pro: true, enterprise: true },
-  { name: 'Widget za spletno stran', basic: true, pro: true, enterprise: true },
   { name: 'Pregled statistike pogovorov', basic: 'Osnovni', pro: 'Napredni', enterprise: 'Napredni' },
   { name: 'Zgodovina pogovorov', basic: '30 dni', pro: '60 dni', enterprise: '180 dni' },
   { name: 'Zbiranje kontaktov (leadov)', basic: false, pro: true, enterprise: true },

@@ -50,7 +50,6 @@ const planPrices = {
       'Dodajanje Q&A vprašanj',
       'Nalaganje PDF/Word dokumentov',
       'Učenje iz vaše spletne strani',
-      'Widget za vgradnjo na vašo spletno stran',
       'Osnovni pregled statistike pogovorov',
       'Zgodovina pogovorov – 30 dni'
     ] as FeatureItem[]
