@@ -65,11 +65,42 @@ type AddonCategory = {
 };
 
 // Define all add-ons with monthly prices in euros (removed CRM & INTEGRACIJE)
+// Order: badges first (tickets, contacts), then others, product_ai last
 const ALL_ADDONS: Record<string, AddonCategory> = {
   features: {
     title: '✨ DODATNE FUNKCIJE',
     icon: Sparkles,
     items: [
+      { 
+        id: 'tickets', 
+        label: 'Support ticket kreiranje', 
+        monthlyPrice: 35, 
+        yearlyPrice: 336,
+        badge: '🔥 Najbolj priljubljeno',
+        videoUrl: '/videos/support-ticket.mp4',
+        description: 'Stranke ustvarijo support ticket direktno v chatu',
+        bullets: [
+          'Stranke ustvarijo ticket direktno v chatu',
+          'Vsi podatki shranjeni na enem mestu',
+          'Obveščanje po emailu za vas in stranko'
+        ],
+        stat: '40% hitrejše reševanje zahtevkov'
+      },
+      { 
+        id: 'contacts', 
+        label: 'Avtomatsko zbiranje kontaktov', 
+        monthlyPrice: 20, 
+        yearlyPrice: 192,
+        badge: '💰 Najboljša vrednost',
+        videoUrl: '/videos/leadgeneration.mp4',
+        description: 'Avtomatsko zbirajte kontakte potencialnih strank',
+        bullets: [
+          'Chatbot naravno vpraša za email',
+          'Avtomatski export iz nadzorne plošče',
+          'GDPR skladna soglasja'
+        ],
+        stat: 'Povprečno +45% več leadov'
+      },
       { 
         id: 'multilanguage', 
         label: 'Multilanguage upgrade', 
@@ -101,21 +132,6 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         stat: 'Povprečno +60% več rezervacij'
       },
       { 
-        id: 'contacts', 
-        label: 'Avtomatsko zbiranje kontaktov', 
-        monthlyPrice: 20, 
-        yearlyPrice: 192,
-        badge: '💰 Najboljša vrednost',
-        videoUrl: '/videos/leadgeneration.mp4',
-        description: 'Avtomatsko zbirajte kontakte potencialnih strank',
-        bullets: [
-          'Chatbot naravno vpraša za email',
-          'Avtomatski export iz nadzorne plošče',
-          'GDPR skladna soglasja'
-        ],
-        stat: 'Povprečno +45% več leadov'
-      },
-      { 
         id: 'product_ai', 
         label: 'Product recommendations (AI)', 
         monthlyPrice: 80, 
@@ -130,21 +146,6 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
           'Direktna povezava do nakupa'
         ],
         stat: 'Povprečno +34% večja košarica'
-      },
-      { 
-        id: 'tickets', 
-        label: 'Support ticket kreiranje', 
-        monthlyPrice: 35, 
-        yearlyPrice: 336,
-        badge: '🔥 Najbolj priljubljeno',
-        videoUrl: '/videos/support-ticket.mp4',
-        description: 'Stranke ustvarijo support ticket direktno v chatu',
-        bullets: [
-          'Stranke ustvarijo ticket direktno v chatu',
-          'Vsi podatki shranjeni na enem mestu',
-          'Obveščanje po emailu za vas in stranko'
-        ],
-        stat: '40% hitrejše reševanje zahtevkov'
       },
     ],
   },
@@ -509,52 +510,77 @@ export default function Complete() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-1">
-                        {category.items.map((item) => {
+                        {category.items.map((item, index) => {
                           const isCapacityAddon = item.id.startsWith('capacity_');
                           const isSelected = selectedAddons.includes(item.id);
                           const hasDemo = !isCapacityAddon && item.description;
+                          
+                          // Gradient colors based on position (first = best)
+                          const rowGradients = [
+                            'from-amber-500/5 to-transparent',    // 1st - best
+                            'from-orange-500/5 to-transparent',   // 2nd
+                            'from-transparent to-transparent',     // 3rd - neutral
+                            'from-transparent to-transparent',     // 4th - neutral
+                            'from-transparent to-transparent',     // 5th
+                          ];
+                          const gradientClass = isCapacityAddon ? '' : (rowGradients[index] || rowGradients[rowGradients.length - 1]);
+                          
+                          // Badge styling based on content
+                          const getBadgeClass = (badge: string) => {
+                            if (badge.includes('priljubljeno')) {
+                              return 'bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-400 border border-orange-500/30';
+                            } else if (badge.includes('vrednost')) {
+                              return 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border border-green-500/30';
+                            }
+                            return 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 border border-purple-500/30';
+                          };
+                          
                           return (
                             <div 
                               key={item.id}
                               onClick={() => toggleAddon(item.id)}
-                              className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 group ${
+                              className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 group bg-gradient-to-r ${gradientClass} ${
                                 isSelected 
-                                  ? 'bg-primary/15 border-2 border-primary shadow-sm' 
-                                  : 'bg-muted/30 border-2 border-transparent hover:bg-muted/60 hover:border-muted-foreground/20'
+                                  ? 'bg-amber-500/15 border-2 border-amber-500 shadow-sm' 
+                                  : 'border-2 border-transparent hover:bg-muted/60 hover:border-muted-foreground/20'
                               }`}
                             >
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
                                 <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all flex-shrink-0 ${
                                   isSelected 
-                                    ? 'bg-primary text-primary-foreground' 
+                                    ? 'bg-amber-500 text-white' 
                                     : 'bg-muted border border-border group-hover:border-muted-foreground/40'
                                 }`}>
                                   {isSelected && <Check className="h-3.5 w-3.5" />}
                                 </div>
-                                <span className={`text-sm font-medium truncate ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
                                   {item.label}
                                 </span>
                                 {item.badge && (
-                                  <span className="hidden sm:inline-flex text-xs font-medium px-2 py-0.5 rounded-full bg-primary/20 text-primary whitespace-nowrap">
+                                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${getBadgeClass(item.badge)}`}>
                                     {item.badge}
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                  {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
-                                </span>
-                                {hasDemo && (
+                              <div className="flex items-center flex-shrink-0">
+                                {isCapacityAddon ? (
+                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
+                                  </span>
+                                ) : hasDemo ? (
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       setDemoAddon(item.id);
                                     }}
-                                    className="text-muted-foreground hover:text-primary transition-colors p-1"
-                                    title="Poglej demo"
+                                    className="text-xs font-medium px-3 py-1.5 rounded-lg bg-muted hover:bg-amber-500/20 text-muted-foreground hover:text-amber-500 transition-all"
                                   >
-                                    <Info className="h-4 w-4" />
+                                    Poglej več
                                   </button>
+                                ) : (
+                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
+                                  </span>
                                 )}
                               </div>
                             </div>
