@@ -59,6 +59,9 @@ export default function Step1() {
       currentStep={2} 
       totalSteps={4} 
       preview={<WidgetPreview config={config} showChat={false} showHome={true} />}
+      backPath="/customize/step-1"
+      nextPath="/customize/step-3"
+      nextLabel="Naprej"
     >
       <div className="space-y-8">
         <div>
@@ -237,16 +240,6 @@ export default function Step1() {
             checked={config.showEmailField}
             onCheckedChange={(checked) => setConfig({ showEmailField: checked })}
           />
-        </div>
-
-        {/* Navigation */}
-        <div className="pt-4 flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-1')} size="lg">
-            Nazaj
-          </Button>
-          <Button onClick={() => navigate('/customize/step-3')} size="lg">
-            Naprej
-          </Button>
         </div>
       </div>
     </WizardLayout>

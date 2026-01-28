@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
-import { ArrowLeft, AlignLeft, AlignRight, MessageCircle, MessageSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
+import { AlignLeft, AlignRight, MessageCircle, MessageSquare, Bot, Sparkles, Headphones, Zap, LucideIcon } from 'lucide-react';
 import { useWizardConfig, TRIGGER_ICONS } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { TriggerPreview } from '@/components/widget/WidgetPreview';
@@ -25,21 +25,28 @@ export default function Step3() {
   const { config, setConfig } = useWizardConfig();
 
   return (
-    <WizardLayout currentStep={4} totalSteps={4} preview={
-      <div 
-        className="relative w-full h-full"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          alignItems: config.position === 'right' ? 'flex-end' : 'flex-start',
-          padding: '20px',
-          paddingBottom: `${config.verticalOffset + 20}px`,
-        }}
-      >
-        <TriggerPreview config={config} />
-      </div>
-    }>
+    <WizardLayout 
+      currentStep={4} 
+      totalSteps={4} 
+      preview={
+        <div 
+          className="relative w-full h-full"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            alignItems: config.position === 'right' ? 'flex-end' : 'flex-start',
+            padding: '20px',
+            paddingBottom: `${config.verticalOffset + 20}px`,
+          }}
+        >
+          <TriggerPreview config={config} />
+        </div>
+      }
+      backPath="/customize/step-3"
+      nextPath="/customize/complete"
+      nextLabel="Zaključi"
+    >
       <div className="space-y-8">
         <div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Gumb za odpiranje</h2>
@@ -170,17 +177,6 @@ export default function Step3() {
             />
           </div>
         )}
-
-        {/* Navigation */}
-        <div className="pt-4 flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-3')} size="lg">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Nazaj
-          </Button>
-          <Button onClick={() => navigate('/customize/complete')} size="lg">
-            Zaključi
-          </Button>
-        </div>
       </div>
     </WizardLayout>
   );

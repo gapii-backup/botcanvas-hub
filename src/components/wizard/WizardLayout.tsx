@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import logoInline from '@/assets/logo-inline-light.png';
 
 type WizardLayoutProps = {
@@ -8,6 +10,11 @@ type WizardLayoutProps = {
   totalSteps: number;
   children: ReactNode;
   preview: ReactNode;
+  backPath?: string;
+  nextPath?: string;
+  nextLabel?: string;
+  onNext?: () => void;
+  nextDisabled?: boolean;
 };
 
 const steps = [
@@ -17,7 +24,18 @@ const steps = [
   { number: 4, label: 'Bubble' },
 ];
 
-export function WizardLayout({ currentStep, totalSteps, children, preview }: WizardLayoutProps) {
+export function WizardLayout({ 
+  currentStep, 
+  totalSteps, 
+  children, 
+  preview,
+  backPath,
+  nextPath,
+  nextLabel = 'Naprej',
+  onNext,
+  nextDisabled = false,
+}: WizardLayoutProps) {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -27,8 +45,22 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
     return () => clearTimeout(timer);
   }, [currentStep]);
 
+  const handleNext = () => {
+    if (onNext) {
+      onNext();
+    } else if (nextPath) {
+      navigate(nextPath);
+    }
+  };
+
+  const handleBack = () => {
+    if (backPath) {
+      navigate(backPath);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-24">
       {/* Header with logo and progress bar */}
       <div className="border-b border-border bg-background">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -126,6 +158,37 @@ export function WizardLayout({ currentStep, totalSteps, children, preview }: Wiz
           </div>
         </div>
       </div>
+
+      {/* Sticky Footer Navigation */}
+      {(backPath || nextPath || onNext) && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-700/50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+            <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
+              {/* Nazaj gumb - leva stran */}
+              {backPath ? (
+                <Button variant="outline" onClick={handleBack} size="lg" className="w-full sm:w-auto">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Nazaj
+                </Button>
+              ) : (
+                <div className="hidden sm:block" /> 
+              )}
+              
+              {/* Naprej gumb - desna stran */}
+              {(nextPath || onNext) && (
+                <Button 
+                  onClick={handleNext} 
+                  size="lg" 
+                  disabled={nextDisabled}
+                  className="w-full sm:w-auto"
+                >
+                  {nextLabel}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

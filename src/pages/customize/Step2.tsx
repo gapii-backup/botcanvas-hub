@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sun, Moon, ArrowLeft, RotateCcw } from 'lucide-react';
+import { Sun, Moon, RotateCcw } from 'lucide-react';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { WidgetPreview } from '@/components/widget/WidgetPreview';
@@ -25,6 +25,9 @@ export default function Step2() {
       currentStep={3} 
       totalSteps={4} 
       preview={<WidgetPreview config={config} showChat={true} showHome={false} />}
+      backPath="/customize/step-2"
+      nextPath="/customize/step-4"
+      nextLabel="Naprej"
     >
       <div className="space-y-8">
         <div>
@@ -149,17 +152,6 @@ export default function Step2() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Navigation */}
-        <div className="pt-4 flex justify-between">
-          <Button variant="outline" onClick={() => navigate('/customize/step-2')} size="lg">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Nazaj
-          </Button>
-          <Button onClick={() => navigate('/customize/step-4')} size="lg">
-            Naprej
-          </Button>
         </div>
       </div>
     </WizardLayout>
