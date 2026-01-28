@@ -522,8 +522,8 @@ export default function Complete() {
                               tickets: { gradient: 'from-orange-500 via-orange-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]' },
                               contacts: { gradient: 'from-emerald-500 via-emerald-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]' },
                               product_ai: { gradient: 'from-purple-500 via-purple-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]' },
-                              multilanguage: { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' },
-                              booking: { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' },
+                              multilanguage: { gradient: 'from-blue-500 via-blue-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]' },
+                              booking: { gradient: 'from-red-500 via-red-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]' },
                             };
                             return accents[addonId] || { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' };
                           };
