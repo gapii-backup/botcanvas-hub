@@ -516,16 +516,8 @@ export default function Complete() {
                           const isSelected = selectedAddons.includes(item.id);
                           const hasDemo = !isCapacityAddon; // All feature addons show "Poglej več" button
                           
-                          // Gradient colors based on VISIBLE position (first = best)
-                          // index here is already the visible item index since category.items is filtered
-                          const rowGradients = [
-                            'from-amber-500/10 to-amber-500/5',   // 1st - best (strongest)
-                            'from-orange-500/8 to-orange-500/3',  // 2nd
-                            'from-yellow-500/6 to-yellow-500/2',  // 3rd
-                            'from-amber-500/5 to-transparent',    // 4th
-                            'from-orange-500/4 to-transparent',   // 5th
-                          ];
-                          const gradientClass = isCapacityAddon ? '' : (rowGradients[index] || rowGradients[rowGradients.length - 1]);
+                          // All feature addon rows have the same amber gradient background
+                          const gradientClass = isCapacityAddon ? '' : 'from-amber-500/10 to-amber-500/5';
                           
                           // Badge styling based on content
                           const getBadgeClass = (badge: string) => {
