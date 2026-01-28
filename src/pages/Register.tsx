@@ -216,7 +216,7 @@ export default function Register() {
                 {isLoginMode ? 'Dobrodošli nazaj' : 'Ustvarite račun'}
               </h1>
               <p className="mt-2 text-slate-400">
-                {isLoginMode ? 'Prijavite se v svoj račun' : 'Začnite graditi svoje AI chatbota'}
+                {isLoginMode ? 'Prijavite se v svoj račun' : 'Začnite graditi svojega AI chatbota'}
               </p>
             </div>
 
