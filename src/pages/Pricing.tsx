@@ -62,6 +62,7 @@ const plans = [
       '8.000 sporočil na mesec',
       'Rezervacija sestankov preko chatbota',
       'Pametna priporočila izdelkov (AI)',
+      'Tedensko AI poročilo o uspešnosti',
       'Zgodovina pogovorov – 180 dni'
     ],
     popular: false,
@@ -81,6 +82,7 @@ const comparisonFeatures = [
   { name: 'Kreiranje support ticketov', basic: false, pro: true, enterprise: true },
   { name: 'Rezervacija sestankov preko chatbota', basic: false, pro: false, enterprise: true },
   { name: 'Pametna priporočila izdelkov (AI)', basic: false, pro: false, enterprise: true },
+  { name: 'Tedensko AI poročilo o uspešnosti', basic: false, pro: false, enterprise: true },
   { name: 'Setup fee (enkratno)', basic: '€80 +DDV', pro: '€140 +DDV', enterprise: '€320 +DDV' },
 ];
 
