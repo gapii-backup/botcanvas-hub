@@ -241,7 +241,7 @@ export default function Pricing() {
                 </div>
 
                 <div className="text-center mb-6">
-                  <div className="h-6 mb-1">
+                  <div className="h-5">
                     <span className={cn(
                       "text-sm line-through",
                       isYearly ? "text-muted-foreground" : "invisible"
