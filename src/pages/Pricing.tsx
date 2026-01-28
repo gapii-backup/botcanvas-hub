@@ -192,8 +192,8 @@ export default function Pricing() {
             <Label htmlFor="billing-toggle" className={cn("text-sm font-medium", isYearly && "text-foreground")}>
               Letno
             </Label>
-            <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-medium">
-              -17%
+            <span className="text-xs bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-2.5 py-1 rounded-full font-bold shadow-sm">
+              ✨ 2 meseca gratis
             </span>
           </div>
         </div>
