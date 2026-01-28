@@ -67,54 +67,39 @@ export default function Step0() {
     } finally {
       setIsSaving(false);
     }
-    
-    navigate('/customize/step-2');
   };
 
   const content = (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">
+        <h2 className="text-xl font-bold text-foreground mb-1">
           Začnimo s povezavo
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Vnesite povezavo do vaše spletne strani.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="website-url">URL vaše spletne strani</Label>
-          <div className="flex">
-            <div className="flex items-center px-4 bg-secondary rounded-l-lg border border-r-0 border-border">
-              <span className="text-muted-foreground text-sm">https://</span>
-            </div>
-            <Input
-              id="website-url"
-              placeholder="vasa-stran.si"
-              value={websiteUrl}
-              onChange={(e) => {
-                setWebsiteUrl(e.target.value);
-                if (error) setError('');
-              }}
-              className={`rounded-l-none ${error ? 'border-destructive' : ''}`}
-            />
+      <div className="space-y-2">
+        <Label htmlFor="website-url">URL vaše spletne strani</Label>
+        <div className="flex">
+          <div className="flex items-center px-3 bg-secondary rounded-l-lg border border-r-0 border-border">
+            <span className="text-muted-foreground text-sm">https://</span>
           </div>
-          {error && (
-            <p className="text-sm text-destructive animate-fade-in">{error}</p>
-          )}
+          <Input
+            id="website-url"
+            placeholder="vasa-stran.si"
+            value={websiteUrl}
+            onChange={(e) => {
+              setWebsiteUrl(e.target.value);
+              if (error) setError('');
+            }}
+            className={`rounded-l-none ${error ? 'border-destructive' : ''}`}
+          />
         </div>
-
-        <Button
-          onClick={handleNext}
-          className="w-full"
-          size="lg"
-          variant="glow"
-          disabled={isSaving}
-        >
-          {isSaving ? 'Shranjujem...' : 'Naprej'}
-          <ArrowRight className="h-4 w-4 ml-2" />
-        </Button>
+        {error && (
+          <p className="text-sm text-destructive animate-fade-in">{error}</p>
+        )}
       </div>
     </div>
   );
@@ -146,6 +131,10 @@ export default function Step0() {
       currentStep={1}
       totalSteps={4}
       preview={rightPanel}
+      nextPath="/customize/step-2"
+      nextLabel={isSaving ? 'Shranjujem...' : 'Naprej'}
+      onNext={handleNext}
+      nextDisabled={isSaving}
     >
       {content}
     </WizardLayout>

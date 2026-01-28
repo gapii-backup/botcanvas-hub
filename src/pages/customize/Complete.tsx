@@ -429,10 +429,10 @@ export default function Complete() {
   ];
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-24">
       {/* Header with logo and steps */}
       <div className="border-b border-border bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-4">
           {/* Logo */}
           <div className="flex justify-center mb-4">
             <a href="https://botmotion.ai/" className="block">
@@ -463,13 +463,13 @@ export default function Complete() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
+      <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-2 gap-6">
           {/* Left side - Add-ons */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Dodatne možnosti</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-xl font-bold text-foreground mb-1">Dodatne možnosti</h2>
+              <p className="text-muted-foreground text-sm">
                 Izboljšajte svojega AI asistenta z dodatnimi funkcijami.
               </p>
             </div>
@@ -712,7 +712,7 @@ export default function Complete() {
 
       {/* Sticky Footer Navigation */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-700/50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
             {/* Nazaj gumb - leva stran */}
             <Button variant="outline" onClick={() => navigate('/customize/step-4')} size="lg" className="w-full sm:w-auto">
