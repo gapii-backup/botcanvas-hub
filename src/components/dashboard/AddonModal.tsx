@@ -43,11 +43,11 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec' },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec' },
     // Ostali addoni - letni
-    { id: 'multilanguage', name: 'Večjezičnost', price: 288, period: 'leto' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
-    { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto' },
-    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 960, period: 'leto' },
-    { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
+    { id: 'multilanguage', name: 'Večjezičnost', price: 300, period: 'leto' },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 355, period: 'leto', proOnly: true },
+    { id: 'contacts', name: 'Zbiranje kontaktov', price: 200, period: 'leto' },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 1000, period: 'leto' },
+    { id: 'tickets', name: 'Support Ticketi', price: 355, period: 'leto' }
   ]
 };
 
@@ -195,7 +195,7 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
                 <div className="font-bold text-foreground">
                   {billingPeriod === 'monthly' ? 'Mesečno' : 'Letno'}
                   {billingPeriod === 'yearly' && (
-                    <span className="text-success text-sm font-normal ml-2">20% popust</span>
+                    <span className="text-success text-sm font-normal ml-2">17% popust</span>
                   )}
                 </div>
                 <div className="text-2xl font-bold text-foreground">

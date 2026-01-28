@@ -76,7 +76,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         id: 'product_ai', 
         label: 'AI priporočanje izdelkov', 
         monthlyPrice: 100,
-        yearlyPrice: 960, 
+        yearlyPrice: 1000, 
         proOnly: true,
         badge: '💎 Največji ROI',
         videoUrl: '/videos/ai-products.mp4',
@@ -92,7 +92,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         id: 'tickets', 
         label: 'Support ticket kreiranje', 
         monthlyPrice: 35, 
-        yearlyPrice: 336,
+        yearlyPrice: 355,
         badge: '🔥 Najbolj priljubljeno',
         videoUrl: '/videos/support-ticket.mp4',
         description: 'Stranke ustvarijo support ticket direktno v chatu',
@@ -107,7 +107,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         id: 'contacts', 
         label: 'Avtomatsko zbiranje kontaktov', 
         monthlyPrice: 20, 
-        yearlyPrice: 192,
+        yearlyPrice: 200,
         badge: '💰 Najboljša vrednost',
         videoUrl: '/videos/leadgeneration.mp4',
         description: 'Avtomatsko zbirajte kontakte potencialnih strank',
@@ -122,7 +122,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         id: 'multilanguage', 
         label: 'Večjezičnost', 
         monthlyPrice: 30,
-        yearlyPrice: 288,
+        yearlyPrice: 300,
         badge: undefined,
         videoUrl: null,
         description: 'Vaš chatbot bo komuniciral v jeziku vaše stranke',
@@ -137,7 +137,7 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
         id: 'booking', 
         label: 'Rezervacija sestankov', 
         monthlyPrice: 35, 
-        yearlyPrice: 336,
+        yearlyPrice: 355,
         badge: undefined,
         videoUrl: '/videos/rezervacija-termina.mp4',
         description: 'Omogočite strankam rezervacijo terminov direktno v chatu',
@@ -170,9 +170,9 @@ const PLAN_NAMES: Record<string, string> = {
 
 // Plan pricing data
 const PLAN_PRICING: Record<string, { monthlyPrice: number; yearlyPrice: number; setupFee: number }> = {
-  basic: { monthlyPrice: 49.99, yearlyPrice: 479.99, setupFee: 80 },
-  pro: { monthlyPrice: 129.99, yearlyPrice: 1249.99, setupFee: 140 },
-  enterprise: { monthlyPrice: 299.99, yearlyPrice: 2879.99, setupFee: 320 },
+  basic: { monthlyPrice: 49.99, yearlyPrice: 499.99, setupFee: 80 },
+  pro: { monthlyPrice: 129.99, yearlyPrice: 1299.99, setupFee: 140 },
+  enterprise: { monthlyPrice: 299.99, yearlyPrice: 2999.99, setupFee: 320 },
 };
 
 // Calculate price based on billing period
@@ -469,7 +469,7 @@ export default function Complete() {
                 </span>
                 {isYearly && (
                   <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
-                    -20%
+                    -17%
                   </span>
                 )}
               </div>
@@ -617,7 +617,7 @@ export default function Complete() {
                       <Sparkles className="h-4 w-4 text-primary" />
                       <p className="text-sm font-medium text-foreground">
                         {selectedAddons.length} {selectedAddons.length === 1 ? 'dodatek izbran' : 'dodatkov izbranih'}
-                        {isYearly && <span className="text-primary ml-1">(20% popust)</span>}
+                        {isYearly && <span className="text-primary ml-1">(17% popust)</span>}
                       </p>
                     </div>
                   </div>
@@ -823,7 +823,7 @@ export default function Complete() {
 
                   {isYearly && (
                     <p className="text-xs text-center text-muted-foreground mt-2">
-                      Prihranite 20% z letno naročnino!
+                      Prihranite 17% z letno naročnino!
                     </p>
                   )}
                 </div>
