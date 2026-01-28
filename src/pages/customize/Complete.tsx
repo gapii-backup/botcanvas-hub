@@ -547,7 +547,7 @@ export default function Complete() {
                                 }`}>
                                   {isSelected && <Check className="h-3.5 w-3.5" />}
                                 </div>
-                                <span className={`text-sm font-medium ${isSelected ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                <span className="text-sm font-medium text-foreground">
                                   {item.label}
                                 </span>
                                 {item.badge && (
