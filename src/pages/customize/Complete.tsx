@@ -514,7 +514,7 @@ export default function Complete() {
                         {category.items.map((item, index) => {
                           const isCapacityAddon = item.id.startsWith('capacity_');
                           const isSelected = selectedAddons.includes(item.id);
-                          const hasDemo = !isCapacityAddon && item.description;
+                          const hasDemo = !isCapacityAddon; // All feature addons show "Poglej več" button
                           
                           // Gradient colors based on VISIBLE position (first = best)
                           // index here is already the visible item index since category.items is filtered
