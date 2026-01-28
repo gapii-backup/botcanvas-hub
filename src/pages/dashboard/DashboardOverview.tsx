@@ -36,6 +36,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { MessageUsageCard } from '@/components/dashboard/MessageUsageCard';
 import { SubscriptionPopup } from '@/components/dashboard/SubscriptionPopup';
 import { EmbedCodePopup } from '@/components/dashboard/EmbedCodePopup';
+import { UpsellPopup, shouldShowUpsell } from '@/components/dashboard/UpsellPopup';
 
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,6 +71,7 @@ export default function DashboardOverview() {
   const [subscribing, setSubscribing] = useState<'monthly' | 'yearly' | null>(null);
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
   const [showEmbedCodePopup, setShowEmbedCodePopup] = useState(false);
+  const [showUpsellPopup, setShowUpsellPopup] = useState(false);
 
   const tableName = widget?.table_name;
   const { stats, loading: statsLoading } = useDashboardStats(tableName);
@@ -120,14 +122,23 @@ export default function DashboardOverview() {
   useEffect(() => {
     const subscriptionResult = searchParams.get('subscription');
     if (subscriptionResult === 'success') {
-      toast({
-        title: 'Naročnina aktivirana!',
-        description: 'Vaša naročnina je bila uspešno aktivirana.',
-      });
       fetchWidget();
       setSearchParams({});
-      // Show embed code popup after successful subscription
-      setShowEmbedCodePopup(true);
+      
+      // Check if we should show upsell popup first
+      const existingAddons = Array.isArray(widget?.addons) ? widget.addons as string[] : [];
+      const widgetPlan = widget?.plan || 'basic';
+      
+      if (shouldShowUpsell(widgetPlan, existingAddons)) {
+        setShowUpsellPopup(true);
+      } else {
+        // No upsell available - show toast and embed code directly
+        toast({
+          title: 'Naročnina aktivirana!',
+          description: 'Vaša naročnina je bila uspešno aktivirana.',
+        });
+        setShowEmbedCodePopup(true);
+      }
     } else if (subscriptionResult === 'cancelled') {
       toast({
         title: 'Naročnina preklicana',
@@ -136,7 +147,7 @@ export default function DashboardOverview() {
       });
       setSearchParams({});
     }
-  }, [searchParams]);
+  }, [searchParams, widget?.plan, widget?.addons]);
 
   // Show subscription popup when user lands on dashboard with active bot but no subscription
   useEffect(() => {
@@ -636,6 +647,23 @@ export default function DashboardOverview() {
         onOpenChange={setShowSubscriptionPopup}
         onSubscribe={handleSubscribe}
         subscribing={subscribing}
+      />
+
+      {/* Upsell Popup after subscription */}
+      <UpsellPopup
+        open={showUpsellPopup}
+        onOpenChange={setShowUpsellPopup}
+        onContinueWithoutAddons={() => {
+          toast({
+            title: 'Naročnina aktivirana!',
+            description: 'Vaša naročnina je bila uspešno aktivirana.',
+          });
+          setShowEmbedCodePopup(true);
+        }}
+        plan={widget?.plan || 'basic'}
+        billingPeriod={widget?.billing_period || 'monthly'}
+        existingAddons={Array.isArray(widget?.addons) ? widget.addons as string[] : []}
+        apiKey={widget?.api_key || ''}
       />
 
       {/* Embed Code Popup after subscription */}
