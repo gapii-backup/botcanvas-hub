@@ -395,13 +395,13 @@ export default function DashboardOverview() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400/70 to-amber-500/70 hover:from-amber-400/90 hover:to-amber-500/90 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/20"
+                className="w-full h-14 text-base font-bold bg-transparent border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 transition-all duration-300 hover:scale-[1.02]"
                 size="lg"
                 onClick={() => handleSubscribe('monthly')}
                 disabled={subscribing !== null}
               >
-                {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin text-amber-950" />}
-                <span className="font-bold text-amber-950">Mesečna naročnina</span>
+                {subscribing === 'monthly' && <Loader2 className="h-5 w-5 mr-2 animate-spin" />}
+                <span className="font-bold">Mesečna naročnina</span>
               </Button>
               <Button 
                 className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30"
