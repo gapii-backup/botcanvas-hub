@@ -217,8 +217,8 @@ export default function Pricing() {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-blue-600 border border-blue-400 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-blue-600 border border-blue-400 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
                       Najboljša izbira
                     </span>
                   </div>
