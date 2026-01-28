@@ -33,7 +33,7 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec' },
     { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 20, period: 'mesec' },
-    { id: 'product_ai', name: 'Product AI', price: 80, period: 'mesec' },
+    { id: 'product_ai', name: 'Product AI', price: 100, period: 'mesec' },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec' }
   ],
   yearly: [
@@ -46,7 +46,7 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto' },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto' },
-    { id: 'product_ai', name: 'Product AI', price: 768, period: 'leto' },
+    { id: 'product_ai', name: 'Product AI', price: 960, period: 'leto' },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto' }
   ]
 };

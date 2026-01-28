@@ -75,8 +75,8 @@ const ALL_ADDONS: Record<string, AddonCategory> = {
       { 
         id: 'product_ai', 
         label: 'Product recommendations (AI)', 
-        monthlyPrice: 80, 
-        yearlyPrice: 768, 
+        monthlyPrice: 100, 
+        yearlyPrice: 960, 
         proOnly: true,
         badge: '💎 Največji ROI',
         videoUrl: '/videos/ai-products.mp4',
