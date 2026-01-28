@@ -930,27 +930,27 @@ export default function Complete() {
                     <span className="text-sm font-medium text-amber-500">{addon.stat}</span>
                   </div>
 
-                  {/* CTA - AMBER GRADIENT */}
+                  {/* CTA - AMBER GRADIENT ali "Že dodano" */}
                   <div className="border-t border-border pt-4 flex flex-col gap-2">
-                    <button
-                      onClick={() => {
-                        toggleAddon(demoAddon);
-                        setDemoAddon(null);
-                      }}
-                      className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold py-3.5 px-6 rounded-xl transition-all hover:from-amber-600 hover:to-yellow-600 flex items-center justify-center gap-2"
-                    >
-                      {selectedAddons.includes(demoAddon) ? (
-                        <>
-                          <X className="h-4 w-4" />
-                          Odstrani iz paketa
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="h-4 w-4" />
-                          Dodaj za {price}
-                        </>
-                      )}
-                    </button>
+                    {selectedAddons.includes(demoAddon) ? (
+                      /* Že dodano - prikaži potrditev namesto gumba */
+                      <div className="w-full bg-green-500/10 border border-green-500/30 text-green-500 font-semibold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2">
+                        <Check className="h-5 w-5" />
+                        Že dodano v paket ✓
+                      </div>
+                    ) : (
+                      /* Dodaj gumb */
+                      <button
+                        onClick={() => {
+                          toggleAddon(demoAddon);
+                          setDemoAddon(null);
+                        }}
+                        className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold py-3.5 px-6 rounded-xl transition-all hover:from-amber-600 hover:to-yellow-600 flex items-center justify-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Dodaj za {price}
+                      </button>
+                    )}
                     <Button 
                       variant="ghost" 
                       onClick={() => setDemoAddon(null)} 
