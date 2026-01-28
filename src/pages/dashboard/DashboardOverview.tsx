@@ -388,14 +388,14 @@ export default function DashboardOverview() {
                 <CheckCircle className="w-6 h-6 md:w-7 md:h-7 text-amber-950" />
               </div>
               <div>
-                <h3 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">Vaš chatbot je pripravljen!</h3>
-                <p className="text-amber-200/80 text-sm md:text-base">Za aktivacijo izberite naročniški paket</p>
+                <h3 className="text-xl md:text-2xl font-bold text-white">Vaš chatbot je pripravljen!</h3>
+                <p className="text-white/70 text-sm md:text-base">Za aktivacijo izberite naročniški paket</p>
               </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Button 
-                className="w-full h-14 text-base font-bold bg-transparent border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-14 text-base font-bold bg-transparent border-2 border-amber-500/50 text-amber-400 hover:bg-amber-500/20 hover:border-amber-400 transition-all duration-300"
                 size="lg"
                 onClick={() => handleSubscribe('monthly')}
                 disabled={subscribing !== null}
@@ -404,7 +404,7 @@ export default function DashboardOverview() {
                 <span className="font-bold">Mesečna naročnina</span>
               </Button>
               <Button 
-                className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/30"
+                className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 border-0 transition-all duration-300"
                 size="lg"
                 onClick={() => handleSubscribe('yearly')}
                 disabled={subscribing !== null}
