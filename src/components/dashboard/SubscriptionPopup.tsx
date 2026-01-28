@@ -39,7 +39,7 @@ export function SubscriptionPopup({
         
         <div className="grid grid-cols-1 gap-4 mt-6">
           <Button 
-            className="w-full h-14 text-base font-bold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25"
+            className="w-full h-14 text-base font-bold bg-gradient-to-r from-amber-400/70 to-amber-500/70 hover:from-amber-400/90 hover:to-amber-500/90 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/20"
             size="lg"
             onClick={() => onSubscribe('monthly')}
             disabled={subscribing !== null}
