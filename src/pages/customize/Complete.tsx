@@ -504,7 +504,7 @@ export default function Complete() {
               <>
                 <div className="space-y-4">
                   {Object.entries(availableAddons).map(([key, category]) => (
-                    <Card key={key} className="border-border bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                    <Card key={key} className="border-zinc-700/50 bg-zinc-900/90 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                           {category.title}
