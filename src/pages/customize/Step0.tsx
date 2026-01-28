@@ -146,6 +146,10 @@ export default function Step0() {
       currentStep={1}
       totalSteps={4}
       preview={rightPanel}
+      nextPath="/customize/step-2"
+      nextLabel={isSaving ? 'Shranjujem...' : 'Naprej'}
+      onNext={handleNext}
+      nextDisabled={isSaving}
     >
       {content}
     </WizardLayout>
