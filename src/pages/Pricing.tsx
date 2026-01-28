@@ -193,7 +193,7 @@ export default function Pricing() {
               Letno
             </Label>
             <span className="text-xs bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-2.5 py-1 rounded-full font-bold shadow-sm">
-              ✨ 2 meseca gratis
+              🎁 2 meseca gratis
             </span>
           </div>
         </div>
@@ -242,13 +242,15 @@ export default function Pricing() {
                 </div>
 
                 <div className="text-center mb-6">
-                  {isYearly && (
-                    <div className="mb-1">
+                  <div className="h-7 mb-1 flex items-center justify-center">
+                    {isYearly ? (
                       <span className="text-lg text-muted-foreground line-through">
                         €{formatPrice(plan.monthlyPrice * 12)}
                       </span>
-                    </div>
-                  )}
+                    ) : (
+                      <span className="invisible text-lg">placeholder</span>
+                    )}
+                  </div>
                   <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
                   <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   <span className="text-muted-foreground">{period}</span>
