@@ -60,9 +60,10 @@ interface AddonModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   addon: string | null;
+  onSuccess?: (addonId: string) => void; // Optional callback when addon is successfully added
 }
 
-export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
+export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { widget, fetchWidget } = useWidget();
@@ -116,9 +117,14 @@ export function AddonModal({ open, onOpenChange, addon }: AddonModalProps) {
           title: 'Funkcija dodana!',
           description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
         });
+        setIsProcessing(false);
         onOpenChange(false);
-        // Refresh the page to reload all data
-        window.location.reload();
+        // Call onSuccess callback if provided, otherwise reload page
+        if (onSuccess) {
+          onSuccess(addon);
+        } else {
+          window.location.reload();
+        }
       } else {
         throw new Error(result.error || 'Napaka pri dodajanju funkcije');
       }
