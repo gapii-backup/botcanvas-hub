@@ -430,35 +430,18 @@ export default function Complete() {
 
   return (
     <div className="min-h-screen bg-muted/30 pb-24">
-      {/* Header with logo and steps */}
+      {/* Header with logo */}
       <div className="border-b border-border bg-background">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          {/* Logo */}
-          <div className="flex justify-center mb-4">
+          {/* Logo - larger */}
+          <div className="flex justify-center">
             <a href="https://botmotion.ai/" className="block">
               <img 
                 src={logoInline} 
                 alt="BotMotion.AI" 
-                className="h-8 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
+                className="h-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" 
               />
             </a>
-          </div>
-
-          {/* Steps indicator - minimal */}
-          <div className="flex items-center justify-center">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                    <Check className="h-3 w-3" />
-                  </div>
-                  <span className="text-xs font-medium text-muted-foreground hidden sm:block">{step.label}</span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className="w-8 sm:w-12 h-px bg-primary/50 mx-2" />
-                )}
-              </div>
-            ))}
           </div>
         </div>
       </div>
