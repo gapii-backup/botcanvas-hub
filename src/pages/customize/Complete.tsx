@@ -541,8 +541,8 @@ export default function Complete() {
                                 group
                                 ${accentStyles.glow}
                                 ${isSelected 
-                                  ? 'ring-2 ring-amber-500 bg-zinc-800/70' 
-                                  : 'bg-zinc-800/50 hover:bg-zinc-800/60'
+                                  ? 'ring-2 ring-amber-500 bg-zinc-900' 
+                                  : 'bg-zinc-950 hover:bg-zinc-900'
                                 }
                               `}
                             >
