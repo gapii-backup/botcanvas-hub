@@ -222,7 +222,7 @@ export default function Pricing() {
                   </div>
                 )}
 
-                <div className="text-center mb-6">
+                <div className="text-center mb-2">
                   <div
                     className={cn(
                       'h-14 w-14 rounded-xl flex items-center justify-center mx-auto mb-4',
@@ -237,7 +237,7 @@ export default function Pricing() {
                     />
                   </div>
                   <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1 mb-3">{plan.description}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
                 </div>
 
                 <div className="text-center mb-6">
