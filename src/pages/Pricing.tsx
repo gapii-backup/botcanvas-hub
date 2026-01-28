@@ -222,7 +222,7 @@ export default function Pricing() {
                   </div>
                 )}
 
-                <div className="text-center mb-2">
+                <div className={cn("text-center mb-2", plan.popular && "mt-4")}>
                   <div
                     className={cn(
                       'h-14 w-14 rounded-xl flex items-center justify-center mx-auto mb-4',
