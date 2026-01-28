@@ -242,7 +242,7 @@ export default function Login() {
                 {isRegisterMode ? 'Ustvarite račun' : 'Dobrodošli nazaj'}
               </h1>
               <p className="mt-2 text-slate-400">
-                {isRegisterMode ? 'Začnite graditi svoje AI chatbota' : 'Prijavite se v svoj račun'}
+                {isRegisterMode ? 'Začnite graditi svojega AI chatbota' : 'Prijavite se v svoj račun'}
               </p>
             </div>
 
