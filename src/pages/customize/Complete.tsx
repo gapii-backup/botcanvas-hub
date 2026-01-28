@@ -510,14 +510,27 @@ export default function Complete() {
                           {category.title}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-1">
+                      <CardContent className="space-y-2">
                         {category.items.map((item, index) => {
                           const isCapacityAddon = item.id.startsWith('capacity_');
                           const isSelected = selectedAddons.includes(item.id);
                           const hasDemo = !isCapacityAddon; // All feature addons show "Poglej več" button
                           
-                          // All feature addon rows have the same amber gradient background
-                          const gradientClass = isCapacityAddon ? '' : 'from-amber-500/10 to-amber-500/5';
+                          // Accent colors based on addon id for feature addons
+                          const getAccentStyles = (addonId: string) => {
+                            const accents: Record<string, { gradient: string; glow: string }> = {
+                              tickets: { gradient: 'from-orange-500 via-orange-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]' },
+                              contacts: { gradient: 'from-emerald-500 via-emerald-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]' },
+                              product_ai: { gradient: 'from-purple-500 via-purple-500/50 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]' },
+                              multilanguage: { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' },
+                              booking: { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' },
+                            };
+                            return accents[addonId] || { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' };
+                          };
+                          
+                          const accentStyles = isCapacityAddon 
+                            ? { gradient: 'from-zinc-500 via-zinc-500/30 to-transparent', glow: 'hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]' }
+                            : getAccentStyles(item.id);
                           
                           // Badge styling based on content
                           const getBadgeClass = (badge: string) => {
@@ -533,21 +546,35 @@ export default function Complete() {
                             <div 
                               key={item.id}
                               onClick={() => toggleAddon(item.id)}
-                              className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 group bg-gradient-to-r ${gradientClass} ${
-                                isSelected 
-                                  ? 'bg-amber-500/15 border-2 border-amber-500 shadow-sm' 
-                                  : 'border-2 border-transparent hover:bg-muted/60 hover:border-muted-foreground/20'
-                              }`}
+                              className={`
+                                relative
+                                flex items-center justify-between 
+                                p-4 
+                                rounded-xl 
+                                cursor-pointer 
+                                transition-all duration-300
+                                backdrop-blur-sm
+                                border border-zinc-700/50
+                                group
+                                ${accentStyles.glow}
+                                ${isSelected 
+                                  ? 'ring-2 ring-amber-500 bg-zinc-800/70' 
+                                  : 'bg-zinc-800/50 hover:bg-zinc-800/60'
+                                }
+                              `}
                             >
-                              <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
+                              {/* Gradient left border */}
+                              <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl bg-gradient-to-b ${accentStyles.gradient}`} />
+                              
+                              <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap pl-2">
                                 <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all flex-shrink-0 ${
                                   isSelected 
                                     ? 'bg-amber-500 text-white' 
-                                    : 'bg-muted border border-border group-hover:border-muted-foreground/40'
+                                    : 'bg-zinc-700 border border-zinc-600 group-hover:border-zinc-500'
                                 }`}>
                                   {isSelected && <Check className="h-3.5 w-3.5" />}
                                 </div>
-                                <span className="text-sm font-medium text-foreground">
+                                <span className="text-sm font-medium text-white">
                                   {item.label}
                                 </span>
                                 {item.badge && (
@@ -558,7 +585,7 @@ export default function Complete() {
                               </div>
                               <div className="flex items-center flex-shrink-0">
                                 {isCapacityAddon ? (
-                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`}>
                                     {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
                                   </span>
                                 ) : hasDemo ? (
@@ -572,7 +599,7 @@ export default function Complete() {
                                     Poglej več
                                   </button>
                                 ) : (
-                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                  <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`}>
                                     {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
                                   </span>
                                 )}
