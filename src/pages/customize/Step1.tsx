@@ -63,10 +63,10 @@ export default function Step1() {
       nextPath="/customize/step-3"
       nextLabel="Naprej"
     >
-      <div className="space-y-8">
+      <div className="space-y-5">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Chat nastavitve</h2>
-          <p className="text-muted-foreground">Prilagodite sporočila in hitra vprašanja.</p>
+          <h2 className="text-xl font-bold text-foreground mb-1">Chat nastavitve</h2>
+          <p className="text-muted-foreground text-sm">Prilagodite sporočila in hitra vprašanja.</p>
         </div>
 
         {/* Home title */}

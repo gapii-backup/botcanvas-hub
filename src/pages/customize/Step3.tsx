@@ -47,10 +47,10 @@ export default function Step3() {
       nextPath="/customize/complete"
       nextLabel="Zaključi"
     >
-      <div className="space-y-8">
+      <div className="space-y-5">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Gumb za odpiranje</h2>
-          <p className="text-muted-foreground">Prilagodite gumb za odpiranje chata.</p>
+          <h2 className="text-xl font-bold text-foreground mb-1">Gumb za odpiranje</h2>
+          <p className="text-muted-foreground text-sm">Prilagodite gumb za odpiranje chata.</p>
         </div>
 
         {/* Show bubble */}

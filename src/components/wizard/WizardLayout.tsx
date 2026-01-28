@@ -122,12 +122,12 @@ export function WizardLayout({
       </div>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 py-8 lg:py-8 min-h-[calc(100vh-120px)] flex items-center lg:items-start">
-        <div className="grid lg:grid-cols-2 gap-8 items-start w-full">
+      <div className="max-w-5xl mx-auto px-4 py-6 lg:py-6 min-h-[calc(100vh-120px)] flex items-center lg:items-start pb-24">
+        <div className="grid lg:grid-cols-2 gap-6 items-start w-full">
           {/* Settings panel with animation */}
           <div 
             className={cn(
-              "bg-background rounded-2xl border border-border shadow-sm p-6 md:p-8 transition-all duration-500 ease-out w-full max-w-md mx-auto lg:max-w-none",
+              "bg-background rounded-xl border border-border shadow-sm p-4 md:p-6 transition-all duration-500 ease-out w-full max-w-sm mx-auto lg:max-w-md",
               isVisible 
                 ? "opacity-100 translate-y-0" 
                 : "opacity-0 translate-y-4"
@@ -137,10 +137,10 @@ export function WizardLayout({
           </div>
 
           {/* Preview panel with dotted pattern */}
-          <div className="hidden lg:block lg:sticky lg:top-8">
+          <div className="hidden lg:block lg:sticky lg:top-6">
             <div 
               className={cn(
-                "rounded-2xl border border-border overflow-hidden relative transition-all duration-500 ease-out delay-100",
+                "rounded-xl border border-border overflow-hidden relative transition-all duration-500 ease-out delay-100",
                 isVisible 
                   ? "opacity-100 translate-y-0" 
                   : "opacity-0 translate-y-4"
@@ -151,7 +151,7 @@ export function WizardLayout({
                 backgroundColor: 'hsl(var(--muted) / 0.4)',
               }}
             >
-              <div className="p-8 min-h-[500px] flex items-center justify-center">
+              <div className="p-6 min-h-[450px] flex items-center justify-center">
                 {preview}
               </div>
             </div>
@@ -162,7 +162,7 @@ export function WizardLayout({
       {/* Sticky Footer Navigation */}
       {(backPath || nextPath || onNext) && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-700/50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
             <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
               {/* Nazaj gumb - leva stran */}
               {backPath ? (

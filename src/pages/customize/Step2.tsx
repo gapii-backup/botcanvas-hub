@@ -29,10 +29,10 @@ export default function Step2() {
       nextPath="/customize/step-4"
       nextLabel="Naprej"
     >
-      <div className="space-y-8">
+      <div className="space-y-5">
         <div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Osnovni izgled</h2>
-          <p className="text-muted-foreground">Prilagodite videz vašega chatbota.</p>
+          <h2 className="text-xl font-bold text-foreground mb-1">Osnovni izgled</h2>
+          <p className="text-muted-foreground text-sm">Prilagodite videz vašega chatbota.</p>
         </div>
 
         {/* Agent name */}
