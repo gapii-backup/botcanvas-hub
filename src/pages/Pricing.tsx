@@ -218,8 +218,8 @@ export default function Pricing() {
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-blue-600 border border-blue-400 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                      Najboljša izbira
+                    <span className="bg-blue-600 border border-blue-400 text-white text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full">
+                      ⭐ Najbolj priljubljen ⭐
                     </span>
                   </div>
                 )}
