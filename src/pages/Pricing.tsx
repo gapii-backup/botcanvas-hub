@@ -173,8 +173,9 @@ export default function Pricing() {
           <h1 className="text-4xl font-bold text-foreground sm:text-5xl">
             Izberite svoj paket
           </h1>
-          <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto">
-            Transparentne cene brez skritih stroškov. Nadgradite kadarkoli.
+          <p className="mt-4 text-2xl max-w-2xl mx-auto">
+            <span className="text-foreground">Z letno naročnino prejmete </span>
+            <span className="text-amber-400 font-semibold">2 meseca brezplačno!</span>
           </p>
         </div>
 
