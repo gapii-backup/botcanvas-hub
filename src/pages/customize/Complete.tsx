@@ -487,7 +487,7 @@ export default function Complete() {
               <>
                 <div className="space-y-4">
                   {Object.entries(availableAddons).map(([key, category]) => (
-                    <Card key={key} className="border-zinc-700/50 bg-zinc-900/90 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
+                    <Card key={key} className="border-zinc-700/50 bg-zinc-950 backdrop-blur-sm hover:border-primary/30 transition-all duration-300">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                           {category.title}
@@ -541,8 +541,8 @@ export default function Complete() {
                                 group
                                 ${accentStyles.glow}
                                 ${isSelected 
-                                  ? 'ring-2 ring-amber-500 bg-zinc-900' 
-                                  : 'bg-zinc-950 hover:bg-zinc-900'
+                                  ? 'ring-2 ring-amber-500 bg-zinc-800/70' 
+                                  : 'bg-zinc-800/50 hover:bg-zinc-800/60'
                                 }
                               `}
                             >
