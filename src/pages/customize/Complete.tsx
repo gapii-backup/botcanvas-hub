@@ -721,16 +721,15 @@ export default function Complete() {
               </Button>
             </>
             
-            {/* Nadaljuj na plačilo - enaka velikost kot ostali Naprej gumbi */}
-            <Button
+            {/* Nadaljuj na plačilo - zlati stil, enaka velikost kot ostali Naprej gumbi */}
+            <button
               onClick={handleOpenPaymentDialog}
               disabled={isSaving}
-              size="lg"
-              className="order-1 sm:order-2 w-full sm:w-auto shiny-button"
+              className="order-1 sm:order-2 w-full sm:w-auto shiny-button h-11 px-8 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <CreditCard className="h-4 w-4 mr-2" />
+              <CreditCard className="h-4 w-4" />
               Nadaljuj na plačilo
-            </Button>
+            </button>
           </div>
         </div>
       </div>
