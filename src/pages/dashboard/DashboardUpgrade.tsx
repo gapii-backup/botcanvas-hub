@@ -89,10 +89,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
-    { id: 'multilanguage', name: 'Multilanguage', price: 30, period: 'mesec', icon: Languages },
+    { id: 'multilanguage', name: 'Večjezičnost', price: 30, period: 'mesec', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 35, period: 'mesec', icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 20, period: 'mesec', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 100, period: 'mesec', proOnly: true, icon: Lightbulb },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 100, period: 'mesec', proOnly: true, icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 35, period: 'mesec', icon: Ticket }
   ],
   yearly: [
@@ -100,10 +100,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_1000', name: '+1.000 pogovorov', price: 32, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
-    { id: 'multilanguage', name: 'Multilanguage', price: 288, period: 'leto', icon: Languages },
+    { id: 'multilanguage', name: 'Večjezičnost', price: 288, period: 'leto', icon: Languages },
     { id: 'booking', name: 'Rezervacija sestankov', price: 336, period: 'leto', icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 192, period: 'leto', icon: Users },
-    { id: 'product_ai', name: 'Product AI', price: 960, period: 'leto', proOnly: true, icon: Lightbulb },
+    { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 960, period: 'leto', proOnly: true, icon: Lightbulb },
     { id: 'tickets', name: 'Support Ticketi', price: 336, period: 'leto', icon: Ticket }
   ]
 };
