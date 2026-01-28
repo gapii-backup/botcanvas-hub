@@ -163,24 +163,42 @@ export function WizardLayout({
       {(backPath || nextPath || onNext) && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-md border-t border-zinc-700/50">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4">
-            <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4">
-              {/* Nazaj gumb - leva stran */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+              {/* Nazaj gumb - manjši na mobile, leva stran na desktop */}
               {backPath ? (
-                <Button variant="outline" onClick={handleBack} size="lg" className="w-full sm:w-auto">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Nazaj
-                </Button>
+                <>
+                  {/* Mobile: ghost, small */}
+                  <Button 
+                    variant="ghost" 
+                    onClick={handleBack} 
+                    size="sm"
+                    className="order-2 sm:hidden text-muted-foreground"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" />
+                    Nazaj
+                  </Button>
+                  {/* Desktop: outline, large */}
+                  <Button 
+                    variant="outline" 
+                    onClick={handleBack} 
+                    size="lg"
+                    className="hidden sm:flex"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Nazaj
+                  </Button>
+                </>
               ) : (
                 <div className="hidden sm:block" /> 
               )}
               
-              {/* Naprej gumb - desna stran */}
+              {/* Naprej gumb - velik, full width na mobile */}
               {(nextPath || onNext) && (
                 <Button 
                   onClick={handleNext} 
                   size="lg" 
                   disabled={nextDisabled}
-                  className="w-full sm:w-auto"
+                  className="order-1 sm:order-2 w-full sm:w-auto"
                 >
                   {nextLabel}
                 </Button>
