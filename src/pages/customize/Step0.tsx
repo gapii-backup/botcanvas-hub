@@ -10,6 +10,7 @@ import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function Step0() {
   const { config, setConfig } = useWizardConfig();
@@ -20,6 +21,7 @@ export default function Step0() {
   const { updateUserBot } = useUserBot();
   const { updateWidget } = useWidget();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const validateUrl = (url: string): boolean => {
     if (!url.trim()) {
@@ -146,10 +148,12 @@ export default function Step0() {
       currentStep={1}
       totalSteps={4}
       preview={rightPanel}
-      nextPath="/customize/step-2"
-      nextLabel={isSaving ? 'Shranjujem...' : 'Naprej'}
-      onNext={handleNext}
-      nextDisabled={isSaving}
+      {...(!isMobile && {
+        nextPath: "/customize/step-2",
+        nextLabel: isSaving ? 'Shranjujem...' : 'Naprej',
+        onNext: handleNext,
+        nextDisabled: isSaving,
+      })}
     >
       {content}
     </WizardLayout>
