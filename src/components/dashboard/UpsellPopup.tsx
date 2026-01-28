@@ -16,7 +16,8 @@ import {
   Sparkles,
   ArrowRight,
 } from 'lucide-react';
-import { AddonModal } from './AddonModal';
+import { UpsellConfirmDialog } from './UpsellConfirmDialog';
+import { useToast } from '@/hooks/use-toast';
 
 type AddonConfig = {
   id: string;
@@ -54,9 +55,10 @@ export function UpsellPopup({
   existingAddons,
   apiKey,
 }: UpsellPopupProps) {
-  const [selectedAddon, setSelectedAddon] = useState<string | null>(null);
-  const [showAddonModal, setShowAddonModal] = useState(false);
+  const [selectedAddon, setSelectedAddon] = useState<AddonConfig | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [addedAddons, setAddedAddons] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   // Filter addons based on plan
   const getAvailableAddons = (): AddonConfig[] => {
@@ -86,20 +88,41 @@ export function UpsellPopup({
   const availableAddons = getAvailableAddons();
   const isYearly = billingPeriod === 'yearly';
 
-  const handleAddAddon = (addonId: string) => {
-    setSelectedAddon(addonId);
-    setShowAddonModal(true);
+  const handleAddAddon = (addon: AddonConfig) => {
+    setSelectedAddon(addon);
+    setShowConfirmDialog(true);
   };
 
   const handleAddonSuccess = (addonId: string) => {
     // Mark addon as added and update button state
     setAddedAddons(prev => new Set(prev).add(addonId));
-    setShowAddonModal(false);
+    setShowConfirmDialog(false);
     setSelectedAddon(null);
+  };
+
+  const handleClose = (openState: boolean) => {
+    if (!openState) {
+      // Popup is being closed
+      const addedAny = addedAddons.size > 0;
+      toast({
+        title: 'Naročnina aktivirana!',
+        description: addedAny 
+          ? 'Vaša naročnina in dodatki so bili uspešno aktivirani.' 
+          : 'Vaša naročnina je bila uspešno aktivirana.',
+      });
+      onOpenChange(false);
+      onContinueWithoutAddons(addedAny);
+    }
   };
 
   const handleContinue = () => {
     const addedAny = addedAddons.size > 0;
+    toast({
+      title: 'Naročnina aktivirana!',
+      description: addedAny 
+        ? 'Vaša naročnina in dodatki so bili uspešno aktivirani.' 
+        : 'Vaša naročnina je bila uspešno aktivirana.',
+    });
     onOpenChange(false);
     onContinueWithoutAddons(addedAny);
   };
@@ -111,7 +134,7 @@ export function UpsellPopup({
 
   return (
     <>
-      <Dialog open={open && !showAddonModal} onOpenChange={onOpenChange}>
+      <Dialog open={open && !showConfirmDialog} onOpenChange={handleClose}>
         <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg mx-auto border-2 border-amber-400/50 bg-gradient-to-br from-background via-background to-amber-500/5">
           <DialogHeader className="text-center space-y-4 flex flex-col items-center">
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
@@ -159,7 +182,7 @@ export function UpsellPopup({
                   ) : (
                     <Button
                       size="sm"
-                      onClick={() => handleAddAddon(addon.id)}
+                      onClick={() => handleAddAddon(addon)}
                       className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-black font-semibold"
                     >
                       Dodaj
@@ -183,16 +206,18 @@ export function UpsellPopup({
         </DialogContent>
       </Dialog>
 
-      {/* AddonModal for purchase confirmation with legal info */}
-      <AddonModal
-        open={showAddonModal}
+      {/* Direct confirmation dialog for addon purchase */}
+      <UpsellConfirmDialog
+        open={showConfirmDialog}
         onOpenChange={(open) => {
-          setShowAddonModal(open);
+          setShowConfirmDialog(open);
           if (!open) {
             setSelectedAddon(null);
           }
         }}
         addon={selectedAddon}
+        billingPeriod={billingPeriod}
+        apiKey={apiKey}
         onSuccess={handleAddonSuccess}
       />
     </>
