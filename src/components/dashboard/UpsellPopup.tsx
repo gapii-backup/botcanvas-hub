@@ -15,9 +15,11 @@ import {
   Calendar,
   Sparkles,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import { UpsellConfirmDialog } from './UpsellConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 type AddonConfig = {
   id: string;
@@ -58,7 +60,9 @@ export function UpsellPopup({
   const [selectedAddon, setSelectedAddon] = useState<AddonConfig | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [addedAddons, setAddedAddons] = useState<Set<string>>(new Set());
+  const [loadingAddon, setLoadingAddon] = useState<string | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // Filter addons based on plan
   const getAvailableAddons = (): AddonConfig[] => {
@@ -93,11 +97,54 @@ export function UpsellPopup({
     setShowConfirmDialog(true);
   };
 
-  const handleAddonSuccess = (addonId: string) => {
-    // Mark addon as added and update button state
-    setAddedAddons(prev => new Set(prev).add(addonId));
+  const handleConfirmAddon = async () => {
+    if (!selectedAddon || !apiKey) {
+      toast({
+        title: 'Napaka',
+        description: 'Manjkajo podatki za nakup.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Close dialog and show loading on button
     setShowConfirmDialog(false);
-    setSelectedAddon(null);
+    setLoadingAddon(selectedAddon.id);
+    
+    try {
+      const response = await fetch('https://hub.botmotion.ai/webhook/create-addon-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: apiKey,
+          addon: selectedAddon.id,
+          billing_period: billingPeriod,
+          user_email: user?.email,
+          cancel_url: window.location.href
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast({
+          title: 'Funkcija dodana!',
+          description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
+        });
+        setAddedAddons(prev => new Set(prev).add(selectedAddon.id));
+      } else {
+        throw new Error(result.error || 'Napaka pri dodajanju funkcije');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Napaka',
+        description: error.message || 'Nekaj je šlo narobe',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingAddon(null);
+      setSelectedAddon(null);
+    }
   };
 
   const handleClose = (openState: boolean) => {
@@ -179,13 +226,13 @@ export function UpsellPopup({
                     >
                       Dodano ✓
                     </Button>
-                  ) : selectedAddon?.id === addon.id && showConfirmDialog ? (
+                  ) : loadingAddon === addon.id ? (
                     <Button
                       size="sm"
                       disabled
                       className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold min-w-[70px]"
                     >
-                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                     </Button>
                   ) : (
                     <Button
@@ -225,8 +272,7 @@ export function UpsellPopup({
         }}
         addon={selectedAddon}
         billingPeriod={billingPeriod}
-        apiKey={apiKey}
-        onSuccess={handleAddonSuccess}
+        onConfirm={handleConfirmAddon}
       />
     </>
   );
