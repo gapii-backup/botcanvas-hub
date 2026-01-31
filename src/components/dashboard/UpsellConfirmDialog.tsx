@@ -128,6 +128,9 @@ export function UpsellConfirmDialog({
     );
   }
 
+  const periodLabel = isYearly ? 'leto' : 'mesec';
+  const nextPeriodLabel = isYearly ? 'leta' : 'meseca';
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
@@ -139,7 +142,7 @@ export function UpsellConfirmDialog({
                 <div className="font-semibold text-foreground text-lg">{addon.name}</div>
                 <div className="text-2xl font-bold text-amber-500 mt-1">
                   €{price}
-                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{period}</span>
+                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{periodLabel}</span>
                 </div>
               </div>
 
@@ -149,27 +152,31 @@ export function UpsellConfirmDialog({
                   Takojšnje plačilo
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Sorazmerni del cene za obdobje do vašega naslednjega plačila bo zaračunan takoj iz vaše shranjene plačilne metode.
+                  Znesek bo zaračunan takoj iz vaše plačilne metode.
                 </p>
               </div>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-3 text-sm">
-                <p className="font-medium text-foreground">Kako deluje zaračunavanje:</p>
+                <p className="font-medium text-foreground">Kaj to pomeni:</p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-amber-500 mt-0.5">•</span>
-                    <span><strong className="text-foreground">Danes:</strong> Zaračuna se sorazmerni del cene (npr. če je do naslednjega plačila še pol obdobja, plačate pol cene)</span>
+                    <span>Cena <strong className="text-foreground">€{price} +DDV/{periodLabel}</strong> bo zaračunana danes</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-amber-500 mt-0.5">•</span>
-                    <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{price} +DDV/{period})</span>
+                    <span>Funkcija se aktivira v roku <strong className="text-foreground">24 ur</strong></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-500 mt-0.5">•</span>
+                    <span>Od naslednjega {nextPeriodLabel} se zaračunava skupaj z vašo naročnino</span>
                   </li>
                 </ul>
               </div>
 
               <div className="flex items-center gap-2 text-amber-400 text-sm bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
                 <span>⚡</span>
-                <span>Funkcija bo aktivirana v roku <strong>24 ur</strong> po potrditvi nakupa.</span>
+                <span>Funkcija bo aktivirana v roku <strong>24 ur</strong> po potrditvi.</span>
               </div>
             </div>
           </AlertDialogDescription>
