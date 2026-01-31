@@ -179,6 +179,14 @@ export function UpsellPopup({
                     >
                       Dodano ✓
                     </Button>
+                  ) : selectedAddon?.id === addon.id && showConfirmDialog ? (
+                    <Button
+                      size="sm"
+                      disabled
+                      className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold min-w-[70px]"
+                    >
+                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    </Button>
                   ) : (
                     <Button
                       size="sm"

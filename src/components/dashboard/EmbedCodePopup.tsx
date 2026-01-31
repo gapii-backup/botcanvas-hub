@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -7,7 +8,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Check, Code, Copy, Mail, Phone } from 'lucide-react';
+import { Check, Code, Copy, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface EmbedCodePopupProps {
@@ -23,6 +24,7 @@ export function EmbedCodePopup({
 }: EmbedCodePopupProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const copyEmbedCode = () => {
     navigator.clipboard.writeText(embedCode);
@@ -56,10 +58,21 @@ export function EmbedCodePopup({
             </code>
           </div>
           
-          <div className="flex justify-center">
+          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3">
             <Button onClick={copyEmbedCode} className="w-full sm:w-auto h-10 sm:h-11 text-sm">
               {copied ? <Check className="h-4 w-4 mr-2" /> : <Copy className="h-4 w-4 mr-2" />}
               {copied ? 'Kopirano!' : 'Kopiraj kodo'}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                onOpenChange(false);
+                navigate('/dashboard/docs');
+              }}
+              className="w-full sm:w-auto h-10 sm:h-11 text-sm"
+            >
+              <HelpCircle className="h-4 w-4 mr-2" />
+              Potrebujete pomoč?
             </Button>
           </div>
           
@@ -68,28 +81,6 @@ export function EmbedCodePopup({
             <p className="text-muted-foreground">
               Kodo prilepite pred zaključni <code className="bg-muted px-1 rounded">&lt;/body&gt;</code> tag na vaši spletni strani.
             </p>
-          </div>
-          
-          <div className="bg-muted/30 rounded-lg p-3 sm:p-4 text-xs sm:text-sm">
-            <p className="text-muted-foreground mb-2 sm:mb-3">
-              Embed koda bo vedno prikazana na dashboardu. Če potrebujete pomoč pri nastavitvi:
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-              <a 
-                href="mailto:info@botmotion.ai" 
-                className="flex items-center gap-2 text-primary hover:underline text-xs sm:text-sm"
-              >
-                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                info@botmotion.ai
-              </a>
-              <a 
-                href="tel:+38641353600" 
-                className="flex items-center gap-2 text-primary hover:underline text-xs sm:text-sm"
-              >
-                <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                +386 41 353 600
-              </a>
-            </div>
           </div>
         </div>
       </DialogContent>
