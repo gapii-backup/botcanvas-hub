@@ -15,7 +15,8 @@ import {
   Ticket,
   Lightbulb,
   MessageSquare,
-  CheckCircle
+  CheckCircle,
+  Info
 } from 'lucide-react';
 import { useWidget } from '@/hooks/useWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +29,7 @@ import { SetupPendingLock } from '@/components/dashboard/SetupPendingLock';
 import { PartnerBlockedLock } from '@/components/dashboard/PartnerBlockedLock';
 import { useToast } from '@/hooks/use-toast';
 import { AddonModal } from '@/components/dashboard/AddonModal';
+import { AddonDemoDialog, ADDON_DEMO_DATA } from '@/components/dashboard/AddonDemoDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -158,6 +160,7 @@ export default function DashboardUpgrade() {
   const [cancelAddonDialog, setCancelAddonDialog] = useState<string | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
   const [displayBillingPeriod, setDisplayBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [demoAddon, setDemoAddon] = useState<string | null>(null);
   
   // Upgrade/Downgrade confirmation state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -514,34 +517,56 @@ export default function DashboardUpgrade() {
                     .map(addon => {
                     const isActive = activeAddonIds.includes(addon.id);
                     const IconComponent = addon.icon;
+                    const hasDemoData = !addon.id.startsWith('capacity_') && ADDON_DEMO_DATA[addon.id];
                     
                     return (
-                      <button
+                      <div
                         key={addon.id}
-                        onClick={() => !isActive && openAddonModal(addon.id)}
-                        disabled={isActive}
                         className={`
-                          flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 w-full
+                          relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 w-full
                           ${isActive 
-                            ? 'border-green-500 bg-green-500/10 cursor-default' 
-                            : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5 cursor-pointer hover:scale-105'
+                            ? 'border-green-500 bg-green-500/10' 
+                            : 'border-border bg-muted/30 hover:border-amber-500/50 hover:bg-amber-500/5'
                           }
                         `}
                       >
-                        <div className={`p-2 rounded-lg ${isActive ? 'bg-green-500/20' : 'bg-muted'}`}>
-                          {isActive ? (
-                            <CheckCircle className="w-5 h-5 text-green-500" />
-                          ) : (
-                            <IconComponent className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </div>
-                        <span className={`text-sm font-medium text-center ${isActive ? 'text-green-500' : 'text-foreground'}`}>
-                          {addon.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          €{addon.price}/{addon.period}
-                        </span>
-                      </button>
+                        {/* Info button for addons with demo data */}
+                        {hasDemoData && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDemoAddon(addon.id);
+                            }}
+                            className="absolute top-2 right-2 p-1.5 rounded-lg bg-muted/80 hover:bg-amber-500/20 transition-colors z-10"
+                            title="Več informacij"
+                          >
+                            <Info className="w-4 h-4 text-muted-foreground hover:text-amber-500" />
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => !isActive && openAddonModal(addon.id)}
+                          disabled={isActive}
+                          className={`
+                            flex flex-col items-center gap-2 w-full
+                            ${!isActive ? 'cursor-pointer hover:scale-105 transition-transform' : 'cursor-default'}
+                          `}
+                        >
+                          <div className={`p-2 rounded-lg ${isActive ? 'bg-green-500/20' : 'bg-muted'}`}>
+                            {isActive ? (
+                              <CheckCircle className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <IconComponent className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className={`text-sm font-medium text-center ${isActive ? 'text-green-500' : 'text-foreground'}`}>
+                            {addon.name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            €{addon.price}/{addon.period}
+                          </span>
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -594,6 +619,22 @@ export default function DashboardUpgrade() {
 
       {/* Addon Modal */}
       <AddonModal open={addonModalOpen} onOpenChange={setAddonModalOpen} addon={selectedAddon} />
+
+      {/* Addon Demo Dialog */}
+      <AddonDemoDialog
+        open={!!demoAddon}
+        onOpenChange={(open) => !open && setDemoAddon(null)}
+        addonId={demoAddon}
+        addonName={demoAddon ? getAddonDetails(demoAddon, billingPeriod).name : ''}
+        addonPrice={demoAddon ? getAddonDetails(demoAddon, billingPeriod).price : 0}
+        addonPeriod={demoAddon ? getAddonDetails(demoAddon, billingPeriod).period : 'mesec'}
+        isActive={demoAddon ? activeAddonIds.includes(demoAddon) : false}
+        onAddClick={() => {
+          if (demoAddon) {
+            openAddonModal(demoAddon);
+          }
+        }}
+      />
 
       {/* Upgrade Confirmation Dialog */}
       <AlertDialog open={confirmDialog.open && !confirmDialog.isDowngrade} onOpenChange={(open) => !open && setConfirmDialog({ open: false, planId: null, isDowngrade: false })}>
