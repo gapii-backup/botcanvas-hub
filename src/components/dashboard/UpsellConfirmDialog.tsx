@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { Loader2, Sparkles } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,12 +8,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Dialog,
-  DialogContent,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
 
 type AddonConfig = {
   id: string;
@@ -29,8 +21,7 @@ interface UpsellConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   addon: AddonConfig | null;
   billingPeriod: string;
-  apiKey: string;
-  onSuccess: (addonId: string) => void;
+  onConfirm: () => void;
 }
 
 export function UpsellConfirmDialog({
@@ -38,96 +29,12 @@ export function UpsellConfirmDialog({
   onOpenChange,
   addon,
   billingPeriod,
-  apiKey,
-  onSuccess,
+  onConfirm,
 }: UpsellConfirmDialogProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
-
   if (!addon) return null;
 
   const isYearly = billingPeriod === 'yearly';
   const price = isYearly ? addon.yearlyPrice : addon.monthlyPrice;
-  const period = isYearly ? 'leto' : 'mesec';
-
-  const handleConfirmAddon = async () => {
-    if (!apiKey) {
-      toast({
-        title: 'Napaka',
-        description: 'Manjkajo podatki za nakup.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    
-    try {
-      const response = await fetch('https://hub.botmotion.ai/webhook/create-addon-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: apiKey,
-          addon: addon.id,
-          billing_period: billingPeriod,
-          user_email: user?.email,
-          cancel_url: window.location.href
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({
-          title: 'Funkcija dodana!',
-          description: result.message || 'Funkcija je bila uspešno dodana k vaši naročnini.'
-        });
-        setIsProcessing(false);
-        onOpenChange(false);
-        onSuccess(addon.id);
-      } else {
-        throw new Error(result.error || 'Napaka pri dodajanju funkcije');
-      }
-    } catch (error: any) {
-      toast({
-        title: 'Napaka',
-        description: error.message || 'Nekaj je šlo narobe',
-        variant: 'destructive',
-      });
-      setIsProcessing(false);
-    }
-  };
-
-  // Show processing overlay when addon is being added
-  if (isProcessing) {
-    return (
-      <Dialog open={true} onOpenChange={() => {}}>
-        <DialogContent className="max-w-sm [&>button]:hidden">
-          <div className="flex flex-col items-center justify-center py-8 space-y-6">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 animate-pulse flex items-center justify-center">
-                <Sparkles className="h-10 w-10 text-black animate-bounce" />
-              </div>
-              <div className="absolute inset-0 w-20 h-20 rounded-full border-4 border-amber-500/30 animate-ping" />
-            </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-semibold text-foreground">Dodajanje funkcije...</h3>
-              <p className="text-sm text-muted-foreground">
-                {addon.name}
-              </p>
-              <div className="flex items-center justify-center gap-1 pt-2">
-                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 rounded-full bg-amber-500 animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   const periodLabel = isYearly ? 'leto' : 'mesec';
   const nextPeriodLabel = isYearly ? 'leta' : 'meseca';
 
@@ -184,7 +91,7 @@ export function UpsellConfirmDialog({
         <AlertDialogFooter className="mt-4">
           <AlertDialogCancel>Prekliči</AlertDialogCancel>
           <AlertDialogAction 
-            onClick={handleConfirmAddon}
+            onClick={onConfirm}
             className="bg-amber-500 hover:bg-amber-600 text-black"
           >
             Potrjujem nakup
