@@ -44,10 +44,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec' },
     // Ostali addoni - letni
     { id: 'multilanguage', name: 'Večjezičnost', price: 300, period: 'leto' },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 355, period: 'leto', proOnly: true },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 350, period: 'leto', proOnly: true },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 200, period: 'leto' },
     { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 1000, period: 'leto' },
-    { id: 'tickets', name: 'Support Ticketi', price: 355, period: 'leto' }
+    { id: 'tickets', name: 'Support Ticketi', price: 350, period: 'leto' }
   ]
 };
 

@@ -33,8 +33,8 @@ type AddonConfig = {
 const allAddons: AddonConfig[] = [
   { id: 'multilanguage', name: 'Večjezičnost', icon: Languages, monthlyPrice: 30, yearlyPrice: 300 },
   { id: 'contacts', name: 'Zbiranje kontaktov', icon: Users, monthlyPrice: 20, yearlyPrice: 200 },
-  { id: 'tickets', name: 'Support Ticketi', icon: Ticket, monthlyPrice: 35, yearlyPrice: 355 },
-  { id: 'booking', name: 'Rezervacija terminov', icon: Calendar, monthlyPrice: 35, yearlyPrice: 355 },
+  { id: 'tickets', name: 'Support Ticketi', icon: Ticket, monthlyPrice: 35, yearlyPrice: 350 },
+  { id: 'booking', name: 'Rezervacija terminov', icon: Calendar, monthlyPrice: 35, yearlyPrice: 350 },
   { id: 'product_ai', name: 'AI priporočanje izdelkov', icon: Lightbulb, monthlyPrice: 100, yearlyPrice: 1000, proOnly: true },
 ];
 
