@@ -103,10 +103,10 @@ const allAddons: Record<string, AddonItem[]> = {
     { id: 'capacity_2500', name: '+2.500 pogovorov', price: 70, period: 'mesec', icon: MessageSquare },
     { id: 'capacity_5000', name: '+5.000 pogovorov', price: 120, period: 'mesec', icon: MessageSquare },
     { id: 'multilanguage', name: 'Večjezičnost', price: 300, period: 'leto', icon: Languages },
-    { id: 'booking', name: 'Rezervacija sestankov', price: 355, period: 'leto', icon: Calendar },
+    { id: 'booking', name: 'Rezervacija sestankov', price: 350, period: 'leto', icon: Calendar },
     { id: 'contacts', name: 'Zbiranje kontaktov', price: 200, period: 'leto', icon: Users },
     { id: 'product_ai', name: 'AI priporočanje izdelkov', price: 1000, period: 'leto', proOnly: true, icon: Lightbulb },
-    { id: 'tickets', name: 'Support Ticketi', price: 355, period: 'leto', icon: Ticket }
+    { id: 'tickets', name: 'Support Ticketi', price: 350, period: 'leto', icon: Ticket }
   ]
 };
 

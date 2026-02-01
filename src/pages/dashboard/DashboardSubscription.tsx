@@ -32,7 +32,7 @@ const addonPrices = {
     // Capacity - mesečne cene (vedno mesečni)
     capacity_500: 18, capacity_1000: 32, capacity_2500: 70, capacity_5000: 120,
     // Ostalo - letne cene
-    multilanguage: 300, booking: 355, contacts: 200, product_ai: 1000, tickets: 355
+    multilanguage: 300, booking: 350, contacts: 200, product_ai: 1000, tickets: 350
   }
 };
 
