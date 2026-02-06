@@ -347,7 +347,6 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
                   <div className="text-2xl font-bold my-2 text-foreground">
                     €{price}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
@@ -416,17 +415,17 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   </div>
                   <div className="flex justify-between border-t border-border pt-2 mt-2">
                     <span>Naročnina ({billingPeriod === 'monthly' ? 'mesečna' : 'letna'}):</span>
-                    <span>€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span></span>
+                    <span>€{getSelectedPlanPrice()}</span>
                   </div>
                   {getSelectedSetupFee() && (
                     <div className="flex justify-between text-amber-500">
                       <span>Enkratni setup fee:</span>
-                      <span>€{getSelectedSetupFee()?.price} <span className="text-xs opacity-70">+DDV</span></span>
+                      <span>€{getSelectedSetupFee()?.price}</span>
                     </div>
                   )}
                   <div className="flex justify-between font-bold border-t border-border pt-2">
                     <span>Skupaj danes:</span>
-                    <span>€{getTotalPrice()} <span className="text-xs opacity-70 font-normal">+DDV</span></span>
+                    <span>€{getTotalPrice()}</span>
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
@@ -476,7 +475,7 @@ export function UpgradeModal({ open, onOpenChange, initialBillingPeriod }: Upgra
                   </div>
                   <div className="flex justify-between border-t border-border pt-2 mt-2">
                     <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">

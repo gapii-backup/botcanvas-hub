@@ -405,7 +405,6 @@ export default function DashboardUpgrade() {
                     </div>
                     <div className="text-3xl font-bold text-foreground mb-1">
                       €{price}
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">
                         /{displayBillingPeriod === 'monthly' ? 'mes' : 'leto'}
                       </span>
@@ -591,9 +590,7 @@ export default function DashboardUpgrade() {
                             <div>
                               <span className="font-medium text-foreground">{addon.name}</span>
                               <div className="text-sm text-muted-foreground">
-                                €{addon.price}
-                                <span className="text-xs ml-1">+DDV</span>
-                                /{addon.period}
+                                €{addon.price}/{addon.period}
                               </div>
                             </div>
                           </div>
@@ -657,7 +654,7 @@ export default function DashboardUpgrade() {
                   </div>
                   <div className="flex justify-between border-t border-border pt-2 mt-2">
                     <span>Naročnina ({displayBillingPeriod === 'monthly' ? 'mesečna' : 'letna'}):</span>
-                    <span>€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span></span>
+                    <span>€{getSelectedPlanPrice()}</span>
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
@@ -722,7 +719,7 @@ export default function DashboardUpgrade() {
                   </div>
                   <div className="flex justify-between border-t border-border pt-2 mt-2">
                     <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{displayBillingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()}/{displayBillingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">

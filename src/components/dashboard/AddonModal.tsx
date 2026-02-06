@@ -186,7 +186,6 @@ export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalP
                 </div>
                 <div className="text-2xl font-bold text-foreground">
                   €{addonData.price}
-                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   <span className="text-sm text-muted-foreground font-normal">
                     /{addonData.period}
                   </span>
@@ -206,7 +205,6 @@ export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalP
                 </div>
                 <div className="text-2xl font-bold text-foreground">
                   €{addonData.price}
-                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   <span className="text-sm text-muted-foreground font-normal">
                     /{addonData.period}
                   </span>
@@ -236,8 +234,7 @@ export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalP
                 <div className="bg-muted/80 rounded-lg p-4">
                   <div className="font-semibold text-foreground text-lg">{addonData.name}</div>
                   <div className="text-2xl font-bold text-amber-500 mt-1">
-                    €{addonData.price}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{addonData.period}</span>
+                    €{addonData.price}/{addonData.period}
                   </div>
                 </div>
 
@@ -252,7 +249,7 @@ export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalP
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">•</span>
-                        <span>Cena: <strong className="text-foreground">€{addonData.price} +DDV/mesec</strong></span>
+                        <span>Cena: <strong className="text-foreground">€{addonData.price}/mesec</strong></span>
                       </li>
                     </ul>
                   </div>
@@ -278,7 +275,7 @@ export function AddonModal({ open, onOpenChange, addon, onSuccess }: AddonModalP
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-500 mt-0.5">•</span>
-                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price} +DDV/{addonData.period})</span>
+                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{addonData.price}/{addonData.period})</span>
                         </li>
                       </ul>
                     </div>

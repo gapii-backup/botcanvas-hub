@@ -61,7 +61,6 @@ export default function Checkout() {
                     </div>
                     <div className="flex items-start">
                       <span className="text-lg font-semibold text-foreground">{plan.priceDisplay}</span>
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-lg font-semibold text-foreground">/mesec</span>
                     </div>
                   </div>
@@ -69,7 +68,6 @@ export default function Checkout() {
                     <p className="font-medium text-foreground">Skupaj</p>
                     <div className="flex items-start">
                       <span className="text-2xl font-bold text-primary">{plan.priceDisplay}</span>
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-2xl font-bold text-primary">/mesec</span>
                     </div>
                   </div>
@@ -153,7 +151,7 @@ export default function Checkout() {
                 ) : (
                   <>
                     <Lock className="h-4 w-4 mr-2" />
-                    Plačaj {plan?.priceDisplay}/mesec <span className="text-xs opacity-70">+DDV</span>
+                    Plačaj {plan?.priceDisplay}/mesec
                   </>
                 )}
               </Button>
