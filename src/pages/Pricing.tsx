@@ -81,7 +81,7 @@ const comparisonFeatures = [
   { name: 'Rezervacija sestankov preko chatbota', basic: false, pro: false, enterprise: true },
   { name: 'Pametna priporočila izdelkov (AI)', basic: false, pro: false, enterprise: true },
   { name: 'Tedensko AI poročilo o uspešnosti', basic: false, pro: false, enterprise: true },
-  { name: 'Setup fee (enkratno)', basic: '€80 +DDV', pro: '€140 +DDV', enterprise: '€320 +DDV' },
+  { name: 'Setup fee (enkratno)', basic: '€80', pro: '€140', enterprise: '€320' },
 ];
 
 const faqItems = [
@@ -105,10 +105,6 @@ const faqItems = [
     question: "Kaj pomeni \"učenje iz spletne strani\"?",
     answer: "AI chatbot prebere vsebino vaše spletne strani in se nauči o vaših izdelkih, storitvah in podjetju. Tako lahko odgovarja na vprašanja obiskovalcev brez ročnega vnašanja podatkov."
   },
-  {
-    question: "Ali cene vključujejo DDV?",
-    answer: "Ne, vse cene so navedene brez DDV. DDV se obračuna po veljavni stopnji ob plačilu."
-  }
 ];
 
 export default function Pricing() {
@@ -251,7 +247,6 @@ export default function Pricing() {
                   </div>
                   <div>
                     <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-muted-foreground">{period}</span>
                   </div>
                 </div>
@@ -276,7 +271,6 @@ export default function Pricing() {
                   <div className="text-center py-2 px-3 rounded-lg bg-secondary/50 border border-border">
                     <span className="text-xs text-muted-foreground">Setup fee (enkratno): </span>
                     <span className="text-sm font-semibold text-foreground">€{plan.setupFee}</span>
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                   </div>
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}

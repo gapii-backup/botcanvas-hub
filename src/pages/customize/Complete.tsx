@@ -178,14 +178,14 @@ function formatPrice(monthlyPrice: number | null, yearlyPrice: number | null, is
   // Capacity addons are always monthly
   if (isCapacityAddon) {
     if (monthlyPrice === null) return 'po dogovoru';
-    return `€${monthlyPrice} +DDV/mesec`;
+    return `€${monthlyPrice}/mesec`;
   }
   if (isYearly) {
     if (yearlyPrice === null) return 'po dogovoru';
-    return `€${yearlyPrice} +DDV/leto`;
+    return `€${yearlyPrice}/leto`;
   }
   if (monthlyPrice === null) return 'po dogovoru';
-  return `€${monthlyPrice} +DDV/mesec`;
+  return `€${monthlyPrice}/mesec`;
 }
 
 // Get available add-ons based on plan and billing period
@@ -764,7 +764,7 @@ export default function Complete() {
                     <span className="font-medium">Setup fee</span>
                     <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
                   </div>
-                  <span className="text-lg font-bold text-amber-500">€{setupFee} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                  <span className="text-lg font-bold text-amber-500">€{setupFee}</span>
                 </div>
               </div>
 
@@ -781,7 +781,7 @@ export default function Complete() {
                     <div>
                       <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
                     </div>
-                    <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                    <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')}</span>
                   </div>
 
                   {/* Selected add-ons */}
@@ -801,7 +801,7 @@ export default function Complete() {
                         return (
                           <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
                             <span className="text-sm">{addonLabel}</span>
-                            <span className="text-sm font-medium">€{price} <span className="text-xs text-muted-foreground/70">+DDV</span></span>
+                            <span className="text-sm font-medium">€{price}</span>
                           </div>
                         );
                       })}
@@ -813,7 +813,6 @@ export default function Complete() {
                     <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
                     <span className="text-lg font-bold text-amber-500">
                       €{totalSubscription.toFixed(2).replace('.', ',')}
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
                     </span>
                   </div>
@@ -843,7 +842,7 @@ export default function Complete() {
                 className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 flex items-center justify-center gap-2"
               >
                 <CreditCard className="h-4 w-4" />
-                {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee} +DDV)`}
+                {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee})`}
               </button>
               <Button 
                 variant="outline" 

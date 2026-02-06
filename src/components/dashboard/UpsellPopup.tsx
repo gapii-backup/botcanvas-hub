@@ -214,7 +214,7 @@ export function UpsellPopup({
                     <div>
                       <p className="font-medium text-foreground">{addon.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        €{price}<span className="text-xs">+DDV</span>/{period}
+                        €{price}/{period}
                       </p>
                     </div>
                   </div>

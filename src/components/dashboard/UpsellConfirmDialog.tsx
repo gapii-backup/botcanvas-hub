@@ -48,8 +48,7 @@ export function UpsellConfirmDialog({
               <div className="bg-muted/80 rounded-lg p-4">
                 <div className="font-semibold text-foreground text-lg">{addon.name}</div>
                 <div className="text-2xl font-bold text-amber-500 mt-1">
-                  €{price}
-                  <span className="text-xs text-muted-foreground/70 ml-1">+DDV/{periodLabel}</span>
+                  €{price}/{periodLabel}
                 </div>
               </div>
 
@@ -68,7 +67,7 @@ export function UpsellConfirmDialog({
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-amber-500 mt-0.5">•</span>
-                    <span>Cena <strong className="text-foreground">€{price} +DDV/{periodLabel}</strong> bo zaračunana danes</span>
+                    <span>Cena <strong className="text-foreground">€{price}/{periodLabel}</strong> bo zaračunana danes</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-amber-500 mt-0.5">•</span>

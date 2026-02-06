@@ -175,7 +175,6 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                   <div className="text-right">
                     <div className="font-bold text-foreground">
                       €{option.price}
-                      <span className="text-xs text-muted-foreground ml-1">+DDV</span>
                     </div>
                     <div className="text-xs text-muted-foreground">/{option.period}</div>
                   </div>
@@ -225,7 +224,6 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                     <div className="font-semibold text-foreground text-lg">{selectedOption.name}</div>
                     <div className="text-2xl font-bold text-amber-500 mt-1">
                       €{selectedOption.price}
-                      <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                       <span className="text-sm text-muted-foreground font-normal">
                         /{selectedOption.period}
                       </span>
@@ -244,7 +242,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">•</span>
-                        <span>Cena: <strong className="text-foreground">€{selectedOption?.price} +DDV/mesec</strong></span>
+                        <span>Cena: <strong className="text-foreground">€{selectedOption?.price}/mesec</strong></span>
                       </li>
                     </ul>
                   </div>
@@ -267,7 +265,7 @@ export function CapacityAddonModal({ open, onOpenChange }: CapacityAddonModalPro
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-amber-500 mt-0.5">•</span>
-                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{selectedOption?.price} +DDV/mesec)</span>
+                          <span><strong className="text-foreground">Od naslednjega obdobja:</strong> Funkcija se zaračuna skupaj z naročnino po polni ceni (€{selectedOption?.price}/mesec)</span>
                         </li>
                       </ul>
                     </div>

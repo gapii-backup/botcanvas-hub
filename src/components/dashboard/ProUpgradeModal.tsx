@@ -249,7 +249,6 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   <h3 className="text-lg font-bold text-foreground mt-1">{plan.name}</h3>
                   <div className="text-2xl font-bold my-2 text-foreground">
                     €{price}
-                    <span className="text-xs text-muted-foreground/70 ml-1">+DDV</span>
                     <span className="text-sm text-muted-foreground font-normal">
                       /{billingPeriod === 'monthly' ? 'mesec' : 'leto'}
                     </span>
@@ -313,7 +312,7 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   </div>
                   <div className="flex justify-between">
                     <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
                 <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-sm">
@@ -377,7 +376,7 @@ export function ProUpgradeModal({ open, onOpenChange }: ProUpgradeModalProps) {
                   </div>
                   <div className="flex justify-between">
                     <span>Nova cena:</span>
-                    <span className="font-semibold">€{getSelectedPlanPrice()} <span className="text-xs opacity-70">+DDV</span>/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
+                    <span className="font-semibold">€{getSelectedPlanPrice()}/{billingPeriod === 'monthly' ? 'mesec' : 'leto'}</span>
                   </div>
                 </div>
                 <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm">
