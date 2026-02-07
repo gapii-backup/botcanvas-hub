@@ -739,26 +739,13 @@ export default function Complete() {
             <DialogHeader>
               <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
               <DialogDescription>
-                Preglejte stroške pred nadaljevanjem na plačilo.
+                Vaš AI asistent bo pripravljen v 24 urah.
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-6 py-4">
-              {/* Info box */}
-              <div className="flex gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
-                <Zap className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-foreground mb-1">Kako poteka plačilo?</p>
-                  <p className="text-muted-foreground">
-                    Najprej boste plačali enkratni <strong>setup fee</strong> za pripravo vašega AI asistenta. 
-                    Ko bo bot pripravljen, se bo za aktivacijo potrebna še {isYearly ? 'letna' : 'mesečna'} naročnina.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 1: Setup Fee */}
+              {/* Setup Fee */}
               <div>
-                <h4 className="text-sm font-semibold text-muted-foreground mb-3">1. ENKRATNO PLAČILO (ZDAJ)</h4>
                 <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                   <div>
                     <span className="font-medium">Setup fee</span>
@@ -766,70 +753,16 @@ export default function Complete() {
                   </div>
                   <span className="text-lg font-bold text-amber-500">€{setupFee}</span>
                 </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Po pripravi chatbota se aktivira {isYearly ? 'letna' : 'mesečna'} naročnina.
+                </p>
               </div>
 
-              <Separator />
-
-              {/* Step 2: Subscription */}
-              <div>
-                <h4 className="text-sm font-semibold text-muted-foreground mb-3">
-                  2. {isYearly ? 'LETNA' : 'MESEČNA'} NAROČNINA (PO AKTIVACIJI)
-                </h4>
-                <div className="space-y-2">
-                  {/* Plan price */}
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <div>
-                      <span className="font-medium">Paket {PLAN_NAMES[userPlan]}</span>
-                    </div>
-                    <span className="font-semibold">€{subscriptionPrice.toFixed(2).replace('.', ',')}</span>
-                  </div>
-
-                  {/* Selected add-ons */}
-                  {selectedAddons.length > 0 && (
-                    <>
-                      {selectedAddons.map(addonId => {
-                        const price = getAddonPrice(addonId);
-                        let addonLabel = '';
-                        for (const category of Object.values(ALL_ADDONS)) {
-                          const addon = category.items.find(item => item.id === addonId);
-                          if (addon) {
-                            addonLabel = addon.label;
-                            break;
-                          }
-                        }
-                        if (price === 0) return null;
-                        return (
-                          <div key={addonId} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
-                            <span className="text-sm">{addonLabel}</span>
-                            <span className="text-sm font-medium">€{price}</span>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-
-                  {/* Total subscription */}
-                  <div className="flex justify-between items-center p-3 bg-amber-500/10 rounded-lg border border-amber-500/30 mt-3">
-                    <span className="font-semibold">Skupaj {isYearly ? 'letno' : 'mesečno'}</span>
-                    <span className="text-lg font-bold text-amber-500">
-                      €{totalSubscription.toFixed(2).replace('.', ',')}
-                      <span className="text-sm font-normal text-muted-foreground">/{isYearly ? 'leto' : 'mesec'}</span>
-                    </span>
-                  </div>
-
-                  {isYearly && (
-                    <p className="text-xs text-center text-muted-foreground mt-2">
-                      Prihranite 17% z letno naročnino!
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Activation info */}
+              {/* Info box */}
               <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
-                <Zap className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                <span className="text-amber-500 flex-shrink-0">✓</span>
                 <p className="text-sm text-amber-500">
-                  Vaš AI asistent bo aktiviran v roku <strong>24 ur</strong>, po potrditvi nakupa.
+                  Brez vezave — naročnino aktivirate šele ko je chatbot pripravljen.
                 </p>
               </div>
             </div>
