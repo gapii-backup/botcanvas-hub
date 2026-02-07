@@ -414,7 +414,7 @@ export default function DashboardPartners() {
                       <p className="font-semibold">Gašper Perko s.p.</p>
                       <p>Zalog 2, 4204 Golnik</p>
                       <p>Slovenija</p>
-                      <p>Davčna št.: SI12345678</p>
+                      <p>Davčna št.: 24429295</p>
                     </div>
                     <p>2. Račun pošljite na: <a href="mailto:info@botmotion.ai" className="font-medium text-primary hover:underline">info@botmotion.ai</a></p>
                     <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih strankah</p>
