@@ -412,7 +412,7 @@ export default function Register() {
                       onChange={(e) => setTermsAccepted(e.target.checked)}
                       className="mt-1 h-4 w-4 rounded border-white/20 bg-[#0a0a0a] text-[#3B82F6] focus:ring-[#3B82F6]/20 focus:ring-offset-0 cursor-pointer"
                     />
-                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                    <span className="text-sm text-slate-400">
                       Strinjam se s{' '}
                       <a 
                         href="https://botmotion.ai/terms" 
