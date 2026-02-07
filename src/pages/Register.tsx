@@ -31,6 +31,7 @@ type FieldErrors = {
   name?: string;
   email?: string;
   password?: string;
+  terms?: string;
   general?: string;
 };
 
@@ -55,6 +56,7 @@ export default function Register() {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { signUp, signIn, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
@@ -106,6 +108,7 @@ export default function Register() {
     setName('');
     setEmail('');
     setPassword('');
+    setTermsAccepted(false);
     setErrors({});
   };
 
@@ -128,6 +131,12 @@ export default function Register() {
         }
       });
       setErrors(newErrors);
+      triggerShake();
+      return;
+    }
+
+    if (!termsAccepted) {
+      setErrors({ terms: 'Za registracijo se morate strinjati s pogoji uporabe.' });
       triggerShake();
       return;
     }
@@ -392,6 +401,41 @@ export default function Register() {
                       </ul>
                     </div>
                   )}
+                </div>
+
+                {/* Terms checkbox */}
+                <div className="space-y-2">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-white/20 bg-[#0a0a0a] text-[#3B82F6] focus:ring-[#3B82F6]/20 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">
+                      Strinjam se s{' '}
+                      <a 
+                        href="https://botmotion.ai/terms" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Pogoji uporabe
+                      </a>
+                      {' '}in{' '}
+                      <a 
+                        href="https://botmotion.ai/privacy" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Politiko zasebnosti
+                      </a>
+                    </span>
+                  </label>
+                  {errors.terms && <ErrorMessage message={errors.terms} />}
                 </div>
 
                 <button
