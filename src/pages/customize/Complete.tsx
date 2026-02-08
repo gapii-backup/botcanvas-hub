@@ -733,58 +733,55 @@ export default function Complete() {
 
       {/* Payment Summary Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-        <DialogContent className="p-0 gap-0 w-screen h-screen max-w-none max-h-none sm:w-auto sm:h-auto sm:max-w-lg sm:max-h-[90vh] rounded-none sm:rounded-lg flex flex-col border-0 sm:border">
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-            <DialogHeader>
-              <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
-              <DialogDescription>
-                Vaš AI asistent bo pripravljen v 24 urah.
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-6 py-4">
-              {/* Setup Fee */}
-              <div>
-                <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                  <div>
-                    <span className="font-medium">Setup fee</span>
-                    <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
-                  </div>
-                  <span className="text-lg font-bold text-amber-500">€{setupFee}</span>
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md max-h-[70vh] sm:max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Potrditev nakupa</DialogTitle>
+            <DialogDescription>
+              Vaš AI asistent bo pripravljen v 24 urah.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Setup Fee */}
+            <div>
+              <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
+                <div>
+                  <span className="font-medium">Setup fee</span>
+                  <span className="text-sm text-muted-foreground ml-2">({PLAN_NAMES[userPlan]})</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Po pripravi chatbota se aktivira {isYearly ? 'letna' : 'mesečna'} naročnina.
-                </p>
+                <span className="text-lg font-bold text-amber-500">€{setupFee}</span>
               </div>
-
-              {/* Info box */}
-              <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
-                <span className="text-amber-500 flex-shrink-0">✓</span>
-                <p className="text-sm text-amber-500">
-                  Brez vezave — naročnino aktivirate šele ko je chatbot pripravljen.
-                </p>
-              </div>
+              <p className="text-sm text-muted-foreground mt-2">
+                Po pripravi chatbota se aktivira {isYearly ? 'letna' : 'mesečna'} naročnina.
+              </p>
             </div>
 
-            {/* Gumbi na dnu vsebine */}
-            <div className="border-t border-border pt-4 mt-4 pb-4 sm:pb-0 flex flex-col gap-2">
-              <button
-                onClick={handleContinueToCheckout}
-                disabled={isSaving}
-                className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 flex items-center justify-center gap-2"
-              >
-                <CreditCard className="h-4 w-4" />
-                {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee})`}
-              </button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowPaymentDialog(false)} 
-                className="w-full"
-              >
-                Prekliči
-              </Button>
+            {/* Info box */}
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30">
+              <span className="text-amber-500 flex-shrink-0">✓</span>
+              <p className="text-sm text-amber-500">
+                Brez vezave — naročnino aktivirate šele ko je chatbot pripravljen.
+              </p>
             </div>
+          </div>
+
+          {/* Gumbi na dnu vsebine */}
+          <div className="border-t border-border pt-4 flex flex-col gap-2">
+            <button
+              onClick={handleContinueToCheckout}
+              disabled={isSaving}
+              className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0 font-semibold py-3.5 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed sm:hover:from-amber-600 sm:hover:to-yellow-600 flex items-center justify-center gap-2"
+            >
+              <CreditCard className="h-4 w-4" />
+              {isSaving ? 'Shranjujem...' : `Plačaj setup fee (€${setupFee})`}
+            </button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowPaymentDialog(false)} 
+              className="w-full"
+            >
+              Prekliči
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
