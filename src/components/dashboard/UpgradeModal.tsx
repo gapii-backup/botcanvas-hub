@@ -44,12 +44,12 @@ const setupFees = {
   },
   pro: {
     fromNone: { price: 140, name: 'Pro Setup Fee', priceId: null },
-    fromBasic: { price: 60, name: 'Basic to Pro Upgrade Fee', priceId: 'price_1SkRYj6cfwnnZsVXMp3H5O4T' },
+    fromBasic: { price: 60, name: 'Basic to Pro Upgrade Fee', priceId: 'price_1SyY2V7Xspws9Ve6BAgAz40C' },
   },
   enterprise: {
     fromNone: { price: 320, name: 'Enterprise Setup Fee', priceId: null },
-    fromBasic: { price: 240, name: 'Basic to Enterprise Upgrade Fee', priceId: 'price_1SkRZ36cfwnnZsVXQCpslYYY' },
-    fromPro: { price: 180, name: 'Pro to Enterprise Upgrade Fee', priceId: 'price_1SkRZO6cfwnnZsVXJBICSiGI' },
+    fromBasic: { price: 240, name: 'Basic to Enterprise Upgrade Fee', priceId: 'price_1SyY3e7Xspws9Ve6LedFalKw' },
+    fromPro: { price: 180, name: 'Pro to Enterprise Upgrade Fee', priceId: 'price_1SyY3F7Xspws9Ve6v7evXmhy' },
   },
 };
 
