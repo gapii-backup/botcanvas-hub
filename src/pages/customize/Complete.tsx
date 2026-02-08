@@ -368,9 +368,9 @@ export default function Complete() {
 
       // Setup fee price IDs
       const setupFeePrices: Record<string, string> = {
-        basic: 'price_1SjJIs6cfwnnZsVXwrLbUCqf',
-        pro: 'price_1SjJJO6cfwnnZsVX7FgojdDM',
-        enterprise: 'price_1SjJJi6cfwnnZsVXld7HUqDF'
+        basic: 'price_1SyXm17Xspws9Ve6NsdYMEqX',
+        pro: 'price_1SyXmp7Xspws9Ve6su78MSPd',
+        enterprise: 'price_1SyXnc7Xspws9Ve6tOQyj1gv'
       };
 
       const priceId = setupFeePrices[userPlan] || setupFeePrices.basic;
