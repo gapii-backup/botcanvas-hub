@@ -2,23 +2,26 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-interface PartnerReferral {
+interface PartnerCommission {
   id: string;
-  customer_name: string | null;
-  customer_email: string;
-  plan: string;
-  commission_amount: number;
-  invoice_requested_at: string | null;
   partner_id: string;
+  partner_customer_id: string | null;
+  type: string;
+  amount: number;
+  commission_number: number | null;
+  milestone_type: string | null;
+  invoice_requested_at: string | null;
+  customer_name?: string | null;
+  customer_email?: string;
 }
 
-export interface PartnerWithUnpaidReferrals {
+export interface PartnerWithUnpaidCommissions {
   id: string;
   name: string;
   email: string;
   company: string | null;
   totalUnpaid: number;
-  referrals: PartnerReferral[];
+  commissions: PartnerCommission[];
 }
 
 interface PaymentStats {
@@ -28,7 +31,7 @@ interface PaymentStats {
 }
 
 export function useAdminPayments() {
-  const [partnersWithUnpaid, setPartnersWithUnpaid] = useState<PartnerWithUnpaidReferrals[]>([]);
+  const [partnersWithUnpaid, setPartnersWithUnpaid] = useState<PartnerWithUnpaidCommissions[]>([]);
   const [stats, setStats] = useState<PaymentStats>({
     forPayment: 0,
     totalPaid: 0,
@@ -40,39 +43,53 @@ export function useAdminPayments() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Fetch all referrals with partner info
-      const { data: referralsData, error: referralsError } = await supabase
-        .from('partner_referrals')
+      // Fetch all commissions
+      const { data: commissionsData, error: commissionsError } = await supabase
+        .from('partner_commissions')
         .select('*')
-        .order('invoice_requested_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
-      if (referralsError) throw referralsError;
+      if (commissionsError) throw commissionsError;
+
+      const allCommissions = commissionsData || [];
+
+      // Fetch all partner_customers for name lookup
+      const customerIds = [...new Set(allCommissions.filter(c => c.partner_customer_id).map(c => c.partner_customer_id!))];
+      let customersMap: Record<string, { customer_name: string | null; customer_email: string }> = {};
+      
+      if (customerIds.length > 0) {
+        const { data: customersData } = await supabase
+          .from('partner_customers')
+          .select('id, customer_name, customer_email')
+          .in('id', customerIds);
+
+        (customersData || []).forEach(c => {
+          customersMap[c.id] = { customer_name: c.customer_name, customer_email: c.customer_email };
+        });
+      }
 
       // Calculate stats
-      const allReferrals = referralsData || [];
-      const forPayment = allReferrals
-        .filter((r) => r.invoice_requested === true && r.invoice_paid === false)
-        .reduce((sum, r) => sum + Number(r.commission_amount || 0), 0);
+      const forPayment = allCommissions
+        .filter((c) => c.invoice_requested === true && c.invoice_paid === false)
+        .reduce((sum, c) => sum + Number(c.amount || 0), 0);
 
-      const totalPaid = allReferrals
-        .filter((r) => r.invoice_paid === true)
-        .reduce((sum, r) => sum + Number(r.commission_amount || 0), 0);
+      const totalPaid = allCommissions
+        .filter((c) => c.invoice_paid === true)
+        .reduce((sum, c) => sum + Number(c.amount || 0), 0);
 
-      const waitingForRequest = allReferrals
-        .filter((r) => r.invoice_requested === false || r.invoice_requested === null)
-        .reduce((sum, r) => sum + Number(r.commission_amount || 0), 0);
+      const waitingForRequest = allCommissions
+        .filter((c) => c.invoice_requested === false || c.invoice_requested === null)
+        .reduce((sum, c) => sum + Number(c.amount || 0), 0);
 
       setStats({ forPayment, totalPaid, waitingForRequest });
 
-      // Get unpaid referrals
-      const unpaidReferrals = allReferrals.filter(
-        (r) => r.invoice_requested === true && r.invoice_paid === false
+      // Get unpaid commissions (requested but not paid)
+      const unpaidCommissions = allCommissions.filter(
+        (c) => c.invoice_requested === true && c.invoice_paid === false
       );
 
-      // Get unique partner IDs
-      const partnerIds = [...new Set(unpaidReferrals.map((r) => r.partner_id))];
+      const partnerIds = [...new Set(unpaidCommissions.map((c) => c.partner_id))];
 
-      // Fetch partner details
       const { data: partnersData, error: partnersError } = await supabase
         .from('partners')
         .select('*')
@@ -80,13 +97,12 @@ export function useAdminPayments() {
 
       if (partnersError) throw partnersError;
 
-      // Group referrals by partner
-      const grouped: PartnerWithUnpaidReferrals[] = (partnersData || []).map((partner) => {
-        const partnerReferrals = unpaidReferrals.filter(
-          (r) => r.partner_id === partner.id
+      const grouped: PartnerWithUnpaidCommissions[] = (partnersData || []).map((partner) => {
+        const partnerCommissions = unpaidCommissions.filter(
+          (c) => c.partner_id === partner.id
         );
-        const totalUnpaid = partnerReferrals.reduce(
-          (sum, r) => sum + Number(r.commission_amount || 0),
+        const totalUnpaid = partnerCommissions.reduce(
+          (sum, c) => sum + Number(c.amount || 0),
           0
         );
 
@@ -96,21 +112,25 @@ export function useAdminPayments() {
           email: partner.email,
           company: partner.company,
           totalUnpaid,
-          referrals: partnerReferrals.map((r) => ({
-            id: r.id,
-            customer_name: r.customer_name,
-            customer_email: r.customer_email,
-            plan: r.plan,
-            commission_amount: Number(r.commission_amount),
-            invoice_requested_at: r.invoice_requested_at,
-            partner_id: r.partner_id,
-          })),
+          commissions: partnerCommissions.map((c) => {
+            const customer = c.partner_customer_id ? customersMap[c.partner_customer_id] : null;
+            return {
+              id: c.id,
+              partner_id: c.partner_id,
+              partner_customer_id: c.partner_customer_id,
+              type: c.type,
+              amount: Number(c.amount),
+              commission_number: c.commission_number,
+              milestone_type: c.milestone_type,
+              invoice_requested_at: c.invoice_requested_at,
+              customer_name: customer?.customer_name || null,
+              customer_email: customer?.customer_email || '',
+            };
+          }),
         };
       });
 
-      // Sort by total unpaid descending
       grouped.sort((a, b) => b.totalUnpaid - a.totalUnpaid);
-
       setPartnersWithUnpaid(grouped);
     } catch (error) {
       console.error('Error fetching payment data:', error);
@@ -124,15 +144,15 @@ export function useAdminPayments() {
     }
   };
 
-  const markAsPaid = async (referralId: string) => {
+  const markAsPaid = async (commissionId: string) => {
     try {
       const { error } = await supabase
-        .from('partner_referrals')
+        .from('partner_commissions')
         .update({
           invoice_paid: true,
           invoice_paid_at: new Date().toISOString(),
         })
-        .eq('id', referralId);
+        .eq('id', commissionId);
 
       if (error) throw error;
 
@@ -155,7 +175,7 @@ export function useAdminPayments() {
   const markAllAsPaid = async (partnerId: string) => {
     try {
       const { error } = await supabase
-        .from('partner_referrals')
+        .from('partner_commissions')
         .update({
           invoice_paid: true,
           invoice_paid_at: new Date().toISOString(),
@@ -185,7 +205,7 @@ export function useAdminPayments() {
   const getUnpaidInvoiceCount = async (): Promise<number> => {
     try {
       const { count, error } = await supabase
-        .from('partner_referrals')
+        .from('partner_commissions')
         .select('*', { count: 'exact', head: true })
         .eq('invoice_requested', true)
         .eq('invoice_paid', false);

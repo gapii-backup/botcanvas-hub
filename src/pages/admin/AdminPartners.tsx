@@ -68,7 +68,7 @@ export default function AdminPartners() {
     const fetchUnpaidCount = async () => {
       try {
         const { count, error } = await supabase
-          .from('partner_referrals')
+          .from('partner_commissions')
           .select('*', { count: 'exact', head: true })
           .eq('invoice_requested', true)
           .eq('invoice_paid', false);
@@ -119,14 +119,12 @@ export default function AdminPartners() {
   const handleSavePromoCode = async () => {
     if (!editingPartner) return;
 
-    // Validation
     const trimmedCode = editPromoCode.trim();
     if (!trimmedCode) {
       setPromoCodeError('Promo koda ne sme biti prazna');
       return;
     }
 
-    // Check if promo code already exists for another partner
     const existingPartner = partners.find(
       (p) => p.promo_code?.toLowerCase() === trimmedCode.toLowerCase() && p.id !== editingPartner.id
     );
@@ -183,7 +181,6 @@ export default function AdminPartners() {
     try {
       setActionLoading(true);
 
-      // IMPORTANT: Save admin session BEFORE signUp
       const { data: adminSessionData } = await supabase.auth.getSession();
       const adminSession = adminSessionData.session;
       
@@ -193,7 +190,6 @@ export default function AdminPartners() {
         return;
       }
 
-      // Create user via signUp
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newEmail,
         password: newPassword,
@@ -207,7 +203,6 @@ export default function AdminPartners() {
 
       const newUserId = authData.user.id;
 
-      // IMMEDIATELY restore admin session
       const { error: sessionError } = await supabase.auth.setSession({
         access_token: adminSession.access_token,
         refresh_token: adminSession.refresh_token,
@@ -220,8 +215,6 @@ export default function AdminPartners() {
         return;
       }
 
-      // Now create widget for the user (admin is authenticated again)
-      // Always create as partner with pro plan
       const { error: widgetError } = await supabase
         .from('widgets')
         .insert({
@@ -246,13 +239,10 @@ export default function AdminPartners() {
         toast.success('Partner uspešno ustvarjen z widgetom');
       }
 
-      // Reset form and close dialog
       setAddDialogOpen(false);
       setNewEmail('');
       setNewPassword('');
       setShowPassword(false);
-      
-      // Refresh partners list
       refetch();
     } catch (error: unknown) {
       console.error('Error creating user:', error);
@@ -416,7 +406,7 @@ export default function AdminPartners() {
                 <TableHead>Email</TableHead>
                 <TableHead>Podjetje</TableHead>
                 <TableHead>Promo koda</TableHead>
-                <TableHead className="text-center">Aktivni referrali</TableHead>
+                <TableHead className="text-center">Aktivne stranke</TableHead>
                 <TableHead className="text-right">Zaslužek</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-center">Akcije</TableHead>
@@ -451,7 +441,7 @@ export default function AdminPartners() {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline">{partner.activeReferrals}</Badge>
+                      <Badge variant="outline">{partner.activeCustomers}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(partner.totalEarnings)}

@@ -10,7 +10,7 @@ export interface AdminPartner {
   promo_code: string | null;
   is_active: boolean | null;
   created_at: string | null;
-  activeReferrals: number;
+  activeCustomers: number;
   totalEarnings: number;
 }
 
@@ -22,7 +22,6 @@ export function useAdminPartners() {
   const fetchPartners = async () => {
     setIsLoading(true);
     try {
-      // Fetch all partners
       const { data: partnersData, error: partnersError } = await supabase
         .from('partners')
         .select('*')
@@ -30,25 +29,21 @@ export function useAdminPartners() {
 
       if (partnersError) throw partnersError;
 
-      // Fetch referral stats for each partner
       const partnersWithStats = await Promise.all(
         (partnersData || []).map(async (partner) => {
-          // Get active referrals count (excluding bonus)
-          const { count: activeReferrals } = await supabase
-            .from('partner_referrals')
+          const { count: activeCustomers } = await supabase
+            .from('partner_customers')
             .select('*', { count: 'exact', head: true })
             .eq('partner_id', partner.id)
-            .eq('status', 'active')
-            .neq('plan', 'bonus');
+            .eq('status', 'active');
 
-          // Get total earnings
           const { data: earningsData } = await supabase
-            .from('partner_referrals')
-            .select('commission_amount')
+            .from('partner_commissions')
+            .select('amount')
             .eq('partner_id', partner.id);
 
           const totalEarnings = (earningsData || []).reduce(
-            (sum, ref) => sum + Number(ref.commission_amount || 0),
+            (sum, c) => sum + Number(c.amount || 0),
             0
           );
 
@@ -60,7 +55,7 @@ export function useAdminPartners() {
             promo_code: partner.promo_code,
             is_active: partner.is_active,
             created_at: partner.created_at,
-            activeReferrals: activeReferrals || 0,
+            activeCustomers: activeCustomers || 0,
             totalEarnings,
           };
         })
@@ -108,15 +103,14 @@ export function useAdminPartners() {
 
   const getPartnerStats = async (id: string) => {
     try {
-      const { data: referrals, error } = await supabase
-        .from('partner_referrals')
+      const { data: commissions, error } = await supabase
+        .from('partner_commissions')
         .select('*')
         .eq('partner_id', id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-
-      return referrals || [];
+      return commissions || [];
     } catch (error) {
       console.error('Error fetching partner stats:', error);
       return [];

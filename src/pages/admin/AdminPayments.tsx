@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   AlertCircle,
   PartyPopper,
+  Gift,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
@@ -62,12 +63,12 @@ export default function AdminPayments() {
     });
   };
 
-  const handleMarkAsPaid = async (referralId: string) => {
-    setLoadingActions((prev) => new Set(prev).add(referralId));
-    await markAsPaid(referralId);
+  const handleMarkAsPaid = async (commissionId: string) => {
+    setLoadingActions((prev) => new Set(prev).add(commissionId));
+    await markAsPaid(commissionId);
     setLoadingActions((prev) => {
       const next = new Set(prev);
-      next.delete(referralId);
+      next.delete(commissionId);
       return next;
     });
   };
@@ -82,19 +83,13 @@ export default function AdminPayments() {
     });
   };
 
-  const getPlanLabel = (plan: string) => {
-    switch (plan) {
-      case 'basic':
-        return 'Basic';
-      case 'pro':
-        return 'Pro';
-      case 'enterprise':
-        return 'Enterprise';
-      case 'bonus':
-        return 'Bonus';
-      default:
-        return plan;
-    }
+  const getMilestoneLabel = (milestoneType: string | null) => {
+    const labels: Record<string, string> = {
+      '3_customers': 'Milestone: 3 stranke',
+      '10_customers': 'Milestone: 10 strank',
+      '25_customers': 'Milestone: 25 strank',
+    };
+    return labels[milestoneType || ''] || 'Milestone';
   };
 
   return (
@@ -147,7 +142,7 @@ export default function AdminPayments() {
           </Card>
         </div>
 
-        {/* Partners with unpaid invoices */}
+        {/* Partners with unpaid commissions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -207,8 +202,8 @@ export default function AdminPayments() {
                               </p>
                             </div>
                             <Badge variant="secondary">
-                              {partner.referrals.length}{' '}
-                              {partner.referrals.length === 1 ? 'zahtevek' : 'zahtevkov'}
+                              {partner.commissions.length}{' '}
+                              {partner.commissions.length === 1 ? 'zahtevek' : 'zahtevkov'}
                             </Badge>
                             <Button
                               size="sm"
@@ -232,33 +227,40 @@ export default function AdminPayments() {
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-muted/20">
+                              <TableHead>Tip</TableHead>
                               <TableHead>Stranka</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>Paket</TableHead>
                               <TableHead className="text-right">Provizija</TableHead>
                               <TableHead>Zahtevano dne</TableHead>
                               <TableHead className="text-center">Akcija</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {partner.referrals.map((referral) => (
-                              <TableRow key={referral.id}>
-                                <TableCell className="font-medium">
-                                  {referral.customer_name || '-'}
-                                </TableCell>
-                                <TableCell>{referral.customer_email}</TableCell>
+                            {partner.commissions.map((commission) => (
+                              <TableRow key={commission.id}>
                                 <TableCell>
-                                  <Badge variant="outline">
-                                    {getPlanLabel(referral.plan)}
-                                  </Badge>
+                                  {commission.type === 'milestone' ? (
+                                    <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                      <Gift className="h-3 w-3 mr-1" />
+                                      Milestone
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                                      Recurring
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {commission.type === 'milestone'
+                                    ? getMilestoneLabel(commission.milestone_type)
+                                    : commission.customer_name || commission.customer_email || '—'}
                                 </TableCell>
                                 <TableCell className="text-right font-medium">
-                                  {formatCurrency(referral.commission_amount)}
+                                  {formatCurrency(commission.amount)}
                                 </TableCell>
                                 <TableCell>
-                                  {referral.invoice_requested_at
+                                  {commission.invoice_requested_at
                                     ? format(
-                                        new Date(referral.invoice_requested_at),
+                                        new Date(commission.invoice_requested_at),
                                         'dd. MMM yyyy',
                                         { locale: sl }
                                       )
@@ -268,10 +270,10 @@ export default function AdminPayments() {
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => handleMarkAsPaid(referral.id)}
-                                    disabled={loadingActions.has(referral.id)}
+                                    onClick={() => handleMarkAsPaid(commission.id)}
+                                    disabled={loadingActions.has(commission.id)}
                                   >
-                                    {loadingActions.has(referral.id) ? (
+                                    {loadingActions.has(commission.id) ? (
                                       <Loader2 className="h-4 w-4 animate-spin" />
                                     ) : (
                                       <>

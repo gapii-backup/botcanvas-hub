@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePartner, TIERS, TierInfo } from '@/hooks/usePartner';
+import { usePartner, MILESTONES, PartnerCommission, PartnerCustomer } from '@/hooks/usePartner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +31,6 @@ import {
   Copy,
   Check,
   Users,
-  Trophy,
   Euro,
   FileText,
   Clock,
@@ -51,29 +50,25 @@ export default function DashboardPartners() {
   const { toast } = useToast();
   const {
     partner,
-    referrals,
+    customers,
+    commissions,
     loading,
-    activeReferralsCount,
+    activeCustomersCount,
     totalCommission,
-    currentTier,
-    nextTierInfo,
-    pendingPayouts,
-    requestedPayouts,
-    paidPayouts,
+    pendingPayoutAmount,
     requestPayout,
   } = usePartner();
 
   const [copied, setCopied] = useState(false);
   const [payoutDialogOpen, setPayoutDialogOpen] = useState(false);
-  const [selectedReferral, setSelectedReferral] = useState<typeof referrals[0] | null>(null);
+  const [selectedCommission, setSelectedCommission] = useState<PartnerCommission | null>(null);
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
-  
+
   // Pagination states
-  const [payoutsPage, setPayoutsPage] = useState(1);
+  const [commissionsPage, setCommissionsPage] = useState(1);
   const [customersPage, setCustomersPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // Redirect if not a partner
   useEffect(() => {
     if (!loading && !partner) {
       navigate('/dashboard');
@@ -92,44 +87,33 @@ export default function DashboardPartners() {
     }
   };
 
-  const handleRequestPayout = (referral: typeof referrals[0]) => {
-    setSelectedReferral(referral);
+  const handleRequestPayout = (commission: PartnerCommission) => {
+    setSelectedCommission(commission);
     setPayoutDialogOpen(true);
   };
 
   const confirmPayout = async () => {
-    if (!selectedReferral) return;
-
+    if (!selectedCommission) return;
     setIsRequestingPayout(true);
-    await requestPayout(selectedReferral.id);
+    await requestPayout(selectedCommission.id);
     setIsRequestingPayout(false);
     setPayoutDialogOpen(false);
-    setSelectedReferral(null);
+    setSelectedCommission(null);
     toast({
       title: 'Zahtevek oddan!',
       description: 'Izplačilo boste prejeli v roku 14 dneh.',
     });
   };
 
-  // Sort and paginate data
-  // Sort all referrals by created_at DESC for payouts table
-  const sortedPayoutReferrals = [...referrals].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  // Pagination
+  const commissionsTotalPages = Math.ceil(commissions.length / ITEMS_PER_PAGE);
+  const paginatedCommissions = commissions.slice(
+    (commissionsPage - 1) * ITEMS_PER_PAGE,
+    commissionsPage * ITEMS_PER_PAGE
   );
-  const sortedReferrals = [...referrals].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-  
-  // Payouts table pagination
-  const payoutsTotalPages = Math.ceil(sortedPayoutReferrals.length / ITEMS_PER_PAGE);
-  const paginatedPayoutReferrals = sortedPayoutReferrals.slice(
-    (payoutsPage - 1) * ITEMS_PER_PAGE,
-    payoutsPage * ITEMS_PER_PAGE
-  );
-  
-  // Customers table pagination
-  const customersTotalPages = Math.ceil(sortedReferrals.length / ITEMS_PER_PAGE);
-  const paginatedReferrals = sortedReferrals.slice(
+
+  const customersTotalPages = Math.ceil(customers.length / ITEMS_PER_PAGE);
+  const paginatedCustomers = customers.slice(
     (customersPage - 1) * ITEMS_PER_PAGE,
     customersPage * ITEMS_PER_PAGE
   );
@@ -139,22 +123,32 @@ export default function DashboardPartners() {
   };
 
   const formatCurrency = (amount: number) => {
-    return `€${amount.toLocaleString('sl-SI')}`;
+    return `€${amount.toLocaleString('sl-SI', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
 
-  // Check if referral is a bonus row
-  const isBonusRow = (referral: typeof referrals[0]) => {
-    return referral.plan === 'bonus' || referral.customer_email === 'BONUS';
+  const getCustomerName = (commission: PartnerCommission): string => {
+    if (commission.type === 'milestone') {
+      const milestoneLabels: Record<string, string> = {
+        '3_customers': 'Bonus: 3 stranke dosežene',
+        '10_customers': 'Bonus: 10 strank doseženih',
+        '25_customers': 'Bonus: 25 strank doseženih',
+      };
+      return milestoneLabels[commission.milestone_type || ''] || 'Milestone bonus';
+    }
+    if (commission.partner_customer_id) {
+      const customer = customers.find(c => c.id === commission.partner_customer_id);
+      return customer?.customer_name || customer?.customer_email || '—';
+    }
+    return '—';
   };
 
-  // Calculate progress to next tier
-  const calculateProgress = () => {
-    if (!nextTierInfo) return 100;
-    const currentTierIndex = TIERS.findIndex(t => t.name === currentTier.name);
-    const currentMin = TIERS[currentTierIndex].min;
-    const nextMin = nextTierInfo.tier.min;
-    const progress = ((activeReferralsCount - currentMin + 1) / (nextMin - currentMin)) * 100;
-    return Math.min(Math.max(progress, 0), 100);
+  const getMilestoneLabel = (type: string | null): string => {
+    const labels: Record<string, string> = {
+      '3_customers': '3 stranke',
+      '10_customers': '10 strank',
+      '25_customers': '25 strank',
+    };
+    return labels[type || ''] || 'Milestone';
   };
 
   if (loading) {
@@ -174,9 +168,7 @@ export default function DashboardPartners() {
     );
   }
 
-  if (!partner) {
-    return null;
-  }
+  if (!partner) return null;
 
   return (
     <DashboardSidebar>
@@ -243,7 +235,6 @@ export default function DashboardPartners() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Active Customers */}
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -252,35 +243,12 @@ export default function DashboardPartners() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Aktivne stranke</p>
-                  <p className="text-3xl font-bold">{activeReferralsCount}</p>
+                  <p className="text-3xl font-bold">{activeCustomersCount}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Current Tier */}
-          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Trophy className="h-6 w-6 text-amber-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Vaš tier</p>
-                  <p className="text-2xl font-bold">
-                    {currentTier.name} {currentTier.emoji}
-                  </p>
-                  {nextTierInfo && (
-                    <p className="text-xs text-muted-foreground">
-                      Še {nextTierInfo.remaining} strank do {nextTierInfo.tier.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Total Earnings */}
           <Card className="bg-card/50 backdrop-blur-sm border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -294,111 +262,82 @@ export default function DashboardPartners() {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Tier Progress Card */}
-        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-          <CardHeader>
-            <CardTitle>Vaš napredek</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Progress Bar */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-end">
-                <div>
-                  <span className="text-lg font-semibold">
-                    {currentTier.emoji} {currentTier.name}
-                  </span>
+          <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-amber-500" />
                 </div>
-                <div className="text-right">
-                  {nextTierInfo ? (
-                    <div>
-                      <span className="text-lg font-semibold">
-                        {nextTierInfo.tier.emoji} {nextTierInfo.tier.name}
-                      </span>
-                      {nextTierInfo.tier.bonus > 0 && (
-                        <span className="text-sm text-muted-foreground ml-2">
-                          · Bonus €{nextTierInfo.tier.bonus.toLocaleString('sl-SI')}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-lg font-semibold text-green-500">
-                      ✨ Maksimalni tier dosežen!
-                    </span>
-                  )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Čaka na izplačilo</p>
+                  <p className="text-3xl font-bold">{formatCurrency(pendingPayoutAmount)}</p>
                 </div>
               </div>
-              <Progress value={calculateProgress()} className="h-3" />
-              <p className="text-sm text-muted-foreground text-center">
-                {activeReferralsCount} aktivnih strank
-                {nextTierInfo && ` · Še ${nextTierInfo.remaining} do naslednjega tiera`}
-              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Milestone Progress Card */}
+        <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+          <CardHeader>
+            <CardTitle>Milestone bonusi</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {MILESTONES.map((milestone) => {
+                const claimed = partner[milestone.key as keyof typeof partner] as boolean;
+                const reached = activeCustomersCount >= milestone.count;
+                const progress = Math.min((activeCustomersCount / milestone.count) * 100, 100);
+
+                return (
+                  <Card
+                    key={milestone.key}
+                    className={cn(
+                      "border",
+                      (claimed || reached) 
+                        ? "border-green-500/30 bg-green-500/5" 
+                        : "border-border/50"
+                    )}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl">{milestone.emoji}</span>
+                        <span className="text-lg font-bold">{formatCurrency(milestone.bonus)}</span>
+                      </div>
+                      <p className="font-medium">{milestone.label}</p>
+                      {(claimed || reached) ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Dosežen
+                        </Badge>
+                      ) : (
+                        <div className="space-y-2">
+                          <Progress value={progress} className="h-2" />
+                          <p className="text-xs text-muted-foreground">
+                            {activeCustomersCount}/{milestone.count}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
-            {/* Bonus Table */}
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead>Tier</TableHead>
-                    <TableHead>Aktivni chatboti</TableHead>
-                    <TableHead className="text-right font-mono">Basic</TableHead>
-                    <TableHead className="text-right font-mono">Pro</TableHead>
-                    <TableHead className="text-right font-mono">Enterprise</TableHead>
-                    <TableHead className="text-right font-mono">Enkratni bonus</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[
-                    { name: 'Bronze', emoji: '🟤', range: '1-10', basic: 60, pro: 120, enterprise: 280, bonus: 0, bonusField: 'bonus_bronze_claimed' },
-                    { name: 'Silver', emoji: '⚪', range: '11-25', basic: 75, pro: 150, enterprise: 360, bonus: 200, bonusField: 'bonus_silver_claimed' },
-                    { name: 'Gold', emoji: '🟡', range: '26-50', basic: 90, pro: 180, enterprise: 440, bonus: 500, bonusField: 'bonus_gold_claimed' },
-                    { name: 'Platinum', emoji: '💠', range: '51-100', basic: 105, pro: 210, enterprise: 520, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
-                    { name: 'Diamond', emoji: '💎', range: '100+', basic: 120, pro: 240, enterprise: 600, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
-                  ].map((tier) => {
-                    const isCurrentTier = tier.name === currentTier.name;
-                    const bonusClaimed = partner[tier.bonusField as keyof typeof partner];
-                    return (
-                      <TableRow 
-                        key={tier.name}
-                        className={cn(
-                          isCurrentTier && "bg-primary/5 border-l-2 border-l-primary"
-                        )}
-                      >
-                        <TableCell className="font-medium">
-                          {tier.name} {tier.emoji}
-                        </TableCell>
-                        <TableCell>{tier.range}</TableCell>
-                        <TableCell className="text-right font-mono">€{tier.basic}</TableCell>
-                        <TableCell className="text-right font-mono">€{tier.pro}</TableCell>
-                        <TableCell className="text-right font-mono">€{tier.enterprise}</TableCell>
-                        <TableCell className="text-right font-mono">
-                          {tier.bonus > 0 ? (
-                            bonusClaimed ? (
-                              <span className="text-green-500">✓ Izplačano</span>
-                            ) : (
-                              `€${tier.bonus.toLocaleString('sl-SI')}`
-                            )
-                          ) : (
-                            '—'
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            <div className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
+              <Info className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>Milestone bonusi se avtomatsko dodelijo ko dosežete zadostno število aktivnih strank. Bonus se pojavi kot provizija v tabeli spodaj.</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Payouts Section */}
+        {/* Commissions Table */}
         <Card className="bg-card/50 backdrop-blur-sm border-border/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Zahtevki za izplačilo
+              Provizije
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -417,7 +356,7 @@ export default function DashboardPartners() {
                       <p>Davčna št.: 24429295</p>
                     </div>
                     <p>2. Račun pošljite na: <a href="mailto:info@botmotion.ai" className="font-medium text-primary hover:underline">info@botmotion.ai</a></p>
-                    <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih strankah</p>
+                    <p>3. Ko prejmemo račun, kliknite 'Zahtevaj izplačilo' pri ustreznih provizijah</p>
                     <p>4. Izplačilo prejmete v roku 14 dneh</p>
                     <p className="text-amber-600 dark:text-amber-400 font-medium">
                       ⚠️ Če ste DDV zavezanec, k proviziji prištejte 22% DDV.
@@ -427,102 +366,65 @@ export default function DashboardPartners() {
               </div>
             </div>
 
-            {/* Single Consolidated Payouts Table */}
-            {referrals.length > 0 ? (
+            {commissions.length > 0 ? (
               <div className="space-y-3">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow className="grid grid-cols-[1fr_auto_auto] md:table-row">
-                        <TableHead className="order-4 md:order-none hidden md:table-cell">Stranka</TableHead>
-                        <TableHead className="order-5 md:order-none hidden md:table-cell">Email</TableHead>
-                        <TableHead className="order-3 md:order-none">Paket</TableHead>
-                        <TableHead className="order-1 md:order-none">Provizija</TableHead>
-                        <TableHead className="order-2 md:order-none hidden md:table-cell">Status</TableHead>
-                        <TableHead className="order-2 md:order-none text-right">Akcija</TableHead>
+                      <TableRow>
+                        <TableHead>Tip</TableHead>
+                        <TableHead className="hidden md:table-cell">Stranka</TableHead>
+                        <TableHead>Znesek</TableHead>
+                        <TableHead className="hidden md:table-cell">Status</TableHead>
+                        <TableHead className="text-right">Akcija</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedPayoutReferrals.map((referral) => {
-                        const isBonus = isBonusRow(referral);
+                      {paginatedCommissions.map((commission) => {
+                        const isMilestone = commission.type === 'milestone';
                         return (
-                          <TableRow 
-                            key={referral.id}
+                          <TableRow
+                            key={commission.id}
                             className={cn(
-                              "grid grid-cols-[1fr_auto_auto] md:table-row gap-2 md:gap-0 py-3 md:py-0",
-                              isBonus && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
+                              isMilestone && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
                             )}
                           >
-                            {/* Stranka - hidden on mobile */}
-                            <TableCell className="order-4 md:order-none hidden md:table-cell font-medium">
-                              {isBonus ? (
+                            <TableCell>
+                              {isMilestone ? (
+                                <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                                  <Gift className="h-3 w-3 mr-1" />
+                                  Milestone
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">
+                                  Recurring
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell font-medium">
+                              {isMilestone ? (
                                 <div className="flex items-center gap-2">
                                   <Gift className="h-4 w-4 text-amber-500" />
-                                  <div>
-                                    <div>{referral.customer_name || 'Bonus'}</div>
-                                    <div className="text-xs text-muted-foreground">Enkratni bonus za dosežen tier</div>
-                                  </div>
+                                  <span>{getCustomerName(commission)}</span>
                                 </div>
                               ) : (
-                                referral.customer_name || '—'
+                                getCustomerName(commission)
                               )}
                             </TableCell>
-                            {/* Email - hidden on mobile */}
-                            <TableCell className="order-5 md:order-none hidden md:table-cell">
-                              {isBonus ? '—' : referral.customer_email}
-                            </TableCell>
-                            {/* Paket */}
-                            <TableCell className="order-3 md:order-none">
-                              {isBonus ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                >
-                                  🎁 Bonus
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className={cn(
-                                    referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                                    referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                                    referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-                                  )}
-                                >
-                                  {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                                </Badge>
-                              )}
-                            </TableCell>
-                            {/* Provizija - first on mobile */}
-                            <TableCell className="order-1 md:order-none font-semibold">
-                              {formatCurrency(referral.commission_amount)}
-                              {/* Show customer name on mobile */}
+                            <TableCell className="font-semibold">
+                              {formatCurrency(commission.amount)}
                               <div className="md:hidden text-xs text-muted-foreground font-normal mt-0.5">
-                                {isBonus ? (
-                                  <span className="flex items-center gap-1">
-                                    <Gift className="h-3 w-3 text-amber-500" />
-                                    {referral.customer_name || 'Bonus'}
-                                  </span>
-                                ) : (
-                                  referral.customer_name || referral.customer_email
-                                )}
+                                {getCustomerName(commission)}
                               </div>
                             </TableCell>
-                            {/* Status - hidden on mobile, shown in Akcija cell */}
-                            <TableCell className="order-2 md:order-none hidden md:table-cell">
-                              {referral.invoice_paid ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-green-500/10 text-green-500 border-green-500/20"
-                                >
+                            <TableCell className="hidden md:table-cell">
+                              {commission.invoice_paid ? (
+                                <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
                                   Izplačano
                                 </Badge>
-                              ) : referral.invoice_requested ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-500/10 text-amber-500 border-amber-500/20"
-                                >
+                              ) : commission.invoice_requested ? (
+                                <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20">
                                   <Clock className="h-3 w-3 mr-1" />
                                   Čaka na izplačilo
                                 </Badge>
@@ -532,51 +434,42 @@ export default function DashboardPartners() {
                                 </Badge>
                               )}
                             </TableCell>
-                            {/* Akcija - second on mobile, includes status on mobile */}
-                            <TableCell className="order-2 md:order-none text-right">
-                              {!referral.invoice_requested && !referral.invoice_paid && (
+                            <TableCell className="text-right">
+                              {!commission.invoice_requested && !commission.invoice_paid && (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() => handleRequestPayout(referral)}
+                                  onClick={() => handleRequestPayout(commission)}
                                   className="text-xs md:text-sm"
                                 >
                                   <span className="hidden md:inline">Zahtevaj izplačilo</span>
                                   <span className="md:hidden">Zahtevaj</span>
                                 </Button>
                               )}
-                              {referral.invoice_requested && !referral.invoice_paid && (
+                              {commission.invoice_requested && !commission.invoice_paid && (
                                 <div className="flex flex-col items-end gap-1">
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs"
-                                  >
+                                  <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 text-xs">
                                     <Clock className="h-3 w-3 mr-1" />
-                                    <span className="hidden md:inline">Čaka</span>
-                                    <span className="md:hidden">⏳</span>
+                                    Čaka
                                   </Badge>
-                                  <span className="text-xs text-muted-foreground hidden md:block">
-                                    {referral.invoice_requested_at
-                                      ? formatDate(referral.invoice_requested_at)
-                                      : '—'}
-                                  </span>
+                                  {commission.invoice_requested_at && (
+                                    <span className="text-xs text-muted-foreground hidden md:block">
+                                      {formatDate(commission.invoice_requested_at)}
+                                    </span>
+                                  )}
                                 </div>
                               )}
-                              {referral.invoice_paid && (
+                              {commission.invoice_paid && (
                                 <div className="flex flex-col items-end gap-1">
-                                  <Badge
-                                    variant="outline"
-                                    className="bg-green-500/10 text-green-500 border-green-500/20 text-xs"
-                                  >
+                                  <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20 text-xs">
                                     <CheckCircle2 className="h-3 w-3 mr-1" />
-                                    <span className="hidden md:inline">Izplačano</span>
-                                    <span className="md:hidden">✓</span>
+                                    Izplačano
                                   </Badge>
-                                  <span className="text-xs text-muted-foreground hidden md:block">
-                                    {referral.invoice_paid_at
-                                      ? formatDate(referral.invoice_paid_at)
-                                      : '—'}
-                                  </span>
+                                  {commission.invoice_paid_at && (
+                                    <span className="text-xs text-muted-foreground hidden md:block">
+                                      {formatDate(commission.invoice_paid_at)}
+                                    </span>
+                                  )}
                                 </div>
                               )}
                             </TableCell>
@@ -586,17 +479,17 @@ export default function DashboardPartners() {
                     </TableBody>
                   </Table>
                 </div>
-                {payoutsTotalPages > 1 && (
+                {commissionsTotalPages > 1 && (
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-sm text-muted-foreground">
-                      Stran {payoutsPage} od {payoutsTotalPages}
+                      Stran {commissionsPage} od {commissionsTotalPages}
                     </span>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPayoutsPage(p => Math.max(1, p - 1))}
-                        disabled={payoutsPage === 1}
+                        onClick={() => setCommissionsPage(p => Math.max(1, p - 1))}
+                        disabled={commissionsPage === 1}
                         className="gap-1"
                       >
                         <ChevronLeft className="h-4 w-4" />
@@ -605,8 +498,8 @@ export default function DashboardPartners() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPayoutsPage(p => Math.min(payoutsTotalPages, p + 1))}
-                        disabled={payoutsPage === payoutsTotalPages}
+                        onClick={() => setCommissionsPage(p => Math.min(commissionsTotalPages, p + 1))}
+                        disabled={commissionsPage === commissionsTotalPages}
                         className="gap-1"
                       >
                         Naslednja
@@ -618,7 +511,7 @@ export default function DashboardPartners() {
               </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
-                <p>Še nimate provizij za izplačilo.</p>
+                <p>Še nimate provizij.</p>
               </div>
             )}
           </CardContent>
@@ -633,7 +526,7 @@ export default function DashboardPartners() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {referrals.length === 0 ? (
+            {customers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
                   <Users className="h-8 w-8 text-muted-foreground" />
@@ -649,78 +542,59 @@ export default function DashboardPartners() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Stranka</TableHead>
-                        <TableHead>Email</TableHead>
+                        <TableHead>Ime</TableHead>
+                        <TableHead className="hidden md:table-cell">Email</TableHead>
                         <TableHead>Paket</TableHead>
-                        <TableHead>Provizija</TableHead>
+                        <TableHead className="hidden md:table-cell">Billing</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead className="hidden md:table-cell">Meseci</TableHead>
                         <TableHead className="text-right">Datum</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {paginatedReferrals.map((referral) => {
-                        const isBonus = isBonusRow(referral);
-                        return (
-                          <TableRow 
-                            key={referral.id}
-                            className={cn(
-                              isBonus && "bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-l-[3px] border-l-amber-500"
-                            )}
-                          >
-                            <TableCell className="font-medium">
-                              {isBonus ? (
-                                <div className="flex items-center gap-2">
-                                  <Gift className="h-4 w-4 text-amber-500" />
-                                  <div>
-                                    <div>{referral.customer_name || 'Bonus'}</div>
-                                    <div className="text-xs text-muted-foreground">Enkratni bonus za dosežen tier</div>
-                                  </div>
-                                </div>
-                              ) : (
-                                referral.customer_name || '—'
+                      {paginatedCustomers.map((customer) => (
+                        <TableRow key={customer.id}>
+                          <TableCell className="font-medium">
+                            {customer.customer_name || '—'}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {customer.customer_email}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                customer.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+                                customer.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                customer.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
                               )}
-                            </TableCell>
-                            <TableCell>{isBonus ? '—' : referral.customer_email}</TableCell>
-                            <TableCell>
-                              {isBonus ? (
-                                <Badge
-                                  variant="outline"
-                                  className="bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                >
-                                  🎁 Bonus
-                                </Badge>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className={cn(
-                                    referral.plan === 'enterprise' && 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-                                    referral.plan === 'pro' && 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                                    referral.plan === 'basic' && 'bg-gray-500/10 text-gray-500 border-gray-500/20'
-                                  )}
-                                >
-                                  {referral.plan.charAt(0).toUpperCase() + referral.plan.slice(1)}
-                                </Badge>
+                            >
+                              {customer.plan.charAt(0).toUpperCase() + customer.plan.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {customer.billing_period === 'yearly' ? 'Letno' : 'Mesečno'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                customer.status === 'active' && 'bg-green-500/10 text-green-500 border-green-500/20',
+                                customer.status === 'pending' && 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+                                customer.status === 'cancelled' && 'bg-red-500/10 text-red-500 border-red-500/20'
                               )}
-                            </TableCell>
-                            <TableCell>{formatCurrency(referral.commission_amount)}</TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="outline"
-                                className={cn(
-                                  referral.status === 'active'
-                                    ? 'bg-green-500/10 text-green-500 border-green-500/20'
-                                    : 'bg-red-500/10 text-red-500 border-red-500/20'
-                                )}
-                              >
-                                {referral.status === 'active' ? 'Aktiven' : 'Neaktiven'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {formatDate(referral.created_at)}
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                            >
+                              {customer.status === 'active' ? 'Aktiven' : customer.status === 'pending' ? 'V čakanju' : 'Preklican'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            {customer.months_covered}/{customer.max_months}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatDate(customer.created_at)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
@@ -757,7 +631,6 @@ export default function DashboardPartners() {
             )}
           </CardContent>
         </Card>
-
       </div>
 
       {/* Payout Confirmation Dialog */}
@@ -775,11 +648,11 @@ export default function DashboardPartners() {
                 <p className="text-amber-600 dark:text-amber-400 font-medium">
                   Zahtevek oddajte SAMO če ste že poslali račun za to provizijo na info@botmotion.ai
                 </p>
-                
-                {selectedReferral && (
+
+                {selectedCommission && (
                   <div className="bg-muted/50 rounded-lg p-3 text-sm">
                     <p className="font-medium text-foreground">
-                      {selectedReferral.customer_name || selectedReferral.customer_email} - {selectedReferral.plan.charAt(0).toUpperCase() + selectedReferral.plan.slice(1)} paket - {formatCurrency(selectedReferral.commission_amount)}
+                      {getCustomerName(selectedCommission)} — {formatCurrency(selectedCommission.amount)}
                     </p>
                   </div>
                 )}
@@ -788,8 +661,8 @@ export default function DashboardPartners() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isRequestingPayout}>Prekliči</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmPayout} 
+            <AlertDialogAction
+              onClick={confirmPayout}
               disabled={isRequestingPayout}
             >
               {isRequestingPayout ? 'Pošiljam...' : 'Potrdi zahtevek'}
