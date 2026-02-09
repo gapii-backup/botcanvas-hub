@@ -143,6 +143,137 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_commissions: {
+        Row: {
+          amount: number
+          commission_number: number | null
+          created_at: string
+          id: string
+          invoice_paid: boolean
+          invoice_paid_at: string | null
+          invoice_requested: boolean
+          invoice_requested_at: string | null
+          milestone_type: string | null
+          partner_customer_id: string | null
+          partner_id: string
+          stripe_invoice_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          commission_number?: number | null
+          created_at?: string
+          id?: string
+          invoice_paid?: boolean
+          invoice_paid_at?: string | null
+          invoice_requested?: boolean
+          invoice_requested_at?: string | null
+          milestone_type?: string | null
+          partner_customer_id?: string | null
+          partner_id: string
+          stripe_invoice_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          commission_number?: number | null
+          created_at?: string
+          id?: string
+          invoice_paid?: boolean
+          invoice_paid_at?: string | null
+          invoice_requested?: boolean
+          invoice_requested_at?: string | null
+          milestone_type?: string | null
+          partner_customer_id?: string | null
+          partner_id?: string
+          stripe_invoice_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_commissions_partner_customer_id_fkey"
+            columns: ["partner_customer_id"]
+            isOneToOne: false
+            referencedRelation: "partner_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_customers: {
+        Row: {
+          billing_period: string
+          commission_locked: boolean
+          commissions_total: number
+          created_at: string
+          customer_email: string
+          customer_name: string | null
+          first_paid_at: string | null
+          id: string
+          max_months: number
+          months_covered: number
+          original_billing_period: string | null
+          partner_id: string
+          plan: string
+          promo_code: string
+          status: string
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_period: string
+          commission_locked?: boolean
+          commissions_total?: number
+          created_at?: string
+          customer_email: string
+          customer_name?: string | null
+          first_paid_at?: string | null
+          id?: string
+          max_months?: number
+          months_covered?: number
+          original_billing_period?: string | null
+          partner_id: string
+          plan: string
+          promo_code: string
+          status?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_period?: string
+          commission_locked?: boolean
+          commissions_total?: number
+          created_at?: string
+          customer_email?: string
+          customer_name?: string | null
+          first_paid_at?: string | null
+          id?: string
+          max_months?: number
+          months_covered?: number
+          original_billing_period?: string | null
+          partner_id?: string
+          plan?: string
+          promo_code?: string
+          status?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_customers_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_referrals: {
         Row: {
           commission_amount: number
@@ -204,11 +335,6 @@ export type Database = {
       }
       partners: {
         Row: {
-          bonus_bronze_claimed: boolean | null
-          bonus_diamond_claimed: boolean | null
-          bonus_gold_claimed: boolean | null
-          bonus_platinum_claimed: boolean | null
-          bonus_silver_claimed: boolean | null
           company: string | null
           created_at: string | null
           email: string
@@ -225,11 +351,6 @@ export type Database = {
           website: string | null
         }
         Insert: {
-          bonus_bronze_claimed?: boolean | null
-          bonus_diamond_claimed?: boolean | null
-          bonus_gold_claimed?: boolean | null
-          bonus_platinum_claimed?: boolean | null
-          bonus_silver_claimed?: boolean | null
           company?: string | null
           created_at?: string | null
           email: string
@@ -246,11 +367,6 @@ export type Database = {
           website?: string | null
         }
         Update: {
-          bonus_bronze_claimed?: boolean | null
-          bonus_diamond_claimed?: boolean | null
-          bonus_gold_claimed?: boolean | null
-          bonus_platinum_claimed?: boolean | null
-          bonus_silver_claimed?: boolean | null
           company?: string | null
           created_at?: string | null
           email?: string
