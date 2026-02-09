@@ -79,9 +79,8 @@ export default function DashboardOverview() {
   // Partner data - only used if user is an active partner
   const { 
     partner, 
-    activeReferralsCount, 
+    activeCustomersCount, 
     totalCommission, 
-    currentTier,
     loading: partnerLoading 
   } = usePartner();
 
@@ -345,12 +344,8 @@ export default function DashboardOverview() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
                 <div className="flex items-center gap-4 sm:gap-6 text-sm">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-foreground">{activeReferralsCount}</span>
+                    <span className="font-semibold text-foreground">{activeCustomersCount}</span>
                     <span className="text-muted-foreground">aktivnih strank</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-muted-foreground">Tier:</span>
-                    <span className="font-semibold text-foreground">{currentTier.emoji} {currentTier.name}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="font-semibold text-foreground">€{totalCommission.toLocaleString('sl-SI')}</span>

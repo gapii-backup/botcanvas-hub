@@ -18,75 +18,67 @@ export interface Partner {
   promo_code: string | null;
   is_active: boolean;
   user_id: string | null;
-  bonus_bronze_claimed: boolean;
-  bonus_silver_claimed: boolean;
-  bonus_gold_claimed: boolean;
-  bonus_platinum_claimed: boolean;
-  bonus_diamond_claimed: boolean;
+  milestone_3_claimed: boolean;
+  milestone_10_claimed: boolean;
+  milestone_25_claimed: boolean;
 }
 
-export interface PartnerReferral {
+export interface PartnerCustomer {
   id: string;
   partner_id: string;
   promo_code: string;
   customer_email: string;
   customer_name: string | null;
+  stripe_customer_id: string | null;
   plan: string;
-  commission_amount: number;
-  tier_at_purchase: string | null;
+  billing_period: string;
+  status: string;
+  first_paid_at: string | null;
+  months_covered: number;
+  commissions_total: number;
+  created_at: string;
+  updated_at: string;
+  original_billing_period: string | null;
+  max_months: number;
+  commission_locked: boolean;
+}
+
+export interface PartnerCommission {
+  id: string;
+  partner_id: string;
+  partner_customer_id: string | null;
+  type: 'recurring' | 'milestone';
+  amount: number;
+  commission_number: number | null;
+  milestone_type: string | null;
+  stripe_invoice_id: string | null;
   invoice_requested: boolean;
   invoice_requested_at: string | null;
   invoice_paid: boolean;
   invoice_paid_at: string | null;
-  status: string;
   created_at: string;
 }
 
-export interface TierInfo {
-  name: string;
-  emoji: string;
-  min: number;
-  max: number;
+export interface MilestoneInfo {
+  key: string;
+  count: number;
   bonus: number;
-  bonusField: keyof Partner;
+  label: string;
+  emoji: string;
 }
 
-export const TIERS: TierInfo[] = [
-  { name: 'Bronze', emoji: '🟤', min: 1, max: 10, bonus: 0, bonusField: 'bonus_bronze_claimed' },
-  { name: 'Silver', emoji: '⚪', min: 11, max: 25, bonus: 200, bonusField: 'bonus_silver_claimed' },
-  { name: 'Gold', emoji: '🟡', min: 26, max: 50, bonus: 500, bonusField: 'bonus_gold_claimed' },
-  { name: 'Platinum', emoji: '💠', min: 51, max: 100, bonus: 1000, bonusField: 'bonus_platinum_claimed' },
-  { name: 'Diamond', emoji: '💎', min: 101, max: Infinity, bonus: 2000, bonusField: 'bonus_diamond_claimed' },
+export const MILESTONES: MilestoneInfo[] = [
+  { key: 'milestone_3_claimed', count: 3, bonus: 75, label: '3 stranke', emoji: '🎯' },
+  { key: 'milestone_10_claimed', count: 10, bonus: 250, label: '10 strank', emoji: '🚀' },
+  { key: 'milestone_25_claimed', count: 25, bonus: 750, label: '25 strank', emoji: '💎' },
 ];
-
-export function calculateTier(activeCount: number): TierInfo {
-  for (const tier of TIERS) {
-    if (activeCount >= tier.min && activeCount <= tier.max) {
-      return tier;
-    }
-  }
-  return TIERS[0]; // Default to Bronze
-}
-
-export function getNextTierInfo(activeCount: number): { tier: TierInfo; remaining: number } | null {
-  const currentTier = calculateTier(activeCount);
-  const currentIndex = TIERS.findIndex(t => t.name === currentTier.name);
-  
-  if (currentIndex >= TIERS.length - 1) {
-    return null; // Already at highest tier
-  }
-  
-  const nextTier = TIERS[currentIndex + 1];
-  const remaining = nextTier.min - activeCount;
-  
-  return { tier: nextTier, remaining };
-}
 
 export function usePartner() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [partner, setPartner] = useState<Partner | null>(null);
-  const [referrals, setReferrals] = useState<PartnerReferral[]>([]);
+  const [customers, setCustomers] = useState<PartnerCustomer[]>([]);
+  const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +92,6 @@ export function usePartner() {
       setLoading(true);
       setError(null);
 
-      // Fetch partner by email
       const { data: partnerData, error: partnerError } = await supabase
         .from('partners')
         .select('*')
@@ -108,31 +99,37 @@ export function usePartner() {
         .eq('is_active', true)
         .maybeSingle();
 
-      if (partnerError) {
-        throw partnerError;
-      }
+      if (partnerError) throw partnerError;
 
       if (!partnerData) {
         setPartner(null);
-        setReferrals([]);
+        setCustomers([]);
+        setCommissions([]);
         setLoading(false);
         return;
       }
 
       setPartner(partnerData as Partner);
 
-      // Fetch referrals for this partner
-      const { data: referralsData, error: referralsError } = await supabase
-        .from('partner_referrals')
+      // Fetch customers
+      const { data: customersData, error: customersError } = await supabase
+        .from('partner_customers')
         .select('*')
         .eq('partner_id', partnerData.id)
         .order('created_at', { ascending: false });
 
-      if (referralsError) {
-        throw referralsError;
-      }
+      if (customersError) throw customersError;
+      setCustomers((customersData || []) as PartnerCustomer[]);
 
-      setReferrals((referralsData || []) as PartnerReferral[]);
+      // Fetch commissions
+      const { data: commissionsData, error: commissionsError } = await supabase
+        .from('partner_commissions')
+        .select('*')
+        .eq('partner_id', partnerData.id)
+        .order('created_at', { ascending: false });
+
+      if (commissionsError) throw commissionsError;
+      setCommissions((commissionsData || []) as PartnerCommission[]);
     } catch (err: any) {
       console.error('Error fetching partner data:', err);
       setError(err.message || 'Napaka pri nalaganju podatkov');
@@ -150,21 +147,18 @@ export function usePartner() {
     fetchPartner();
   }, [fetchPartner]);
 
-  const requestPayout = async (referralId: string) => {
+  const requestPayout = async (commissionId: string) => {
     try {
       const { error: updateError } = await supabase
-        .from('partner_referrals')
+        .from('partner_commissions')
         .update({
           invoice_requested: true,
           invoice_requested_at: new Date().toISOString(),
         })
-        .eq('id', referralId);
+        .eq('id', commissionId);
 
-      if (updateError) {
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      // Refresh referrals
       await fetchPartner();
 
       toast({
@@ -184,40 +178,33 @@ export function usePartner() {
     }
   };
 
-  // Calculate stats - exclude bonus rows from active count
-  const activeReferralsCount = referrals.filter(r => 
-    r.status === 'active' && 
-    r.plan !== 'bonus' && 
-    r.customer_email !== 'BONUS'
-  ).length;
-  const totalCommission = referrals.reduce((sum, r) => sum + Number(r.commission_amount), 0);
-  const currentTier = calculateTier(activeReferralsCount);
-  const nextTierInfo = getNextTierInfo(activeReferralsCount);
-
-  // Pending payouts (not requested yet - regardless of customer status)
-  const pendingPayouts = referrals.filter(r => !r.invoice_requested);
-  
-  // Requested payouts (requested but not paid)
-  const requestedPayouts = referrals.filter(r => r.invoice_requested && !r.invoice_paid);
-  
-  // Paid payouts
-  const paidPayouts = referrals.filter(r => r.invoice_paid);
+  // Stats
+  const activeCustomersCount = customers.filter(c => c.status === 'active').length;
+  const totalCommission = commissions.reduce((sum, c) => sum + Number(c.amount), 0);
+  const pendingPayoutAmount = commissions
+    .filter(c => !c.invoice_requested)
+    .reduce((sum, c) => sum + Number(c.amount), 0);
+  const requestedPayoutAmount = commissions
+    .filter(c => c.invoice_requested && !c.invoice_paid)
+    .reduce((sum, c) => sum + Number(c.amount), 0);
+  const paidPayoutAmount = commissions
+    .filter(c => c.invoice_paid)
+    .reduce((sum, c) => sum + Number(c.amount), 0);
 
   return {
     partner,
-    referrals,
+    customers,
+    commissions,
     loading,
     error,
     refetch: fetchPartner,
     requestPayout,
-    // Stats
-    activeReferralsCount,
+    activeCustomersCount,
     totalCommission,
-    currentTier,
-    nextTierInfo,
-    pendingPayouts,
-    requestedPayouts,
-    paidPayouts,
+    pendingPayoutAmount,
+    requestedPayoutAmount,
+    paidPayoutAmount,
+    MILESTONES,
   };
 }
 
