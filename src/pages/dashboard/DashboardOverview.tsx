@@ -169,8 +169,7 @@ export default function DashboardOverview() {
       return;
     }
 
-    const priceId = subscriptionPrices[widget.plan]?.[billingPeriod];
-    if (!priceId) {
+    if (!['basic', 'pro', 'enterprise'].includes(widget.plan)) {
       toast({
         title: 'Napaka',
         description: 'Neveljavni naročniški paket.',
