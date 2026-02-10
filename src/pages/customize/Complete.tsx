@@ -366,22 +366,12 @@ export default function Complete() {
         addons: selectedAddons,
       });
 
-      // Setup fee price IDs
-      const setupFeePrices: Record<string, string> = {
-        basic: 'price_1SyXm17Xspws9Ve6NsdYMEqX',
-        pro: 'price_1SyXmp7Xspws9Ve6su78MSPd',
-        enterprise: 'price_1SyXnc7Xspws9Ve6tOQyj1gv'
-      };
-
-      const priceId = setupFeePrices[userPlan] || setupFeePrices.basic;
-
       // Call n8n to create checkout session - billing_period se pošlje samo v webhook
       const selectedBillingPeriod = userBot?.billing_period || 'monthly';
       const response = await fetch('https://hub.botmotion.ai/webhook/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          price_id: priceId,
           api_key: apiKey,
           plan: userPlan,
           billing_period: selectedBillingPeriod, // samo pošlje, ne shranjuje v DB
