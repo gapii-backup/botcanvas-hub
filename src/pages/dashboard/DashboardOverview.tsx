@@ -41,20 +41,6 @@ import { UpsellPopup, shouldShowUpsell } from '@/components/dashboard/UpsellPopu
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
-const subscriptionPrices: Record<string, { monthly: string; yearly: string }> = {
-  basic: {
-    monthly: 'price_1SyXof7Xspws9Ve6FJ1XSYC5',
-    yearly: 'price_1SyXq77Xspws9Ve6XuiChSKD'
-  },
-  pro: {
-    monthly: 'price_1SyXs07Xspws9Ve6h2VvfkPo',
-    yearly: 'price_1SyXsb7Xspws9Ve6QIMIa9S6'
-  },
-  enterprise: {
-    monthly: 'price_1SyXtJ7Xspws9Ve6pehSvtwE',
-    yearly: 'price_1SyXto7Xspws9Ve6ToZXnTvd'
-  }
-};
 
 const planNames: Record<string, string> = {
   basic: 'Basic',
