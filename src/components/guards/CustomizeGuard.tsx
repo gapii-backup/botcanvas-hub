@@ -17,19 +17,20 @@ export function CustomizeGuard({ children }: CustomizeGuardProps) {
     );
   }
 
-  // Partner users - redirect to dashboard (they don't need customization)
+  // Partner users - redirect to dashboard
   if (widget?.is_partner === true) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // If no widget or no plan selected, redirect to pricing
-  if (!widget?.plan) {
-    return <Navigate to="/pricing" replace />;
+  // If widget is already active, setup is paid, or cancelling, redirect to dashboard
+  if (widget?.status && ['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // If widget is already active, setup is paid, or cancelling, redirect to dashboard
-  if (['active', 'setup_paid', 'sub_paid', 'cancelling'].includes(widget.status)) {
-    return <Navigate to="/dashboard" replace />;
+  // Check if plan was selected (from localStorage OR from existing widget)
+  const selectedPlan = widget?.plan || localStorage.getItem('botmotion_selected_plan');
+  if (!selectedPlan) {
+    return <Navigate to="/pricing" replace />;
   }
 
   // Has plan, not active - allow access to customize
