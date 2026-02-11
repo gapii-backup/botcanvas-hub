@@ -56,21 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error, user: null };
     }
 
-    // Create widgets row after successful registration
-    if (data.user) {
-      const { error: widgetError } = await supabase
-        .from('widgets')
-        .insert({
-          user_id: data.user.id,
-          user_email: email,
-          phone: phone || null,
-        });
-
-      if (widgetError) {
-        console.error('Error creating widgets row:', widgetError);
-      }
-    }
-
     return { error: null, user: data.user };
   };
 

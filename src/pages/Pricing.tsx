@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Check, Bot, Sparkles, Building2, Loader2, Minus, Settings, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useWidget } from '@/hooks/useWidget';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -68,7 +67,7 @@ const plans = [
   },
 ];
 
-const comparisonFeatures = [
+const allComparisonFeatures = [
   { name: 'Sporočila na mesec', basic: '1.000', pro: '3.000', enterprise: '8.000' },
   { name: 'Podpora za jezike', basic: '1 jezik', pro: 'Več jezikov', enterprise: 'Več jezikov' },
   { name: 'Dodajanje Q&A vprašanj', basic: true, pro: true, enterprise: true },
@@ -81,7 +80,7 @@ const comparisonFeatures = [
   { name: 'Rezervacija sestankov preko chatbota', basic: false, pro: false, enterprise: true },
   { name: 'Pametna priporočila izdelkov (AI)', basic: false, pro: false, enterprise: true },
   { name: 'Tedensko AI poročilo o uspešnosti', basic: false, pro: false, enterprise: true },
-  { name: 'Setup fee (enkratno)', basic: '€80', pro: '€140', enterprise: '€320' },
+  { name: 'Setup fee (enkratno)', basic: '€80', pro: '€140', enterprise: '€320', setupFeeRow: true },
 ];
 
 const faqItems = [
@@ -113,24 +112,24 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { upsertWidget, widget } = useWidget();
   const { toast } = useToast();
   
   const returnTo = searchParams.get('returnTo');
+  const showPrices = returnTo === 'complete';
+
+  const comparisonFeatures = showPrices
+    ? allComparisonFeatures
+    : allComparisonFeatures.filter(f => !(f as any).setupFeeRow);
 
   const handleSelectPlan = async (planId: string) => {
     setSelectedPlan(planId);
     setIsLoading(true);
 
     try {
-      // Update widget with selected plan
-      await upsertWidget({ 
-        plan: planId,
-        billing_period: isYearly ? 'yearly' : 'monthly',
-        status: 'pending', // Set status to pending after plan selection
-      });
+      // Shrani SAMO v localStorage, NE v DB
+      localStorage.setItem('botmotion_selected_plan', planId);
+      localStorage.setItem('botmotion_billing_period', isYearly ? 'yearly' : 'monthly');
       
-      // If returning from Complete page, go back there
       if (returnTo === 'complete') {
         navigate('/customize/complete');
       } else {
@@ -139,7 +138,7 @@ export default function Pricing() {
     } catch (error) {
       toast({
         title: 'Napaka',
-        description: 'Ni bilo mogoče shraniti paketa. Poskusite znova.',
+        description: 'Prišlo je do napake. Poskusite znova.',
         variant: 'destructive',
       });
     } finally {
@@ -167,31 +166,35 @@ export default function Pricing() {
 
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-4xl font-bold text-foreground sm:text-5xl">
-            Izberite svoj paket
+            Izberite obseg chatbota
           </h1>
-          <p className="mt-4 text-2xl max-w-2xl mx-auto">
-            <span className="text-foreground">Z letno naročnino prejmete </span>
-            <span className="text-amber-400 font-semibold">2 meseca brezplačno!</span>
-          </p>
+          {showPrices && (
+            <p className="mt-4 text-2xl max-w-2xl mx-auto">
+              <span className="text-foreground">Z letno naročnino prejmete </span>
+              <span className="text-amber-400 font-semibold">2 meseca brezplačno!</span>
+            </p>
+          )}
         </div>
 
         {/* Billing toggle */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <Label htmlFor="billing-toggle" className={cn("text-sm font-medium", !isYearly && "text-foreground")}>
-            Mesečno
-          </Label>
-          <Switch
-            id="billing-toggle"
-            checked={isYearly}
-            onCheckedChange={setIsYearly}
-          />
-          <div className="flex items-center gap-2">
-            <Label htmlFor="billing-toggle" className={cn("text-sm font-medium", isYearly && "text-foreground")}>
-              Letno
+        {showPrices && (
+          <div className="flex items-center justify-center gap-4 mb-12">
+            <Label htmlFor="billing-toggle" className={cn("text-sm font-medium", !isYearly && "text-foreground")}>
+              Mesečno
             </Label>
-            <span className="text-sm font-semibold text-amber-400">-17%</span>
+            <Switch
+              id="billing-toggle"
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+            />
+            <div className="flex items-center gap-2">
+              <Label htmlFor="billing-toggle" className={cn("text-sm font-medium", isYearly && "text-foreground")}>
+                Letno
+              </Label>
+              <span className="text-sm font-semibold text-amber-400">-17%</span>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan, index) => {
@@ -236,20 +239,22 @@ export default function Pricing() {
                   <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
                 </div>
 
-                <div className="text-center mb-6">
-                  <div className="h-5">
-                    <span className={cn(
-                      "text-sm line-through",
-                      isYearly ? "text-muted-foreground" : "invisible"
-                    )}>
-                      €{formatPrice(plan.monthlyPrice * 12)}
-                    </span>
+                {showPrices && (
+                  <div className="text-center mb-6">
+                    <div className="h-5">
+                      <span className={cn(
+                        "text-sm line-through",
+                        isYearly ? "text-muted-foreground" : "invisible"
+                      )}>
+                        €{formatPrice(plan.monthlyPrice * 12)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
+                      <span className="text-muted-foreground">{period}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-4xl font-bold text-foreground">€{formatPrice(displayPrice)}</span>
-                    <span className="text-muted-foreground">{period}</span>
-                  </div>
-                </div>
+                )}
 
                 {'highlight' in plan && plan.highlight && (
                   <p className="text-sm text-primary font-medium mb-3">{plan.highlight}</p>
@@ -268,10 +273,12 @@ export default function Pricing() {
                 </ul>
 
                 <div className="space-y-3">
-                  <div className="text-center py-2 px-3 rounded-lg bg-secondary/50 border border-border">
-                    <span className="text-xs text-muted-foreground">Setup fee (enkratno): </span>
-                    <span className="text-sm font-semibold text-foreground">€{plan.setupFee}</span>
-                  </div>
+                  {showPrices && (
+                    <div className="text-center py-2 px-3 rounded-lg bg-secondary/50 border border-border">
+                      <span className="text-xs text-muted-foreground">Setup fee (enkratno): </span>
+                      <span className="text-sm font-semibold text-foreground">€{plan.setupFee}</span>
+                    </div>
+                  )}
                   <Button
                     onClick={() => handleSelectPlan(plan.id)}
                     variant={plan.popular ? 'glow' : 'outline'}
@@ -282,7 +289,7 @@ export default function Pricing() {
                     {isLoading && selectedPlan === plan.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      'Izberi'
+                      showPrices ? 'Izberi' : 'Naprej'
                     )}
                   </Button>
                 </div>
@@ -344,28 +351,30 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-20 max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">
-            Pogosta vprašanja
-          </h2>
-          <div className="space-y-4">
-            {faqItems.map((item, index) => (
-              <details
-                key={index}
-                className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
-              >
-                <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors">
-                  <span className="font-medium text-white pr-4">{item.question}</span>
-                  <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform shrink-0" />
-                </summary>
-                <div className="px-6 pb-6 pt-0 text-slate-400 text-sm leading-relaxed">
-                  {item.answer}
-                </div>
-              </details>
-            ))}
+        {/* FAQ Section - only when showing prices */}
+        {showPrices && (
+          <div className="mt-20 max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-white text-center mb-8">
+              Pogosta vprašanja
+            </h2>
+            <div className="space-y-4">
+              {faqItems.map((item, index) => (
+                <details
+                  key={index}
+                  className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+                >
+                  <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-white/5 transition-colors">
+                    <span className="font-medium text-white pr-4">{item.question}</span>
+                    <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform shrink-0" />
+                  </summary>
+                  <div className="px-6 pb-6 pt-0 text-slate-400 text-sm leading-relaxed">
+                    {item.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

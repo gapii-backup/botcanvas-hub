@@ -5,9 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Globe, ArrowRight } from 'lucide-react';
 import logo from '@/assets/logo.png';
-import { useUserBot } from '@/hooks/useUserBot';
-import { useWidget } from '@/hooks/useWidget';
-import { useToast } from '@/hooks/use-toast';
 import { WizardLayout } from '@/components/wizard/WizardLayout';
 import { useWizardConfig } from '@/hooks/useWizardConfig';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -16,11 +13,7 @@ export default function Step0() {
   const { config, setConfig } = useWizardConfig();
   const [websiteUrl, setWebsiteUrl] = useState(config.websiteUrl || '');
   const [error, setError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
-  const { updateUserBot } = useUserBot();
-  const { updateWidget } = useWidget();
-  const { toast } = useToast();
   const isMobile = useIsMobile();
 
   const validateUrl = (url: string): boolean => {
@@ -42,33 +35,13 @@ export default function Step0() {
     return true;
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (!validateUrl(websiteUrl)) {
       return;
     }
 
-    const fullUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
-    
-    // Save to wizard config
+    // Shrani SAMO v wizard config (localStorage)
     setConfig({ websiteUrl: websiteUrl });
-
-    setIsSaving(true);
-    try {
-      // Save website_url to widgets table
-      await updateWidget({ 
-        website_url: fullUrl,
-      });
-      
-      // Also update user_bots for backwards compatibility
-      await updateUserBot({ 
-        booking_url: fullUrl,
-        bot_name: `Asistent za ${new URL(fullUrl).hostname}`,
-      });
-    } catch (err) {
-      console.log('Could not save URL, continuing anyway');
-    } finally {
-      setIsSaving(false);
-    }
     
     navigate('/customize/step-2');
   };
@@ -112,9 +85,8 @@ export default function Step0() {
           className="w-full"
           size="lg"
           variant="glow"
-          disabled={isSaving}
         >
-          {isSaving ? 'Shranjujem...' : 'Naprej'}
+          Naprej
           <ArrowRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
@@ -150,9 +122,8 @@ export default function Step0() {
       preview={rightPanel}
       {...(!isMobile && {
         nextPath: "/customize/step-2",
-        nextLabel: isSaving ? 'Shranjujem...' : 'Naprej',
+        nextLabel: 'Naprej',
         onNext: handleNext,
-        nextDisabled: isSaving,
       })}
     >
       {content}

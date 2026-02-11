@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap, Plus, X } from 'lucide-react';
+import { Check, ArrowLeft, CreditCard, MessageCircle, Globe, Users, Headphones, Home, MessagesSquare, MousePointer, AlertCircle, Sparkles, Info, Zap, Plus, X, ChevronDown } from 'lucide-react';
 import { useWizardConfig, BOT_ICONS } from '@/hooks/useWizardConfig';
 import { useUserBot } from '@/hooks/useUserBot';
 import { useWidget } from '@/hooks/useWidget';
@@ -10,6 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { WidgetPreview, TriggerPreview } from '@/components/widget/WidgetPreview';
 import { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import logoInline from '@/assets/logo-inline-light.png';
 import {
   Dialog,
@@ -249,9 +252,10 @@ export default function Complete() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [demoAddon, setDemoAddon] = useState<string | null>(null);
 
-  const userPlan = userBot?.plan || 'basic';
-  const isYearly = userBot?.billing_period === 'yearly';
-  const availableAddons = getAvailableAddons(userPlan, isYearly);
+  const userPlan = localStorage.getItem('botmotion_selected_plan') || 'basic';
+  const initialIsYearly = localStorage.getItem('botmotion_billing_period') === 'yearly';
+  const [billingIsYearly, setBillingIsYearly] = useState(initialIsYearly);
+  const availableAddons = getAvailableAddons(userPlan, billingIsYearly);
   const hasAddons = Object.keys(availableAddons).length > 0;
   
   // Scroll to top on mount
@@ -276,7 +280,7 @@ export default function Complete() {
   // Get pricing for current plan
   const planPricing = PLAN_PRICING[userPlan] || PLAN_PRICING.basic;
   const setupFee = planPricing.setupFee;
-  const subscriptionPrice = isYearly ? planPricing.yearlyPrice : planPricing.monthlyPrice;
+  const subscriptionPrice = billingIsYearly ? planPricing.yearlyPrice : planPricing.monthlyPrice;
   
   // Calculate add-ons total
   // Capacity addons are ALWAYS monthly, other addons follow billing period
@@ -290,7 +294,7 @@ export default function Complete() {
           return addon.monthlyPrice || 0;
         }
         // Other addons follow billing period
-        if (isYearly && addon.yearlyPrice) {
+        if (billingIsYearly && addon.yearlyPrice) {
           return addon.yearlyPrice;
         }
         return addon.monthlyPrice || 0;
@@ -301,6 +305,11 @@ export default function Complete() {
   
   const addonsTotal = selectedAddons.reduce((sum, addonId) => sum + getAddonPrice(addonId), 0);
   const totalSubscription = subscriptionPrice + addonsTotal;
+
+  const handleBillingChange = (yearly: boolean) => {
+    setBillingIsYearly(yearly);
+    localStorage.setItem('botmotion_billing_period', yearly ? 'yearly' : 'monthly');
+  };
 
   const toggleAddon = (addonId: string) => {
     setSelectedAddons(prev => 
@@ -330,13 +339,14 @@ export default function Complete() {
       const existingApiKey = widget?.api_key;
       const apiKey = existingApiKey || crypto.randomUUID().replace(/-/g, '').slice(0, 16).replace(/(.{4})/g, '$1-').slice(0, -1);
       
-      // Save all widget data to widgets table (billing_period NOT saved - only sent to webhook)
+      // Save all widget data to widgets table
+      const selectedBillingPeriod = localStorage.getItem('botmotion_billing_period') || 'monthly';
       await upsertWidget({
         user_id: user.id,
         user_email: user.email || '',
         api_key: apiKey,
         plan: userPlan,
-        // billing_period se NE shranjuje tukaj - shrani se šele po plačilu preko Stripe webhook
+        billing_period: selectedBillingPeriod,
         status: 'pending_payment',
         is_active: false,
         bot_name: config.name || '',
@@ -366,15 +376,14 @@ export default function Complete() {
         addons: selectedAddons,
       });
 
-      // Call n8n to create checkout session - billing_period se pošlje samo v webhook
-      const selectedBillingPeriod = userBot?.billing_period || 'monthly';
+      // Call n8n to create checkout session
       const response = await fetch('https://hub.botmotion.ai/webhook/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           api_key: apiKey,
           plan: userPlan,
-          billing_period: selectedBillingPeriod, // samo pošlje, ne shranjuje v DB
+          billing_period: selectedBillingPeriod,
           user_email: user.email,
           addons: selectedAddons,
           success_url: 'https://app.botmotion.ai/payment-success',
@@ -452,22 +461,41 @@ export default function Complete() {
                   {PLAN_NAMES[userPlan] || 'BASIC'}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  ({isYearly ? 'letno' : 'mesečno'})
+                  ({billingIsYearly ? 'letno' : 'mesečno'}) — €{billingIsYearly 
+                    ? planPricing.yearlyPrice.toFixed(2).replace('.', ',') 
+                    : planPricing.monthlyPrice.toFixed(2).replace('.', ',')}
+                  /{billingIsYearly ? 'leto' : 'mesec'}
                 </span>
-                {isYearly && (
+                {billingIsYearly && (
                   <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
                     -17%
                   </span>
                 )}
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/pricing?returnTo=complete')}
-                className="w-full sm:w-auto"
-              >
-                Zamenjaj paket
-              </Button>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                {/* Billing toggle */}
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="billing-toggle-complete" className={cn("text-xs", !billingIsYearly && "text-foreground")}>
+                    Mesečno
+                  </Label>
+                  <Switch
+                    id="billing-toggle-complete"
+                    checked={billingIsYearly}
+                    onCheckedChange={handleBillingChange}
+                  />
+                  <Label htmlFor="billing-toggle-complete" className={cn("text-xs", billingIsYearly && "text-foreground")}>
+                    Letno
+                  </Label>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/pricing?returnTo=complete')}
+                  className="w-full sm:w-auto"
+                >
+                  Zamenjaj paket
+                </Button>
+              </div>
             </div>
 
             {hasAddons ? (
@@ -556,7 +584,7 @@ export default function Complete() {
                               <div className="flex items-center flex-shrink-0">
                                 {isCapacityAddon ? (
                                   <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`}>
-                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
+                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, billingIsYearly, isCapacityAddon)}
                                   </span>
                                 ) : hasDemo ? (
                                   <button
@@ -570,7 +598,7 @@ export default function Complete() {
                                   </button>
                                 ) : (
                                   <span className={`text-sm font-semibold ${isSelected ? 'text-amber-500' : 'text-zinc-400'}`}>
-                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, isYearly, isCapacityAddon)}
+                                    {formatPrice(item.monthlyPrice, item.yearlyPrice || null, billingIsYearly, isCapacityAddon)}
                                   </span>
                                 )}
                               </div>
@@ -582,7 +610,7 @@ export default function Complete() {
                   ))}
 
                   {/* Info za yearly - capacity addoni */}
-                  {isYearly && (
+                  {billingIsYearly && (
                     <div className="mt-4">
                       <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                         <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
@@ -604,7 +632,7 @@ export default function Complete() {
                       <Sparkles className="h-4 w-4 text-primary" />
                       <p className="text-sm font-medium text-foreground">
                         {selectedAddons.length} {selectedAddons.length === 1 ? 'dodatek izbran' : 'dodatkov izbranih'}
-                        {isYearly && <span className="text-primary ml-1">(17% popust)</span>}
+                        {billingIsYearly && <span className="text-primary ml-1">(17% popust)</span>}
                       </p>
                     </div>
                   </div>
@@ -676,6 +704,50 @@ export default function Complete() {
           </div>
         </div>
 
+        {/* FAQ Section */}
+        <div className="mt-12 max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-foreground text-center mb-8">
+            Pogosta vprašanja
+          </h2>
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {[
+              {
+                question: "Kaj je setup fee?",
+                answer: "Setup fee je enkratno plačilo za vzpostavitev vašega AI chatbota. Vključuje konfiguracijo chatbota, učenje iz vaše spletne strani, nastavitev widgeta in testiranje. Setup je končan v 24 urah od naročila."
+              },
+              {
+                question: "Ali lahko kadarkoli prekinem naročnino?",
+                answer: "Da, brez dolgoročne vezave. Naročnino lahko prekličete kadarkoli, chatbot bo deloval do konca obračunskega obdobja."
+              },
+              {
+                question: "Kaj se zgodi ko porabim vsa sporočila?",
+                answer: "Ko dosežete mesečno omejitev sporočil, vas obvestimo. Če do konca obračunskega obdobja ne dokupite dodatnih sporočil, se chatbot začasno deaktivira. Ko se začne novo obdobje, se kvota ponastavi in chatbot se samodejno ponovno aktivira."
+              },
+              {
+                question: "Ali lahko kasneje nadgradim paket?",
+                answer: "Da, paket lahko kadarkoli nadgradite. Prav tako lahko dokupite posamezne funkcije iz višjih paketov brez menjave celotnega paketa."
+              },
+              {
+                question: "Kaj pomeni \"učenje iz spletne strani\"?",
+                answer: "AI chatbot prebere vsebino vaše spletne strani in se nauči o vaših izdelkih, storitvah in podjetju. Tako lahko odgovarja na vprašanja obiskovalcev brez ročnega vnašanja podatkov."
+              },
+            ].map((item, index) => (
+              <details
+                key={index}
+                className="group bg-muted/30 border border-border rounded-2xl overflow-hidden"
+              >
+                <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <span className="font-medium text-foreground pr-4">{item.question}</span>
+                  <ChevronDown className="w-5 h-5 text-muted-foreground group-open:rotate-180 transition-transform shrink-0" />
+                </summary>
+                <div className="px-6 pb-6 pt-0 text-muted-foreground text-sm leading-relaxed">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
         {/* Spacer for sticky footer */}
         <div className="h-28" />
       </div>
@@ -742,7 +814,7 @@ export default function Complete() {
                 <span className="text-lg font-bold text-amber-500">€{setupFee}</span>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Po pripravi chatbota se aktivira {isYearly ? 'letna' : 'mesečna'} naročnina.
+                Po pripravi chatbota se aktivira {billingIsYearly ? 'letna' : 'mesečna'} naročnina.
               </p>
             </div>
 
@@ -788,7 +860,7 @@ export default function Complete() {
               if (!addon || !addon.description) return null;
               
               const isCapacity = demoAddon.startsWith('capacity_');
-              const price = formatPrice(addon.monthlyPrice, addon.yearlyPrice || null, isYearly, isCapacity);
+              const price = formatPrice(addon.monthlyPrice, addon.yearlyPrice || null, billingIsYearly, isCapacity);
               
               return (
                 <>
